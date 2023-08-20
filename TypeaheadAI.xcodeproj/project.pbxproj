@@ -1,0 +1,602 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2B7F9B752A91ECFA001A5D17 /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B742A91ECFA001A5D17 /* TypeaheadAIApp.swift */; };
+		2B7F9B772A91ECFA001A5D17 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B762A91ECFA001A5D17 /* ContentView.swift */; };
+		2B7F9B792A91ECFB001A5D17 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B7F9B782A91ECFB001A5D17 /* Assets.xcassets */; };
+		2B7F9B7C2A91ECFB001A5D17 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B7F9B7B2A91ECFB001A5D17 /* Preview Assets.xcassets */; };
+		2B7F9B7E2A91ECFB001A5D17 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B7D2A91ECFB001A5D17 /* Persistence.swift */; };
+		2B7F9B812A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B7F2A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld */; };
+		2B7F9B8C2A91ECFB001A5D17 /* TypeaheadAITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B8B2A91ECFB001A5D17 /* TypeaheadAITests.swift */; };
+		2B7F9B962A91ECFB001A5D17 /* TypeaheadAIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B952A91ECFB001A5D17 /* TypeaheadAIUITests.swift */; };
+		2B7F9B982A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B972A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2B7F9B882A91ECFB001A5D17 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B7F9B692A91ECFA001A5D17 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2B7F9B702A91ECFA001A5D17;
+			remoteInfo = TypeaheadAI;
+		};
+		2B7F9B922A91ECFB001A5D17 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B7F9B692A91ECFA001A5D17 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2B7F9B702A91ECFA001A5D17;
+			remoteInfo = TypeaheadAI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2B7F9B712A91ECFA001A5D17 /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B7F9B742A91ECFA001A5D17 /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
+		2B7F9B762A91ECFA001A5D17 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2B7F9B782A91ECFB001A5D17 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2B7F9B7B2A91ECFB001A5D17 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		2B7F9B7D2A91ECFB001A5D17 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		2B7F9B802A91ECFB001A5D17 /* TypeaheadAI.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TypeaheadAI.xcdatamodel; sourceTree = "<group>"; };
+		2B7F9B822A91ECFB001A5D17 /* TypeaheadAI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TypeaheadAI.entitlements; sourceTree = "<group>"; };
+		2B7F9B872A91ECFB001A5D17 /* TypeaheadAITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TypeaheadAITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B7F9B8B2A91ECFB001A5D17 /* TypeaheadAITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAITests.swift; sourceTree = "<group>"; };
+		2B7F9B912A91ECFB001A5D17 /* TypeaheadAIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TypeaheadAIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B7F9B952A91ECFB001A5D17 /* TypeaheadAIUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIUITests.swift; sourceTree = "<group>"; };
+		2B7F9B972A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2B7F9B6E2A91ECFA001A5D17 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2B7F9B842A91ECFB001A5D17 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2B7F9B8E2A91ECFB001A5D17 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2B7F9B682A91ECFA001A5D17 = {
+			isa = PBXGroup;
+			children = (
+				2B7F9B732A91ECFA001A5D17 /* TypeaheadAI */,
+				2B7F9B8A2A91ECFB001A5D17 /* TypeaheadAITests */,
+				2B7F9B942A91ECFB001A5D17 /* TypeaheadAIUITests */,
+				2B7F9B722A91ECFA001A5D17 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2B7F9B722A91ECFA001A5D17 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2B7F9B712A91ECFA001A5D17 /* TypeaheadAI.app */,
+				2B7F9B872A91ECFB001A5D17 /* TypeaheadAITests.xctest */,
+				2B7F9B912A91ECFB001A5D17 /* TypeaheadAIUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2B7F9B732A91ECFA001A5D17 /* TypeaheadAI */ = {
+			isa = PBXGroup;
+			children = (
+				2B7F9B742A91ECFA001A5D17 /* TypeaheadAIApp.swift */,
+				2B7F9B762A91ECFA001A5D17 /* ContentView.swift */,
+				2B7F9B782A91ECFB001A5D17 /* Assets.xcassets */,
+				2B7F9B7D2A91ECFB001A5D17 /* Persistence.swift */,
+				2B7F9B822A91ECFB001A5D17 /* TypeaheadAI.entitlements */,
+				2B7F9B7F2A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld */,
+				2B7F9B7A2A91ECFB001A5D17 /* Preview Content */,
+			);
+			path = TypeaheadAI;
+			sourceTree = "<group>";
+		};
+		2B7F9B7A2A91ECFB001A5D17 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				2B7F9B7B2A91ECFB001A5D17 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		2B7F9B8A2A91ECFB001A5D17 /* TypeaheadAITests */ = {
+			isa = PBXGroup;
+			children = (
+				2B7F9B8B2A91ECFB001A5D17 /* TypeaheadAITests.swift */,
+			);
+			path = TypeaheadAITests;
+			sourceTree = "<group>";
+		};
+		2B7F9B942A91ECFB001A5D17 /* TypeaheadAIUITests */ = {
+			isa = PBXGroup;
+			children = (
+				2B7F9B952A91ECFB001A5D17 /* TypeaheadAIUITests.swift */,
+				2B7F9B972A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift */,
+			);
+			path = TypeaheadAIUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2B7F9B702A91ECFA001A5D17 /* TypeaheadAI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2B7F9B9B2A91ECFB001A5D17 /* Build configuration list for PBXNativeTarget "TypeaheadAI" */;
+			buildPhases = (
+				2B7F9B6D2A91ECFA001A5D17 /* Sources */,
+				2B7F9B6E2A91ECFA001A5D17 /* Frameworks */,
+				2B7F9B6F2A91ECFA001A5D17 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TypeaheadAI;
+			productName = TypeaheadAI;
+			productReference = 2B7F9B712A91ECFA001A5D17 /* TypeaheadAI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2B7F9B862A91ECFB001A5D17 /* TypeaheadAITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2B7F9B9E2A91ECFB001A5D17 /* Build configuration list for PBXNativeTarget "TypeaheadAITests" */;
+			buildPhases = (
+				2B7F9B832A91ECFB001A5D17 /* Sources */,
+				2B7F9B842A91ECFB001A5D17 /* Frameworks */,
+				2B7F9B852A91ECFB001A5D17 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2B7F9B892A91ECFB001A5D17 /* PBXTargetDependency */,
+			);
+			name = TypeaheadAITests;
+			productName = TypeaheadAITests;
+			productReference = 2B7F9B872A91ECFB001A5D17 /* TypeaheadAITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		2B7F9B902A91ECFB001A5D17 /* TypeaheadAIUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2B7F9BA12A91ECFB001A5D17 /* Build configuration list for PBXNativeTarget "TypeaheadAIUITests" */;
+			buildPhases = (
+				2B7F9B8D2A91ECFB001A5D17 /* Sources */,
+				2B7F9B8E2A91ECFB001A5D17 /* Frameworks */,
+				2B7F9B8F2A91ECFB001A5D17 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2B7F9B932A91ECFB001A5D17 /* PBXTargetDependency */,
+			);
+			name = TypeaheadAIUITests;
+			productName = TypeaheadAIUITests;
+			productReference = 2B7F9B912A91ECFB001A5D17 /* TypeaheadAIUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2B7F9B692A91ECFA001A5D17 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					2B7F9B702A91ECFA001A5D17 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+					2B7F9B862A91ECFB001A5D17 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = 2B7F9B702A91ECFA001A5D17;
+					};
+					2B7F9B902A91ECFB001A5D17 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = 2B7F9B702A91ECFA001A5D17;
+					};
+				};
+			};
+			buildConfigurationList = 2B7F9B6C2A91ECFA001A5D17 /* Build configuration list for PBXProject "TypeaheadAI" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2B7F9B682A91ECFA001A5D17;
+			productRefGroup = 2B7F9B722A91ECFA001A5D17 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2B7F9B702A91ECFA001A5D17 /* TypeaheadAI */,
+				2B7F9B862A91ECFB001A5D17 /* TypeaheadAITests */,
+				2B7F9B902A91ECFB001A5D17 /* TypeaheadAIUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2B7F9B6F2A91ECFA001A5D17 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B7F9B7C2A91ECFB001A5D17 /* Preview Assets.xcassets in Resources */,
+				2B7F9B792A91ECFB001A5D17 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2B7F9B852A91ECFB001A5D17 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2B7F9B8F2A91ECFB001A5D17 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2B7F9B6D2A91ECFA001A5D17 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B7F9B7E2A91ECFB001A5D17 /* Persistence.swift in Sources */,
+				2B7F9B772A91ECFA001A5D17 /* ContentView.swift in Sources */,
+				2B7F9B752A91ECFA001A5D17 /* TypeaheadAIApp.swift in Sources */,
+				2B7F9B812A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2B7F9B832A91ECFB001A5D17 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B7F9B8C2A91ECFB001A5D17 /* TypeaheadAITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2B7F9B8D2A91ECFB001A5D17 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B7F9B982A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift in Sources */,
+				2B7F9B962A91ECFB001A5D17 /* TypeaheadAIUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2B7F9B892A91ECFB001A5D17 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2B7F9B702A91ECFA001A5D17 /* TypeaheadAI */;
+			targetProxy = 2B7F9B882A91ECFB001A5D17 /* PBXContainerItemProxy */;
+		};
+		2B7F9B932A91ECFB001A5D17 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2B7F9B702A91ECFA001A5D17 /* TypeaheadAI */;
+			targetProxy = 2B7F9B922A91ECFB001A5D17 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2B7F9B992A91ECFB001A5D17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		2B7F9B9A2A91ECFB001A5D17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		2B7F9B9C2A91ECFB001A5D17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TypeaheadAI/TypeaheadAI.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"TypeaheadAI/Preview Content\"";
+				DEVELOPMENT_TEAM = TZA789GZFT;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kchro3.TypeaheadAI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		2B7F9B9D2A91ECFB001A5D17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TypeaheadAI/TypeaheadAI.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"TypeaheadAI/Preview Content\"";
+				DEVELOPMENT_TEAM = TZA789GZFT;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kchro3.TypeaheadAI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		2B7F9B9F2A91ECFB001A5D17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZA789GZFT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kchro3.TypeaheadAITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TypeaheadAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TypeaheadAI";
+			};
+			name = Debug;
+		};
+		2B7F9BA02A91ECFB001A5D17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZA789GZFT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kchro3.TypeaheadAITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TypeaheadAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TypeaheadAI";
+			};
+			name = Release;
+		};
+		2B7F9BA22A91ECFB001A5D17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZA789GZFT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kchro3.TypeaheadAIUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = TypeaheadAI;
+			};
+			name = Debug;
+		};
+		2B7F9BA32A91ECFB001A5D17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZA789GZFT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kchro3.TypeaheadAIUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = TypeaheadAI;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2B7F9B6C2A91ECFA001A5D17 /* Build configuration list for PBXProject "TypeaheadAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2B7F9B992A91ECFB001A5D17 /* Debug */,
+				2B7F9B9A2A91ECFB001A5D17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2B7F9B9B2A91ECFB001A5D17 /* Build configuration list for PBXNativeTarget "TypeaheadAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2B7F9B9C2A91ECFB001A5D17 /* Debug */,
+				2B7F9B9D2A91ECFB001A5D17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2B7F9B9E2A91ECFB001A5D17 /* Build configuration list for PBXNativeTarget "TypeaheadAITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2B7F9B9F2A91ECFB001A5D17 /* Debug */,
+				2B7F9BA02A91ECFB001A5D17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2B7F9BA12A91ECFB001A5D17 /* Build configuration list for PBXNativeTarget "TypeaheadAIUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2B7F9BA22A91ECFB001A5D17 /* Debug */,
+				2B7F9BA32A91ECFB001A5D17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		2B7F9B7F2A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2B7F9B802A91ECFB001A5D17 /* TypeaheadAI.xcdatamodel */,
+			);
+			currentVersion = 2B7F9B802A91ECFB001A5D17 /* TypeaheadAI.xcdatamodel */;
+			path = TypeaheadAI.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 2B7F9B692A91ECFA001A5D17 /* Project object */;
+}
