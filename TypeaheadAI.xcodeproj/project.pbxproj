@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		2B7F9B752A91ECFA001A5D17 /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B742A91ECFA001A5D17 /* TypeaheadAIApp.swift */; };
-		2B7F9B772A91ECFA001A5D17 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B762A91ECFA001A5D17 /* ContentView.swift */; };
 		2B7F9B792A91ECFB001A5D17 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B7F9B782A91ECFB001A5D17 /* Assets.xcassets */; };
 		2B7F9B7C2A91ECFB001A5D17 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B7F9B7B2A91ECFB001A5D17 /* Preview Assets.xcassets */; };
 		2B7F9B7E2A91ECFB001A5D17 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B7D2A91ECFB001A5D17 /* Persistence.swift */; };
@@ -16,6 +15,12 @@
 		2B7F9B8C2A91ECFB001A5D17 /* TypeaheadAITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B8B2A91ECFB001A5D17 /* TypeaheadAITests.swift */; };
 		2B7F9B962A91ECFB001A5D17 /* TypeaheadAIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B952A91ECFB001A5D17 /* TypeaheadAIUITests.swift */; };
 		2B7F9B982A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9B972A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift */; };
+		2B7F9BA62A91EE79001A5D17 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 2B7F9BA52A91EE79001A5D17 /* HotKey */; };
+		2B7F9BA92A91F25E001A5D17 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 2B7F9BA82A91F25E001A5D17 /* KeyboardShortcuts */; };
+		2B7F9BAD2A91F4B5001A5D17 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9BAC2A91F4B5001A5D17 /* Constants.swift */; };
+		2B7F9BAF2A91F4C6001A5D17 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9BAE2A91F4C6001A5D17 /* SettingsView.swift */; };
+		2B7F9BB12A91F559001A5D17 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9BB02A91F559001A5D17 /* ContentView.swift */; };
+		2B7F9BB32A92BC4A001A5D17 /* ClientManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F9BB22A92BC4A001A5D17 /* ClientManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +43,6 @@
 /* Begin PBXFileReference section */
 		2B7F9B712A91ECFA001A5D17 /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B7F9B742A91ECFA001A5D17 /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
-		2B7F9B762A91ECFA001A5D17 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2B7F9B782A91ECFB001A5D17 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2B7F9B7B2A91ECFB001A5D17 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2B7F9B7D2A91ECFB001A5D17 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -49,6 +53,10 @@
 		2B7F9B912A91ECFB001A5D17 /* TypeaheadAIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TypeaheadAIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B7F9B952A91ECFB001A5D17 /* TypeaheadAIUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIUITests.swift; sourceTree = "<group>"; };
 		2B7F9B972A91ECFB001A5D17 /* TypeaheadAIUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		2B7F9BAC2A91F4B5001A5D17 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		2B7F9BAE2A91F4C6001A5D17 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2B7F9BB02A91F559001A5D17 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2B7F9BB22A92BC4A001A5D17 /* ClientManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +64,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B7F9BA62A91EE79001A5D17 /* HotKey in Frameworks */,
+				2B7F9BA92A91F25E001A5D17 /* KeyboardShortcuts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,12 +110,15 @@
 			isa = PBXGroup;
 			children = (
 				2B7F9B742A91ECFA001A5D17 /* TypeaheadAIApp.swift */,
-				2B7F9B762A91ECFA001A5D17 /* ContentView.swift */,
 				2B7F9B782A91ECFB001A5D17 /* Assets.xcassets */,
 				2B7F9B7D2A91ECFB001A5D17 /* Persistence.swift */,
 				2B7F9B822A91ECFB001A5D17 /* TypeaheadAI.entitlements */,
 				2B7F9B7F2A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld */,
 				2B7F9B7A2A91ECFB001A5D17 /* Preview Content */,
+				2B7F9BAC2A91F4B5001A5D17 /* Constants.swift */,
+				2B7F9BAE2A91F4C6001A5D17 /* SettingsView.swift */,
+				2B7F9BB02A91F559001A5D17 /* ContentView.swift */,
+				2B7F9BB22A92BC4A001A5D17 /* ClientManager.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -151,6 +164,10 @@
 			dependencies = (
 			);
 			name = TypeaheadAI;
+			packageProductDependencies = (
+				2B7F9BA52A91EE79001A5D17 /* HotKey */,
+				2B7F9BA82A91F25E001A5D17 /* KeyboardShortcuts */,
+			);
 			productName = TypeaheadAI;
 			productReference = 2B7F9B712A91ECFA001A5D17 /* TypeaheadAI.app */;
 			productType = "com.apple.product-type.application";
@@ -223,6 +240,10 @@
 				Base,
 			);
 			mainGroup = 2B7F9B682A91ECFA001A5D17;
+			packageReferences = (
+				2B7F9BA42A91EE79001A5D17 /* XCRemoteSwiftPackageReference "HotKey" */,
+				2B7F9BA72A91F25E001A5D17 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+			);
 			productRefGroup = 2B7F9B722A91ECFA001A5D17 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -265,10 +286,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B7F9BAF2A91F4C6001A5D17 /* SettingsView.swift in Sources */,
 				2B7F9B7E2A91ECFB001A5D17 /* Persistence.swift in Sources */,
-				2B7F9B772A91ECFA001A5D17 /* ContentView.swift in Sources */,
+				2B7F9BB32A92BC4A001A5D17 /* ClientManager.swift in Sources */,
+				2B7F9BB12A91F559001A5D17 /* ContentView.swift in Sources */,
 				2B7F9B752A91ECFA001A5D17 /* TypeaheadAIApp.swift in Sources */,
 				2B7F9B812A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld in Sources */,
+				2B7F9BAD2A91F4B5001A5D17 /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -584,6 +608,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2B7F9BA42A91EE79001A5D17 /* XCRemoteSwiftPackageReference "HotKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soffes/HotKey";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		2B7F9BA72A91F25E001A5D17 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2B7F9BA52A91EE79001A5D17 /* HotKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B7F9BA42A91EE79001A5D17 /* XCRemoteSwiftPackageReference "HotKey" */;
+			productName = HotKey;
+		};
+		2B7F9BA82A91F25E001A5D17 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B7F9BA72A91F25E001A5D17 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		2B7F9B7F2A91ECFB001A5D17 /* TypeaheadAI.xcdatamodeld */ = {
