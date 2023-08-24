@@ -8,20 +8,48 @@
 import Foundation
 
 struct RequestPayload: Codable {
-    let prompt: String
+    let username: String
+    let userFullName: String
+    let userObjective: String
+    let copiedText: String
     let url: String
+    let activeAppName: String
+    let activeAppBundleIdentifier: String
 }
 
 struct ResponsePayload: Codable {
-    let response: String
+    let textToPaste: String
+    let responseCode: Int
+    let errorMessage: String?
 }
 
-func sendRequest(prompt: String, url: String, completion: @escaping (Result<String, Error>) -> Void) {
+enum TypeaheadAIError: Error {
+    case runtimeError(message: String)
+}
+
+func sendRequest(
+    username: String,
+    userFullName: String,
+    userObjective: String,
+    copiedText: String,
+    url: String,
+    activeAppName: String,
+    activeAppBundleIdentifier: String,
+    completion: @escaping (Result<String, Error>) -> Void) {
     // Set the API endpoint
     let apiUrl = URL(string: "http://127.0.0.1:5000/get_response")!
 
     // Create the payload
-    let payload = RequestPayload(prompt: prompt, url: url)
+    let payload = RequestPayload(
+        username: username,
+        userFullName: userFullName,
+        userObjective: userObjective,
+        copiedText: copiedText,
+        url: url,
+        activeAppName: activeAppName,
+        activeAppBundleIdentifier: activeAppBundleIdentifier
+    )
+    print(payload)
 
     // Encode the payload
     guard let httpBody = try? JSONEncoder().encode(payload) else {
@@ -46,7 +74,13 @@ func sendRequest(prompt: String, url: String, completion: @escaping (Result<Stri
             do {
                 // Decode the response
                 let decodedResponse = try JSONDecoder().decode(ResponsePayload.self, from: data)
-                completion(.success(decodedResponse.response))
+                print(decodedResponse)
+                if decodedResponse.responseCode == 200 {
+                    completion(.success(decodedResponse.textToPaste))
+                } else {
+                    print("\(decodedResponse.responseCode): " + (decodedResponse.errorMessage ?? "no error message"))
+                    completion(.failure(TypeaheadAIError.runtimeError(message: decodedResponse.errorMessage ?? "")))
+                }
             } catch {
                 completion(.failure(error))
             }

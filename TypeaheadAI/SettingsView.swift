@@ -11,8 +11,15 @@ import KeyboardShortcuts
 struct SettingsView: View {
     var body: some View {
         Form {
-            KeyboardShortcuts.Recorder("Special Paste (Lowercase):", name: .specialPaste)
+            KeyboardShortcuts.Recorder("Special Copy:", name: .specialCopy)
+            KeyboardShortcuts.Recorder("Special Paste:", name: .specialPaste)
+            Button("Clear User Defaults", action: clearUserDefaults)
         }
+    }
+
+    private func clearUserDefaults() {
+        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+        UserDefaults.standard.synchronize()
     }
 }
 
