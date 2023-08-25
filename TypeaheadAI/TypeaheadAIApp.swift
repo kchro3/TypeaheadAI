@@ -22,12 +22,13 @@ final class AppState: ObservableObject {
             self.specialPaste()
         }
 
-        startMonitoringCmdC()
+        startMonitoringCmdCAndV()
+        checkAndRequestAccessibilityPermissions()
     }
     
     deinit {
         Task { // Use a task to call the method on the main actor
-            await stopMonitoringCmdC()
+            await stopMonitoringCmdCAndV()
         }
     }
     
@@ -47,21 +48,23 @@ final class AppState: ObservableObject {
         DispatchQueue.main.async { self.isBlinking = false }
     }
     
-    private func startMonitoringCmdC() {
+    private func startMonitoringCmdCAndV() {
         globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyUp], handler: { event in
             DispatchQueue.main.async {
-                // Check if the released key is 'C' and the command modifier was used
-                if event.keyCode == 8 && event.modifierFlags.contains(.command) {
+                let commandKeyUsed = event.modifierFlags.contains(.command)
+                if event.keyCode == 8 && commandKeyUsed { // 'C' key
                     // Get the latest string content from the pasteboard
                     if let _ = NSPasteboard.general.string(forType: .string) {
-                        print("regular copy")
+                        print("copy detected")
                     }
+                } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
+                    print("paste detected")
                 }
             }
         })
     }
     
-    private func stopMonitoringCmdC() async {
+    private func stopMonitoringCmdCAndV() async {
         if let globalEventMonitor = globalEventMonitor {
             NSEvent.removeMonitor(globalEventMonitor)
         }
@@ -250,6 +253,23 @@ final class AppState: ObservableObject {
         cmdVDown.post(tap: .cghidEventTap)
         cmdVUp.post(tap: .cghidEventTap)
     }
+    
+    private func checkAndRequestAccessibilityPermissions() {
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
+        let accessibilityEnabled = AXIsProcessTrustedWithOptions(options)
+        
+        if !accessibilityEnabled {
+            // You can display a custom alert here to explain why the app needs accessibility permissions
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                alert.messageText = "Accessibility Permissions Required"
+                alert.informativeText = "This app requires accessibility permissions to function properly. Please grant the permissions in System Preferences."
+                alert.alertStyle = .warning
+                alert.addButton(withTitle: "OK")
+                alert.runModal()
+            }
+        }
+    }
 }
 
 @main
@@ -260,7 +280,7 @@ struct TypeaheadAIApp: App {
         Settings {
             SettingsView()
         }
-                
+
         MenuBarExtra("TypeaheadAI", systemImage: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard") {
             MenuView(
                 isEnabled: $appState.isEnabled,

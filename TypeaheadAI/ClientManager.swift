@@ -82,6 +82,7 @@ func sendRequest(
                     completion(.failure(TypeaheadAIError.runtimeError(message: decodedResponse.errorMessage ?? "")))
                 }
             } catch {
+                print("failed to process response")
                 completion(.failure(error))
             }
         }
