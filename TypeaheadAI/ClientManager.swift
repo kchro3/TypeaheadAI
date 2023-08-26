@@ -37,7 +37,7 @@ func sendRequest(
     activeAppBundleIdentifier: String,
     completion: @escaping (Result<String, Error>) -> Void) {
     // Set the API endpoint
-    let apiUrl = URL(string: "http://127.0.0.1:5000/get_response")!
+    let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
 
     // Create the payload
     let payload = RequestPayload(

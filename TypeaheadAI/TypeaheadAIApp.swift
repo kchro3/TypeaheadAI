@@ -1,7 +1,9 @@
 import SwiftUI
 import KeyboardShortcuts
 import AppKit
+import AVFoundation
 import Carbon.HIToolbox
+import os.log
 
 @MainActor
 final class AppState: ObservableObject {
@@ -12,6 +14,10 @@ final class AppState: ObservableObject {
     
     private var globalEventMonitor: Any?
     private var blinkTimer: Timer?
+    private let logger = Logger(
+        subsystem: "ai.typeahead.TypeaheadAI",
+        category: "AppState"
+    )
 
     init() {
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
@@ -23,7 +29,6 @@ final class AppState: ObservableObject {
         }
 
         startMonitoringCmdCAndV()
-        checkAndRequestAccessibilityPermissions()
     }
     
     deinit {
@@ -55,10 +60,10 @@ final class AppState: ObservableObject {
                 if event.keyCode == 8 && commandKeyUsed { // 'C' key
                     // Get the latest string content from the pasteboard
                     if let _ = NSPasteboard.general.string(forType: .string) {
-                        print("copy detected")
+                        self.logger.debug("copy detected")
                     }
                 } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
-                    print("paste detected")
+                    self.logger.debug("paste detected")
                 }
             }
         })
@@ -72,11 +77,11 @@ final class AppState: ObservableObject {
     
     func specialCopy() {
         if !isEnabled {
-            print("special copy is disabled")
+            self.logger.debug("special copy is disabled")
             return
         }
         
-        print("special copy")
+        self.logger.debug("special copy")
         let pasteboard = NSPasteboard.general
         
         // Get the current items from the pasteboard
@@ -115,22 +120,22 @@ final class AppState: ObservableObject {
         pasteboard.writeObjects(combinedItems)
 
         // Debug print
-        print("Number of items on pasteboard:", combinedItems.count)
+        self.logger.debug("Number of items on pasteboard: \(combinedItems.count)")
     }
 
     func specialPaste() {
         if !isEnabled {
-            print("special paste is disabled")
+            self.logger.debug("special paste is disabled")
             return
         }
         
-        print("special paste")
+        self.logger.debug("special paste")
         let pasteboard = NSPasteboard.general
         let items = pasteboard.pasteboardItems ?? []
 
         if items.isEmpty {
             DispatchQueue.main.async { self.isLoading = false }
-            print("No items found")
+            self.logger.debug("No items found")
             return
         }
 
@@ -146,11 +151,11 @@ final class AppState: ObservableObject {
 
         if combinedString.isEmpty {
             DispatchQueue.main.async { self.isLoading = false }
-            print("No string found")
+            self.logger.debug("No string found")
             return
         }
 
-        print("Combined string:", combinedString)
+        self.logger.debug("Combined string: \(combinedString)")
         
         DispatchQueue.main.async { self.isLoading = true }
         startBlinking()
@@ -174,12 +179,13 @@ final class AppState: ObservableObject {
                     
                     switch result {
                     case .success(let response):
-                        print("Response from server:", response)
+                        self.logger.debug("Response from server: \(response)")
                         pasteboard.setString(response, forType: .string)
                         // Simulate a paste of the lowercase string
                         self.simulatePaste()
+                        AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
                     case .failure(let error):
-                        print("Error:", error.localizedDescription)
+                        self.logger.debug("Error: \(error.localizedDescription)")
                     }
                 }
             }
@@ -187,10 +193,10 @@ final class AppState: ObservableObject {
     }
     
     private func getActiveApplicationInfo(completion: @escaping (String?, String?, String?) -> Void) {
-        print("get active app")
+        self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
-            print(activeApp)
             let appName = activeApp.localizedName
+            self.logger.debug("Detected active app: \(appName ?? "none")")
             let bundleIdentifier = activeApp.bundleIdentifier
 
             if bundleIdentifier == "com.google.Chrome" {
@@ -222,14 +228,14 @@ final class AppState: ObservableObject {
         }
 
         if let error = error {
-            print("Error retrieving URL from Chrome:", error)
+            self.logger.debug("Error retrieving URL from Chrome: \(error)")
         }
 
         return nil
     }
     
     private func simulateCopy() {
-        print("simulated copy")
+        self.logger.debug("simulated copy")
         // Post a Command-C keystroke
         let source = CGEventSource(stateID: .hidSystemState)!
         let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)! // c key
@@ -242,7 +248,7 @@ final class AppState: ObservableObject {
     }
 
     private func simulatePaste() {
-        print("simulated paste")
+        self.logger.debug("simulated paste")
         // Post a Command-V keystroke
         let source = CGEventSource(stateID: .hidSystemState)!
         let cmdVDown = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true)! // v key
@@ -280,12 +286,12 @@ struct TypeaheadAIApp: App {
         Settings {
             SettingsView()
         }
-
-        MenuBarExtra("TypeaheadAI", systemImage: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard") {
-            MenuView(
-                isEnabled: $appState.isEnabled,
-                presetsManager: appState.presetsManager
-            )
+        
+        MenuBarExtra {
+            MenuView(isEnabled: $appState.isEnabled, presetsManager: appState.presetsManager)
+        } label: {
+            Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
+            // TODO: Add symbolEffect when available
         }
         .menuBarExtraStyle(.window)
     }
