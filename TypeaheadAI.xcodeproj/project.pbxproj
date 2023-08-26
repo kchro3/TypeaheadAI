@@ -64,7 +64,6 @@
 		2B7F9BB62A95D5FC001A5D17 /* PresetsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsManager.swift; sourceTree = "<group>"; };
 		2B876D6F2A95DD72000BD03C /* TestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestView.swift; sourceTree = "<group>"; };
 		2B876D712A95EAC6000BD03C /* MenuPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPromptView.swift; sourceTree = "<group>"; };
-		2B876D732A982799000BD03C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,7 +115,6 @@
 		2B7F9B732A91ECFA001A5D17 /* TypeaheadAI */ = {
 			isa = PBXGroup;
 			children = (
-				2B876D732A982799000BD03C /* Info.plist */,
 				2B7F9B742A91ECFA001A5D17 /* TypeaheadAIApp.swift */,
 				2B7F9B782A91ECFB001A5D17 /* Assets.xcassets */,
 				2B7F9B7D2A91ECFB001A5D17 /* Persistence.swift */,
