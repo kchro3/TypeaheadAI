@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct MenuPromptView: View {
-    var prompt: String
+    @Binding var prompt: String
     var isActive: Bool
+    @Binding var isEditing: Bool
+    var onDelete: (() -> Void)?
+
     @State private var isHovering: Bool = false
 
     var body: some View {
@@ -20,7 +23,24 @@ struct MenuPromptView: View {
                 .symbolRenderingMode(isActive ? .palette : .monochrome)
                 .foregroundStyle(.primary, .blue)
 
-            Text(prompt)
+            if isEditing {
+                TextField("", text: $prompt)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    // On submit, revert back to Text view
+                    // If empty, execute deletion callback
+                    .onSubmit {
+                        isEditing = false
+                        if prompt.isEmpty {
+                            onDelete?()
+                        }
+                    }
+            } else {
+                Text(prompt)
+                    // On double-click, switch to TextField
+                    .onTapGesture(count: 2) {
+                        isEditing = true
+                    }
+            }
 
             Spacer()
         }
@@ -36,8 +56,14 @@ struct MenuPromptView: View {
 }
 
 struct MenuPromptView_Previews: PreviewProvider {
+    @State static var prompt = "sample prompt"
+    @State static var isNotEditing = false
+    @State static var isEditing = true
+
     static var previews: some View {
-        MenuPromptView(prompt: "sample prompt", isActive: false)
-        MenuPromptView(prompt: "sample prompt", isActive: true)
+        MenuPromptView(prompt: $prompt, isActive: false, isEditing: $isNotEditing)
+        MenuPromptView(prompt: $prompt, isActive: true, isEditing: $isNotEditing)
+        MenuPromptView(prompt: $prompt, isActive: false, isEditing: $isEditing)
+        MenuPromptView(prompt: $prompt, isActive: true, isEditing: $isEditing)
     }
 }

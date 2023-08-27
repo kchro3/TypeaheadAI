@@ -14,6 +14,7 @@ struct MenuView: View {
     @State private var currentPreset: String = ""
     @State private var isHoveringSettings = false
     @State private var isHoveringQuit = false
+    @State private var isEditingIndex: Int?
     @FocusState private var isTextFieldFocused: Bool
 
     private let verticalPadding: CGFloat = 5
@@ -39,9 +40,11 @@ struct MenuView: View {
             TextField("Enter prompt...", text: $currentPreset)
                 .focused($isTextFieldFocused)
                 .onSubmit {
-                    promptManager.savedPrompts.insert(currentPreset, at: 0)
-                    promptManager.activePromptIndex = 0
-                    currentPreset = ""
+                    if !currentPreset.isEmpty {
+                        promptManager.savedPrompts.insert(currentPreset, at: 0)
+                        promptManager.activePromptIndex = 0
+                        currentPreset = ""
+                    }
                 }
                 .textFieldStyle(RoundedBorderTextFieldStyle())
 
@@ -60,8 +63,18 @@ struct MenuView: View {
                             }
                         }) {
                             MenuPromptView(
-                                prompt: promptManager.savedPrompts[index],
-                                isActive: index == promptManager.activePromptIndex
+                                prompt: $promptManager.savedPrompts[index],
+                                isActive: index == promptManager.activePromptIndex,
+                                isEditing: .init(
+                                    get: { self.isEditingIndex == index },
+                                    set: { _ in self.isEditingIndex = (self.isEditingIndex == index ? nil : index) }
+                                ),
+                                onDelete: {
+                                    promptManager.savedPrompts.remove(at: index)
+                                    if promptManager.activePromptIndex == index {
+                                        promptManager.activePromptIndex = nil
+                                    }
+                                }
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
