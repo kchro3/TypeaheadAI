@@ -12,14 +12,17 @@ struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
 
     @State private var currentPreset: String = ""
-    @State private var isHovering = false // State to keep track of hover
+    @State private var isHoveringSettings = false
+    @State private var isHoveringQuit = false
     @FocusState private var isTextFieldFocused: Bool
 
+    private let verticalPadding: CGFloat = 5
+    private let horizontalPadding: CGFloat = 10
+
     var body: some View {
-        VStack {
+        VStack(spacing: verticalPadding) {
             HStack {
-                Text("TypeaheadAI")
-                    .bold()
+                Text("TypeaheadAI").font(.headline)
 
                 Spacer()
 
@@ -27,22 +30,32 @@ struct MenuView: View {
                     .toggleStyle(.switch)
                     .accentColor(.blue)
             }
+            .padding(.vertical, verticalPadding)
+            .padding(.horizontal, horizontalPadding)
 
             Divider()
+                .padding(.horizontal, horizontalPadding)
+
+            TextField("Enter prompt...", text: $currentPreset)
+                .focused($isTextFieldFocused)
+                .onSubmit {
+                    promptManager.savedPrompts.insert(currentPreset, at: 0)
+                    promptManager.activePromptIndex = 0
+                    currentPreset = ""
+                }
+                .textFieldStyle(RoundedBorderTextFieldStyle())
 
             ScrollView {
-                VStack(spacing: 0) { // Remove spacing between rows
+                VStack(spacing: 0) {
                     ForEach(0..<promptManager.savedPrompts.count, id: \.self) { index in
                         Button(action: {
                             if let activeIndex = promptManager.activePromptIndex {
                                 if activeIndex == index {
-                                    // Toggle off if already active
                                     promptManager.activePromptIndex = nil
                                 } else {
                                     promptManager.activePromptIndex = index
                                 }
                             } else {
-                                // Set active prompt
                                 promptManager.activePromptIndex = index
                             }
                         }) {
@@ -55,23 +68,34 @@ struct MenuView: View {
                     }
                 }
             }
+            .frame(maxHeight: 200)
 
-            TextField("Enter preset...",
-                      text: $currentPreset)
-            .focused($isTextFieldFocused)
-            .onSubmit {
-                promptManager.savedPrompts.append(currentPreset)
-                // Automatically set the new prompt as active
-                promptManager.activePromptIndex = promptManager.savedPrompts.count - 1
-                currentPreset = ""
-            }
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .padding(.top)
-            .onAppear {
-                isTextFieldFocused = true
+            Divider()
+                .padding(.horizontal, horizontalPadding)
+
+            VStack(spacing: 0) {
+                buttonRow(title: "Settings", isHovering: $isHoveringSettings)
+                buttonRow(title: "Quit", isHovering: $isHoveringQuit)
             }
         }
-        .padding(10)
+        .padding(4)
+    }
+
+    private func buttonRow(title: String, isHovering: Binding<Bool>) -> some View {
+        Button(action: {
+            NSApplication.shared.terminate(self)
+        }) {
+            Text(title)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(4)
+                .background(isHovering.wrappedValue ? Color.gray.opacity(0.2) : Color.clear)
+                .cornerRadius(4)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+        .onHover { hovering in
+            isHovering.wrappedValue = hovering
+        }
     }
 }
 
