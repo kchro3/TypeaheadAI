@@ -87,21 +87,27 @@ struct MenuView: View {
                 .padding(.horizontal, horizontalPadding)
 
             VStack(spacing: 0) {
-                buttonRow(title: "Settings", isHovering: $isHoveringSettings)
-                buttonRow(title: "Quit", isHovering: $isHoveringQuit)
+                buttonRow(title: "Settings", isHovering: $isHoveringSettings, action: {    NSApp.activate(ignoringOtherApps: true)
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                })
+                buttonRow(title: "Quit", isHovering: $isHoveringQuit, action: {
+                    NSApplication.shared.terminate(self)
+                })
             }
         }
         .padding(4)
     }
 
-    private func buttonRow(title: String, isHovering: Binding<Bool>) -> some View {
-        Button(action: {
-            NSApplication.shared.terminate(self)
-        }) {
+    private func buttonRow(
+        title: String,
+        isHovering: Binding<Bool>,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
             Text(title)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(4)
-                .background(isHovering.wrappedValue ? Color.gray.opacity(0.2) : Color.clear)
+                .background(isHovering.wrappedValue ? Color.gray : Color.clear)
                 .cornerRadius(4)
                 .contentShape(Rectangle())
         }
