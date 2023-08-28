@@ -10,12 +10,5 @@
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<key>com.apple.security.scripting-targets</key>
-	<dict/>
-	<key>com.apple.security.temporary-exception.apple-events
-com.apple.security.temporary-exception.apple-events</key>
-	<array>
-		<string>com.google.Chrome</string>
-	</array>
 </dict>
 </plist>
