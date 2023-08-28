@@ -26,6 +26,7 @@ final class AppState: ObservableObject {
         category: "AppState"
     )
     private let clientManager = ClientManager()
+    private let googleChromeURLHandler = GoogleChromeURLHandler()
 
     init() {
         checkAndRequestAccessibilityPermissions()
@@ -69,6 +70,9 @@ final class AppState: ObservableObject {
                 let commandKeyUsed = event.modifierFlags.contains(.command)
                 if event.keyCode == 8 && commandKeyUsed { // 'C' key
                                                           // Get the latest string content from the pasteboard
+
+                    let _ = self.googleChromeURLHandler.getCurrentURLFromChrome()
+
                     if let _ = NSPasteboard.general.string(forType: .string) {
                         self.logger.debug("copy detected")
                     }
