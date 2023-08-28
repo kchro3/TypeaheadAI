@@ -180,7 +180,7 @@ final class AppState: ObservableObject {
                     userFullName: NSFullUserName(),
                     userObjective: self.promptManager.getActivePrompt() ?? "",
                     copiedText: combinedString,
-                    url: url ?? "none",
+                    url: url ?? "unknown",
                     activeAppName: appName ?? "",
                     activeAppBundleIdentifier: bundleIdentifier ?? ""
                 ) { result in
