@@ -46,6 +46,7 @@ final class AppState: ObservableObject {
         Task { // Use a task to call the method on the main actor
             await stopMonitoringCmdCAndV()
         }
+        self.scriptManager.stopAccessingDirectory()
     }
 
     private func startBlinking() {
@@ -72,7 +73,6 @@ final class AppState: ObservableObject {
                                                           // Get the latest string content from the pasteboard
                     if let _ = NSPasteboard.general.string(forType: .string) {
                         self.logger.debug("copy detected")
-                        self.scriptManager.executeScript()
                     }
                 } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
                     self.logger.debug("paste detected")
@@ -215,7 +215,20 @@ final class AppState: ObservableObject {
             let appName = activeApp.localizedName
             self.logger.debug("Detected active app: \(appName ?? "none")")
             let bundleIdentifier = activeApp.bundleIdentifier
-            completion(appName, bundleIdentifier, nil)
+
+            if bundleIdentifier == "com.google.Chrome" {
+                self.scriptManager.executeScript { (result, error) in
+                    if let error = error {
+                        self.logger.error("Failed to execute script: \(error.errorDescription ?? "Unknown error")")
+                        completion(appName, bundleIdentifier, nil)
+                    } else if let url = result?.stringValue {
+                        self.logger.info("Successfully executed script. URL: \(url)")
+                        completion(appName, bundleIdentifier, url)
+                    }
+                }
+            } else {
+                completion(appName, bundleIdentifier, nil)
+            }
         } else {
             completion(nil, nil, nil)
         }
