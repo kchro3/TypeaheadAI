@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2B8B95202A9C099E00FB9EA9 /* GoogleChromeURLHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B951F2A9C099E00FB9EA9 /* GoogleChromeURLHandler.swift */; };
+		2B8B95252A9C1F7B00FB9EA9 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B8B95242A9C1F7B00FB9EA9 /* ScriptingBridge.framework */; };
+		2B8B95272A9C2E0D00FB9EA9 /* GoogleChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B95262A9C2E0D00FB9EA9 /* GoogleChrome.swift */; };
+		2B8B95292A9C2E6400FB9EA9 /* GoogleChromeScripting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B95282A9C2E6400FB9EA9 /* GoogleChromeScripting.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
 		2BA7F07D2A9ABBA8003D38BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */; };
 		2BA7F0802A9ABBA8003D38BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07F2A9ABBA8003D38BA /* Preview Assets.xcassets */; };
@@ -42,6 +46,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2B8B951E2A9C08DC00FB9EA9 /* GoogleChrome.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GoogleChrome.h; sourceTree = "<group>"; };
+		2B8B951F2A9C099E00FB9EA9 /* GoogleChromeURLHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleChromeURLHandler.swift; sourceTree = "<group>"; };
+		2B8B95222A9C1A2E00FB9EA9 /* GoogleChrome-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GoogleChrome-Bridging-Header.h"; sourceTree = "<group>"; };
+		2B8B95242A9C1F7B00FB9EA9 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
+		2B8B95262A9C2E0D00FB9EA9 /* GoogleChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleChrome.swift; sourceTree = "<group>"; };
+		2B8B95282A9C2E6400FB9EA9 /* GoogleChromeScripting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleChromeScripting.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
 		2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -67,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B8B95252A9C1F7B00FB9EA9 /* ScriptingBridge.framework in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -88,6 +99,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2B8B95232A9C1F7B00FB9EA9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2B8B95242A9C1F7B00FB9EA9 /* ScriptingBridge.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		2BA7F06C2A9ABBA7003D38BA = {
 			isa = PBXGroup;
 			children = (
@@ -95,6 +114,7 @@
 				2BA7F08E2A9ABBA8003D38BA /* TypeaheadAITests */,
 				2BA7F0982A9ABBA8003D38BA /* TypeaheadAIUITests */,
 				2BA7F0762A9ABBA8003D38BA /* Products */,
+				2B8B95232A9C1F7B00FB9EA9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -121,6 +141,11 @@
 				2BA7F0A82A9ABBE2003D38BA /* ClientManager.swift */,
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
 				2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */,
+				2B8B951E2A9C08DC00FB9EA9 /* GoogleChrome.h */,
+				2B8B951F2A9C099E00FB9EA9 /* GoogleChromeURLHandler.swift */,
+				2B8B95222A9C1A2E00FB9EA9 /* GoogleChrome-Bridging-Header.h */,
+				2B8B95262A9C2E0D00FB9EA9 /* GoogleChrome.swift */,
+				2B8B95282A9C2E6400FB9EA9 /* GoogleChromeScripting.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -300,11 +325,14 @@
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
+				2B8B95292A9C2E6400FB9EA9 /* GoogleChromeScripting.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
+				2B8B95272A9C2E0D00FB9EA9 /* GoogleChrome.swift in Sources */,
 				2BA7F0852A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld in Sources */,
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
 				2BA7F0B12A9ABCA5003D38BA /* MenuPromptView.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
+				2B8B95202A9C099E00FB9EA9 /* GoogleChromeURLHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,6 +512,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "TypeaheadAI/GoogleChrome-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -518,6 +547,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "TypeaheadAI/GoogleChrome-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
