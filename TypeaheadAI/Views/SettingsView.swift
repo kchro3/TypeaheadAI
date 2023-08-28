@@ -13,7 +13,7 @@ struct SettingsView: View {
         Form {
             KeyboardShortcuts.Recorder("Special Copy:", name: .specialCopy)
             KeyboardShortcuts.Recorder("Special Paste:", name: .specialPaste)
-            Button("Clear User Defaults", action: clearUserDefaults)
+            Button("Reset User Settings", action: clearUserDefaults)
         }
     }
 

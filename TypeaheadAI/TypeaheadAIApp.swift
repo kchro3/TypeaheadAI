@@ -26,6 +26,7 @@ final class AppState: ObservableObject {
         category: "AppState"
     )
     private let clientManager = ClientManager()
+    private let scriptManager = ScriptManager()
 
     init() {
         checkAndRequestAccessibilityPermissions()
@@ -71,6 +72,7 @@ final class AppState: ObservableObject {
                                                           // Get the latest string content from the pasteboard
                     if let _ = NSPasteboard.general.string(forType: .string) {
                         self.logger.debug("copy detected")
+                        self.scriptManager.executeScript()
                     }
                 } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
                     self.logger.debug("paste detected")
