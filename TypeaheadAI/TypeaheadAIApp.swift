@@ -203,51 +203,20 @@ final class AppState: ObservableObject {
         }
     }
 
+    /**
+     NOTE: We are punting on trying to access the Google Chrome URL. It doesn't seem like it's possible
+     while being sandboxed and without the temporary exception entitlement.
+     */
     private func getActiveApplicationInfo(completion: @escaping (String?, String?, String?) -> Void) {
         self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
             let appName = activeApp.localizedName
             self.logger.debug("Detected active app: \(appName ?? "none")")
             let bundleIdentifier = activeApp.bundleIdentifier
-
-            if bundleIdentifier == "com.google.Chrome" {
-                DispatchQueue.global(qos: .userInitiated).async {
-                    let url = self.getChromeActiveURL()
-                    DispatchQueue.main.async {
-                        completion(appName, bundleIdentifier, url)
-                    }
-                }
-            } else {
-                completion(appName, bundleIdentifier, nil)
-            }
+            completion(appName, bundleIdentifier, nil)
         } else {
             completion(nil, nil, nil)
         }
-    }
-
-    nonisolated private func getChromeActiveURL() -> String? {
-        let source = """
-            tell application "Google Chrome"
-                return URL of active tab of front window
-            end tell
-        """
-
-        var error: NSDictionary?
-        if let script = NSAppleScript(source: source) {
-            if let output = script.executeAndReturnError(&error).stringValue {
-                self.logger.debug("Successfully retrieved URL from Chrome: \(output)")
-                return output
-            } else {
-                self.logger.debug("Failed to retrieve URL from Chrome: \(error)")
-                return nil
-            }
-        }
-
-        if let error = error {
-            self.logger.debug("Error retrieving URL from Chrome: \(error)")
-        }
-
-        return nil
     }
 
     private func simulateCopy() {
@@ -289,21 +258,6 @@ final class AppState: ObservableObject {
                 alert.alertStyle = .warning
                 alert.addButton(withTitle: "OK")
                 alert.runModal()
-            }
-        }
-    }
-
-    func promptUserToEnablePermission() {
-        // Prompt the user to manually enable Automation permission for Google Chrome
-        let alert = NSAlert()
-        alert.messageText = "Automation Permission Required"
-        alert.informativeText = "Please enable Automation permission for Google Chrome in System Preferences."
-        alert.addButton(withTitle: "Open System Preferences")
-        alert.addButton(withTitle: "Cancel")
-        if alert.runModal() == .alertFirstButtonReturn {
-            // Open System Preferences > Security & Privacy > Privacy > Automation
-            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
-                NSWorkspace.shared.open(url)
             }
         }
     }
