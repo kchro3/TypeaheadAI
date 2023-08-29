@@ -5,6 +5,7 @@
 //  Created by Jeff Hara on 8/26/23.
 //
 
+import CoreData
 import SwiftUI
 import KeyboardShortcuts
 import AppKit
@@ -27,8 +28,11 @@ final class AppState: ObservableObject {
     )
     private let clientManager = ClientManager()
     private let scriptManager = ScriptManager()
+    private let historyManager: HistoryManager
 
-    init() {
+    init(context: NSManagedObjectContext) {
+        self.historyManager = HistoryManager(context: context)
+
         checkAndRequestAccessibilityPermissions()
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
@@ -177,6 +181,8 @@ final class AppState: ObservableObject {
         DispatchQueue.main.async { self.isLoading = true }
         startBlinking()
 
+        let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
+
         // Replace the current clipboard contents with the lowercase string
         pasteboard.declareTypes([.string], owner: nil)
 
@@ -197,12 +203,22 @@ final class AppState: ObservableObject {
                     switch result {
                     case .success(let response):
                         self.logger.debug("Response from server: \(response)")
+                        self.historyManager.updateHistoryEntry(
+                            entry: newEntry,
+                            withResponse: response,
+                            andStatus: .success
+                        )
                         pasteboard.setString(response, forType: .string)
                         // Simulate a paste of the lowercase string
                         self.simulatePaste()
                         AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
                     case .failure(let error):
                         self.logger.debug("Error: \(error.localizedDescription)")
+                        self.historyManager.updateHistoryEntry(
+                            entry: newEntry,
+                            withResponse: nil,
+                            andStatus: .failure
+                        )
                         AudioServicesPlaySystemSound(1306) // Funk sound
                     }
                 }
@@ -307,15 +323,23 @@ final class AppState: ObservableObject {
 
 @main
 struct TypeaheadAIApp: App {
-    @StateObject private var appState = AppState()
+    let persistenceController = PersistenceController.shared
+    @StateObject private var appState: AppState
+
+    init() {
+        let context = persistenceController.container.viewContext
+        _appState = StateObject(wrappedValue: AppState(context: context))
+    }
 
     var body: some Scene {
         Settings {
             SettingsView()
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
 
         MenuBarExtra {
             MenuView(isEnabled: $appState.isEnabled, promptManager: appState.promptManager)
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         } label: {
             Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
