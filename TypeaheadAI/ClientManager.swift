@@ -43,8 +43,9 @@ class ClientManager {
         url: String,
         activeAppName: String,
         activeAppBundleIdentifier: String,
-        retryCount: Int = 3, // Maximum number of retry attempts
-        delay: TimeInterval = 1, // Delay for the first retry (seconds)
+        retryCount: Int = 3,
+        delay: TimeInterval = 1,
+        timeout: TimeInterval = 10,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
 
@@ -65,7 +66,7 @@ class ClientManager {
             return
         }
 
-        var request = URLRequest(url: apiUrl)
+        var request = URLRequest(url: apiUrl, timeoutInterval: timeout)
         request.httpMethod = "POST"
         request.httpBody = httpBody
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")

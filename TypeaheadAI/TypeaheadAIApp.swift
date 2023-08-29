@@ -46,6 +46,7 @@ final class AppState: ObservableObject {
         Task { // Use a task to call the method on the main actor
             await stopMonitoringCmdCAndV()
         }
+
         self.scriptManager.stopAccessingDirectory()
     }
 
@@ -92,6 +93,8 @@ final class AppState: ObservableObject {
             self.logger.debug("special copy is disabled")
             return
         }
+
+        checkAndRequestAccessibilityPermissions()
 
         self.logger.debug("special copy")
         let pasteboard = NSPasteboard.general
@@ -140,6 +143,8 @@ final class AppState: ObservableObject {
             self.logger.debug("special paste is disabled")
             return
         }
+
+        checkAndRequestAccessibilityPermissions()
 
         self.logger.debug("special paste")
         let pasteboard = NSPasteboard.general
@@ -260,19 +265,41 @@ final class AppState: ObservableObject {
         cmdVUp.post(tap: .cghidEventTap)
     }
 
-    private func checkAndRequestAccessibilityPermissions() {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
+    private func checkAndRequestAccessibilityPermissions() -> Void {
+        // Check if the process is trusted for accessibility
+        let options: NSDictionary = [
+            kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true
+        ]
+
         let accessibilityEnabled = AXIsProcessTrustedWithOptions(options)
 
-        if !accessibilityEnabled {
-            // You can display a custom alert here to explain why the app needs accessibility permissions
+        // Debugging logs
+        if accessibilityEnabled {
+            self.logger.info("Accessibility permissions granted.")
+        } else {
+            self.logger.warning("Accessibility permissions not granted.")
+
             DispatchQueue.main.async {
                 let alert = NSAlert()
                 alert.messageText = "Accessibility Permissions Required"
-                alert.informativeText = "This app requires accessibility permissions to function properly. Please grant the permissions in System Preferences."
+                alert.informativeText = "This app requires accessibility permissions to function properly. Would you like to open System Preferences to grant these permissions?"
                 alert.alertStyle = .warning
-                alert.addButton(withTitle: "OK")
-                alert.runModal()
+                alert.addButton(withTitle: "Open System Preferences")
+                alert.addButton(withTitle: "Cancel")
+
+                let modalResult = alert.runModal()
+
+                switch modalResult {
+                case .alertFirstButtonReturn:
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                        NSWorkspace.shared.open(url)
+                    }
+                case .alertSecondButtonReturn:
+                    // Handle cancel action if needed
+                    break
+                default:
+                    break
+                }
             }
         }
     }
