@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct MenuPromptView: View {
-    @Binding var prompt: String
+    @Binding var prompt: PromptEntry
     var isActive: Bool
     @Binding var isEditing: Bool
     var onDelete: (() -> Void)?
+    var onUpdate: ((String) -> Void)?
 
     @State private var isHovering: Bool = false
 
@@ -24,18 +25,21 @@ struct MenuPromptView: View {
                 .foregroundStyle(.primary, .blue)
 
             if isEditing {
-                TextField("", text: $prompt)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    // On submit, revert back to Text view
-                    // If empty, execute deletion callback
-                    .onSubmit {
-                        isEditing = false
-                        if prompt.isEmpty {
-                            onDelete?()
-                        }
+                TextField("", text: Binding(
+                    get: { self.prompt.prompt ?? "" },
+                    set: { self.prompt.prompt = $0 }
+                ))
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .onSubmit {
+                    isEditing = false
+                    if let newContent = prompt.prompt, !newContent.isEmpty {
+                        onUpdate?(newContent)
+                    } else {
+                        onDelete?()
                     }
+                }
             } else {
-                Text(prompt)
+                Text(prompt.prompt ?? "")
                     // On double-click, switch to TextField
                     .onTapGesture(count: 2) {
                         isEditing = true
@@ -56,14 +60,28 @@ struct MenuPromptView: View {
 }
 
 struct MenuPromptView_Previews: PreviewProvider {
-    @State static var prompt = "sample prompt"
     @State static var isNotEditing = false
     @State static var isEditing = true
 
     static var previews: some View {
-        MenuPromptView(prompt: $prompt, isActive: false, isEditing: $isNotEditing)
-        MenuPromptView(prompt: $prompt, isActive: true, isEditing: $isNotEditing)
-        MenuPromptView(prompt: $prompt, isActive: false, isEditing: $isEditing)
-        MenuPromptView(prompt: $prompt, isActive: true, isEditing: $isEditing)
+        // Create an in-memory Core Data store
+        let container = NSPersistentContainer(name: "TypeaheadAI")
+        container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        container.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        }
+
+        let context = container.viewContext
+        let prompt = PromptEntry(context: context)
+        prompt.prompt = "sample prompt"
+
+        return Group {
+            MenuPromptView(prompt: .constant(prompt), isActive: false, isEditing: $isNotEditing)
+            MenuPromptView(prompt: .constant(prompt), isActive: true, isEditing: $isNotEditing)
+            MenuPromptView(prompt: .constant(prompt), isActive: false, isEditing: $isEditing)
+            MenuPromptView(prompt: .constant(prompt), isActive: true, isEditing: $isEditing)
+        }
     }
 }

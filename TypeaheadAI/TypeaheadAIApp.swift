@@ -19,7 +19,7 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var isEnabled: Bool = true
-    @Published var promptManager: PromptManager = PromptManager()
+    @Published var promptManager: PromptManager
 
     // Monitors: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
@@ -37,6 +37,7 @@ final class AppState: ObservableObject {
 
     init(context: NSManagedObjectContext) {
         self.historyManager = HistoryManager(context: context)
+        self.promptManager = PromptManager(context: context)
 
         checkAndRequestAccessibilityPermissions()
         checkAndRequestNotificationPermissions()
