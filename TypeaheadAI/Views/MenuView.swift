@@ -16,7 +16,7 @@ struct MenuView: View {
     @State private var currentPreset: String = ""
     @State private var isHoveringSettings = false
     @State private var isHoveringQuit = false
-    @State private var isEditingIndex: Int?
+    @State private var isEditingID: UUID?
     @FocusState private var isTextFieldFocused: Bool
 
     private let verticalPadding: CGFloat = 5
@@ -44,7 +44,6 @@ struct MenuView: View {
                 .onSubmit {
                     if !currentPreset.isEmpty {
                         promptManager.addPrompt(currentPreset, context: viewContext)
-                        promptManager.activePromptIndex = 0
                         currentPreset = ""
                     }
                 }
@@ -52,36 +51,36 @@ struct MenuView: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    ForEach(0..<promptManager.savedPrompts.count, id: \.self) { index in
+                    ForEach(promptManager.savedPrompts, id: \.id) { prompt in
                         Button(action: {
-                            if let activeIndex = promptManager.activePromptIndex {
-                                if activeIndex == index {
-                                    promptManager.activePromptIndex = nil
-                                } else {
-                                    promptManager.activePromptIndex = index
-                                }
+                            if promptManager.activePromptID == prompt.id {
+                                promptManager.activePromptID = nil
                             } else {
-                                promptManager.activePromptIndex = index
+                                promptManager.activePromptID = prompt.id
                             }
                         }) {
                             MenuPromptView(
-                                prompt: $promptManager.savedPrompts[index],
-                                isActive: index == promptManager.activePromptIndex,
+                                prompt: prompt,
+                                isActive: prompt.id == promptManager.activePromptID,
                                 isEditing: .init(
-                                    get: { self.isEditingIndex == index },
+                                    get: { self.isEditingID == prompt.id },
                                     set: { _ in
-                                        self.isEditingIndex = (self.isEditingIndex == index ? nil : index)
-                                        promptManager.activePromptIndex = index
+                                        self.isEditingID = (self.isEditingID == prompt.id ? nil : prompt.id)
+                                        promptManager.activePromptID = prompt.id
                                     }
                                 ),
                                 onDelete: {
-                                    promptManager.removePrompt(at: index, context: viewContext)
-                                    if promptManager.activePromptIndex == index {
-                                        promptManager.activePromptIndex = nil
+                                    promptManager.removePrompt(with: prompt.id!, context: viewContext)
+                                    if promptManager.activePromptID == prompt.id {
+                                        promptManager.activePromptID = nil
                                     }
                                 },
                                 onUpdate: { newContent in
-                                    promptManager.updatePrompt(at: index, with: newContent, context: viewContext)
+                                    promptManager.updatePrompt(
+                                        with: prompt.id!,
+                                        newContent: newContent,
+                                        context: viewContext
+                                    )
                                 }
                             )
                         }
@@ -149,8 +148,6 @@ struct MenuView_Previews: PreviewProvider {
             newPrompt.prompt = prompt
             promptManager.addPrompt(prompt, context: context)
         }
-
-        promptManager.activePromptIndex = 1
 
         return MenuView(
             isEnabled: $isEnabled,

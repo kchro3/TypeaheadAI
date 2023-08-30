@@ -8,13 +8,29 @@
 import SwiftUI
 
 struct MenuPromptView: View {
-    @Binding var prompt: PromptEntry
+    var prompt: PromptEntry
     var isActive: Bool
     @Binding var isEditing: Bool
     var onDelete: (() -> Void)?
     var onUpdate: ((String) -> Void)?
 
     @State private var isHovering: Bool = false
+    @State private var localPromptContent: String
+
+    init(
+        prompt: PromptEntry,
+        isActive: Bool,
+        isEditing: Binding<Bool>,
+        onDelete: (() -> Void)? = nil,
+        onUpdate: ((String) -> Void)? = nil
+    ) {
+        self.prompt = prompt
+        self.isActive = isActive
+        self._isEditing = isEditing
+        self.onDelete = onDelete
+        self.onUpdate = onUpdate
+        self._localPromptContent = State(initialValue: prompt.prompt ?? "")
+    }
 
     var body: some View {
         HStack {
@@ -25,19 +41,16 @@ struct MenuPromptView: View {
                 .foregroundStyle(.primary, .blue)
 
             if isEditing {
-                TextField("", text: Binding(
-                    get: { self.prompt.prompt ?? "" },
-                    set: { self.prompt.prompt = $0 }
-                ))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .onSubmit {
-                    isEditing = false
-                    if let newContent = prompt.prompt, !newContent.isEmpty {
-                        onUpdate?(newContent)
-                    } else {
-                        onDelete?()
+                TextField("", text: $localPromptContent)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .onSubmit {
+                        isEditing = false
+                        if !localPromptContent.isEmpty {
+                            onUpdate?(localPromptContent)
+                        } else {
+                            onDelete?()
+                        }
                     }
-                }
             } else {
                 Text(prompt.prompt ?? "")
                     // On double-click, switch to TextField
@@ -78,10 +91,10 @@ struct MenuPromptView_Previews: PreviewProvider {
         prompt.prompt = "sample prompt"
 
         return Group {
-            MenuPromptView(prompt: .constant(prompt), isActive: false, isEditing: $isNotEditing)
-            MenuPromptView(prompt: .constant(prompt), isActive: true, isEditing: $isNotEditing)
-            MenuPromptView(prompt: .constant(prompt), isActive: false, isEditing: $isEditing)
-            MenuPromptView(prompt: .constant(prompt), isActive: true, isEditing: $isEditing)
+            MenuPromptView(prompt: prompt, isActive: false, isEditing: $isNotEditing)
+            MenuPromptView(prompt: prompt, isActive: true, isEditing: $isNotEditing)
+            MenuPromptView(prompt: prompt, isActive: false, isEditing: $isEditing)
+            MenuPromptView(prompt: prompt, isActive: true, isEditing: $isEditing)
         }
     }
 }

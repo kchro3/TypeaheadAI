@@ -399,7 +399,7 @@ struct TypeaheadAIApp: App {
 
     var body: some Scene {
         Settings {
-            SettingsView()
+            SettingsView(promptManager: appState.promptManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
 
