@@ -264,10 +264,6 @@ final class AppState: ObservableObject {
         }
     }
 
-    /**
-     NOTE: We are punting on trying to access the Google Chrome URL. It doesn't seem like it's possible
-     while being sandboxed and without the temporary exception entitlement.
-     */
     private func getActiveApplicationInfo(completion: @escaping (String?, String?, String?) -> Void) {
         self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
