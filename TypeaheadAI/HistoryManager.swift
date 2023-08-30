@@ -9,10 +9,6 @@ import Foundation
 import CoreData
 import os.log
 
-enum RequestStatus: String {
-    case pending, success, failure
-}
-
 class HistoryManager {
     private let managedObjectContext: NSManagedObjectContext
     private let logger = Logger(

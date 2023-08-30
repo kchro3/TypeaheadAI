@@ -8,6 +8,7 @@
 import CoreData
 import SwiftUI
 import KeyboardShortcuts
+import UserNotifications
 import AppKit
 import AVFoundation
 import Carbon.HIToolbox
@@ -20,7 +21,11 @@ final class AppState: ObservableObject {
     @Published var isEnabled: Bool = true
     @Published var promptManager: PromptManager = PromptManager()
 
+    // Monitors: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
+    private var mouseClicked: Bool = false
+    private var mouseEventMonitor: Any?
+
     private var blinkTimer: Timer?
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -34,6 +39,7 @@ final class AppState: ObservableObject {
         self.historyManager = HistoryManager(context: context)
 
         checkAndRequestAccessibilityPermissions()
+        checkAndRequestNotificationPermissions()
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             self.specialCopy()
@@ -89,6 +95,23 @@ final class AppState: ObservableObject {
     private func stopMonitoringCmdCAndV() async {
         if let globalEventMonitor = globalEventMonitor {
             NSEvent.removeMonitor(globalEventMonitor)
+        }
+    }
+
+    private func startMonitoringMouseClicks() {
+        self.logger.debug("monitoring clicks")
+        mouseClicked = false
+        mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown], handler: { [weak self] _ in
+            self?.logger.debug("click detected")
+            self?.mouseClicked = true
+        })
+    }
+
+    private func stopMonitoringMouseClicks() {
+        if let mouseEventMonitor = mouseEventMonitor {
+            self.logger.debug("stop monitoring clicks")
+            NSEvent.removeMonitor(mouseEventMonitor)
+            self.mouseEventMonitor = nil
         }
     }
 
@@ -178,8 +201,11 @@ final class AppState: ObservableObject {
 
         self.logger.debug("Combined string: \(combinedString)")
 
-        DispatchQueue.main.async { self.isLoading = true }
-        startBlinking()
+        DispatchQueue.main.async {
+            self.isLoading = true
+            self.startBlinking()
+            self.startMonitoringMouseClicks()
+        }
 
         let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
 
@@ -197,8 +223,11 @@ final class AppState: ObservableObject {
                     activeAppName: appName ?? "",
                     activeAppBundleIdentifier: bundleIdentifier ?? ""
                 ) { result in
-                    DispatchQueue.main.async { self.isLoading = false }
-                    self.stopBlinking()
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        self.stopBlinking()
+                        self.stopMonitoringMouseClicks()
+                    }
 
                     switch result {
                     case .success(let response):
@@ -210,8 +239,12 @@ final class AppState: ObservableObject {
                         )
                         pasteboard.setString(response, forType: .string)
                         // Simulate a paste of the lowercase string
-                        self.simulatePaste()
-                        AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
+                        if self.mouseClicked {
+                            self.sendClipboardNotification(status: .success)
+                        } else {
+                            AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
+                            self.simulatePaste()
+                        }
                     case .failure(let error):
                         self.logger.debug("Error: \(error.localizedDescription)")
                         self.historyManager.updateHistoryEntry(
@@ -219,6 +252,7 @@ final class AppState: ObservableObject {
                             withResponse: nil,
                             andStatus: .failure
                         )
+                        self.sendClipboardNotification(status: .failure)
                         AudioServicesPlaySystemSound(1306) // Funk sound
                     }
                 }
@@ -316,6 +350,38 @@ final class AppState: ObservableObject {
                 default:
                     break
                 }
+            }
+        }
+    }
+
+    private func checkAndRequestNotificationPermissions() -> Void {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            if granted {
+                self.logger.debug("Notification permission granted")
+            } else if let error = error {
+                self.logger.error("Notification permission error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func sendClipboardNotification(status: RequestStatus) {
+        let content = UNMutableNotificationContent()
+
+        if status == RequestStatus.success {
+            content.title = "Clipboard Ready"
+            content.body = "Paste with cmd-v."
+        } else {
+            content.title = "Failed to paste"
+            content.body = "Something went wrong... Please try again."
+        }
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                self.logger.error("Failed to send notification: \(error.localizedDescription)")
             }
         }
     }
