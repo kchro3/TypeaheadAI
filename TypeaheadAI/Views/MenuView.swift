@@ -39,7 +39,7 @@ struct MenuView: View {
             Divider()
                 .padding(.horizontal, horizontalPadding)
 
-            TextField("Enter prompt...", text: $currentPreset)
+            TextField("Set a goal (e.g. summarize, translate, reply)", text: $currentPreset)
                 .focused($isTextFieldFocused)
                 .onSubmit {
                     if !currentPreset.isEmpty {
