@@ -203,7 +203,10 @@ final class AppState: ObservableObject {
 
         DispatchQueue.main.async {
             self.isLoading = true
-            self.startBlinking()
+            if self.historyManager.pendingRequestCount() == 0 {
+                // Invalidate blink timer and start blinking.
+                self.startBlinking()
+            }
             self.startMonitoringMouseClicks()
         }
 
@@ -224,12 +227,6 @@ final class AppState: ObservableObject {
                     activeAppName: appName ?? "",
                     activeAppBundleIdentifier: bundleIdentifier ?? ""
                 ) { result in
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                        self.stopBlinking()
-                        self.stopMonitoringMouseClicks()
-                    }
-
                     switch result {
                     case .success(let response):
                         self.logger.debug("Response from server: \(response)")
@@ -255,6 +252,14 @@ final class AppState: ObservableObject {
                         )
                         self.sendClipboardNotification(status: .failure)
                         AudioServicesPlaySystemSound(1306) // Funk sound
+                    }
+
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        if self.historyManager.pendingRequestCount() == 0 {
+                            self.stopBlinking()
+                        }
+                        self.stopMonitoringMouseClicks()
                     }
                 }
             }
