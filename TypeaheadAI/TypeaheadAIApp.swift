@@ -215,6 +215,7 @@ final class AppState: ObservableObject {
         getActiveApplicationInfo { (appName, bundleIdentifier, url) in
             DispatchQueue.main.async {
                 self.clientManager.sendRequest(
+                    id: newEntry.id!,
                     username: NSUserName(),
                     userFullName: NSFullUserName(),
                     userObjective: self.promptManager.getActivePrompt() ?? "",
