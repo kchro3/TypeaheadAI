@@ -126,45 +126,8 @@ final class AppState: ObservableObject {
         checkAndRequestAccessibilityPermissions()
 
         self.logger.debug("special copy")
-        let pasteboard = NSPasteboard.general
 
-        // Get the current items from the pasteboard
-        let currentItems: [NSPasteboardItem] = pasteboard.pasteboardItems ?? []
-
-        // Store the data for each type in a new array
-        var combinedItems: [NSPasteboardItem] = []
-
-        for item in currentItems {
-            let newItem = NSPasteboardItem()
-            for type in item.types {
-                if let data = item.data(forType: type) {
-                    newItem.setData(data, forType: type)
-                }
-            }
-            combinedItems.append(newItem)
-        }
-
-        self.simulateCopy()
-
-        // Append the new items to the combined items
-        if let newItems = pasteboard.pasteboardItems {
-            for item in newItems {
-                let newItem = NSPasteboardItem()
-                for type in item.types {
-                    if let data = item.data(forType: type) {
-                        newItem.setData(data, forType: type)
-                    }
-                }
-                combinedItems.append(newItem)
-            }
-        }
-
-        // Clear the pasteboard and write the combined items
-        pasteboard.clearContents()
-        pasteboard.writeObjects(combinedItems)
-
-        // Debug print
-        self.logger.debug("Number of items on pasteboard: \(combinedItems.count)")
+        showSpecialCopyModal()
     }
 
     func specialPaste() {
@@ -409,6 +372,28 @@ final class AppState: ObservableObject {
                 self.logger.error("Failed to send notification: \(error.localizedDescription)")
             }
         }
+    }
+
+    private func showSpecialCopyModal() {
+        let contentView = ModalView(showModal: .constant(true))
+
+        // Create the window
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
+            styleMask: [.titled, .closable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        window.center()
+        window.setFrameAutosaveName("Special Copy Modal")
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: contentView)
+        window.level = .popUpMenu  // Try different levels here like .popUpMenu or .statusBar
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary] // This line is important
+
+        // Activate the app before making the window key
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
     }
 }
 
