@@ -60,19 +60,26 @@ class ScriptManager {
         }
 
         let scriptURL = directoryURL.appendingPathComponent("GetActiveTabURL.scpt")
+        self.logger.debug("Executing script at \(scriptURL)")
 
         do {
             let appleScriptTask = try NSUserAppleScriptTask(url: scriptURL)
             appleScriptTask.execute(withAppleEvent: nil) { (result, error) in
-                if let _ = error {
-                    self.logger.debug("Error: \(ScriptManagerError.scriptExecutionFailed)")
+                if let error = error, error.localizedDescription.contains("-1743") {
+                    // Check if the user has opted to not see the warning again
+                    if !UserDefaults.standard.bool(forKey: "DontShowAppleEventWarning") {
+                        self.showAppleEventPermissionDialog()
+                    }
+                    completion(nil, ScriptManagerError.scriptExecutionFailed)
+                } else if let _ = error {
+                    self.logger.error("\(error?.localizedDescription ?? "")")
                     completion(nil, ScriptManagerError.scriptExecutionFailed)
                 } else {
                     completion(result, nil)
                 }
             }
-        } catch {
-            logger.debug("Failed to execute script: \(ScriptManagerError.scriptExecutionFailed)")
+        } catch let error {
+            self.logger.error("\(error.localizedDescription)")
             completion(nil, ScriptManagerError.scriptExecutionFailed)
         }
     }
@@ -106,6 +113,37 @@ class ScriptManager {
                     self.writeScript(to: selectedURL)
                     self.saveScriptDirectoryBookmark(from: selectedURL)
                 }
+            }
+        }
+    }
+
+    private func showAppleEventPermissionDialog() {
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = "Permission Required"
+            alert.informativeText = "TypeaheadAI wants permission to control Google Chrome to tailor the results. Click 'Open Preferences' to go to the Security & Privacy pane where you can grant permission."
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "Open Preferences")
+            alert.addButton(withTitle: "Cancel")
+            alert.showsSuppressionButton = true // Allow the user to not show this alert again
+
+            let modalResult = alert.runModal()
+
+            // Save the user's choice to not show the alert again
+            if let suppressionButton = alert.suppressionButton, suppressionButton.state == .on {
+                UserDefaults.standard.set(true, forKey: "DontShowAppleEventWarning")
+            }
+
+            switch modalResult {
+            case .alertFirstButtonReturn:
+                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+                    NSWorkspace.shared.open(url)
+                }
+            case .alertSecondButtonReturn:
+                // Handle cancel action if needed
+                break
+            default:
+                break
             }
         }
     }
