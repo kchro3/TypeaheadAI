@@ -147,7 +147,7 @@ class ScriptManager {
             }
         }
     }
-    Identify where UI manipulations are happening outside the main thread and wrap them in DispatchQueue.main.async {}.
+
     private func writeScript(to directoryURL: URL) {
         let appleScript = """
         tell application "Google Chrome"
