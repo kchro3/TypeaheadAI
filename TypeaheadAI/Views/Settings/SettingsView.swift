@@ -16,6 +16,8 @@ enum Tabs: String, CaseIterable, Identifiable {
 }
 
 struct SettingsView: View {
+    var promptManager: PromptManager
+
     @State private var selectedTab: Tabs = .general
 
     var body: some View {
@@ -33,7 +35,7 @@ struct SettingsView: View {
     private func viewForTab(_ tab: Tabs) -> some View {
         switch tab {
         case .general:
-            return AnyView(GeneralSettingsView())
+            return AnyView(GeneralSettingsView(promptManager: promptManager))
         case .shortcuts:
             return AnyView(HistoryListView())
         case .about:
@@ -71,6 +73,29 @@ struct ItemRow: View {
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView()
+        // Create an in-memory Core Data store
+        let container = NSPersistentContainer(name: "TypeaheadAI")
+        container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        container.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        }
+
+        let context = container.viewContext
+        let promptManager = PromptManager(context: context)
+
+        // Create some sample prompts
+        let samplePrompts = ["this is a sample prompt", "this is an active prompt"]
+        for prompt in samplePrompts {
+            let newPrompt = PromptEntry(context: context)
+            newPrompt.prompt = prompt
+            promptManager.addPrompt(prompt, context: context)
+        }
+
+        return SettingsView(
+            promptManager: promptManager
+        )
+        .environment(\.managedObjectContext, context)
     }
 }

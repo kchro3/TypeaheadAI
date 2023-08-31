@@ -6,15 +6,17 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct MenuView: View {
     @Binding var isEnabled: Bool
     @ObservedObject var promptManager: PromptManager
+    @Environment(\.managedObjectContext) private var viewContext
 
     @State private var currentPreset: String = ""
     @State private var isHoveringSettings = false
     @State private var isHoveringQuit = false
-    @State private var isEditingIndex: Int?
+    @State private var isEditingID: UUID?
     @FocusState private var isTextFieldFocused: Bool
 
     private let verticalPadding: CGFloat = 5
@@ -41,8 +43,7 @@ struct MenuView: View {
                 .focused($isTextFieldFocused)
                 .onSubmit {
                     if !currentPreset.isEmpty {
-                        promptManager.savedPrompts.insert(currentPreset, at: 0)
-                        promptManager.activePromptIndex = 0
+                        promptManager.addPrompt(currentPreset, context: viewContext)
                         currentPreset = ""
                     }
                 }
@@ -50,30 +51,36 @@ struct MenuView: View {
 
             ScrollView {
                 VStack(spacing: 0) {
-                    ForEach(0..<promptManager.savedPrompts.count, id: \.self) { index in
+                    ForEach(promptManager.savedPrompts, id: \.id) { prompt in
                         Button(action: {
-                            if let activeIndex = promptManager.activePromptIndex {
-                                if activeIndex == index {
-                                    promptManager.activePromptIndex = nil
-                                } else {
-                                    promptManager.activePromptIndex = index
-                                }
+                            if promptManager.activePromptID == prompt.id {
+                                promptManager.activePromptID = nil
                             } else {
-                                promptManager.activePromptIndex = index
+                                promptManager.activePromptID = prompt.id
                             }
                         }) {
                             MenuPromptView(
-                                prompt: $promptManager.savedPrompts[index],
-                                isActive: index == promptManager.activePromptIndex,
+                                prompt: prompt,
+                                isActive: prompt.id == promptManager.activePromptID,
                                 isEditing: .init(
-                                    get: { self.isEditingIndex == index },
-                                    set: { _ in self.isEditingIndex = (self.isEditingIndex == index ? nil : index) }
+                                    get: { self.isEditingID == prompt.id },
+                                    set: { _ in
+                                        self.isEditingID = (self.isEditingID == prompt.id ? nil : prompt.id)
+                                        promptManager.activePromptID = prompt.id
+                                    }
                                 ),
                                 onDelete: {
-                                    promptManager.savedPrompts.remove(at: index)
-                                    if promptManager.activePromptIndex == index {
-                                        promptManager.activePromptIndex = nil
+                                    promptManager.removePrompt(with: prompt.id!, context: viewContext)
+                                    if promptManager.activePromptID == prompt.id {
+                                        promptManager.activePromptID = nil
                                     }
+                                },
+                                onUpdate: { newContent in
+                                    promptManager.updatePrompt(
+                                        with: prompt.id!,
+                                        newContent: newContent,
+                                        context: viewContext
+                                    )
                                 }
                             )
                         }
@@ -120,16 +127,33 @@ struct MenuView: View {
 
 struct MenuView_Previews: PreviewProvider {
     @State static var isEnabled = true
-    static var promptManager = PromptManager(savedPrompts: [
-        "this is a sample prompt",
-        "this is an active prompt"
-    ], activePromptIndex: 1)
 
     static var previews: some View {
-        MenuView(
+        // Create an in-memory Core Data store
+        let container = NSPersistentContainer(name: "TypeaheadAI")
+        container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        container.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        }
+
+        let context = container.viewContext
+        let promptManager = PromptManager(context: context)
+
+        // Create some sample prompts
+        let samplePrompts = ["this is a sample prompt", "this is an active prompt"]
+        for prompt in samplePrompts {
+            let newPrompt = PromptEntry(context: context)
+            newPrompt.prompt = prompt
+            promptManager.addPrompt(prompt, context: context)
+        }
+
+        return MenuView(
             isEnabled: $isEnabled,
             promptManager: promptManager
         )
+        .environment(\.managedObjectContext, context)
         .frame(width: 300)
     }
 }

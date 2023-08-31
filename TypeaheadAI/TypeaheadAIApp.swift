@@ -19,7 +19,7 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var isEnabled: Bool = true
-    @Published var promptManager: PromptManager = PromptManager()
+    @Published var promptManager: PromptManager
 
     // Monitors: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
@@ -37,6 +37,7 @@ final class AppState: ObservableObject {
 
     init(context: NSManagedObjectContext) {
         self.historyManager = HistoryManager(context: context)
+        self.promptManager = PromptManager(context: context)
 
         checkAndRequestAccessibilityPermissions()
         checkAndRequestNotificationPermissions()
@@ -263,10 +264,6 @@ final class AppState: ObservableObject {
         }
     }
 
-    /**
-     NOTE: We are punting on trying to access the Google Chrome URL. It doesn't seem like it's possible
-     while being sandboxed and without the temporary exception entitlement.
-     */
     private func getActiveApplicationInfo(completion: @escaping (String?, String?, String?) -> Void) {
         self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
@@ -402,7 +399,7 @@ struct TypeaheadAIApp: App {
 
     var body: some Scene {
         Settings {
-            SettingsView()
+            SettingsView(promptManager: appState.promptManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
 
