@@ -11,6 +11,10 @@ import os.log
 
 class HistoryManager {
     private let managedObjectContext: NSManagedObjectContext
+
+    // maintain pending requests in-memory for fast retrieval
+    private var pendingRequests: Set<UUID> = []
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "HistoryManager"
@@ -28,6 +32,8 @@ class HistoryManager {
         newEntry.timestamp = Date()
         newEntry.status = RequestStatus.pending.rawValue
 
+        pendingRequests.insert(newEntry.id!)
+
         do {
             try managedObjectContext.save()
         } catch {
@@ -41,10 +47,18 @@ class HistoryManager {
         entry.response = response
         entry.status = status.rawValue
 
+        if status != .pending {
+            pendingRequests.remove(entry.id!)
+        }
+
         do {
             try managedObjectContext.save()
         } catch {
             logger.error("Failed to update history entry: \(error.localizedDescription)")
         }
+    }
+
+    func pendingRequestCount() -> Int {
+        return pendingRequests.count
     }
 }

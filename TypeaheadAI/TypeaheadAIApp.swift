@@ -201,13 +201,13 @@ final class AppState: ObservableObject {
 
         self.logger.debug("Combined string: \(combinedString)")
 
+        let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
+
         DispatchQueue.main.async {
             self.isLoading = true
             self.startBlinking()
             self.startMonitoringMouseClicks()
         }
-
-        let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
 
         // Replace the current clipboard contents with the lowercase string
         pasteboard.declareTypes([.string], owner: nil)
@@ -215,6 +215,7 @@ final class AppState: ObservableObject {
         getActiveApplicationInfo { (appName, bundleIdentifier, url) in
             DispatchQueue.main.async {
                 self.clientManager.sendRequest(
+                    id: newEntry.id!,
                     username: NSUserName(),
                     userFullName: NSFullUserName(),
                     userObjective: self.promptManager.getActivePrompt() ?? "",
@@ -223,12 +224,6 @@ final class AppState: ObservableObject {
                     activeAppName: appName ?? "",
                     activeAppBundleIdentifier: bundleIdentifier ?? ""
                 ) { result in
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                        self.stopBlinking()
-                        self.stopMonitoringMouseClicks()
-                    }
-
                     switch result {
                     case .success(let response):
                         self.logger.debug("Response from server: \(response)")
@@ -254,6 +249,14 @@ final class AppState: ObservableObject {
                         )
                         self.sendClipboardNotification(status: .failure)
                         AudioServicesPlaySystemSound(1306) // Funk sound
+                    }
+
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        if self.historyManager.pendingRequestCount() == 0 {
+                            self.stopBlinking()
+                            self.stopMonitoringMouseClicks()
+                        }
                     }
                 }
             }
