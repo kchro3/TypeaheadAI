@@ -201,16 +201,13 @@ final class AppState: ObservableObject {
 
         self.logger.debug("Combined string: \(combinedString)")
 
+        let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
+
         DispatchQueue.main.async {
             self.isLoading = true
-            if self.historyManager.pendingRequestCount() == 0 {
-                // Invalidate blink timer and start blinking.
-                self.startBlinking()
-            }
+            self.startBlinking()
             self.startMonitoringMouseClicks()
         }
-
-        let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
 
         // Replace the current clipboard contents with the lowercase string
         pasteboard.declareTypes([.string], owner: nil)
@@ -258,8 +255,8 @@ final class AppState: ObservableObject {
                         self.isLoading = false
                         if self.historyManager.pendingRequestCount() == 0 {
                             self.stopBlinking()
+                            self.stopMonitoringMouseClicks()
                         }
-                        self.stopMonitoringMouseClicks()
                     }
                 }
             }
