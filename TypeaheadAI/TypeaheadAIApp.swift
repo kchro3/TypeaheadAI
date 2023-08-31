@@ -34,6 +34,7 @@ final class AppState: ObservableObject {
     private let clientManager = ClientManager()
     private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
+    private let maxConcurrentRequests = 5
 
     init(context: NSManagedObjectContext) {
         self.historyManager = HistoryManager(context: context)
@@ -51,14 +52,15 @@ final class AppState: ObservableObject {
         }
 
         startMonitoringCmdCAndV()
+        startMonitoringMouseClicks()
     }
 
     deinit {
-        Task { // Use a task to call the method on the main actor
+        Task {
             await stopMonitoringCmdCAndV()
+            await stopMonitoringMouseClicks()
+            self.scriptManager.stopAccessingDirectory()
         }
-
-        self.scriptManager.stopAccessingDirectory()
     }
 
     private func startBlinking() {
@@ -101,10 +103,9 @@ final class AppState: ObservableObject {
 
     private func startMonitoringMouseClicks() {
         self.logger.debug("monitoring clicks")
-        mouseClicked = false
-        mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown], handler: { [weak self] _ in
-            self?.logger.debug("click detected")
-            self?.mouseClicked = true
+        mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown], handler: { _ in
+            self.logger.debug("click detected")
+            self.mouseClicked = true
         })
     }
 
@@ -117,7 +118,7 @@ final class AppState: ObservableObject {
     }
 
     func specialCopy() {
-        if !isEnabled {
+        if !isEnabled || self.checkForTooManyRequests() {
             self.logger.debug("special copy is disabled")
             return
         }
@@ -167,7 +168,7 @@ final class AppState: ObservableObject {
     }
 
     func specialPaste() {
-        if !isEnabled {
+        if !isEnabled || self.checkForTooManyRequests() {
             self.logger.debug("special paste is disabled")
             return
         }
@@ -207,7 +208,7 @@ final class AppState: ObservableObject {
         DispatchQueue.main.async {
             self.isLoading = true
             self.startBlinking()
-            self.startMonitoringMouseClicks()
+            self.mouseClicked = false
         }
 
         // Replace the current clipboard contents with the lowercase string
@@ -228,19 +229,19 @@ final class AppState: ObservableObject {
                     switch result {
                     case .success(let response):
                         self.logger.debug("Response from server: \(response)")
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: response,
-                            andStatus: .success
-                        )
                         pasteboard.setString(response, forType: .string)
                         // Simulate a paste of the lowercase string
-                        if self.mouseClicked {
+                        if self.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
                             self.sendClipboardNotification(status: .success)
                         } else {
                             AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
                             self.simulatePaste()
                         }
+                        self.historyManager.updateHistoryEntry(
+                            entry: newEntry,
+                            withResponse: response,
+                            andStatus: .success
+                        )
                     case .failure(let error):
                         self.logger.debug("Error: \(error.localizedDescription)")
                         self.historyManager.updateHistoryEntry(
@@ -256,7 +257,6 @@ final class AppState: ObservableObject {
                         self.isLoading = false
                         if self.historyManager.pendingRequestCount() == 0 {
                             self.stopBlinking()
-                            self.stopMonitoringMouseClicks()
                         }
                     }
                 }
@@ -374,6 +374,31 @@ final class AppState: ObservableObject {
             content.title = "Failed to paste"
             content.body = "Something went wrong... Please try again."
         }
+        content.sound = UNNotificationSound.default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                self.logger.error("Failed to send notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func checkForTooManyRequests() -> Bool {
+        if self.historyManager.pendingRequestCount() >= maxConcurrentRequests {
+            sendTooManyRequestsNotification()
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private func sendTooManyRequestsNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Too many requests"
+        content.body = "Too many requests at a time. Please try again later."
+        content.sound = UNNotificationSound.default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 
