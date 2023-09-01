@@ -24,6 +24,11 @@ struct ResponsePayload: Codable {
     let errorMessage: String?
 }
 
+struct ChunkPayload: Codable {
+    let text: String?
+    let finishReason: String?
+}
+
 enum ClientManagerError: Error {
     case badRequest(_ message: String)
     case retriesExceeded(_ message: String)
@@ -35,6 +40,8 @@ class ClientManager {
     private let session: URLSession
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -124,5 +131,56 @@ class ClientManager {
 
         // Start the URLSession data task.
         task.resume()
+    }
+
+    /// Sends a request to the server with the given parameters and listens for a stream of data.
+    ///
+    /// - Parameters:
+    ///   - Same as sendRequest
+    ///   - streamHandler: A closure to be executed for each chunk of data received.
+    func sendStreamRequest(
+        id: UUID,
+        username: String,
+        userFullName: String,
+        userObjective: String,
+        copiedText: String,
+        url: String,
+        activeAppName: String,
+        activeAppBundleIdentifier: String,
+        timeout: TimeInterval = 10,
+        streamHandler: @escaping (String?, Error?) -> Void
+    ) async {
+        let payload = RequestPayload(
+            username: username,
+            userFullName: userFullName,
+            userObjective: userObjective,
+            copiedText: copiedText,
+            url: url,
+            activeAppName: activeAppName,
+            activeAppBundleIdentifier: activeAppBundleIdentifier
+        )
+
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            streamHandler(nil, ClientManagerError.badRequest("Encoding error"))
+            return
+        }
+
+        var request = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
+        request.httpMethod = "POST"
+        request.httpBody = httpBody
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            let (stream, _) = try await URLSession.shared.bytes(for: request)
+
+            for try await line in stream.lines {
+                let decodedResponse = try JSONDecoder().decode(ChunkPayload.self, from: line.data(using: .utf8)!)
+                if let text = decodedResponse.text {
+                    streamHandler(text, nil)
+                }
+            }
+        } catch {
+            streamHandler(nil, error)
+        }
     }
 }

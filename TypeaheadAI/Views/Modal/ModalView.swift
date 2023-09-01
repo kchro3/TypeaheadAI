@@ -9,23 +9,18 @@ import SwiftUI
 
 struct ModalView: View {
     @Binding var showModal: Bool
+    @ObservedObject var appState: AppState
 
     var body: some View {
-        VStack {
-            Text("Special Copy Modal")
-            Button("Close") {
-                showModal = false
+        ZStack {
+            ScrollView {
+                Text(appState.modalText)
+                    .multilineTextAlignment(.leading)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(width: 300, height: 200)
-        .padding()
-    }
-}
-
-struct ModalView_Previews: PreviewProvider {
-    @State static var showModal = true
-
-    static var previews: some View {
-        ModalView(showModal: $showModal)
+        .padding(10)
     }
 }
