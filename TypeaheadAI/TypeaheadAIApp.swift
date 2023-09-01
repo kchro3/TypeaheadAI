@@ -19,21 +19,29 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var isEnabled: Bool = true
+    @Published var modalText: String = ""
     @Published var promptManager: PromptManager
 
     // Monitors: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
     private var mouseClicked: Bool = false
-    private var mouseEventMonitor: Any?
+
+    private var toastWindow: NSWindow?
 
     private var blinkTimer: Timer?
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "AppState"
     )
+
+    // Managers
     private let clientManager = ClientManager()
     private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
+
+    // Monitors
+    private let mouseEventMonitor = MouseEventMonitor()
+
     private let maxConcurrentRequests = 5
 
     init(context: NSManagedObjectContext) {
@@ -52,13 +60,31 @@ final class AppState: ObservableObject {
         }
 
         startMonitoringCmdCAndV()
-        startMonitoringMouseClicks()
+
+        // Configure mouse-click handler
+        mouseEventMonitor.onLeftMouseDown = { [weak self] in
+            self?.mouseClicked = true
+
+            // If the toast window is open and the user clicks out,
+            // we can close the window.
+            if let window = self?.toastWindow {
+                let mouseLocation = NSEvent.mouseLocation
+                let windowRect = window.frame
+
+                if !windowRect.contains(mouseLocation) {
+                    self?.toastWindow?.close()
+                    self?.modalText = ""
+                }
+            }
+        }
+
+        mouseEventMonitor.startMonitoring()
     }
 
     deinit {
         Task {
             await stopMonitoringCmdCAndV()
-            await stopMonitoringMouseClicks()
+            await mouseEventMonitor.stopMonitoring()
             self.scriptManager.stopAccessingDirectory()
         }
     }
@@ -101,22 +127,6 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func startMonitoringMouseClicks() {
-        self.logger.debug("monitoring clicks")
-        mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown], handler: { _ in
-            self.logger.debug("click detected")
-            self.mouseClicked = true
-        })
-    }
-
-    private func stopMonitoringMouseClicks() {
-        if let mouseEventMonitor = mouseEventMonitor {
-            self.logger.debug("stop monitoring clicks")
-            NSEvent.removeMonitor(mouseEventMonitor)
-            self.mouseEventMonitor = nil
-        }
-    }
-
     func specialCopy() {
         if !isEnabled || self.checkForTooManyRequests() {
             self.logger.debug("special copy is disabled")
@@ -126,45 +136,38 @@ final class AppState: ObservableObject {
         checkAndRequestAccessibilityPermissions()
 
         self.logger.debug("special copy")
-        let pasteboard = NSPasteboard.general
 
-        // Get the current items from the pasteboard
-        let currentItems: [NSPasteboardItem] = pasteboard.pasteboardItems ?? []
-
-        // Store the data for each type in a new array
-        var combinedItems: [NSPasteboardItem] = []
-
-        for item in currentItems {
-            let newItem = NSPasteboardItem()
-            for type in item.types {
-                if let data = item.data(forType: type) {
-                    newItem.setData(data, forType: type)
-                }
-            }
-            combinedItems.append(newItem)
-        }
-
-        self.simulateCopy()
-
-        // Append the new items to the combined items
-        if let newItems = pasteboard.pasteboardItems {
-            for item in newItems {
-                let newItem = NSPasteboardItem()
-                for type in item.types {
-                    if let data = item.data(forType: type) {
-                        newItem.setData(data, forType: type)
+        simulateCopy() {
+            if let copiedText = NSPasteboard.general.string(forType: .string) {
+                self.logger.debug("copied '\(copiedText)'")
+                self.showSpecialCopyModal()
+                self.getActiveApplicationInfo { (appName, bundleIdentifier, url) in
+                    Task {
+                        await self.clientManager.sendStreamRequest(
+                            id: UUID(),
+                            username: NSUserName(),
+                            userFullName: NSFullUserName(),
+                            userObjective: self.promptManager.getActivePrompt() ?? "",
+                            copiedText: copiedText,
+                            url: url ?? "unknown",
+                            activeAppName: appName ?? "",
+                            activeAppBundleIdentifier: bundleIdentifier ?? ""
+                        ) { (chunk, error) in
+                            if let chunk = chunk {
+                                DispatchQueue.main.async {
+                                    self.modalText += chunk
+                                    self.logger.info("text: \(self.modalText)")
+                                }
+                                self.logger.info("Received chunk: \(chunk)")
+                            }
+                            if let error = error {
+                                self.logger.error("An error occurred: \(error)")
+                            }
+                        }
                     }
                 }
-                combinedItems.append(newItem)
             }
         }
-
-        // Clear the pasteboard and write the combined items
-        pasteboard.clearContents()
-        pasteboard.writeObjects(combinedItems)
-
-        // Debug print
-        self.logger.debug("Number of items on pasteboard: \(combinedItems.count)")
     }
 
     func specialPaste() {
@@ -289,7 +292,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func simulateCopy() {
+    private func simulateCopy(completion: @escaping () -> Void) {
         self.logger.debug("simulated copy")
         // Post a Command-C keystroke
         let source = CGEventSource(stateID: .hidSystemState)!
@@ -300,6 +303,11 @@ final class AppState: ObservableObject {
 
         cmdCDown.post(tap: .cghidEventTap)
         cmdCUp.post(tap: .cghidEventTap)
+
+        // Delay for the clipboard to update, then call the completion handler
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            completion()
+        }
     }
 
     private func simulatePaste() {
@@ -408,6 +416,70 @@ final class AppState: ObservableObject {
             if let error = error {
                 self.logger.error("Failed to send notification: \(error.localizedDescription)")
             }
+        }
+    }
+
+    private func showSpecialCopyModal() {
+        toastWindow?.close()
+
+        let contentView = ModalView(showModal: .constant(true), appState: self)
+
+        // Create the visual effect view with frosted glass effect
+        let visualEffect = NSVisualEffectView()
+        visualEffect.blendingMode = .behindWindow
+        visualEffect.state = .active
+        visualEffect.material = .popover
+
+        // Create the window
+        toastWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
+            styleMask: [.closable, .fullSizeContentView, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+
+        // Create the hosting view for SwiftUI and add it to the visual effect view
+        let hostingView = NSHostingView(rootView: contentView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        visualEffect.addSubview(hostingView)
+
+        // Add constraints to make the hosting view fill the visual effect view
+        NSLayoutConstraint.activate([
+            hostingView.topAnchor.constraint(equalTo: visualEffect.topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: visualEffect.bottomAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: visualEffect.leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: visualEffect.trailingAnchor)
+        ])
+
+        // Set the visual effect view as the window's content view
+        toastWindow?.contentView = visualEffect
+
+        // Set the x, y coordinates to the user's last preference or the center by default
+        if let x = UserDefaults.standard.value(forKey: "toastWindowX") as? CGFloat,
+           let y = UserDefaults.standard.value(forKey: "toastWindowY") as? CGFloat {
+            toastWindow?.setFrameOrigin(NSPoint(x: x, y: y))
+        } else {
+            toastWindow?.center()
+        }
+
+        toastWindow?.titlebarAppearsTransparent = true
+        toastWindow?.isMovableByWindowBackground = true
+        toastWindow?.isReleasedWhenClosed = false
+        toastWindow?.level = .popUpMenu
+        toastWindow?.makeKeyAndOrderFront(nil)
+
+        // Register for window moved notifications to save the new position
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidMove(_:)),
+            name: NSWindow.didMoveNotification, object: toastWindow)
+    }
+
+    @objc func windowDidMove(_ notification: Notification) {
+        if let movedWindow = notification.object as? NSWindow {
+            let origin = movedWindow.frame.origin
+            UserDefaults.standard.set(origin.x, forKey: "toastWindowX")
+            UserDefaults.standard.set(origin.y, forKey: "toastWindowY")
         }
     }
 }
