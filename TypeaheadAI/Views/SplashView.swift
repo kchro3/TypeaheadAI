@@ -36,6 +36,7 @@ struct SplashView: View {
             }
         }
         .padding(20)
+        .textSelection(.enabled)
     }
 }
 
