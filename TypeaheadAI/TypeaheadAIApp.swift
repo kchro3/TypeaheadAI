@@ -19,8 +19,8 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var isEnabled: Bool = true
-    @Published var modalText: String = ""
     @Published var promptManager: PromptManager
+    @Published var copyModalManager = CopyModalManager()
 
     private var toastWindow: NSWindow?
 
@@ -108,11 +108,11 @@ final class AppState: ObservableObject {
             }
 
             self.logger.debug("copied '\(copiedText)'")
-            if copiedText == initialCopiedText && !self.modalText.isEmpty {
+            if copiedText == initialCopiedText && self.copyModalManager.hasText() {
                 // If nothing changed, then toggle the modal.
-                // NOTE: An edge case is that if the modalText is empty,
-                // whatever that was in the clipboard initially is from
-                // a regular copy, in which case we just do the regular flow.
+                // NOTE: If the modal is empty but the clipboard is not,
+                // whatever was in the clipboard initially is from a regular
+                // copy, in which case we just do the regular flow.
                 if let window = self.toastWindow, window.isVisible {
                     window.close()
                 } else {
@@ -120,7 +120,7 @@ final class AppState: ObservableObject {
                 }
             } else {
                 // Clear the modal text and reissue request
-                self.modalText = ""
+                self.copyModalManager.clearText()
                 self.showSpecialCopyModal()
                 self.getActiveApplicationInfo { (appName, bundleIdentifier, url) in
                     Task {
@@ -136,7 +136,7 @@ final class AppState: ObservableObject {
                         ) { (chunk, error) in
                             if let chunk = chunk {
                                 DispatchQueue.main.async {
-                                    self.modalText += chunk
+                                    self.copyModalManager.appendText(chunk)
                                 }
                                 self.logger.info("Received chunk: \(chunk)")
                             }
@@ -440,37 +440,55 @@ final class AppState: ObservableObject {
     private func showSpecialCopyModal() {
         toastWindow?.close()
 
-        let contentView = ModalView(showModal: .constant(true), appState: self)
-
         // Create the visual effect view with frosted glass effect
         let visualEffect = NSVisualEffectView()
         visualEffect.blendingMode = .behindWindow
         visualEffect.state = .active
-        visualEffect.material = .popover
+        visualEffect.material = .hudWindow
+
+        // Create the content view
+        let contentView = ModalView(
+            showModal: .constant(true),
+            copyModalManager: self.copyModalManager
+        )
+
+        let hostingView = NSHostingView(rootView: contentView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+
+        // Create a base view to hold both the visualEffect and hostingView
+        let baseView = NSView()
 
         // Create the window
         toastWindow = CustomModalWindow(
             contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
-            styleMask: [.closable, .fullSizeContentView, .resizable],
+            styleMask: [
+                .closable,
+                .fullSizeContentView,
+                .resizable,
+                .titled
+            ],
             backing: .buffered,
             defer: false
         )
 
-        // Create the hosting view for SwiftUI and add it to the visual effect view
-        let hostingView = NSHostingView(rootView: contentView)
-        hostingView.translatesAutoresizingMaskIntoConstraints = false
-        visualEffect.addSubview(hostingView)
+        // Set the base effect view as the window's content view
+        toastWindow?.contentView = baseView
 
-        // Add constraints to make the hosting view fill the visual effect view
+        // Now that baseView has a frame, set the frames for visualEffect and hostingView
+        visualEffect.frame = baseView.bounds
+        hostingView.frame = baseView.bounds
+
+        // Add visualEffect and hostingView to baseView
+        baseView.addSubview(visualEffect)
+        baseView.addSubview(hostingView)
+
+        // Add constraints to make the hosting view fill the base view
         NSLayoutConstraint.activate([
-            hostingView.topAnchor.constraint(equalTo: visualEffect.topAnchor),
-            hostingView.bottomAnchor.constraint(equalTo: visualEffect.bottomAnchor),
-            hostingView.leadingAnchor.constraint(equalTo: visualEffect.leadingAnchor),
-            hostingView.trailingAnchor.constraint(equalTo: visualEffect.trailingAnchor)
+            hostingView.topAnchor.constraint(equalTo: baseView.topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor)
         ])
-
-        // Set the visual effect view as the window's content view
-        toastWindow?.contentView = visualEffect
 
         // Set the x, y coordinates to the user's last preference or the center by default
         if let x = UserDefaults.standard.value(forKey: "toastWindowX") as? CGFloat,
