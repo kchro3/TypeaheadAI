@@ -74,7 +74,6 @@ final class AppState: ObservableObject {
                 if !windowRect.contains(mouseLocation) {
                     self?.toastWindow?.close()
                     self?.clientManager.cancelStreamingTask()
-                    self?.modalText = ""
                 }
             }
         }
@@ -100,9 +99,28 @@ final class AppState: ObservableObject {
 
         self.logger.debug("special copy")
 
+        // Get the current clipboard to compare if anything changed:
+        let initialCopiedText = NSPasteboard.general.string(forType: .string) ?? ""
+
         simulateCopy() {
-            if let copiedText = NSPasteboard.general.string(forType: .string) {
-                self.logger.debug("copied '\(copiedText)'")
+            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
+                return
+            }
+
+            self.logger.debug("copied '\(copiedText)'")
+            if copiedText == initialCopiedText && !self.modalText.isEmpty {
+                // If nothing changed, then toggle the modal.
+                // NOTE: An edge case is that if the modalText is empty,
+                // whatever that was in the clipboard initially is from
+                // a regular copy, in which case we just do the regular flow.
+                if let window = self.toastWindow, window.isVisible {
+                    window.close()
+                } else {
+                    self.showSpecialCopyModal()
+                }
+            } else {
+                // Clear the modal text and reissue request
+                self.modalText = ""
                 self.showSpecialCopyModal()
                 self.getActiveApplicationInfo { (appName, bundleIdentifier, url) in
                     Task {
@@ -119,7 +137,6 @@ final class AppState: ObservableObject {
                             if let chunk = chunk {
                                 DispatchQueue.main.async {
                                     self.modalText += chunk
-                                    self.logger.info("text: \(self.modalText)")
                                 }
                                 self.logger.info("Received chunk: \(chunk)")
                             }
@@ -432,7 +449,7 @@ final class AppState: ObservableObject {
         visualEffect.material = .popover
 
         // Create the window
-        toastWindow = NSWindow(
+        toastWindow = CustomModalWindow(
             contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
             styleMask: [.closable, .fullSizeContentView, .resizable],
             backing: .buffered,

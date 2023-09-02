@@ -15,8 +15,8 @@ struct ModalView: View {
         ZStack {
             ScrollView {
                 Text(appState.modalText)
-                    .multilineTextAlignment(.leading)
                     .textSelection(.enabled)
+                    .font(.body)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
