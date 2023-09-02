@@ -137,7 +137,6 @@ final class AppState: ObservableObject {
                             if let chunk = chunk {
                                 DispatchQueue.main.async {
                                     self.modalText += chunk
-                                    self.logger.info("text: \(self.modalText)")
                                 }
                                 self.logger.info("Received chunk: \(chunk)")
                             }
@@ -450,7 +449,7 @@ final class AppState: ObservableObject {
         visualEffect.material = .popover
 
         // Create the window
-        toastWindow = NSWindow(
+        toastWindow = CustomModalWindow(
             contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
             styleMask: [.closable, .fullSizeContentView, .resizable],
             backing: .buffered,

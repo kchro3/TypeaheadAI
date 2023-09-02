@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
+		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
 		2BA7F07D2A9ABBA8003D38BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */; };
 		2BA7F0802A9ABBA8003D38BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07F2A9ABBA8003D38BA /* Preview Assets.xcassets */; };
@@ -51,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
+		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
 		2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
 				2BCF84342A9DD90F00359841 /* HistoryManager.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
+				2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -358,6 +361,7 @@
 				2BCF843E2A9DEA2E00359841 /* HistoryListView.swift in Sources */,
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
+				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
 				2BA7F0B12A9ABCA5003D38BA /* MenuPromptView.swift in Sources */,
 				2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */,
