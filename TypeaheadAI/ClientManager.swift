@@ -47,6 +47,9 @@ class ClientManager {
         category: "ClientManager"
     )
 
+    // Add a Task property to manage the streaming task
+    private var currentStreamingTask: Task<Void, Error>? = nil
+
     init(session: URLSession = .shared) {
         self.session = session
     }
@@ -149,6 +152,40 @@ class ClientManager {
         timeout: TimeInterval = 10,
         streamHandler: @escaping (String?, Error?) -> Void
     ) async {
+        cancelStreamingTask()
+        currentStreamingTask = Task.detached { [weak self] in
+            do {
+                try await self?.performStreamTask(
+                    id: id,
+                    username: username,
+                    userFullName: userFullName,
+                    userObjective: userObjective,
+                    copiedText: copiedText,
+                    url: url,
+                    activeAppName: activeAppName,
+                    activeAppBundleIdentifier: activeAppBundleIdentifier,
+                    timeout: timeout,
+                    streamHandler: streamHandler
+                )
+            } catch {
+                // Handle any errors that 'performStreamTask' might throw
+                streamHandler(nil, error)
+            }
+        }
+    }
+
+    private func performStreamTask(
+        id: UUID,
+        username: String,
+        userFullName: String,
+        userObjective: String,
+        copiedText: String,
+        url: String,
+        activeAppName: String,
+        activeAppBundleIdentifier: String,
+        timeout: TimeInterval,
+        streamHandler: @escaping (String?, Error?) -> Void
+    ) async throws {
         let payload = RequestPayload(
             username: username,
             userFullName: userFullName,
@@ -181,5 +218,9 @@ class ClientManager {
         } catch {
             streamHandler(nil, error)
         }
+    }
+
+    func cancelStreamingTask() {
+        currentStreamingTask?.cancel()
     }
 }

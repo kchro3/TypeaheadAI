@@ -22,10 +22,6 @@ final class AppState: ObservableObject {
     @Published var modalText: String = ""
     @Published var promptManager: PromptManager
 
-    // Monitors: globalEventMonitor is for debugging
-    private var globalEventMonitor: Any?
-    private var mouseClicked: Bool = false
-
     private var toastWindow: NSWindow?
 
     private var blinkTimer: Timer?
@@ -41,7 +37,11 @@ final class AppState: ObservableObject {
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
+    // NOTE: globalEventMonitor is for debugging
+    private var globalEventMonitor: Any?
+    private var mouseClicked: Bool = false
 
+    // Constants
     private let maxConcurrentRequests = 5
 
     init(context: NSManagedObjectContext) {
@@ -73,6 +73,7 @@ final class AppState: ObservableObject {
 
                 if !windowRect.contains(mouseLocation) {
                     self?.toastWindow?.close()
+                    self?.clientManager.cancelStreamingTask()
                     self?.modalText = ""
                 }
             }
@@ -86,44 +87,6 @@ final class AppState: ObservableObject {
             await stopMonitoringCmdCAndV()
             await mouseEventMonitor.stopMonitoring()
             self.scriptManager.stopAccessingDirectory()
-        }
-    }
-
-    private func startBlinking() {
-        // Invalidate the previous timer if it exists
-        blinkTimer?.invalidate()
-
-        // Create and schedule a new timer
-        blinkTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            DispatchQueue.main.async { self.isBlinking.toggle() }
-        }
-    }
-
-    private func stopBlinking() {
-        blinkTimer?.invalidate()
-        blinkTimer = nil
-        DispatchQueue.main.async { self.isBlinking = false }
-    }
-
-    private func startMonitoringCmdCAndV() {
-        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyUp], handler: { event in
-            DispatchQueue.main.async {
-                let commandKeyUsed = event.modifierFlags.contains(.command)
-                if event.keyCode == 8 && commandKeyUsed { // 'C' key
-                                                          // Get the latest string content from the pasteboard
-                    if let _ = NSPasteboard.general.string(forType: .string) {
-                        self.logger.debug("copy detected")
-                    }
-                } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
-                    self.logger.debug("paste detected")
-                }
-            }
-        })
-    }
-
-    private func stopMonitoringCmdCAndV() async {
-        if let globalEventMonitor = globalEventMonitor {
-            NSEvent.removeMonitor(globalEventMonitor)
         }
     }
 
@@ -264,6 +227,44 @@ final class AppState: ObservableObject {
                     }
                 }
             }
+        }
+    }
+
+    private func startBlinking() {
+        // Invalidate the previous timer if it exists
+        blinkTimer?.invalidate()
+
+        // Create and schedule a new timer
+        blinkTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            DispatchQueue.main.async { self.isBlinking.toggle() }
+        }
+    }
+
+    private func stopBlinking() {
+        blinkTimer?.invalidate()
+        blinkTimer = nil
+        DispatchQueue.main.async { self.isBlinking = false }
+    }
+
+    private func startMonitoringCmdCAndV() {
+        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyUp], handler: { event in
+            DispatchQueue.main.async {
+                let commandKeyUsed = event.modifierFlags.contains(.command)
+                if event.keyCode == 8 && commandKeyUsed { // 'C' key
+                                                          // Get the latest string content from the pasteboard
+                    if let _ = NSPasteboard.general.string(forType: .string) {
+                        self.logger.debug("copy detected")
+                    }
+                } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
+                    self.logger.debug("paste detected")
+                }
+            }
+        })
+    }
+
+    private func stopMonitoringCmdCAndV() async {
+        if let globalEventMonitor = globalEventMonitor {
+            NSEvent.removeMonitor(globalEventMonitor)
         }
     }
 
