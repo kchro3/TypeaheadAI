@@ -37,6 +37,8 @@ enum ClientManagerError: Error {
 }
 
 class ClientManager {
+    var llamaModelManager: LlamaModelManager? = nil
+
     private let session: URLSession
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
@@ -65,8 +67,7 @@ class ClientManager {
     ///   - url: The URL that the user is currently viewing.
     ///   - activeAppName: The name of the app that is currently active.
     ///   - activeAppBundleIdentifier: The bundle identifier of the currently active app.
-    ///   - retryCount: The number of times to retry the request. Default is 3.
-    ///   - delay: The initial time interval to wait before retrying. Default is 1 second.
+    ///   - incognitoMode: Whether or not the request is sent to an online or offline model.
     ///   - timeout: The timeout for the request. Default is 10 seconds.
     ///   - completion: A closure to be executed once the request is complete.
     func sendRequest(
@@ -78,6 +79,7 @@ class ClientManager {
         url: String,
         activeAppName: String,
         activeAppBundleIdentifier: String,
+        incognitoMode: Bool,
         timeout: TimeInterval = 10,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
@@ -90,6 +92,11 @@ class ClientManager {
             activeAppName: activeAppName,
             activeAppBundleIdentifier: activeAppBundleIdentifier
         )
+
+        if (incognitoMode) {
+            completion(.success("[work in progress...]"))
+            return
+        }
 
         // Encode the RequestPayload instance into JSON data.
         guard let httpBody = try? JSONEncoder().encode(payload) else {
@@ -149,24 +156,40 @@ class ClientManager {
         url: String,
         activeAppName: String,
         activeAppBundleIdentifier: String,
+        incognitoMode: Bool,
         timeout: TimeInterval = 10,
         streamHandler: @escaping (String?, Error?) -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
             do {
-                try await self?.performStreamTask(
-                    id: id,
-                    username: username,
-                    userFullName: userFullName,
-                    userObjective: userObjective,
-                    copiedText: copiedText,
-                    url: url,
-                    activeAppName: activeAppName,
-                    activeAppBundleIdentifier: activeAppBundleIdentifier,
-                    timeout: timeout,
-                    streamHandler: streamHandler
-                )
+                if (incognitoMode) {
+                    try await self?.performStreamOfflineTask(
+                        id: id,
+                        username: username,
+                        userFullName: userFullName,
+                        userObjective: userObjective,
+                        copiedText: copiedText,
+                        url: url,
+                        activeAppName: activeAppName,
+                        activeAppBundleIdentifier: activeAppBundleIdentifier,
+                        timeout: timeout,
+                        streamHandler: streamHandler
+                    )
+                } else {
+                    try await self?.performStreamOnlineTask(
+                        id: id,
+                        username: username,
+                        userFullName: userFullName,
+                        userObjective: userObjective,
+                        copiedText: copiedText,
+                        url: url,
+                        activeAppName: activeAppName,
+                        activeAppBundleIdentifier: activeAppBundleIdentifier,
+                        timeout: timeout,
+                        streamHandler: streamHandler
+                    )
+                }
             } catch {
                 // Handle any errors that 'performStreamTask' might throw
                 streamHandler(nil, error)
@@ -174,7 +197,7 @@ class ClientManager {
         }
     }
 
-    private func performStreamTask(
+    private func performStreamOnlineTask(
         id: UUID,
         username: String,
         userFullName: String,
@@ -215,6 +238,38 @@ class ClientManager {
                     streamHandler(text, nil)
                 }
             }
+        } catch {
+            streamHandler(nil, error)
+        }
+    }
+
+    private func performStreamOfflineTask(
+        id: UUID,
+        username: String,
+        userFullName: String,
+        userObjective: String,
+        copiedText: String,
+        url: String,
+        activeAppName: String,
+        activeAppBundleIdentifier: String,
+        timeout: TimeInterval,
+        streamHandler: @escaping (String?, Error?) -> Void
+    ) async throws {
+        let payload = RequestPayload(
+            username: username,
+            userFullName: userFullName,
+            userObjective: userObjective,
+            copiedText: copiedText,
+            url: url,
+            activeAppName: activeAppName,
+            activeAppBundleIdentifier: activeAppBundleIdentifier
+        )
+
+        do {
+            try self.llamaModelManager?.predict(
+                request: payload,
+                streamHandler: streamHandler
+            )
         } catch {
             streamHandler(nil, error)
         }

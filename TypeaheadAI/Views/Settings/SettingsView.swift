@@ -10,6 +10,7 @@ import SwiftUI
 enum Tabs: String, CaseIterable, Identifiable {
     case general = "General"
     case shortcuts = "History"
+    case incognito = "Incognito Mode"
     case about = "About"
 
     var id: String { self.rawValue }
@@ -38,6 +39,8 @@ struct SettingsView: View {
             return AnyView(GeneralSettingsView(promptManager: promptManager))
         case .shortcuts:
             return AnyView(HistoryListView())
+        case .incognito:
+            return AnyView(IncognitoModeView())
         case .about:
             return AnyView(SplashView())
         }

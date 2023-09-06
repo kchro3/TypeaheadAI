@@ -9,8 +9,9 @@ import SwiftUI
 import CoreData
 
 struct MenuView: View {
-    @Binding var isEnabled: Bool
+    @Binding var incognitoMode: Bool
     @ObservedObject var promptManager: PromptManager
+    @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
 
     @State private var currentPreset: String = ""
@@ -29,7 +30,7 @@ struct MenuView: View {
 
                 Spacer()
 
-                Toggle("", isOn: $isEnabled)
+                Toggle("Incognito", isOn: $incognitoMode)
                     .toggleStyle(.switch)
                     .accentColor(.blue)
             }
@@ -96,6 +97,7 @@ struct MenuView: View {
             VStack(spacing: 0) {
                 buttonRow(title: "Settings", isHovering: $isHoveringSettings, action: {    NSApp.activate(ignoringOtherApps: true)
                     NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    isMenuVisible = false
                 })
                 buttonRow(title: "Quit", isHovering: $isHoveringQuit, action: {
                     NSApplication.shared.terminate(self)
@@ -126,7 +128,8 @@ struct MenuView: View {
 }
 
 struct MenuView_Previews: PreviewProvider {
-    @State static var isEnabled = true
+    @State static var incognitoMode = true
+    @State static var isMenuVisible = true
 
     static var previews: some View {
         // Create an in-memory Core Data store
@@ -150,8 +153,9 @@ struct MenuView_Previews: PreviewProvider {
         }
 
         return MenuView(
-            isEnabled: $isEnabled,
-            promptManager: promptManager
+            incognitoMode: $incognitoMode,
+            promptManager: promptManager,
+            isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, context)
         .frame(width: 300)
