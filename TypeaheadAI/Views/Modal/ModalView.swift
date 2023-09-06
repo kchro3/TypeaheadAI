@@ -10,6 +10,7 @@ import SwiftUI
 struct ModalView: View {
     @Binding var showModal: Bool
     @ObservedObject var copyModalManager: CopyModalManager
+    @State private var fontSize: CGFloat = 14.0
 
     var body: some View {
         ZStack {
@@ -17,11 +18,17 @@ struct ModalView: View {
                 Text(copyModalManager.modalText)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                     .textSelection(.enabled)
+                    .font(.system(size: fontSize))
                     .foregroundColor(Color.primary)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 10)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .onAppear {
+            if let savedFontSize = UserDefaults.standard.value(forKey: "UserFontSize") as? CGFloat {
+                fontSize = savedFontSize
+            }
         }
         .foregroundColor(Color.secondary.opacity(0.2))
     }
