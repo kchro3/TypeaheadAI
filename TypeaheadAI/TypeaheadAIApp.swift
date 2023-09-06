@@ -13,14 +13,13 @@ import AppKit
 import AVFoundation
 import Carbon.HIToolbox
 import os.log
+import MenuBarExtraAccess
 
 @MainActor
 final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
-    @Published var isEnabled: Bool = true
-    @Published var promptManager: PromptManager
-    @Published var copyModalManager = CopyModalManager()
+    @Published var incognitoMode: Bool = false
 
     private var toastWindow: NSWindow?
 
@@ -31,7 +30,10 @@ final class AppState: ObservableObject {
     )
 
     // Managers
-    private let clientManager = ClientManager()
+    @Published var promptManager: PromptManager
+    @Published var llamaModelManager = LlamaModelManager()
+    @Published var copyModalManager = CopyModalManager()
+    private let clientManager: ClientManager
     private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
 
@@ -47,6 +49,8 @@ final class AppState: ObservableObject {
     init(context: NSManagedObjectContext) {
         self.historyManager = HistoryManager(context: context)
         self.promptManager = PromptManager(context: context)
+        self.clientManager = ClientManager()
+        self.clientManager.llamaModelManager = llamaModelManager
 
         checkAndRequestAccessibilityPermissions()
         checkAndRequestNotificationPermissions()
@@ -86,11 +90,12 @@ final class AppState: ObservableObject {
             await stopMonitoringCmdCAndV()
             await mouseEventMonitor.stopMonitoring()
             self.scriptManager.stopAccessingDirectory()
+            await self.llamaModelManager.stopAccessingDirectory()
         }
     }
 
     func specialCopy() {
-        if !isEnabled || self.checkForTooManyRequests() {
+        if self.checkForTooManyRequests() {
             self.logger.debug("special copy is disabled")
             return
         }
@@ -132,7 +137,8 @@ final class AppState: ObservableObject {
                             copiedText: copiedText,
                             url: url ?? "unknown",
                             activeAppName: appName ?? "",
-                            activeAppBundleIdentifier: bundleIdentifier ?? ""
+                            activeAppBundleIdentifier: bundleIdentifier ?? "",
+                            incognitoMode: self.incognitoMode
                         ) { (chunk, error) in
                             if let chunk = chunk {
                                 DispatchQueue.main.async {
@@ -151,7 +157,7 @@ final class AppState: ObservableObject {
     }
 
     func specialPaste() {
-        if !isEnabled || self.checkForTooManyRequests() {
+        if self.checkForTooManyRequests() {
             self.logger.debug("special paste is disabled")
             return
         }
@@ -207,7 +213,8 @@ final class AppState: ObservableObject {
                     copiedText: combinedString,
                     url: url ?? "unknown",
                     activeAppName: appName ?? "",
-                    activeAppBundleIdentifier: bundleIdentifier ?? ""
+                    activeAppBundleIdentifier: bundleIdentifier ?? "",
+                    incognitoMode: self.incognitoMode
                 ) { result in
                     switch result {
                     case .success(let response):
@@ -547,6 +554,7 @@ final class AppState: ObservableObject {
 struct TypeaheadAIApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var appState: AppState
+    @State var isMenuVisible: Bool = false
 
     init() {
         let context = persistenceController.container.viewContext
@@ -560,12 +568,17 @@ struct TypeaheadAIApp: App {
         }
 
         MenuBarExtra {
-            MenuView(isEnabled: $appState.isEnabled, promptManager: appState.promptManager)
+            MenuView(
+                incognitoMode: $appState.incognitoMode,
+                promptManager: appState.promptManager,
+                isMenuVisible: $isMenuVisible
+            )
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         } label: {
             Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
         }
+        .menuBarExtraAccess(isPresented: $isMenuVisible)
         .menuBarExtraStyle(.window)
     }
 }
