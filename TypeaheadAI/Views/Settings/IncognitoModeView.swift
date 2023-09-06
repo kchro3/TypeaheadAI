@@ -14,11 +14,17 @@ struct IncognitoModeView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Incognito Settings").font(.title)
+            Text("Incognito Settings").font(.title).textSelection(.enabled)
+
+            Divider()
+
+            Text("This is still a work in progress. I got a prototype working, but the prompts are not good enough and the library I was using was unstable.")
+                .textSelection(.enabled)
 
             Divider()
 
             Text("In incognito mode, TypeaheadAI works without connecting to the Internet, and your copy-paste history is 100% private. We will make this more user-friendly, but you can choose which model you want to run below.")
+                .textSelection(.enabled)
 
             Spacer()
 
@@ -26,6 +32,7 @@ struct IncognitoModeView: View {
                 Text("Model files:").font(.headline)
                 Text(modelManager.modelDirectoryURL?.relativePath ?? "No model directory")
             }
+            .textSelection(.enabled)
 
             List(modelManager.modelFiles ?? [], id: \.self) { url in
                 Button(action: {

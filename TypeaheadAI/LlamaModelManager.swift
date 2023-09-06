@@ -164,10 +164,18 @@ class LlamaModelManager: ObservableObject {
 
     func loadModel(from url: URL) {
         self.logger.info("no-op load: \(url.lastPathComponent)")
+
+        DispatchQueue.main.async {
+            self.selectedModel = url
+        }
     }
 
     func unloadModel() {
         self.logger.info("no-op unload")
+
+        DispatchQueue.main.async {
+            self.selectedModel = nil
+        }
     }
 
     func predict(
