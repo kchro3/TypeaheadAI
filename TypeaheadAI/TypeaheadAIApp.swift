@@ -476,6 +476,8 @@ final class AppState: ObservableObject {
 
         // Now that baseView has a frame, set the frames for visualEffect and hostingView
         visualEffect.frame = baseView.bounds
+        visualEffect.autoresizingMask = [.width, .height]
+
         hostingView.frame = baseView.bounds
 
         // Add visualEffect and hostingView to baseView
