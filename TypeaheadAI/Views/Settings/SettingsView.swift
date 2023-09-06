@@ -10,6 +10,7 @@ import SwiftUI
 enum Tabs: String, CaseIterable, Identifiable {
     case general = "General"
     case shortcuts = "History"
+    case incognito = "Incognito Mode"
     case about = "About"
 
     var id: String { self.rawValue }
@@ -17,7 +18,8 @@ enum Tabs: String, CaseIterable, Identifiable {
 
 struct SettingsView: View {
     var promptManager: PromptManager
-
+    @ObservedObject var llamaModelManager: LlamaModelManager
+    @State private var selectedModelURL: URL?
     @State private var selectedTab: Tabs = .general
 
     var body: some View {
@@ -38,6 +40,8 @@ struct SettingsView: View {
             return AnyView(GeneralSettingsView(promptManager: promptManager))
         case .shortcuts:
             return AnyView(HistoryListView())
+        case .incognito:
+            return AnyView(IncognitoSettingsView(modelManager: llamaModelManager))
         case .about:
             return AnyView(Text("Work in Progress"))
         }
@@ -84,6 +88,7 @@ struct SettingsView_Previews: PreviewProvider {
 
         let context = container.viewContext
         let promptManager = PromptManager(context: context)
+        let llamaModelManager = LlamaModelManager()
 
         // Create some sample prompts
         let samplePrompts = ["this is a sample prompt", "this is an active prompt"]
@@ -94,7 +99,8 @@ struct SettingsView_Previews: PreviewProvider {
         }
 
         return SettingsView(
-            promptManager: promptManager
+            promptManager: promptManager,
+            llamaModelManager: llamaModelManager
         )
         .environment(\.managedObjectContext, context)
     }

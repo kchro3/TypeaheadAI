@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 
 struct MenuView: View {
-    @Binding var isEnabled: Bool
+    @Binding var incognitoMode: Bool
     @ObservedObject var promptManager: PromptManager
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -29,7 +29,7 @@ struct MenuView: View {
 
                 Spacer()
 
-                Toggle("", isOn: $isEnabled)
+                Toggle("Incognito", isOn: $incognitoMode)
                     .toggleStyle(.switch)
                     .accentColor(.blue)
             }
@@ -150,7 +150,7 @@ struct MenuView_Previews: PreviewProvider {
         }
 
         return MenuView(
-            isEnabled: $isEnabled,
+            incognitoMode: $isEnabled,
             promptManager: promptManager
         )
         .environment(\.managedObjectContext, context)

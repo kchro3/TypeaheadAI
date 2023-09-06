@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2B650AB02AA5B18B00096A02 /* llmfarm_core in Frameworks */ = {isa = PBXBuildFile; productRef = 2B650AAF2AA5B18B00096A02 /* llmfarm_core */; };
+		2B650AB42AA5B49B00096A02 /* IncognitoIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B650AB32AA5B49B00096A02 /* IncognitoIconView.swift */; };
+		2B650AB62AA6D42B00096A02 /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B650AB52AA6D42B00096A02 /* LlamaModelManager.swift */; };
+		2B650AB82AA70F7800096A02 /* IncognitoSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B650AB72AA70F7800096A02 /* IncognitoSettingsView.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* CopyModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* CopyModalManager.swift */; };
@@ -52,6 +56,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2B650AB32AA5B49B00096A02 /* IncognitoIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoIconView.swift; sourceTree = "<group>"; };
+		2B650AB52AA6D42B00096A02 /* LlamaModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaModelManager.swift; sourceTree = "<group>"; };
+		2B650AB72AA70F7800096A02 /* IncognitoSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoSettingsView.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* CopyModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyModalManager.swift; sourceTree = "<group>"; };
@@ -89,6 +96,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
+				2B650AB02AA5B18B00096A02 /* llmfarm_core in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,6 +157,7 @@
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
 				2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */,
 				2B92BDBA2AA3D10800E65CFA /* CopyModalManager.swift */,
+				2B650AB52AA6D42B00096A02 /* LlamaModelManager.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -186,6 +195,7 @@
 				2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */,
 				2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */,
 				2BE0EC2A2AA1D44000E47C52 /* SplashView.swift */,
+				2B650AB32AA5B49B00096A02 /* IncognitoIconView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -196,6 +206,7 @@
 				2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */,
 				2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */,
 				2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */,
+				2B650AB72AA70F7800096A02 /* IncognitoSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -234,6 +245,7 @@
 			name = TypeaheadAI;
 			packageProductDependencies = (
 				2BA7F0AD2A9ABC47003D38BA /* KeyboardShortcuts */,
+				2B650AAF2AA5B18B00096A02 /* llmfarm_core */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -309,6 +321,7 @@
 			mainGroup = 2BA7F06C2A9ABBA7003D38BA;
 			packageReferences = (
 				2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				2B650AAE2AA5B18B00096A02 /* XCRemoteSwiftPackageReference "llmfarm_core" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -353,6 +366,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2BA7F0822A9ABBA8003D38BA /* Persistence.swift in Sources */,
+				2B650AB62AA6D42B00096A02 /* LlamaModelManager.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2BE0EC2B2AA1D44000E47C52 /* SplashView.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* CopyModalManager.swift in Sources */,
@@ -364,6 +378,8 @@
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
 				2BCF843E2A9DEA2E00359841 /* HistoryListView.swift in Sources */,
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
+				2B650AB42AA5B49B00096A02 /* IncognitoIconView.swift in Sources */,
+				2B650AB82AA70F7800096A02 /* IncognitoSettingsView.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
@@ -541,7 +557,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = TypeaheadAI;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "We need to control Google Chrome to get the URL of the active tab.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "TypeaheadAI needs to control Google Chrome to get the URL of the active tab.";
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "TypeaheadAI needs access to the Documents folder to save LLMs";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -578,7 +595,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = TypeaheadAI;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "We need to control Google Chrome to get the URL of the active tab.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "TypeaheadAI needs to control Google Chrome to get the URL of the active tab.";
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = "TypeaheadAI needs access to the Documents folder to save LLMs";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -708,6 +726,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2B650AAE2AA5B18B00096A02 /* XCRemoteSwiftPackageReference "llmfarm_core" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/guinmoon/llmfarm_core.swift";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -719,6 +745,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2B650AAF2AA5B18B00096A02 /* llmfarm_core */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B650AAE2AA5B18B00096A02 /* XCRemoteSwiftPackageReference "llmfarm_core" */;
+			productName = llmfarm_core;
+		};
 		2BA7F0AD2A9ABC47003D38BA /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;

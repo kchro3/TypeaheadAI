@@ -8,6 +8,15 @@
         "revision" : "43bedc929042742384e5a87b576c17de5394bd7e",
         "version" : "1.14.0"
       }
+    },
+    {
+      "identity" : "llmfarm_core.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/guinmoon/llmfarm_core.swift",
+      "state" : {
+        "branch" : "main",
+        "revision" : "9929ea6a45dc1e5a4a0ec13719d175e3a48a0d9d"
+      }
     }
   ],
   "version" : 2
