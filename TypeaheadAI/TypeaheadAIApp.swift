@@ -554,10 +554,6 @@ struct TypeaheadAIApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
-            SplashView()
-        }
-
         Settings {
             SettingsView(promptManager: appState.promptManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)

@@ -185,7 +185,6 @@
 				2BCF84362A9DE68200359841 /* Settings */,
 				2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */,
 				2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */,
-				2BE0EC2A2AA1D44000E47C52 /* SplashView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -193,6 +192,7 @@
 		2BCF84362A9DE68200359841 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				2BE0EC2A2AA1D44000E47C52 /* SplashView.swift */,
 				2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */,
 				2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */,
 				2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */,

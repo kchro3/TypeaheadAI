@@ -36,6 +36,7 @@ struct SplashView: View {
             }
         }
         .padding(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .textSelection(.enabled)
     }
 }
