@@ -18,7 +18,7 @@ enum Tabs: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     var promptManager: PromptManager
 
-    @State private var selectedTab: Tabs = .general
+    @State var selectedTab: Tabs = .general
 
     var body: some View {
         NavigationView {
@@ -39,7 +39,7 @@ struct SettingsView: View {
         case .shortcuts:
             return AnyView(HistoryListView())
         case .about:
-            return AnyView(Text("Work in Progress"))
+            return AnyView(SplashView())
         }
     }
 }
@@ -93,9 +93,12 @@ struct SettingsView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt, context: context)
         }
 
-        return SettingsView(
-            promptManager: promptManager
-        )
-        .environment(\.managedObjectContext, context)
+
+        return Group {
+            SettingsView(promptManager: promptManager)
+                .environment(\.managedObjectContext, context)
+            SettingsView(promptManager: promptManager, selectedTab: Tabs.about)
+                .environment(\.managedObjectContext, context)
+        }
     }
 }

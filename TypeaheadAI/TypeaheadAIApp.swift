@@ -492,11 +492,16 @@ final class AppState: ObservableObject {
             hostingView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor)
         ])
 
-        // Set the x, y coordinates to the user's last preference or the center by default
-        if let x = UserDefaults.standard.value(forKey: "toastWindowX") as? CGFloat,
-           let y = UserDefaults.standard.value(forKey: "toastWindowY") as? CGFloat {
-            toastWindow?.setFrameOrigin(NSPoint(x: x, y: y))
+        // Set the x, y coordinates and the size to the user's last preference or the center by default
+        let x = UserDefaults.standard.value(forKey: "toastWindowX") as? CGFloat
+        let y = UserDefaults.standard.value(forKey: "toastWindowY") as? CGFloat
+        let width = UserDefaults.standard.value(forKey: "toastWindowSizeWidth") as? CGFloat
+        let height = UserDefaults.standard.value(forKey: "toastWindowSizeHeight") as? CGFloat
+
+        if let x = x, let y = y, let width = width, let height = height {
+            toastWindow?.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true)
         } else {
+            toastWindow?.setFrame(NSRect(x: 0, y: 0, width: 300, height: 200), display: true)
             toastWindow?.center()
         }
 
@@ -511,13 +516,29 @@ final class AppState: ObservableObject {
             self,
             selector: #selector(windowDidMove(_:)),
             name: NSWindow.didMoveNotification, object: toastWindow)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidResize(_:)),
+            name: NSWindow.didResizeNotification, object: toastWindow)
     }
 
     @objc func windowDidMove(_ notification: Notification) {
         if let movedWindow = notification.object as? NSWindow {
             let origin = movedWindow.frame.origin
+
             UserDefaults.standard.set(origin.x, forKey: "toastWindowX")
             UserDefaults.standard.set(origin.y, forKey: "toastWindowY")
+        }
+    }
+
+    @objc func windowDidResize(_ notification: Notification) {
+        if let movedWindow = notification.object as? NSWindow {
+            let size = movedWindow.frame.size
+
+            UserDefaults.standard.set(size.width, forKey: "toastWindowSizeWidth")
+            UserDefaults.standard.set(size.height, forKey: "toastWindowSizeHeight")
+            print("Saved width: \(size.width), height: \(size.height)")
         }
     }
 }
@@ -533,10 +554,6 @@ struct TypeaheadAIApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
-            SplashView()
-        }
-
         Settings {
             SettingsView(promptManager: appState.promptManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)

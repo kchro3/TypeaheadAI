@@ -12,6 +12,7 @@ import CoreData
 struct GeneralSettingsView: View {
     @ObservedObject var promptManager: PromptManager
     @Environment(\.managedObjectContext) private var viewContext
+    @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -26,18 +27,34 @@ struct GeneralSettingsView: View {
             Form {
                 KeyboardShortcuts.Recorder("Smart Copy:", name: .specialCopy)
                 KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
+
+                Slider(value: $selectedFontSize, in: 14...28, step: 2) {
+                    Text("Font Size:")
+                }
+                .onChange(of: selectedFontSize, perform: { value in
+                    UserDefaults.standard.set(value, forKey: "UserFontSize")
+                })
+
+                Text("Sample Text")
+                    .font(.system(size: CGFloat(selectedFontSize)))
             }
+            .padding(.horizontal, 10)
+
+            Spacer()
 
             Divider()
 
             Form {
-                Button("Reset User Prompts", action: {
-                    promptManager.clearPrompts(context: viewContext)
-                })
-                Button("Reset User Settings", action: clearUserDefaults)
+                HStack {
+                    Spacer()
+                    Button("Reset User Prompts", action: {
+                        promptManager.clearPrompts(context: viewContext)
+                    })
+                    Spacer()
+                    Button("Reset User Settings", action: clearUserDefaults)
+                    Spacer()
+                }
             }
-
-            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
