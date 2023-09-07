@@ -158,7 +158,7 @@ class ClientManager {
         activeAppBundleIdentifier: String,
         incognitoMode: Bool,
         timeout: TimeInterval = 10,
-        streamHandler: @escaping (String?, Error?) -> Void
+        streamHandler: @escaping @Sendable (String?, Error?) -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -207,7 +207,7 @@ class ClientManager {
         activeAppName: String,
         activeAppBundleIdentifier: String,
         timeout: TimeInterval,
-        streamHandler: @escaping (String?, Error?) -> Void
+        streamHandler: @escaping @Sendable (String?, Error?) -> Void
     ) async throws {
         let payload = RequestPayload(
             username: username,
@@ -253,7 +253,7 @@ class ClientManager {
         activeAppName: String,
         activeAppBundleIdentifier: String,
         timeout: TimeInterval,
-        streamHandler: @escaping (String?, Error?) -> Void
+        streamHandler: @escaping @Sendable (String?, Error?) -> Void
     ) async throws {
         let payload = RequestPayload(
             username: username,

@@ -29,6 +29,8 @@ final class AppState: ObservableObject {
         category: "AppState"
     )
 
+    private let specialPasteActor = SpecialPasteActor()
+
     // Managers
     @Published var promptManager: PromptManager
     @Published var llamaModelManager = LlamaModelManager()
@@ -165,34 +167,15 @@ final class AppState: ObservableObject {
         checkAndRequestAccessibilityPermissions()
 
         self.logger.debug("special paste")
-        let pasteboard = NSPasteboard.general
-        let items = pasteboard.pasteboardItems ?? []
-
-        if items.isEmpty {
-            DispatchQueue.main.async { self.isLoading = false }
-            self.logger.debug("No items found")
+        guard let copiedText = NSPasteboard.general.string(forType: .string) else {
             return
         }
 
-        var combinedString = ""
-        for item in items {
-            if let string = item.string(forType: .string) {
-                if !combinedString.isEmpty {
-                    combinedString += "\n" // Add newline delimiter between strings
-                }
-                combinedString += string
-            }
-        }
-
-        if combinedString.isEmpty {
+        if copiedText.isEmpty {
             DispatchQueue.main.async { self.isLoading = false }
             self.logger.debug("No string found")
             return
         }
-
-        self.logger.debug("Combined string: \(combinedString)")
-
-        let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
 
         DispatchQueue.main.async {
             self.isLoading = true
@@ -200,56 +183,20 @@ final class AppState: ObservableObject {
             self.mouseClicked = false
         }
 
-        // Replace the current clipboard contents with the lowercase string
-        pasteboard.declareTypes([.string], owner: nil)
-
         getActiveApplicationInfo { (appName, bundleIdentifier, url) in
-            DispatchQueue.main.async {
-                self.clientManager.sendRequest(
-                    id: newEntry.id!,
+            Task.detached {
+                await self.specialPasteActor.specialPaste(
+                    clientManager: self.clientManager,
+                    id: UUID(),
                     username: NSUserName(),
                     userFullName: NSFullUserName(),
                     userObjective: self.promptManager.getActivePrompt() ?? "",
-                    copiedText: combinedString,
+                    copiedText: copiedText,
                     url: url ?? "unknown",
                     activeAppName: appName ?? "",
                     activeAppBundleIdentifier: bundleIdentifier ?? "",
                     incognitoMode: self.incognitoMode
-                ) { result in
-                    switch result {
-                    case .success(let response):
-                        self.logger.debug("Response from server: \(response)")
-                        pasteboard.setString(response, forType: .string)
-                        // Simulate a paste of the lowercase string
-                        if self.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
-                            self.sendClipboardNotification(status: .success)
-                        } else {
-                            AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
-                            self.simulatePaste()
-                        }
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: response,
-                            andStatus: .success
-                        )
-                    case .failure(let error):
-                        self.logger.debug("Error: \(error.localizedDescription)")
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: nil,
-                            andStatus: .failure
-                        )
-                        self.sendClipboardNotification(status: .failure)
-                        AudioServicesPlaySystemSound(1306) // Funk sound
-                    }
-
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                        if self.historyManager.pendingRequestCount() == 0 {
-                            self.stopBlinking()
-                        }
-                    }
-                }
+                )
             }
         }
     }
@@ -280,7 +227,7 @@ final class AppState: ObservableObject {
                         self.logger.debug("copy detected")
                     }
                 } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
-                    self.logger.debug("paste detected")
+                    //self.logger.debug("paste detected")
                 }
             }
         })
