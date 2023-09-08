@@ -58,7 +58,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2B26757B2AAAF16900C23EF4 /* llama.cpp */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = llama.cpp; path = ../forks/llama.cpp; sourceTree = "<group>"; };
 		2B3FAC1E2AAAF22400B2D405 /* TypeaheadAI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TypeaheadAI-Bridging-Header.h"; sourceTree = "<group>"; };
 		2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LlamaWrapper.cpp; sourceTree = "<group>"; };
 		2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LlamaWrapper.hpp; sourceTree = "<group>"; };
@@ -124,14 +123,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2B26757A2AAAF16900C23EF4 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				2B26757B2AAAF16900C23EF4 /* llama.cpp */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
 		2B3FAC1A2AAAF1E300B2D405 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -153,7 +144,6 @@
 		2BA7F06C2A9ABBA7003D38BA = {
 			isa = PBXGroup;
 			children = (
-				2B26757A2AAAF16900C23EF4 /* Packages */,
 				2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */,
 				2BA7F08E2A9ABBA8003D38BA /* TypeaheadAITests */,
 				2BA7F0982A9ABBA8003D38BA /* TypeaheadAIUITests */,

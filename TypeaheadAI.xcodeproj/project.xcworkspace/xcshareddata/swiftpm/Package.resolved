@@ -1,25 +1,32 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "KeyboardShortcuts",
-        "repositoryURL": "https://github.com/sindresorhus/KeyboardShortcuts",
-        "state": {
-          "branch": null,
-          "revision": "43bedc929042742384e5a87b576c17de5394bd7e",
-          "version": "1.14.0"
-        }
-      },
-      {
-        "package": "MenuBarExtraAccess",
-        "repositoryURL": "https://github.com/orchetect/MenuBarExtraAccess",
-        "state": {
-          "branch": null,
-          "revision": "f5896b47e15e114975897354c7e1082c51a2bffd",
-          "version": "1.0.5"
-        }
+  "pins" : [
+    {
+      "identity" : "keyboardshortcuts",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
+      "state" : {
+        "revision" : "b878f8132be59576fc87e39405b1914eff9f55d3",
+        "version" : "1.14.1"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "llama.cpp",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kchro3/llama.cpp",
+      "state" : {
+        "branch" : "kchro3/llama-swift-metal-support",
+        "revision" : "ce92d754a33d4a35d86b572225ea55714927c42d"
+      }
+    },
+    {
+      "identity" : "menubarextraaccess",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orchetect/MenuBarExtraAccess",
+      "state" : {
+        "revision" : "f5896b47e15e114975897354c7e1082c51a2bffd",
+        "version" : "1.0.5"
+      }
+    }
+  ],
+  "version" : 2
 }
