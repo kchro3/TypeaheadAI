@@ -15,8 +15,12 @@ struct IncognitoModeView: View {
 
             Divider()
 
-            Text("This is still a work in progress. I got a prototype working, but the prompts are not good enough and the library I was using was unstable.")
-                .textSelection(.enabled)
+            VStack(alignment: .leading) {
+                Text("This is still a work in progress. Need to use a more advanced sampling method, since it's currently just doing a greedy search. Will integrate with HuggingFace in a future version, but for now, try downloading this to your model directory:")
+                Link("https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf", destination: URL(string: "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf")!)
+                    .foregroundColor(.blue)
+                    .underline()
+            }.textSelection(.enabled)
 
             Divider()
 
