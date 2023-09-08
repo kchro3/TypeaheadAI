@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2B3FAC1C2AAAF1E300B2D405 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3FAC1B2AAAF1E300B2D405 /* llama */; };
+		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
+		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
 		2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B473E8B2AA860380042913D /* MenuBarExtraAccess */; };
@@ -55,6 +58,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2B26757B2AAAF16900C23EF4 /* llama.cpp */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = llama.cpp; path = ../forks/llama.cpp; sourceTree = "<group>"; };
+		2B3FAC1E2AAAF22400B2D405 /* TypeaheadAI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TypeaheadAI-Bridging-Header.h"; sourceTree = "<group>"; };
+		2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LlamaWrapper.cpp; sourceTree = "<group>"; };
+		2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LlamaWrapper.hpp; sourceTree = "<group>"; };
+		2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaWrapper.swift; sourceTree = "<group>"; };
 		2B473E862AA85B9A0042913D /* IncognitoModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoModeView.swift; sourceTree = "<group>"; };
 		2B473E882AA85BDD0042913D /* LlamaModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaModelManager.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
@@ -93,6 +101,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B3FAC1C2AAAF1E300B2D405 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 			);
@@ -115,13 +124,41 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2B26757A2AAAF16900C23EF4 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				2B26757B2AAAF16900C23EF4 /* llama.cpp */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		2B3FAC1A2AAAF1E300B2D405 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2B3FAC1D2AAAF20F00B2D405 /* Llama */ = {
+			isa = PBXGroup;
+			children = (
+				2B3FAC1E2AAAF22400B2D405 /* TypeaheadAI-Bridging-Header.h */,
+				2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */,
+				2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */,
+				2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */,
+			);
+			path = Llama;
+			sourceTree = "<group>";
+		};
 		2BA7F06C2A9ABBA7003D38BA = {
 			isa = PBXGroup;
 			children = (
+				2B26757A2AAAF16900C23EF4 /* Packages */,
 				2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */,
 				2BA7F08E2A9ABBA8003D38BA /* TypeaheadAITests */,
 				2BA7F0982A9ABBA8003D38BA /* TypeaheadAIUITests */,
 				2BA7F0762A9ABBA8003D38BA /* Products */,
+				2B3FAC1A2AAAF1E300B2D405 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -138,6 +175,7 @@
 		2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */ = {
 			isa = PBXGroup;
 			children = (
+				2B3FAC1D2AAAF20F00B2D405 /* Llama */,
 				2BE0EC252AA17F8400E47C52 /* Monitors */,
 				2BE0EC242AA17DB600E47C52 /* Info.plist */,
 				2BA7F0AF2A9ABC62003D38BA /* Views */,
@@ -243,6 +281,7 @@
 			packageProductDependencies = (
 				2BA7F0AD2A9ABC47003D38BA /* KeyboardShortcuts */,
 				2B473E8B2AA860380042913D /* MenuBarExtraAccess */,
+				2B3FAC1B2AAAF1E300B2D405 /* llama */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -296,6 +335,7 @@
 				TargetAttributes = {
 					2BA7F0742A9ABBA8003D38BA = {
 						CreatedOnToolsVersion = 14.3.1;
+						LastSwiftMigration = 1430;
 					};
 					2BA7F08A2A9ABBA8003D38BA = {
 						CreatedOnToolsVersion = 14.3.1;
@@ -369,6 +409,8 @@
 				2B92BDBB2AA3D10800E65CFA /* CopyModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
+				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
+				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
 				2BA7F0852A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld in Sources */,
@@ -538,6 +580,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = TypeaheadAI/TypeaheadAI.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -565,6 +608,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "TypeaheadAI/Llama/TypeaheadAI-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -575,6 +620,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = TypeaheadAI/TypeaheadAI.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -602,6 +648,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "TypeaheadAI/Llama/TypeaheadAI-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -739,6 +786,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2B3FAC1B2AAAF1E300B2D405 /* llama */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = llama;
+		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;

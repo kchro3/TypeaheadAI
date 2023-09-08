@@ -267,7 +267,7 @@ class ClientManager {
 
         do {
             try self.llamaModelManager?.predict(
-                request: payload,
+                payload: payload,
                 streamHandler: streamHandler
             )
         } catch {
