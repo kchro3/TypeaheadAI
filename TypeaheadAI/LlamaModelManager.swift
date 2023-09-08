@@ -49,13 +49,18 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
+    @Published var isLoading: Bool = false
+    @Published var currentlyLoadingModel: URL?
+    @Published var showAlert: Bool = false
+
+    private var model: LlamaWrapper?
+
     init() {
         loadModelDirectoryBookmark()
 
         // Load saved selected model from UserDefaults
         if let urlString = UserDefaults.standard.string(forKey: selectedModelKey),
            let url = URL(string: urlString) {
-            selectedModel = url
             self.loadModel(from: url)
         }
 
@@ -163,26 +168,75 @@ class LlamaModelManager: ObservableObject {
     }
 
     func loadModel(from url: URL) {
-        self.logger.info("no-op load: \(url.lastPathComponent)")
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.model = LlamaWrapper(url)
 
-        DispatchQueue.main.async {
-            self.selectedModel = url
+            guard let model = self.model else {
+                return
+            }
+
+            if (model.isLoaded()) {
+                DispatchQueue.main.async {
+                    self.logger.info("model loaded successfully: \(url.lastPathComponent)")
+                    self.isLoading = false
+                    self.selectedModel = url
+                    self.currentlyLoadingModel = nil
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.logger.info("model failed to load: \(url.lastPathComponent)")
+                    self.isLoading = false
+                    self.selectedModel = nil
+                    self.currentlyLoadingModel = nil
+                    self.showAlert = true
+                }
+            }
         }
     }
 
     func unloadModel() {
-        self.logger.info("no-op unload")
-
+        self.logger.info("unloading model")
         DispatchQueue.main.async {
             self.selectedModel = nil
+            self.model?.deallocate()
+            self.model = nil
         }
     }
 
     func predict(
-        request: RequestPayload,
+        payload: RequestPayload,
         streamHandler: @escaping (String?, Error?) -> Void
     ) throws {
-        self.logger.info("work in progress...")
-        streamHandler("work in progress...", nil)
+        guard let jsonPayload = encodeToJSONString(from: payload) else {
+            streamHandler(nil, ClientManagerError.badRequest("Encoding error"))
+            return
+        }
+
+        let prompt = """
+        ### Instruction:
+        Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+        ### Input:
+        \(jsonPayload)
+
+        ### Response:
+        """
+
+        self.model?.predict(prompt, handler: streamHandler)
+    }
+
+    private func encodeToJSONString<T: Codable>(from object: T) -> String? {
+        let encoder = JSONEncoder()
+
+        do {
+            let jsonData = try encoder.encode(object)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                return jsonString
+            }
+        } catch {
+            self.logger.error("Encoding failed: \(error.localizedDescription)")
+        }
+
+        return nil
     }
 }

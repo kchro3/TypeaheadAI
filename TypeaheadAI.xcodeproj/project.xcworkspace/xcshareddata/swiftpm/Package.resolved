@@ -5,8 +5,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
       "state" : {
-        "revision" : "43bedc929042742384e5a87b576c17de5394bd7e",
-        "version" : "1.14.0"
+        "revision" : "b878f8132be59576fc87e39405b1914eff9f55d3",
+        "version" : "1.14.1"
+      }
+    },
+    {
+      "identity" : "llama.cpp",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kchro3/llama.cpp",
+      "state" : {
+        "branch" : "kchro3/llama-swift-metal-support",
+        "revision" : "ce92d754a33d4a35d86b572225ea55714927c42d"
       }
     },
     {

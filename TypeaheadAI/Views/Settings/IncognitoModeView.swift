@@ -8,9 +8,6 @@ import SwiftUI
 
 struct IncognitoModeView: View {
     @ObservedObject var modelManager = LlamaModelManager()
-    @State private var isLoading = false
-    @State private var showAlert = false
-    @State private var currentlyLoadingModel: URL?
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -18,8 +15,12 @@ struct IncognitoModeView: View {
 
             Divider()
 
-            Text("This is still a work in progress. I got a prototype working, but the prompts are not good enough and the library I was using was unstable.")
-                .textSelection(.enabled)
+            VStack(alignment: .leading) {
+                Text("This is still a work in progress. Need to use a more advanced sampling method, since it's currently just doing a greedy search. Will integrate with HuggingFace in a future version, but for now, try downloading this to your model directory:")
+                Link("https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf", destination: URL(string: "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf")!)
+                    .foregroundColor(.blue)
+                    .underline()
+            }.textSelection(.enabled)
 
             Divider()
 
@@ -39,20 +40,13 @@ struct IncognitoModeView: View {
                     if modelManager.selectedModel == url {
                         modelManager.unloadModel()
                     } else {
-                        isLoading = true
-                        currentlyLoadingModel = url
-                        DispatchQueue.global(qos: .userInitiated).async {
-                            modelManager.loadModel(from: url)
-                            DispatchQueue.main.async {
-                                isLoading = false
-                                showAlert = true
-                                currentlyLoadingModel = nil
-                            }
-                        }
+                        modelManager.isLoading = true
+                        modelManager.currentlyLoadingModel = url
+                        modelManager.loadModel(from: url)
                     }
                 }) {
                     HStack {
-                        if isLoading && currentlyLoadingModel == url {
+                        if modelManager.isLoading && modelManager.currentlyLoadingModel == url {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
                                 .scaleEffect(0.5, anchor: .center)
@@ -75,11 +69,11 @@ struct IncognitoModeView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .disabled(isLoading)
+            .disabled(modelManager.isLoading)
         }
-        .alert(isPresented: $showAlert) {
-            Alert(title: Text("Model Loaded"),
-                  message: Text("The model has been successfully loaded."),
+        .alert(isPresented: $modelManager.showAlert) {
+            Alert(title: Text("Something went wrong..."),
+                  message: Text("The model failed to load."),
                   dismissButton: .default(Text("OK")))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
