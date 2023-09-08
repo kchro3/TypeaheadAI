@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
-		2B3FAC262AAB1AAF00B2D405 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3FAC252AAB1AAF00B2D405 /* llama */; };
+		2B3FAC262AAB1AAF00B2D405 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3FAC252AAB1AAF00B2D405 /* llama */; settings = {ATTRIBUTES = (Required, ); }; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
 		2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B473E8B2AA860380042913D /* MenuBarExtraAccess */; };

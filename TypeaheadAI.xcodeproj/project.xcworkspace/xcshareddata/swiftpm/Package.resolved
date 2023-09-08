@@ -1,23 +1,25 @@
 {
-  "pins" : [
-    {
-      "identity" : "keyboardshortcuts",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
-      "state" : {
-        "revision" : "43bedc929042742384e5a87b576c17de5394bd7e",
-        "version" : "1.14.0"
+  "object": {
+    "pins": [
+      {
+        "package": "KeyboardShortcuts",
+        "repositoryURL": "https://github.com/sindresorhus/KeyboardShortcuts",
+        "state": {
+          "branch": null,
+          "revision": "43bedc929042742384e5a87b576c17de5394bd7e",
+          "version": "1.14.0"
+        }
+      },
+      {
+        "package": "MenuBarExtraAccess",
+        "repositoryURL": "https://github.com/orchetect/MenuBarExtraAccess",
+        "state": {
+          "branch": null,
+          "revision": "f5896b47e15e114975897354c7e1082c51a2bffd",
+          "version": "1.0.5"
+        }
       }
-    },
-    {
-      "identity" : "menubarextraaccess",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/orchetect/MenuBarExtraAccess",
-      "state" : {
-        "revision" : "f5896b47e15e114975897354c7e1082c51a2bffd",
-        "version" : "1.0.5"
-      }
-    }
-  ],
-  "version" : 2
+    ]
+  },
+  "version": 1
 }
