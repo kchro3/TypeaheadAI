@@ -29,6 +29,10 @@ final class AppState: ObservableObject {
         category: "AppState"
     )
 
+    // Actors
+    // TODO: See if copy & paste can fit actor model
+    private let specialCutActor = SpecialCutActor()
+
     // Managers
     @Published var promptManager: PromptManager
     @Published var llamaModelManager = LlamaModelManager()
@@ -61,6 +65,12 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
             self.specialPaste()
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
+            Task {
+                await self.specialCutActor.specialCut()
+            }
         }
 
         startMonitoringCmdCAndV()
