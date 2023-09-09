@@ -10,6 +10,7 @@ import AppKit
 
 struct ProfileView: View {
     @AppStorage("bio") private var bio: String = ""
+    private let maxCharacterCount = 500
 
     var body: some View {
         ScrollView {
@@ -21,10 +22,20 @@ struct ProfileView: View {
                 Text("What should TypeaheadAI know about you to provide better responses?").font(.headline)
 
                 TextEditor(text: $bio)
+                    .onChange(of: bio) { newValue in
+                        if newValue.count > maxCharacterCount {
+                            bio = String(newValue.prefix(maxCharacterCount))
+                        }
+                    }
                     .padding(10)
                     .background(Color.white)
                     .cornerRadius(5)
-                    .frame(height: 50)
+                    .lineSpacing(5)
+                    .frame(minHeight: 50, maxHeight: 200)
+
+                Text("Character count: \(bio.count)/\(maxCharacterCount)")
+                    .font(.footnote)
+                    .foregroundColor(bio.count > maxCharacterCount ? .red : .primary)
 
                 Divider()
             }

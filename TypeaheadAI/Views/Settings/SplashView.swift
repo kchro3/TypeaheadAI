@@ -33,6 +33,7 @@ struct SplashView: View {
                 Text(" - The menu bar icon should flash if it's thinking.")
                 Text(" - You can set \"goals\" in the menu bar to contextualize what you're trying to do.")
                 Text(" - In the Settings, you can configure your key-mappings and see your history.")
+                Text(" - In Profile settings, you can configure a bio or add some context to tailor your results.")
             }
         }
         .padding(20)
