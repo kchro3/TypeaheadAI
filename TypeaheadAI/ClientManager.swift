@@ -12,6 +12,7 @@ struct RequestPayload: Codable {
     let username: String
     let userFullName: String
     let userObjective: String
+    let userBio: String
     let copiedText: String
     let url: String
     let activeAppName: String
@@ -63,6 +64,7 @@ class ClientManager {
     ///   - username: The username of the user.
     ///   - userFullName: The full name of the user.
     ///   - userObjective: The objective of the user.
+    ///   - userBio: Details about the user.
     ///   - copiedText: The text that the user has copied.
     ///   - url: The URL that the user is currently viewing.
     ///   - activeAppName: The name of the app that is currently active.
@@ -75,6 +77,7 @@ class ClientManager {
         username: String,
         userFullName: String,
         userObjective: String,
+        userBio: String,
         copiedText: String,
         url: String,
         activeAppName: String,
@@ -87,6 +90,7 @@ class ClientManager {
             username: username,
             userFullName: userFullName,
             userObjective: userObjective,
+            userBio: userBio,
             copiedText: copiedText,
             url: url,
             activeAppName: activeAppName,
@@ -152,6 +156,7 @@ class ClientManager {
         username: String,
         userFullName: String,
         userObjective: String,
+        userBio: String,
         copiedText: String,
         url: String,
         activeAppName: String,
@@ -163,29 +168,26 @@ class ClientManager {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
             do {
+                let payload = RequestPayload(
+                    username: username,
+                    userFullName: userFullName,
+                    userObjective: userObjective,
+                    userBio: userBio,
+                    copiedText: copiedText,
+                    url: url,
+                    activeAppName: activeAppName,
+                    activeAppBundleIdentifier: activeAppBundleIdentifier
+                )
+
                 if (incognitoMode) {
                     try await self?.performStreamOfflineTask(
-                        id: id,
-                        username: username,
-                        userFullName: userFullName,
-                        userObjective: userObjective,
-                        copiedText: copiedText,
-                        url: url,
-                        activeAppName: activeAppName,
-                        activeAppBundleIdentifier: activeAppBundleIdentifier,
+                        payload: payload,
                         timeout: timeout,
                         streamHandler: streamHandler
                     )
                 } else {
                     try await self?.performStreamOnlineTask(
-                        id: id,
-                        username: username,
-                        userFullName: userFullName,
-                        userObjective: userObjective,
-                        copiedText: copiedText,
-                        url: url,
-                        activeAppName: activeAppName,
-                        activeAppBundleIdentifier: activeAppBundleIdentifier,
+                        payload: payload,
                         timeout: timeout,
                         streamHandler: streamHandler
                     )
@@ -198,27 +200,10 @@ class ClientManager {
     }
 
     private func performStreamOnlineTask(
-        id: UUID,
-        username: String,
-        userFullName: String,
-        userObjective: String,
-        copiedText: String,
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
+        payload: RequestPayload,
         timeout: TimeInterval,
         streamHandler: @escaping (String?, Error?) -> Void
     ) async throws {
-        let payload = RequestPayload(
-            username: username,
-            userFullName: userFullName,
-            userObjective: userObjective,
-            copiedText: copiedText,
-            url: url,
-            activeAppName: activeAppName,
-            activeAppBundleIdentifier: activeAppBundleIdentifier
-        )
-
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             streamHandler(nil, ClientManagerError.badRequest("Encoding error"))
             return
@@ -244,27 +229,10 @@ class ClientManager {
     }
 
     private func performStreamOfflineTask(
-        id: UUID,
-        username: String,
-        userFullName: String,
-        userObjective: String,
-        copiedText: String,
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
+        payload: RequestPayload,
         timeout: TimeInterval,
         streamHandler: @escaping (String?, Error?) -> Void
     ) async throws {
-        let payload = RequestPayload(
-            username: username,
-            userFullName: userFullName,
-            userObjective: userObjective,
-            copiedText: copiedText,
-            url: url,
-            activeAppName: activeAppName,
-            activeAppBundleIdentifier: activeAppBundleIdentifier
-        )
-
         do {
             try self.llamaModelManager?.predict(
                 payload: payload,

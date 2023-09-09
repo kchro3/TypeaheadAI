@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D87C2AAC3330001193A2 /* ProfileView.swift */; };
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
 		2B3FAC262AAB1AAF00B2D405 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3FAC252AAB1AAF00B2D405 /* llama */; settings = {ATTRIBUTES = (Required, ); }; };
@@ -58,6 +59,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2B33D87C2AAC3330001193A2 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		2B3FAC1E2AAAF22400B2D405 /* TypeaheadAI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TypeaheadAI-Bridging-Header.h"; sourceTree = "<group>"; };
 		2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LlamaWrapper.cpp; sourceTree = "<group>"; };
 		2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LlamaWrapper.hpp; sourceTree = "<group>"; };
@@ -232,6 +234,7 @@
 				2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */,
 				2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */,
 				2B473E862AA85B9A0042913D /* IncognitoModeView.swift */,
+				2B33D87C2AAC3330001193A2 /* ProfileView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -399,6 +402,7 @@
 				2BE0EC2B2AA1D44000E47C52 /* SplashView.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* CopyModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
+				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
