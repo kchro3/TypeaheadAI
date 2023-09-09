@@ -13,6 +13,7 @@ struct RequestPayload: Codable {
     let userFullName: String
     let userObjective: String
     let userBio: String
+    let userLang: String
     let copiedText: String
     let url: String
     let activeAppName: String
@@ -65,6 +66,7 @@ class ClientManager {
     ///   - userFullName: The full name of the user.
     ///   - userObjective: The objective of the user.
     ///   - userBio: Details about the user.
+    ///   - userLang: User's preferred language.
     ///   - copiedText: The text that the user has copied.
     ///   - url: The URL that the user is currently viewing.
     ///   - activeAppName: The name of the app that is currently active.
@@ -78,6 +80,7 @@ class ClientManager {
         userFullName: String,
         userObjective: String,
         userBio: String,
+        userLang: String,
         copiedText: String,
         url: String,
         activeAppName: String,
@@ -91,6 +94,7 @@ class ClientManager {
             userFullName: userFullName,
             userObjective: userObjective,
             userBio: userBio,
+            userLang: userLang,
             copiedText: copiedText,
             url: url,
             activeAppName: activeAppName,
@@ -157,6 +161,7 @@ class ClientManager {
         userFullName: String,
         userObjective: String,
         userBio: String,
+        userLang: String,
         copiedText: String,
         url: String,
         activeAppName: String,
@@ -173,6 +178,7 @@ class ClientManager {
                     userFullName: userFullName,
                     userObjective: userObjective,
                     userBio: userBio,
+                    userLang: userLang,
                     copiedText: copiedText,
                     url: url,
                     activeAppName: activeAppName,
