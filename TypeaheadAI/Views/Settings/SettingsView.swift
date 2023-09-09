@@ -8,8 +8,9 @@
 import SwiftUI
 
 enum Tabs: String, CaseIterable, Identifiable {
+    case profile = "Profile"
     case general = "General"
-    case shortcuts = "History"
+    case history = "History"
     case incognito = "Incognito Mode"
     case about = "About"
 
@@ -35,9 +36,11 @@ struct SettingsView: View {
 
     private func viewForTab(_ tab: Tabs) -> some View {
         switch tab {
+        case .profile:
+            return AnyView(ProfileView())
         case .general:
             return AnyView(GeneralSettingsView(promptManager: promptManager))
-        case .shortcuts:
+        case .history:
             return AnyView(HistoryListView())
         case .incognito:
             return AnyView(IncognitoModeView())
