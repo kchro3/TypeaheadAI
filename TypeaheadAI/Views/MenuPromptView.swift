@@ -38,7 +38,7 @@ struct MenuPromptView: View {
                 .resizable()
                 .frame(width: 24, height: 24)
                 .symbolRenderingMode(isActive ? .palette : .monochrome)
-                .foregroundStyle(.primary, .blue)
+                .foregroundStyle(isActive ? .white : .primary, .blue)
 
             if isEditing {
                 TextField("", text: $localPromptContent)
