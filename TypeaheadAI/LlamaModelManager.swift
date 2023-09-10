@@ -67,6 +67,10 @@ class LlamaModelManager: ObservableObject {
         self.modelFiles = loadModelFiles()
     }
 
+    deinit {
+        modelDirectoryURL?.stopAccessingSecurityScopedResource()
+    }
+
     private func loadModelFiles() -> [URL]? {
         guard let dir = modelDirectoryURL else {
             logger.error("No model directory set.")
@@ -163,10 +167,6 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
-    func stopAccessingDirectory() {
-        modelDirectoryURL?.stopAccessingSecurityScopedResource()
-    }
-
     func loadModel(from url: URL) {
         DispatchQueue.global(qos: .userInitiated).async {
             self.model = LlamaWrapper(url)
@@ -206,7 +206,10 @@ class LlamaModelManager: ObservableObject {
         payload: RequestPayload,
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) -> Result<String, Error> {
-        guard let jsonPayload = encodeToJSONString(from: payload) else {
+        var payloadCopy = payload
+        payloadCopy.messages = []
+
+        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
             let result: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
             streamHandler(result)
             return result
@@ -214,6 +217,26 @@ class LlamaModelManager: ObservableObject {
 
         guard let model = self.model else {
             return .failure(ClientManagerError.serverError("Model not found"))
+        }
+
+        var refinements = ""
+        if let messages = payload.messages {
+            for message in messages {
+                if message.isCurrentUser {
+                    refinements += """
+                    \(message.text)
+
+                    ### Response:
+                    """
+                } else {
+                    refinements += """
+                    \(message.text)
+
+                    ### Input:
+
+                    """
+                }
+            }
         }
 
         let prompt = """
@@ -224,7 +247,10 @@ class LlamaModelManager: ObservableObject {
         \(jsonPayload)
 
         ### Response:
+        \(refinements)
         """
+
+        print(prompt)
 
         return model.predict(prompt, handler: streamHandler)
     }

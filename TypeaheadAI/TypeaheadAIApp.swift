@@ -31,7 +31,7 @@ final class AppState: ObservableObject {
     @Published var promptManager: PromptManager
     @Published var llamaModelManager = LlamaModelManager()
     @Published var modalManager: ModalManager
-    private let clientManager: ClientManager
+    @Published var clientManager: ClientManager
     private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
 
@@ -73,6 +73,7 @@ final class AppState: ObservableObject {
         // TODO: Use a dependency injection framework or encapsulate these managers
         self.clientManager.llamaModelManager = llamaModelManager
         self.clientManager.promptManager = promptManager
+        self.modalManager.clientManager = clientManager
 
         checkAndRequestAccessibilityPermissions()
         checkAndRequestNotificationPermissions()
@@ -117,7 +118,6 @@ final class AppState: ObservableObject {
         Task {
             await stopMonitoringCmdCAndV()
             await mouseEventMonitor.stopMonitoring()
-            await self.llamaModelManager.stopAccessingDirectory()
         }
     }
 

@@ -43,11 +43,11 @@ actor SpecialCopyActor {
                 // NOTE: If the modal is empty but the clipboard is not,
                 // whatever was in the clipboard initially is from a regular
                 // copy, in which case we just do the regular flow.
-                self.modalManager.toggleSpecialCopyModal()
+                self.modalManager.toggleModal(incognito: incognitoMode)
             } else {
                 // Clear the modal text and reissue request
                 self.modalManager.clearText()
-                self.modalManager.showSpecialCopyModal()
+                self.modalManager.showModal(incognito: incognitoMode)
                 self.clientManager.predict(
                     id: UUID(),
                     copiedText: copiedText,

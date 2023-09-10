@@ -16,6 +16,7 @@ struct RequestPayload: Codable {
     var userBio: String
     var userLang: String
     var copiedText: String
+    var messages: [Message]?
     var url: String
     var activeAppName: String
     var activeAppBundleIdentifier: String
@@ -89,6 +90,7 @@ class ClientManager {
                         userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: copiedText,
+                        messages: [],
                         url: url ?? "",
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
@@ -112,6 +114,41 @@ class ClientManager {
                         incognitoMode: incognitoMode,
                         completion: completion)
                 }
+            }
+        }
+    }
+
+    /// Refine the currently cached request
+    func refine(
+        messages: [Message],
+        incognitoMode: Bool,
+        timeout: TimeInterval = 10,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        guard let (key, _) = cached,
+              let data = key.data(using: .utf8),
+              let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) else {
+            logger.error("No cached request to refine")
+            return
+        }
+
+        getActiveApplicationInfo { (appName, bundleIdentifier, url) in
+            Task {
+                await self.sendStreamRequest(
+                    id: UUID(),
+                    username: payload.username,
+                    userFullName: payload.userFullName,
+                    userObjective: payload.userObjective,
+                    userBio: payload.userBio,
+                    userLang: payload.userLang,
+                    copiedText: payload.copiedText,
+                    messages: messages,
+                    url: payload.url,
+                    activeAppName: appName ?? "unknown",
+                    activeAppBundleIdentifier: bundleIdentifier ?? "",
+                    incognitoMode: incognitoMode,
+                    streamHandler: completion
+                )
             }
         }
     }
@@ -221,6 +258,7 @@ class ClientManager {
         userBio: String,
         userLang: String,
         copiedText: String,
+        messages: [Message],
         url: String,
         activeAppName: String,
         activeAppBundleIdentifier: String,
@@ -237,6 +275,7 @@ class ClientManager {
                 userBio: userBio,
                 userLang: userLang,
                 copiedText: copiedText,
+                messages: messages,
                 url: url,
                 activeAppName: activeAppName,
                 activeAppBundleIdentifier: activeAppBundleIdentifier
