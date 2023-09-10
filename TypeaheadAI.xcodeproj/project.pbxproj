@@ -11,13 +11,13 @@
 		2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */; };
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
-		2B3FAC262AAB1AAF00B2D405 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3FAC252AAB1AAF00B2D405 /* llama */; settings = {ATTRIBUTES = (Required, ); }; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
 		2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B473E8B2AA860380042913D /* MenuBarExtraAccess */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
+		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
 		2BA7F07D2A9ABBA8003D38BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */; };
 		2BA7F0802A9ABBA8003D38BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07F2A9ABBA8003D38BA /* Preview Assets.xcassets */; };
@@ -104,7 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B3FAC262AAB1AAF00B2D405 /* llama in Frameworks */,
+				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 			);
@@ -285,7 +285,7 @@
 			packageProductDependencies = (
 				2BA7F0AD2A9ABC47003D38BA /* KeyboardShortcuts */,
 				2B473E8B2AA860380042913D /* MenuBarExtraAccess */,
-				2B3FAC252AAB1AAF00B2D405 /* llama */,
+				2BA3C2342AADAC5700537F95 /* llama */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -363,7 +363,7 @@
 			packageReferences = (
 				2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */,
-				2B3FAC242AAB1AAF00B2D405 /* XCRemoteSwiftPackageReference "llama" */,
+				2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -774,20 +774,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		2B3FAC242AAB1AAF00B2D405 /* XCRemoteSwiftPackageReference "llama" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kchro3/llama.cpp";
-			requirement = {
-				branch = "kchro3/llama-swift-metal-support";
-				kind = branch;
-			};
-		};
 		2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.0;
+			};
+		};
+		2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ggerganov/llama.cpp";
+			requirement = {
+				branch = master;
+				kind = branch;
 			};
 		};
 		2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
@@ -801,15 +801,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		2B3FAC252AAB1AAF00B2D405 /* llama */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2B3FAC242AAB1AAF00B2D405 /* XCRemoteSwiftPackageReference "llama" */;
-			productName = llama;
-		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;
 			productName = MenuBarExtraAccess;
+		};
+		2BA3C2342AADAC5700537F95 /* llama */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */;
+			productName = llama;
 		};
 		2BA7F0AD2A9ABC47003D38BA /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;

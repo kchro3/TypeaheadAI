@@ -12,10 +12,10 @@
     {
       "identity" : "llama.cpp",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kchro3/llama.cpp",
+      "location" : "https://github.com/ggerganov/llama.cpp",
       "state" : {
-        "branch" : "kchro3/llama-swift-metal-support",
-        "revision" : "ce92d754a33d4a35d86b572225ea55714927c42d"
+        "branch" : "master",
+        "revision" : "21ac3a1503001020122db5dce6adf34b761675f5"
       }
     },
     {
