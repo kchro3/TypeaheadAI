@@ -30,6 +30,14 @@ class ModalManager: ObservableObject {
         modalText += text
     }
 
+    func toggleSpecialCopyModal() {
+        if toastWindow?.isVisible ?? false {
+            toastWindow?.close()
+        } else {
+            showSpecialCopyModal()
+        }
+    }
+
     func showSpecialCopyModal() {
         toastWindow?.close()
 

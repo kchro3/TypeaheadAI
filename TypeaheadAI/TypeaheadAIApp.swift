@@ -36,8 +36,9 @@ final class AppState: ObservableObject {
     private let historyManager: HistoryManager
 
     // Actors
-    // TODO: See if copy & paste can fit actor model
+    // TODO: See if paste can fit actor model
     private var specialCutActor: SpecialCutActor? = nil
+    private var specialCopyActor: SpecialCopyActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -56,6 +57,12 @@ final class AppState: ObservableObject {
         self.modalManager = ModalManager()
 
         // Initialize actors
+        self.specialCopyActor = SpecialCopyActor(
+            mouseEventMonitor: mouseEventMonitor,
+            clientManager: clientManager,
+            modalManager: modalManager
+        )
+
         self.specialCutActor = SpecialCutActor(
             mouseEventMonitor: mouseEventMonitor,
             clientManager: clientManager,
@@ -71,7 +78,9 @@ final class AppState: ObservableObject {
         checkAndRequestNotificationPermissions()
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
-            self.specialCopy()
+            Task {
+                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode)
+            }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
@@ -109,54 +118,6 @@ final class AppState: ObservableObject {
             await stopMonitoringCmdCAndV()
             await mouseEventMonitor.stopMonitoring()
             await self.llamaModelManager.stopAccessingDirectory()
-        }
-    }
-
-    func specialCopy() {
-        checkAndRequestAccessibilityPermissions()
-
-        self.logger.debug("special copy")
-
-        // Get the current clipboard to compare if anything changed:
-        let initialCopiedText = NSPasteboard.general.string(forType: .string) ?? ""
-
-        simulateCopy() {
-            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
-                return
-            }
-
-            self.logger.debug("copied '\(copiedText)'")
-            if copiedText == initialCopiedText && self.modalManager.hasText() {
-                // If nothing changed, then toggle the modal.
-                // NOTE: If the modal is empty but the clipboard is not,
-                // whatever was in the clipboard initially is from a regular
-                // copy, in which case we just do the regular flow.
-                if let window = self.modalManager.toastWindow, window.isVisible {
-                    window.close()
-                } else {
-                    self.modalManager.showSpecialCopyModal()
-                }
-            } else {
-                // Clear the modal text and reissue request
-                self.modalManager.clearText()
-                self.modalManager.showSpecialCopyModal()
-                self.clientManager.predict(
-                    id: UUID(),
-                    copiedText: copiedText,
-                    incognitoMode: self.incognitoMode,
-                    stream: true
-                ) { result in
-                    switch result {
-                    case .success(let chunk):
-                        DispatchQueue.main.async {
-                            self.modalManager.appendText(chunk)
-                        }
-                        self.logger.info("Received chunk: \(chunk)")
-                    case .failure(let error):
-                        self.logger.error("An error occurred: \(error)")
-                    }
-                }
-            }
         }
     }
 
@@ -283,24 +244,6 @@ final class AppState: ObservableObject {
     private func stopMonitoringCmdCAndV() async {
         if let globalEventMonitor = globalEventMonitor {
             NSEvent.removeMonitor(globalEventMonitor)
-        }
-    }
-
-    private func simulateCopy(completion: @escaping () -> Void) {
-        self.logger.debug("simulated copy")
-        // Post a Command-C keystroke
-        let source = CGEventSource(stateID: .hidSystemState)!
-        let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)! // c key
-        cmdCDown.flags = [.maskCommand]
-        let cmdCUp = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: false)! // c key
-        cmdCUp.flags = [.maskCommand]
-
-        cmdCDown.post(tap: .cghidEventTap)
-        cmdCUp.post(tap: .cghidEventTap)
-
-        // Delay for the clipboard to update, then call the completion handler
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            completion()
         }
     }
 
