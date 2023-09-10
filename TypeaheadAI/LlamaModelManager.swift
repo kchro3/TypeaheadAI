@@ -198,17 +198,16 @@ class LlamaModelManager: ObservableObject {
         self.logger.info("unloading model")
         DispatchQueue.main.async {
             self.selectedModel = nil
-            self.model?.deallocate()
             self.model = nil
         }
     }
 
     func predict(
         payload: RequestPayload,
-        streamHandler: @escaping (String?, Error?) -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void
     ) throws {
         guard let jsonPayload = encodeToJSONString(from: payload) else {
-            streamHandler(nil, ClientManagerError.badRequest("Encoding error"))
+            streamHandler(.failure(ClientManagerError.badRequest("Encoding error")))
             return
         }
 

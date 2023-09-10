@@ -14,7 +14,7 @@ typealias TokenCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
 
 func globalHandler(_ token: UnsafePointer<CChar>?) {
     if let token = token {
-        LlamaWrapper.handler?(String(cString: token), nil)
+        LlamaWrapper.handler?(.success(String(cString: token)))
     }
 }
 
@@ -28,7 +28,7 @@ class LlamaWrapper {
     private var model: OpaquePointer!
     private var ctx: OpaquePointer?
 
-    static var handler: ((String?, Error?) -> Void)?
+    static var handler: ((Result<String, Error>) -> Void)?
 
     init(_ modelPath: URL) {
         llama_backend_init(true)
@@ -42,22 +42,16 @@ class LlamaWrapper {
     }
 
     // TODO: How to support errors
-    func predict(_ prompt: String, handler: @escaping (String?, Error?) -> Void) {
+    func predict(_ prompt: String, handler: @escaping (Result<String, Error>) -> Void) {
         LlamaWrapper.handler = handler
         ctx = llama_new_context_with_model(model, params)
         _ = simple_predict(ctx, prompt, 1, globalHandler)
     }
 
-    /// Even though the ARC (garbage collector) will deallocate automatically, we don't want to
-    /// load a new model before we've deallocated the old model.
-    func deallocate() {
+    deinit {
+        // Just in case
         llama_free(ctx)
         llama_free_model(model)
         llama_backend_free()
-    }
-
-    deinit {
-        // Just in case
-        deallocate()
     }
 }

@@ -10,20 +10,41 @@ import os.log
 
 class MouseEventMonitor {
     private var mouseEventMonitor: Any?
+    private var initialClickPos: NSPoint?
+
     private let logger: Logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "MouseEventMonitor"
     )
 
     var mouseClicked: Bool = false
+    var mouseDragged: Bool = false
+
     var onLeftMouseDown: (() -> Void)?
 
     func startMonitoring() {
         logger.debug("Starting to monitor mouse clicks.")
-        mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown], handler: { [weak self] _ in
-            self?.mouseClicked = true
-            self?.onLeftMouseDown?()
-        })
+        mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .leftMouseUp],
+            handler: { [weak self] event in
+                switch event.type {
+                case .leftMouseDown:
+                    self?.initialClickPos = NSEvent.mouseLocation
+                    print("left mouse down \(NSEvent.mouseLocation)")
+                    self?.mouseClicked = true
+                    self?.onLeftMouseDown?()
+                case .leftMouseUp:
+                    print("left mouse up \(NSEvent.mouseLocation)")
+                    if let initialClickPos = self?.initialClickPos {
+                        if initialClickPos != NSEvent.mouseLocation {
+                            self?.mouseDragged = true
+                            print("mouse dragged")
+                        }
+                    }
+                default:
+                    break
+                }
+            })
     }
 
     func stopMonitoring() async {

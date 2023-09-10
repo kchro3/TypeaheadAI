@@ -21,8 +21,6 @@ final class AppState: ObservableObject {
     @Published var isBlinking: Bool = false
     @Published var incognitoMode: Bool = false
 
-    private var toastWindow: NSWindow?
-
     private var blinkTimer: Timer?
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -32,25 +30,42 @@ final class AppState: ObservableObject {
     // Managers
     @Published var promptManager: PromptManager
     @Published var llamaModelManager = LlamaModelManager()
-    @Published var copyModalManager = CopyModalManager()
+    @Published var modalManager: ModalManager
     private let clientManager: ClientManager
     private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
+
+    // Actors
+    // TODO: See if copy & paste can fit actor model
+    private var specialCutActor: SpecialCutActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
     // NOTE: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
-    private var mouseClicked: Bool = false
 
     // Constants
     private let maxConcurrentRequests = 5
 
     init(context: NSManagedObjectContext) {
+
+        // Initialize managers
         self.historyManager = HistoryManager(context: context)
         self.promptManager = PromptManager(context: context)
         self.clientManager = ClientManager()
+        self.modalManager = ModalManager()
+
+        // Initialize actors
+        self.specialCutActor = SpecialCutActor(
+            mouseEventMonitor: mouseEventMonitor,
+            clientManager: clientManager,
+            modalManager: modalManager
+        )
+
+        // Set lazy params
+        // TODO: Use a dependency injection framework or encapsulate these managers
         self.clientManager.llamaModelManager = llamaModelManager
+        self.clientManager.promptManager = promptManager
 
         checkAndRequestAccessibilityPermissions()
         checkAndRequestNotificationPermissions()
@@ -63,20 +78,24 @@ final class AppState: ObservableObject {
             self.specialPaste()
         }
 
+        KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
+            Task {
+                await self.specialCutActor?.specialCut(incognitoMode: incognitoMode)
+            }
+        }
+
         startMonitoringCmdCAndV()
 
         // Configure mouse-click handler
         mouseEventMonitor.onLeftMouseDown = { [weak self] in
-            self?.mouseClicked = true
-
             // If the toast window is open and the user clicks out,
             // we can close the window.
-            if let window = self?.toastWindow {
+            if let window = self?.modalManager.toastWindow {
                 let mouseLocation = NSEvent.mouseLocation
                 let windowRect = window.frame
 
                 if !windowRect.contains(mouseLocation) {
-                    self?.toastWindow?.close()
+                    self?.modalManager.toastWindow?.close()
                     self?.clientManager.cancelStreamingTask()
                 }
             }
@@ -89,17 +108,11 @@ final class AppState: ObservableObject {
         Task {
             await stopMonitoringCmdCAndV()
             await mouseEventMonitor.stopMonitoring()
-            self.scriptManager.stopAccessingDirectory()
             await self.llamaModelManager.stopAccessingDirectory()
         }
     }
 
     func specialCopy() {
-        if self.checkForTooManyRequests() {
-            self.logger.debug("special copy is disabled")
-            return
-        }
-
         checkAndRequestAccessibilityPermissions()
 
         self.logger.debug("special copy")
@@ -113,45 +126,34 @@ final class AppState: ObservableObject {
             }
 
             self.logger.debug("copied '\(copiedText)'")
-            if copiedText == initialCopiedText && self.copyModalManager.hasText() {
+            if copiedText == initialCopiedText && self.modalManager.hasText() {
                 // If nothing changed, then toggle the modal.
                 // NOTE: If the modal is empty but the clipboard is not,
                 // whatever was in the clipboard initially is from a regular
                 // copy, in which case we just do the regular flow.
-                if let window = self.toastWindow, window.isVisible {
+                if let window = self.modalManager.toastWindow, window.isVisible {
                     window.close()
                 } else {
-                    self.showSpecialCopyModal()
+                    self.modalManager.showSpecialCopyModal()
                 }
             } else {
                 // Clear the modal text and reissue request
-                self.copyModalManager.clearText()
-                self.showSpecialCopyModal()
-                self.getActiveApplicationInfo { (appName, bundleIdentifier, url) in
-                    Task {
-                        await self.clientManager.sendStreamRequest(
-                            id: UUID(),
-                            username: NSUserName(),
-                            userFullName: NSFullUserName(),
-                            userObjective: self.promptManager.getActivePrompt() ?? "",
-                            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                            userLang: Locale.preferredLanguages.first ?? "",
-                            copiedText: copiedText,
-                            url: url ?? "unknown",
-                            activeAppName: appName ?? "",
-                            activeAppBundleIdentifier: bundleIdentifier ?? "",
-                            incognitoMode: self.incognitoMode
-                        ) { (chunk, error) in
-                            if let chunk = chunk {
-                                DispatchQueue.main.async {
-                                    self.copyModalManager.appendText(chunk)
-                                }
-                                self.logger.info("Received chunk: \(chunk)")
-                            }
-                            if let error = error {
-                                self.logger.error("An error occurred: \(error)")
-                            }
+                self.modalManager.clearText()
+                self.modalManager.showSpecialCopyModal()
+                self.clientManager.predict(
+                    id: UUID(),
+                    copiedText: copiedText,
+                    incognitoMode: self.incognitoMode,
+                    stream: true
+                ) { result in
+                    switch result {
+                    case .success(let chunk):
+                        DispatchQueue.main.async {
+                            self.modalManager.appendText(chunk)
                         }
+                        self.logger.info("Received chunk: \(chunk)")
+                    case .failure(let error):
+                        self.logger.error("An error occurred: \(error)")
                     }
                 }
             }
@@ -199,60 +201,48 @@ final class AppState: ObservableObject {
         DispatchQueue.main.async {
             self.isLoading = true
             self.startBlinking()
-            self.mouseClicked = false
+            self.mouseEventMonitor.mouseClicked = false
         }
 
         // Replace the current clipboard contents with the lowercase string
         pasteboard.declareTypes([.string], owner: nil)
 
-        getActiveApplicationInfo { (appName, bundleIdentifier, url) in
-            DispatchQueue.main.async {
-                self.clientManager.sendRequest(
-                    id: newEntry.id!,
-                    username: NSUserName(),
-                    userFullName: NSFullUserName(),
-                    userObjective: self.promptManager.getActivePrompt() ?? "",
-                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                    userLang: Locale.preferredLanguages.first ?? "",
-                    copiedText: combinedString,
-                    url: url ?? "unknown",
-                    activeAppName: appName ?? "",
-                    activeAppBundleIdentifier: bundleIdentifier ?? "",
-                    incognitoMode: self.incognitoMode
-                ) { result in
-                    switch result {
-                    case .success(let response):
-                        self.logger.debug("Response from server: \(response)")
-                        pasteboard.setString(response, forType: .string)
-                        // Simulate a paste of the lowercase string
-                        if self.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
-                            self.sendClipboardNotification(status: .success)
-                        } else {
-                            AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
-                            self.simulatePaste()
-                        }
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: response,
-                            andStatus: .success
-                        )
-                    case .failure(let error):
-                        self.logger.debug("Error: \(error.localizedDescription)")
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: nil,
-                            andStatus: .failure
-                        )
-                        self.sendClipboardNotification(status: .failure)
-                        AudioServicesPlaySystemSound(1306) // Funk sound
-                    }
+        self.clientManager.predict(
+            id: newEntry.id!,
+            copiedText: combinedString,
+            incognitoMode: self.incognitoMode
+        ) { result in
+            switch result {
+            case .success(let response):
+                self.logger.debug("Response from server: \(response)")
+                pasteboard.setString(response, forType: .string)
+                // Simulate a paste of the lowercase string
+                if self.mouseEventMonitor.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
+                    self.sendClipboardNotification(status: .success)
+                } else {
+                    AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
+                    self.simulatePaste()
+                }
+                self.historyManager.updateHistoryEntry(
+                    entry: newEntry,
+                    withResponse: response,
+                    andStatus: .success
+                )
+            case .failure(let error):
+                self.logger.debug("Error: \(error.localizedDescription)")
+                self.historyManager.updateHistoryEntry(
+                    entry: newEntry,
+                    withResponse: nil,
+                    andStatus: .failure
+                )
+                self.sendClipboardNotification(status: .failure)
+                AudioServicesPlaySystemSound(1306) // Funk sound
+            }
 
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                        if self.historyManager.pendingRequestCount() == 0 {
-                            self.stopBlinking()
-                        }
-                    }
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if self.historyManager.pendingRequestCount() == 0 {
+                    self.stopBlinking()
                 }
             }
         }
@@ -293,31 +283,6 @@ final class AppState: ObservableObject {
     private func stopMonitoringCmdCAndV() async {
         if let globalEventMonitor = globalEventMonitor {
             NSEvent.removeMonitor(globalEventMonitor)
-        }
-    }
-
-    private func getActiveApplicationInfo(completion: @escaping (String?, String?, String?) -> Void) {
-        self.logger.debug("get active app")
-        if let activeApp = NSWorkspace.shared.frontmostApplication {
-            let appName = activeApp.localizedName
-            self.logger.debug("Detected active app: \(appName ?? "none")")
-            let bundleIdentifier = activeApp.bundleIdentifier
-
-            if bundleIdentifier == "com.google.Chrome" {
-                self.scriptManager.executeScript { (result, error) in
-                    if let error = error {
-                        self.logger.error("Failed to execute script: \(error.errorDescription ?? "Unknown error")")
-                        completion(appName, bundleIdentifier, nil)
-                    } else if let url = result?.stringValue {
-                        self.logger.info("Successfully executed script. URL: \(url)")
-                        completion(appName, bundleIdentifier, url)
-                    }
-                }
-            } else {
-                completion(appName, bundleIdentifier, nil)
-            }
-        } else {
-            completion(nil, nil, nil)
         }
     }
 
@@ -445,111 +410,6 @@ final class AppState: ObservableObject {
             if let error = error {
                 self.logger.error("Failed to send notification: \(error.localizedDescription)")
             }
-        }
-    }
-
-    private func showSpecialCopyModal() {
-        toastWindow?.close()
-
-        // Create the visual effect view with frosted glass effect
-        let visualEffect = NSVisualEffectView()
-        visualEffect.blendingMode = .behindWindow
-        visualEffect.state = .active
-        visualEffect.material = .hudWindow
-
-        // Create the content view
-        let contentView = ModalView(
-            showModal: .constant(true),
-            copyModalManager: self.copyModalManager
-        )
-
-        let hostingView = NSHostingView(rootView: contentView)
-        hostingView.translatesAutoresizingMaskIntoConstraints = false
-
-        // Create a base view to hold both the visualEffect and hostingView
-        let baseView = NSView()
-
-        // Create the window
-        toastWindow = CustomModalWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
-            styleMask: [
-                .closable,
-                .fullSizeContentView,
-                .resizable,
-                .titled
-            ],
-            backing: .buffered,
-            defer: false
-        )
-
-        // Set the base effect view as the window's content view
-        toastWindow?.contentView = baseView
-
-        // Now that baseView has a frame, set the frames for visualEffect and hostingView
-        visualEffect.frame = baseView.bounds
-        visualEffect.autoresizingMask = [.width, .height]
-
-        hostingView.frame = baseView.bounds
-
-        // Add visualEffect and hostingView to baseView
-        baseView.addSubview(visualEffect)
-        baseView.addSubview(hostingView)
-
-        // Add constraints to make the hosting view fill the base view
-        NSLayoutConstraint.activate([
-            hostingView.topAnchor.constraint(equalTo: baseView.topAnchor),
-            hostingView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor),
-            hostingView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor),
-            hostingView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor)
-        ])
-
-        // Set the x, y coordinates and the size to the user's last preference or the center by default
-        let x = UserDefaults.standard.value(forKey: "toastWindowX") as? CGFloat
-        let y = UserDefaults.standard.value(forKey: "toastWindowY") as? CGFloat
-        let width = UserDefaults.standard.value(forKey: "toastWindowSizeWidth") as? CGFloat
-        let height = UserDefaults.standard.value(forKey: "toastWindowSizeHeight") as? CGFloat
-
-        if let x = x, let y = y, let width = width, let height = height {
-            toastWindow?.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true)
-        } else {
-            toastWindow?.setFrame(NSRect(x: 0, y: 0, width: 300, height: 200), display: true)
-            toastWindow?.center()
-        }
-
-        toastWindow?.titlebarAppearsTransparent = true
-        toastWindow?.isMovableByWindowBackground = true
-        toastWindow?.isReleasedWhenClosed = false
-        toastWindow?.level = .popUpMenu
-        toastWindow?.makeKeyAndOrderFront(nil)
-
-        // Register for window moved notifications to save the new position
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(windowDidMove(_:)),
-            name: NSWindow.didMoveNotification, object: toastWindow)
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(windowDidResize(_:)),
-            name: NSWindow.didResizeNotification, object: toastWindow)
-    }
-
-    @objc func windowDidMove(_ notification: Notification) {
-        if let movedWindow = notification.object as? NSWindow {
-            let origin = movedWindow.frame.origin
-
-            UserDefaults.standard.set(origin.x, forKey: "toastWindowX")
-            UserDefaults.standard.set(origin.y, forKey: "toastWindowY")
-        }
-    }
-
-    @objc func windowDidResize(_ notification: Notification) {
-        if let movedWindow = notification.object as? NSWindow {
-            let size = movedWindow.frame.size
-
-            UserDefaults.standard.set(size.width, forKey: "toastWindowSizeWidth")
-            UserDefaults.standard.set(size.height, forKey: "toastWindowSizeHeight")
-            print("Saved width: \(size.width), height: \(size.height)")
         }
     }
 }
