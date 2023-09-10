@@ -205,10 +205,15 @@ class LlamaModelManager: ObservableObject {
     func predict(
         payload: RequestPayload,
         streamHandler: @escaping (Result<String, Error>) -> Void
-    ) throws {
+    ) -> Result<String, Error> {
         guard let jsonPayload = encodeToJSONString(from: payload) else {
-            streamHandler(.failure(ClientManagerError.badRequest("Encoding error")))
-            return
+            let result: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
+            streamHandler(result)
+            return result
+        }
+
+        guard let model = self.model else {
+            return .failure(ClientManagerError.serverError("Model not found"))
         }
 
         let prompt = """
@@ -221,7 +226,7 @@ class LlamaModelManager: ObservableObject {
         ### Response:
         """
 
-        self.model?.predict(prompt, handler: streamHandler)
+        return model.predict(prompt, handler: streamHandler)
     }
 
     private func encodeToJSONString<T: Codable>(from object: T) -> String? {

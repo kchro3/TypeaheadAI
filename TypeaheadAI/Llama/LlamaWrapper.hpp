@@ -18,7 +18,7 @@ extern "C" {
 typedef void (*TokenCallback)(const char* token);
 
 /// C-friendly version of simple.cpp
-int simple_predict(struct llama_context* ctx, const char* prompt_c, const int n_threads, TokenCallback callback);
+const char * simple_predict(struct llama_context* ctx, const char* prompt_c, const int n_threads, TokenCallback callback);
 
 #ifdef __cplusplus
 }

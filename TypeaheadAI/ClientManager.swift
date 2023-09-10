@@ -10,15 +10,15 @@ import Foundation
 import os.log
 
 struct RequestPayload: Codable {
-    let username: String
-    let userFullName: String
-    let userObjective: String
-    let userBio: String
-    let userLang: String
-    let copiedText: String
-    let url: String
-    let activeAppName: String
-    let activeAppBundleIdentifier: String
+    var username: String
+    var userFullName: String
+    var userObjective: String
+    var userBio: String
+    var userLang: String
+    var copiedText: String
+    var url: String
+    var activeAppName: String
+    var activeAppBundleIdentifier: String
 }
 
 struct ResponsePayload: Codable {
@@ -37,6 +37,7 @@ enum ClientManagerError: Error {
     case retriesExceeded(_ message: String)
     case clientError(_ message: String)
     case serverError(_ message: String)
+    case appError(_ message: String)
 }
 
 class ClientManager {
@@ -56,6 +57,7 @@ class ClientManager {
 
     // Add a Task property to manage the streaming task
     private var currentStreamingTask: Task<Void, Error>? = nil
+    private var cached: (String, String)? = nil
 
     init(session: URLSession = .shared) {
         self.session = session
@@ -240,18 +242,21 @@ class ClientManager {
                 activeAppBundleIdentifier: activeAppBundleIdentifier
             )
 
-            if (incognitoMode) {
-                await self?.performStreamOfflineTask(
-                    payload: payload,
-                    timeout: timeout,
-                    streamHandler: streamHandler
-                )
-            } else {
-                await self?.performStreamOnlineTask(
-                    payload: payload,
-                    timeout: timeout,
-                    streamHandler: streamHandler
-                )
+            if let output = self?.getCachedResponse(for: payload) {
+                streamHandler(.success(output))
+                return
+            }
+
+            if let result: Result<String, Error> = (incognitoMode)
+                    ? await self?.performStreamOfflineTask(payload: payload, timeout: timeout, streamHandler: streamHandler)
+                    : await self?.performStreamOnlineTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
+                switch result {
+                case .success(let output):
+                    self?.cacheResponse(output, for: payload)
+                    break
+                case .failure(_):
+                    break
+                }
             }
         }
     }
@@ -260,10 +265,11 @@ class ClientManager {
         payload: RequestPayload,
         timeout: TimeInterval,
         streamHandler: @escaping (Result<String, Error>) -> Void
-    ) async {
+    ) async -> Result<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            streamHandler(.failure(ClientManagerError.badRequest("Encoding error")))
-            return
+            let error: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
+            streamHandler(error)
+            return error
         }
 
         var request = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
@@ -271,33 +277,36 @@ class ClientManager {
         request.httpBody = httpBody
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        var output = ""
         do {
             let (stream, _) = try await URLSession.shared.bytes(for: request)
 
             for try await line in stream.lines {
                 let decodedResponse = try JSONDecoder().decode(ChunkPayload.self, from: line.data(using: .utf8)!)
                 if let text = decodedResponse.text {
+                    output += text
                     streamHandler(.success(text))
                 }
             }
         } catch {
-            streamHandler(.failure(error))
+            let err: Result<String, Error> = .failure(error)
+            streamHandler(err)
+            return err
         }
+
+        return .success(output)
     }
 
     private func performStreamOfflineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
         streamHandler: @escaping (Result<String, Error>) -> Void
-    ) async {
-        do {
-            try self.llamaModelManager?.predict(
-                payload: payload,
-                streamHandler: streamHandler
-            )
-        } catch {
-            streamHandler(.failure(error))
+    ) async -> Result<String, Error> {
+        guard let modelManager = self.llamaModelManager else {
+            return .failure(ClientManagerError.appError("Model Manager not found"))
         }
+
+        return modelManager.predict(payload: payload, streamHandler: streamHandler)
     }
 
     func cancelStreamingTask() {
@@ -326,6 +335,44 @@ class ClientManager {
             }
         } else {
             completion(nil, nil, nil)
+        }
+    }
+
+    private func generateCacheKey(from payload: RequestPayload) -> String? {
+        let encoder = JSONEncoder()
+
+        do {
+            var payloadCopy = payload
+            payloadCopy.url = ""
+            payloadCopy.activeAppName = ""
+            payloadCopy.activeAppBundleIdentifier = ""
+
+            let jsonData = try encoder.encode(payloadCopy)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                return jsonString
+            }
+        } catch {
+            self.logger.error("Encoding failed: \(error.localizedDescription)")
+        }
+
+        return nil
+    }
+
+    private func getCachedResponse(for requestPayload: RequestPayload) -> String? {
+        guard let cacheKey = generateCacheKey(from: requestPayload) else {
+            return nil
+        }
+
+        if let (key, val) = cached {
+            return (key == cacheKey) ? val : nil
+        } else {
+            return nil
+        }
+    }
+
+    private func cacheResponse(_ response: String, for requestPayload: RequestPayload) {
+        if let cacheKey = generateCacheKey(from: requestPayload) {
+            cached = (cacheKey, response)
         }
     }
 }

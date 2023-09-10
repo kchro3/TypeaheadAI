@@ -18,6 +18,10 @@ func globalHandler(_ token: UnsafePointer<CChar>?) {
     }
 }
 
+enum LlamaWrapperError: Error {
+    case serverError(_ message: String)
+}
+
 class LlamaWrapper {
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -41,15 +45,22 @@ class LlamaWrapper {
         return model != nil
     }
 
-    // TODO: How to support errors
-    func predict(_ prompt: String, handler: @escaping (Result<String, Error>) -> Void) {
+    func predict(
+        _ prompt: String,
+        handler: @escaping (Result<String, Error>) -> Void
+    ) -> Result<String, Error> {
         LlamaWrapper.handler = handler
         ctx = llama_new_context_with_model(model, params)
-        _ = simple_predict(ctx, prompt, 1, globalHandler)
+        guard let cstr = simple_predict(ctx, prompt, 1, globalHandler) else {
+            return .failure(LlamaWrapperError.serverError("Failed to run simple_predict"))
+        }
+
+        let token = String(cString: cstr)
+        free(UnsafeMutableRawPointer(mutating: cstr)) // Needs to be manually freed
+        return .success(token)
     }
 
     deinit {
-        // Just in case
         llama_free(ctx)
         llama_free_model(model)
         llama_backend_free()
