@@ -27,11 +27,8 @@ actor SpecialCopyActor {
         self.modalManager = modalManager
     }
     
-    func specialCut(incognitoMode: Bool) {
+    func specialCopy(incognitoMode: Bool) {
         self.logger.debug("special copy")
-
-        // Get the current clipboard to compare if anything changed:
-        let initialCopiedText = NSPasteboard.general.string(forType: .string) ?? ""
 
         simulateCopy() {
             guard let copiedText = NSPasteboard.general.string(forType: .string) else {
