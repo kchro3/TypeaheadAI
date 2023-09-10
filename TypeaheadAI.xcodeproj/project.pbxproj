@@ -18,6 +18,7 @@
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
+		2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
 		2BA7F07D2A9ABBA8003D38BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */; };
 		2BA7F0802A9ABBA8003D38BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07F2A9ABBA8003D38BA /* Preview Assets.xcassets */; };
@@ -71,6 +72,7 @@
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
+		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
 		2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 			isa = PBXGroup;
 			children = (
 				2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */,
+				2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -417,6 +420,7 @@
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
+				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
 				2BA7F0852A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld in Sources */,
@@ -610,7 +614,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.8;
+				MARKETING_VERSION = 1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -650,7 +654,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.8;
+				MARKETING_VERSION = 1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

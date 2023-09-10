@@ -46,15 +46,15 @@ std::string llama_token_to_piece(const struct llama_context * ctx, llama_token t
 }
 
 /// Almost the same as simple.cpp in examples
-int simple_predict(struct llama_context * ctx,
-                   const char * prompt_c,
-                   const int n_threads,
-                   TokenCallback callback) {
+const char * simple_predict(struct llama_context * ctx,
+                            const char * prompt_c,
+                            const int n_threads,
+                            TokenCallback callback) {
     std::string prompt(prompt_c);
 
     // tokenize the prompt
 
-    fprintf(stderr, "%s: tokenizing...\n", __func__);
+    printf("%s: tokenizing...\n", __func__);
     std::vector<llama_token> tokens_list;
     tokens_list = ::llama_tokenize(ctx, prompt, true);
 
@@ -62,16 +62,16 @@ int simple_predict(struct llama_context * ctx,
     const int max_tokens_list_size = max_context_size - 4;
 
     if ((int) tokens_list.size() > max_tokens_list_size) {
-        fprintf(stderr, "%s: error: prompt too long (%d tokens, max %d)\n", __func__, (int) tokens_list.size(), max_tokens_list_size);
-        return 1;
+        printf("%s: error: prompt too long (%d tokens, max %d)\n", __func__, (int) tokens_list.size(), max_tokens_list_size);
+        return nullptr;
     } else {
         printf("%s: %d tokens\n", __func__, (int) tokens_list.size());
     }
 
-    fprintf(stderr, "\n\n");
+    printf("\n\n");
 
     for (auto id : tokens_list) {
-        fprintf(stderr, "%s", llama_token_to_piece(ctx, id).c_str());
+        printf("%s", llama_token_to_piece(ctx, id).c_str());
     }
 
     // main loop
@@ -82,13 +82,14 @@ int simple_predict(struct llama_context * ctx,
     // example, we will just stop the loop once this cache is full or once an end of stream is detected.
 
     const int n_gen = max_context_size; //std::min(32, max_context_size);
+    std::string generated_text;
 
     while (llama_get_kv_cache_token_count(ctx) < n_gen) {
         // evaluate the transformer
 
         if (llama_eval(ctx, tokens_list.data(), int(tokens_list.size()), llama_get_kv_cache_token_count(ctx), n_threads)) {
             fprintf(stderr, "%s : failed to eval\n", __func__);
-            return 1;
+            return nullptr;
         }
 
         tokens_list.clear();
@@ -116,13 +117,18 @@ int simple_predict(struct llama_context * ctx,
         }
 
         // callback function for the new token :
+        auto piece = llama_token_to_piece(ctx, new_token_id);
         if (callback) {
-            callback(llama_token_to_piece(ctx, new_token_id).c_str());
+            callback(piece.c_str());
         }
+
+        generated_text += piece;
 
         // push this new token for next evaluation
         tokens_list.push_back(new_token_id);
     }
 
-    return 0;
+    char* result = new char[generated_text.length() + 1];
+    std::strcpy(result, generated_text.c_str());
+    return result;
 }

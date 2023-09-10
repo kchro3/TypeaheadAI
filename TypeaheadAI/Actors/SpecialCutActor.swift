@@ -98,7 +98,7 @@ actor SpecialCutActor {
                 self.performOCR(image: cgImage) { recognizedText, _ in
                     self.logger.info("OCRed text: \(recognizedText)")
                     self.modalManager.clearText()
-                    self.modalManager.showSpecialCopyModal()
+                    self.modalManager.showModal(incognito: incognitoMode)
                     self.clientManager.predict(
                         id: UUID(),
                         copiedText: recognizedText,

@@ -8,9 +8,26 @@
 import AppKit
 import SwiftUI
 import Foundation
+import os.log
+
+// TODO: Add to persistence
+struct Message: Codable, Identifiable, Equatable {
+    let id: UUID
+    let text: String
+    let isCurrentUser: Bool
+}
 
 class ModalManager: ObservableObject {
     @Published var modalText: String = ""
+    @Published var messages: [Message] = []
+
+    private let logger = Logger(
+        subsystem: "ai.typeahead.TypeaheadAI",
+        category: "ModalManager"
+    )
+
+    // TODO: Inject?
+    var clientManager: ClientManager? = nil
 
     var toastWindow: NSWindow?
 
@@ -20,6 +37,7 @@ class ModalManager: ObservableObject {
 
     func clearText() {
         modalText = ""
+        messages = []
     }
 
     func setText(_ text: String) {
@@ -30,7 +48,34 @@ class ModalManager: ObservableObject {
         modalText += text
     }
 
-    func showSpecialCopyModal() {
+    /// When a user responds, flush the current text to the messages array and add the system and user prompts
+    func addUserMessage(_ text: String, incognito: Bool) {
+        messages.append(Message(id: UUID(), text: modalText, isCurrentUser: false))
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+        modalText = ""
+
+        self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
+            switch result {
+            case .success(let chunk):
+                DispatchQueue.main.async {
+                    self.appendText(chunk)
+                }
+                self.logger.info("Received chunk: \(chunk)")
+            case .failure(let error):
+                self.logger.error("An error occurred: \(error)")
+            }
+        }
+    }
+
+    func toggleModal(incognito: Bool) {
+        if toastWindow?.isVisible ?? false {
+            toastWindow?.close()
+        } else {
+            showModal(incognito: incognito)
+        }
+    }
+
+    func showModal(incognito: Bool) {
         toastWindow?.close()
 
         // Create the visual effect view with frosted glass effect
@@ -42,7 +87,8 @@ class ModalManager: ObservableObject {
         // Create the content view
         let contentView = ModalView(
             showModal: .constant(true),
-            copyModalManager: self
+            incognito: incognito,
+            modalManager: self
         )
 
         let hostingView = NSHostingView(rootView: contentView)
