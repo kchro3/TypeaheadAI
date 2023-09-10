@@ -158,6 +158,7 @@ actor SpecialCutActor {
         }
 
         request.recognitionLevel = .accurate
+        request.automaticallyDetectsLanguage = true
         let handler = VNImageRequestHandler(cgImage: image, options: [:])
         do {
             self.logger.info("performing OCR")
