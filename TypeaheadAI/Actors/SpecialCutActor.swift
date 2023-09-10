@@ -63,6 +63,9 @@ class ClipboardMonitor {
 
 actor SpecialCutActor {
     private let clipboardMonitor: ClipboardMonitor
+    private let clientManager: ClientManager
+    private let modalManager: ModalManager
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialCutActor"
@@ -73,11 +76,15 @@ actor SpecialCutActor {
         static let thresholdY: CGFloat = 0.02
     }
 
-    init(mouseEventMonitor: MouseEventMonitor) {
+    init(mouseEventMonitor: MouseEventMonitor,
+         clientManager: ClientManager,
+         modalManager: ModalManager) {
         self.clipboardMonitor = ClipboardMonitor(mouseEventMonitor: mouseEventMonitor)
+        self.clientManager = clientManager
+        self.modalManager = modalManager
     }
 
-    func specialCut() {
+    func specialCut(incognitoMode: Bool) {
         do {
             self.clipboardMonitor.stopMonitoring()
             try simulateScreengrab() {
@@ -90,7 +97,24 @@ actor SpecialCutActor {
 
                 self.performOCR(image: cgImage) { recognizedText, _ in
                     self.logger.info("OCRed text: \(recognizedText)")
-                    
+                    self.modalManager.clearText()
+                    self.modalManager.showSpecialCopyModal()
+                    self.clientManager.predict(
+                        id: UUID(),
+                        copiedText: recognizedText,
+                        incognitoMode: incognitoMode,
+                        stream: true
+                    ) { result in
+                        switch result {
+                        case .success(let chunk):
+                            DispatchQueue.main.async {
+                                self.modalManager.appendText(chunk)
+                            }
+                            self.logger.info("Received chunk: \(chunk)")
+                        case .failure(let error):
+                            self.logger.error("An error occurred: \(error)")
+                        }
+                    }
                 }
             }
         } catch {

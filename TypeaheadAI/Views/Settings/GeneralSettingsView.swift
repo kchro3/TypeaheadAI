@@ -25,8 +25,20 @@ struct GeneralSettingsView: View {
                 .padding(.bottom, 5)
 
             Form {
-                KeyboardShortcuts.Recorder("Smart Copy:", name: .specialCopy)
-                KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
+                HStack {
+                    KeyboardShortcuts.Recorder("Smart Copy:", name: .specialCopy)
+                    Text("Responds to what you've selected.")
+                }
+                HStack {
+                    KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
+                    Text("Responds to what you've copied.")
+                }
+                HStack {
+                    KeyboardShortcuts.Recorder("Smart Cut:", name: .specialCut)
+                    Text("Responds to what you've screen-captured.")
+                }
+
+                Spacer()
 
                 Slider(value: $selectedFontSize, in: 14...28, step: 2) {
                     Text("Font Size:")

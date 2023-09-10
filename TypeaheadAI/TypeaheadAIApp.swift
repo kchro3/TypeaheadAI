@@ -27,17 +27,17 @@ final class AppState: ObservableObject {
         category: "AppState"
     )
 
-    // Actors
-    // TODO: See if copy & paste can fit actor model
-    private let specialCutActor: SpecialCutActor
-
     // Managers
     @Published var promptManager: PromptManager
     @Published var llamaModelManager = LlamaModelManager()
-    @Published var modalManager = ModalManager()
+    @Published var modalManager: ModalManager
     private let clientManager: ClientManager
     private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
+
+    // Actors
+    // TODO: See if copy & paste can fit actor model
+    private var specialCutActor: SpecialCutActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -48,13 +48,19 @@ final class AppState: ObservableObject {
     private let maxConcurrentRequests = 5
 
     init(context: NSManagedObjectContext) {
-        // Initialize actors
-        self.specialCutActor = SpecialCutActor(mouseEventMonitor: mouseEventMonitor)
 
         // Initialize managers
         self.historyManager = HistoryManager(context: context)
         self.promptManager = PromptManager(context: context)
         self.clientManager = ClientManager()
+        self.modalManager = ModalManager()
+
+        // Initialize actors
+        self.specialCutActor = SpecialCutActor(
+            mouseEventMonitor: mouseEventMonitor,
+            clientManager: clientManager,
+            modalManager: modalManager
+        )
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
@@ -74,7 +80,7 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
-                await self.specialCutActor.specialCut()
+                await self.specialCutActor?.specialCut(incognitoMode: incognitoMode)
             }
         }
 
