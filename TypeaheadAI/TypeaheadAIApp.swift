@@ -31,12 +31,12 @@ final class AppState: ObservableObject {
 
     // Actors
     // TODO: See if copy & paste can fit actor model
-    private let specialCutActor = SpecialCutActor()
+    private let specialCutActor: SpecialCutActor
 
     // Managers
     @Published var promptManager: PromptManager
     @Published var llamaModelManager = LlamaModelManager()
-    @Published var copyModalManager = CopyModalManager()
+    @Published var modalManager = ModalManager()
     private let clientManager: ClientManager
     private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
@@ -45,16 +45,23 @@ final class AppState: ObservableObject {
     private let mouseEventMonitor = MouseEventMonitor()
     // NOTE: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
-    private var mouseClicked: Bool = false
 
     // Constants
     private let maxConcurrentRequests = 5
 
     init(context: NSManagedObjectContext) {
+        // Initialize actors
+        self.specialCutActor = SpecialCutActor(mouseEventMonitor: mouseEventMonitor)
+
+        // Initialize managers
         self.historyManager = HistoryManager(context: context)
         self.promptManager = PromptManager(context: context)
         self.clientManager = ClientManager()
+
+        // Set lazy params
+        // TODO: Use a dependency injection framework or encapsulate these managers
         self.clientManager.llamaModelManager = llamaModelManager
+        self.clientManager.promptManager = promptManager
 
         checkAndRequestAccessibilityPermissions()
         checkAndRequestNotificationPermissions()
@@ -77,8 +84,6 @@ final class AppState: ObservableObject {
 
         // Configure mouse-click handler
         mouseEventMonitor.onLeftMouseDown = { [weak self] in
-            self?.mouseClicked = true
-
             // If the toast window is open and the user clicks out,
             // we can close the window.
             if let window = self?.toastWindow {
@@ -99,7 +104,6 @@ final class AppState: ObservableObject {
         Task {
             await stopMonitoringCmdCAndV()
             await mouseEventMonitor.stopMonitoring()
-            self.scriptManager.stopAccessingDirectory()
             await self.llamaModelManager.stopAccessingDirectory()
         }
     }
@@ -123,7 +127,7 @@ final class AppState: ObservableObject {
             }
 
             self.logger.debug("copied '\(copiedText)'")
-            if copiedText == initialCopiedText && self.copyModalManager.hasText() {
+            if copiedText == initialCopiedText && self.modalManager.hasText() {
                 // If nothing changed, then toggle the modal.
                 // NOTE: If the modal is empty but the clipboard is not,
                 // whatever was in the clipboard initially is from a regular
@@ -135,33 +139,21 @@ final class AppState: ObservableObject {
                 }
             } else {
                 // Clear the modal text and reissue request
-                self.copyModalManager.clearText()
+                self.modalManager.clearText()
                 self.showSpecialCopyModal()
-                self.getActiveApplicationInfo { (appName, bundleIdentifier, url) in
-                    Task {
-                        await self.clientManager.sendStreamRequest(
-                            id: UUID(),
-                            username: NSUserName(),
-                            userFullName: NSFullUserName(),
-                            userObjective: self.promptManager.getActivePrompt() ?? "",
-                            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                            userLang: Locale.preferredLanguages.first ?? "",
-                            copiedText: copiedText,
-                            url: url ?? "unknown",
-                            activeAppName: appName ?? "",
-                            activeAppBundleIdentifier: bundleIdentifier ?? "",
-                            incognitoMode: self.incognitoMode
-                        ) { (chunk, error) in
-                            if let chunk = chunk {
-                                DispatchQueue.main.async {
-                                    self.copyModalManager.appendText(chunk)
-                                }
-                                self.logger.info("Received chunk: \(chunk)")
-                            }
-                            if let error = error {
-                                self.logger.error("An error occurred: \(error)")
-                            }
+                self.clientManager.predict(
+                    id: UUID(),
+                    copiedText: copiedText,
+                    incognitoMode: self.incognitoMode
+                ) { result in
+                    switch result {
+                    case .success(let chunk):
+                        DispatchQueue.main.async {
+                            self.modalManager.appendText(chunk)
                         }
+                        self.logger.info("Received chunk: \(chunk)")
+                    case .failure(let error):
+                        self.logger.error("An error occurred: \(error)")
                     }
                 }
             }
@@ -209,60 +201,48 @@ final class AppState: ObservableObject {
         DispatchQueue.main.async {
             self.isLoading = true
             self.startBlinking()
-            self.mouseClicked = false
+            self.mouseEventMonitor.mouseClicked = false
         }
 
         // Replace the current clipboard contents with the lowercase string
         pasteboard.declareTypes([.string], owner: nil)
 
-        getActiveApplicationInfo { (appName, bundleIdentifier, url) in
-            DispatchQueue.main.async {
-                self.clientManager.sendRequest(
-                    id: newEntry.id!,
-                    username: NSUserName(),
-                    userFullName: NSFullUserName(),
-                    userObjective: self.promptManager.getActivePrompt() ?? "",
-                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                    userLang: Locale.preferredLanguages.first ?? "",
-                    copiedText: combinedString,
-                    url: url ?? "unknown",
-                    activeAppName: appName ?? "",
-                    activeAppBundleIdentifier: bundleIdentifier ?? "",
-                    incognitoMode: self.incognitoMode
-                ) { result in
-                    switch result {
-                    case .success(let response):
-                        self.logger.debug("Response from server: \(response)")
-                        pasteboard.setString(response, forType: .string)
-                        // Simulate a paste of the lowercase string
-                        if self.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
-                            self.sendClipboardNotification(status: .success)
-                        } else {
-                            AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
-                            self.simulatePaste()
-                        }
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: response,
-                            andStatus: .success
-                        )
-                    case .failure(let error):
-                        self.logger.debug("Error: \(error.localizedDescription)")
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: nil,
-                            andStatus: .failure
-                        )
-                        self.sendClipboardNotification(status: .failure)
-                        AudioServicesPlaySystemSound(1306) // Funk sound
-                    }
+        self.clientManager.predict(
+            id: newEntry.id!,
+            copiedText: combinedString,
+            incognitoMode: self.incognitoMode
+        ) { result in
+            switch result {
+            case .success(let response):
+                self.logger.debug("Response from server: \(response)")
+                pasteboard.setString(response, forType: .string)
+                // Simulate a paste of the lowercase string
+                if self.mouseEventMonitor.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
+                    self.sendClipboardNotification(status: .success)
+                } else {
+                    AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
+                    self.simulatePaste()
+                }
+                self.historyManager.updateHistoryEntry(
+                    entry: newEntry,
+                    withResponse: response,
+                    andStatus: .success
+                )
+            case .failure(let error):
+                self.logger.debug("Error: \(error.localizedDescription)")
+                self.historyManager.updateHistoryEntry(
+                    entry: newEntry,
+                    withResponse: nil,
+                    andStatus: .failure
+                )
+                self.sendClipboardNotification(status: .failure)
+                AudioServicesPlaySystemSound(1306) // Funk sound
+            }
 
-                    DispatchQueue.main.async {
-                        self.isLoading = false
-                        if self.historyManager.pendingRequestCount() == 0 {
-                            self.stopBlinking()
-                        }
-                    }
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if self.historyManager.pendingRequestCount() == 0 {
+                    self.stopBlinking()
                 }
             }
         }
@@ -303,31 +283,6 @@ final class AppState: ObservableObject {
     private func stopMonitoringCmdCAndV() async {
         if let globalEventMonitor = globalEventMonitor {
             NSEvent.removeMonitor(globalEventMonitor)
-        }
-    }
-
-    private func getActiveApplicationInfo(completion: @escaping (String?, String?, String?) -> Void) {
-        self.logger.debug("get active app")
-        if let activeApp = NSWorkspace.shared.frontmostApplication {
-            let appName = activeApp.localizedName
-            self.logger.debug("Detected active app: \(appName ?? "none")")
-            let bundleIdentifier = activeApp.bundleIdentifier
-
-            if bundleIdentifier == "com.google.Chrome" {
-                self.scriptManager.executeScript { (result, error) in
-                    if let error = error {
-                        self.logger.error("Failed to execute script: \(error.errorDescription ?? "Unknown error")")
-                        completion(appName, bundleIdentifier, nil)
-                    } else if let url = result?.stringValue {
-                        self.logger.info("Successfully executed script. URL: \(url)")
-                        completion(appName, bundleIdentifier, url)
-                    }
-                }
-            } else {
-                completion(appName, bundleIdentifier, nil)
-            }
-        } else {
-            completion(nil, nil, nil)
         }
     }
 
@@ -470,7 +425,7 @@ final class AppState: ObservableObject {
         // Create the content view
         let contentView = ModalView(
             showModal: .constant(true),
-            copyModalManager: self.copyModalManager
+            copyModalManager: self.modalManager
         )
 
         let hostingView = NSHostingView(rootView: contentView)

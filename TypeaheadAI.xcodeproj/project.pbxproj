@@ -17,7 +17,7 @@
 		2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B473E8B2AA860380042913D /* MenuBarExtraAccess */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
-		2B92BDBB2AA3D10800E65CFA /* CopyModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* CopyModalManager.swift */; };
+		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
 		2BA7F07D2A9ABBA8003D38BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */; };
 		2BA7F0802A9ABBA8003D38BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2BA7F07F2A9ABBA8003D38BA /* Preview Assets.xcassets */; };
@@ -70,7 +70,7 @@
 		2B473E882AA85BDD0042913D /* LlamaModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaModelManager.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
-		2B92BDBA2AA3D10800E65CFA /* CopyModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyModalManager.swift; sourceTree = "<group>"; };
+		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
 		2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -195,7 +195,7 @@
 				2BCF84342A9DD90F00359841 /* HistoryManager.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
 				2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */,
-				2B92BDBA2AA3D10800E65CFA /* CopyModalManager.swift */,
+				2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */,
 				2B473E882AA85BDD0042913D /* LlamaModelManager.swift */,
 			);
 			path = TypeaheadAI;
@@ -411,7 +411,7 @@
 				2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2BE0EC2B2AA1D44000E47C52 /* SplashView.swift in Sources */,
-				2B92BDBB2AA3D10800E65CFA /* CopyModalManager.swift in Sources */,
+				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,

@@ -1,5 +1,5 @@
 //
-//  CopyModalManager.swift
+//  ModalManager.swift
 //  TypeaheadAI
 //
 //  Created by Jeff Hara on 9/2/23.
@@ -8,7 +8,7 @@
 import AppKit
 import Foundation
 
-class CopyModalManager: ObservableObject {
+class ModalManager: ObservableObject {
     @Published var modalText: String = ""
 
     func hasText() -> Bool {

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ModalView: View {
     @Binding var showModal: Bool
-    @ObservedObject var copyModalManager: CopyModalManager
+    @ObservedObject var copyModalManager: ModalManager
     @State private var fontSize: CGFloat = 14.0
 
     var body: some View {
@@ -38,7 +38,7 @@ struct ModalView_Previews: PreviewProvider {
     @State static var showModal = true
 
     static var previews: some View {
-        let copyModalManager = CopyModalManager()
+        let copyModalManager = ModalManager()
         copyModalManager.setText("hello world")
         return ModalView(showModal: $showModal, copyModalManager: copyModalManager)
     }
