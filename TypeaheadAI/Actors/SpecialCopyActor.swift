@@ -9,8 +9,7 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialCopyActor {
-    private let clipboardMonitor: ClipboardMonitor
+actor SpecialCopyActor: CanSimulateCopy {
     private let clientManager: ClientManager
     private let modalManager: ModalManager
     
@@ -19,10 +18,8 @@ actor SpecialCopyActor {
         category: "SpecialCopyActor"
     )
 
-    init(mouseEventMonitor: MouseEventMonitor,
-         clientManager: ClientManager,
+    init(clientManager: ClientManager,
          modalManager: ModalManager) {
-        self.clipboardMonitor = ClipboardMonitor(mouseEventMonitor: mouseEventMonitor)
         self.clientManager = clientManager
         self.modalManager = modalManager
     }
@@ -52,37 +49,21 @@ actor SpecialCopyActor {
                     id: UUID(),
                     copiedText: copiedText,
                     incognitoMode: incognitoMode,
-                    stream: true
-                ) { result in
-                    switch result {
-                    case .success(let chunk):
-                        DispatchQueue.main.async {
-                            self.modalManager.appendText(chunk)
+                    stream: true,
+                    streamHandler: { result in
+                        switch result {
+                        case .success(let chunk):
+                            DispatchQueue.main.async {
+                                self.modalManager.appendText(chunk)
+                            }
+                            self.logger.info("Received chunk: \(chunk)")
+                        case .failure(let error):
+                            self.logger.error("An error occurred: \(error)")
                         }
-                        self.logger.info("Received chunk: \(chunk)")
-                    case .failure(let error):
-                        self.logger.error("An error occurred: \(error)")
-                    }
-                }
+                    },
+                    completion: { _ in }
+                )
             }
-        }
-    }
-
-    private func simulateCopy(completion: @escaping () -> Void) {
-        self.logger.debug("simulated copy")
-        // Post a Command-C keystroke
-        let source = CGEventSource(stateID: .hidSystemState)!
-        let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)! // c key
-        cmdCDown.flags = [.maskCommand]
-        let cmdCUp = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: false)! // c key
-        cmdCUp.flags = [.maskCommand]
-
-        cmdCDown.post(tap: .cghidEventTap)
-        cmdCUp.post(tap: .cghidEventTap)
-
-        // Delay for the clipboard to update, then call the completion handler
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            completion()
         }
     }
 }

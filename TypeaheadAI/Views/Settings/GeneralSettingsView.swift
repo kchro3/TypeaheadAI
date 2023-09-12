@@ -37,6 +37,10 @@ struct GeneralSettingsView: View {
                     KeyboardShortcuts.Recorder("Smart Cut:", name: .specialCut)
                     Text("Responds to what you've screen-captured.")
                 }
+                HStack {
+                    KeyboardShortcuts.Recorder("Smart Save:", name: .specialSave)
+                    Text("Remembers what you've selected. (Work in Progress)")
+                }
 
                 Spacer()
 

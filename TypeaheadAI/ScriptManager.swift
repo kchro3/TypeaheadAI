@@ -52,6 +52,10 @@ class ScriptManager {
         loadScriptDirectoryBookmark()
     }
 
+    deinit {
+        scriptDirectoryURL?.stopAccessingSecurityScopedResource()
+    }
+
     func executeScript(completion: @escaping (NSAppleEventDescriptor?, ScriptManagerError?) -> Void) {
         guard let directoryURL = scriptDirectoryURL else {
             logger.debug("Script directory is not set.")
@@ -192,9 +196,5 @@ class ScriptManager {
             // If bookmark is missing, prompt for script directory
             promptForScriptDirectory()
         }
-    }
-
-    func stopAccessingDirectory() {
-        scriptDirectoryURL?.stopAccessingSecurityScopedResource()
     }
 }
