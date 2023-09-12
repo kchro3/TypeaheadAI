@@ -14,14 +14,14 @@ struct HistoryListItemView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                Text("\(entry.timestamp!.description(with: .autoupdatingCurrent))")
+                Text("\(entry.timestamp?.description(with: .autoupdatingCurrent) ?? "")")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                 Text("Objective: \(entry.objective ?? "None")")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .textSelection(.enabled)
-                Text(entry.query!)
+                Text(entry.query ?? "")
                     .font(.headline)
                     .fontWeight(.bold)
                     .textSelection(.enabled)
@@ -32,7 +32,7 @@ struct HistoryListItemView: View {
                 case RequestStatus.pending.rawValue:
                     Text("Paste: Pending").foregroundColor(.yellow)
                 default:
-                    Text(entry.response!)
+                    Text(entry.response ?? "None")
                         .textSelection(.enabled)
                 }
             }
@@ -43,6 +43,7 @@ struct HistoryListItemView: View {
 
 struct HistoryListView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @State private var refreshView: Bool = false
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \HistoryEntry.timestamp, ascending: false)],
@@ -77,11 +78,15 @@ struct HistoryListView: View {
     }
 
     private func clearHistory(context: NSManagedObjectContext) {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = HistoryEntry.fetchRequest()
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        let fetchRequest: NSFetchRequest<HistoryEntry> = HistoryEntry.fetchRequest()
 
         do {
-            try context.execute(deleteRequest)
+            let objects = try context.fetch(fetchRequest)
+            // Delete the objects
+            for object in objects {
+                context.delete(object)
+            }
+
             try context.save()
         } catch let error as NSError {
             // Handle the error
