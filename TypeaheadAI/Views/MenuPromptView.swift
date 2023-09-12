@@ -38,7 +38,7 @@ struct MenuPromptView: View {
                 .resizable()
                 .frame(width: 24, height: 24)
                 .symbolRenderingMode(isActive ? .palette : .monochrome)
-                .foregroundStyle(isActive ? .white : .primary, .blue)
+                .foregroundStyle(isActive ? .white : .secondary, .blue)
 
             if isEditing {
                 TextField("", text: $localPromptContent)
@@ -57,6 +57,7 @@ struct MenuPromptView: View {
                     .onTapGesture(count: 2) {
                         isEditing = true
                     }
+                    .foregroundColor(isActive ? .primary : .secondary)
             }
 
             Spacer()

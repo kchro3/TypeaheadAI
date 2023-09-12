@@ -42,6 +42,7 @@ struct ModalView: View {
                     VStack(spacing: 2) {
                         ForEach(modalManager.messages) { message in
                             MessageView(text: message.text, isUser: message.isCurrentUser)
+                                .padding(.trailing, 5)
                         }
                         MessageView(text: modalManager.modalText, isUser: false)
                             .id(bottomID)
@@ -61,7 +62,6 @@ struct ModalView: View {
                         text = ""
                     }
                 }
-                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(5)
         }
         .font(.system(size: fontSize))

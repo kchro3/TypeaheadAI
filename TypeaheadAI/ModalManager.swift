@@ -48,6 +48,11 @@ class ModalManager: ObservableObject {
         modalText += text
     }
 
+    /// Add a user message without flushing the modal text. Use this when there is an active prompt.
+    func setUserMessage(_ text: String) {
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+    }
+
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     func addUserMessage(_ text: String, incognito: Bool) {
         messages.append(Message(id: UUID(), text: modalText, isCurrentUser: false))

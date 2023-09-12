@@ -99,6 +99,11 @@ actor SpecialCutActor {
                     self.logger.info("OCRed text: \(recognizedText)")
                     self.modalManager.clearText()
                     self.modalManager.showModal(incognito: incognitoMode)
+
+                    if let activePrompt = self.clientManager.getActivePrompt() {
+                        self.modalManager.setUserMessage(activePrompt)
+                    }
+
                     self.clientManager.predict(
                         id: UUID(),
                         copiedText: recognizedText,

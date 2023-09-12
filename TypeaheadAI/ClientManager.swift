@@ -64,6 +64,10 @@ class ClientManager {
         self.session = session
     }
 
+    func getActivePrompt() -> String? {
+        return self.promptManager?.getActivePrompt()
+    }
+
     /// Easier to use this wrapper function.
     func predict(
         id: UUID,

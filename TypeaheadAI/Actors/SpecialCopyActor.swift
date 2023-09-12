@@ -45,6 +45,11 @@ actor SpecialCopyActor: CanSimulateCopy {
                 // Clear the modal text and reissue request
                 self.modalManager.clearText()
                 self.modalManager.showModal(incognito: incognitoMode)
+
+                if let activePrompt = self.clientManager.getActivePrompt() {
+                    self.modalManager.setUserMessage(activePrompt)
+                }
+
                 self.clientManager.predict(
                     id: UUID(),
                     copiedText: copiedText,
