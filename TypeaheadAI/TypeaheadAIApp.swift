@@ -34,6 +34,7 @@ final class AppState: ObservableObject {
     @Published var clientManager: ClientManager
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager
+    private let memoManager: MemoManager
 
     // Actors
     // TODO: See if paste can fit actor model
@@ -52,6 +53,7 @@ final class AppState: ObservableObject {
     init(context: NSManagedObjectContext) {
 
         // Initialize managers
+        self.memoManager = MemoManager(context: context)
         self.historyManager = HistoryManager(context: context)
         self.promptManager = PromptManager(context: context)
         self.clientManager = ClientManager()
@@ -70,7 +72,8 @@ final class AppState: ObservableObject {
         )
         self.specialSaveActor = SpecialSaveActor(
             modalManager: modalManager,
-            clientManager: clientManager
+            clientManager: clientManager,
+            memoManager: memoManager
         )
 
         // Set lazy params

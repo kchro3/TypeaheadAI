@@ -12,15 +12,21 @@ import os.log
 actor SpecialSaveActor: CanSimulateCopy {
     private let modalManager: ModalManager
     private let clientManager: ClientManager
+    private let memoManager: MemoManager
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialSaveActor"
     )
 
-    init(modalManager: ModalManager, clientManager: ClientManager) {
+    init(
+        modalManager: ModalManager,
+        clientManager: ClientManager,
+        memoManager: MemoManager
+    ) {
         self.modalManager = modalManager
         self.clientManager = clientManager
+        self.memoManager = memoManager
     }
 
     func specialSave(incognitoMode: Bool) {
@@ -54,6 +60,8 @@ actor SpecialSaveActor: CanSimulateCopy {
                 completion: { result in
                     switch result {
                     case .success(let output):
+                        _ = self.memoManager.createEntry(summary: output, content: copiedText)
+                        self.modalManager.appendText("\nStill a work in progress, but you can manage your saved content in your settings. Saved content will be used to contextualize future results.")
                         self.logger.info("text: \(output)")
                     case .failure(let error):
                         self.logger.error("An error occurred: \(error)")
