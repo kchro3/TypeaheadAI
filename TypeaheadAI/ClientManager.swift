@@ -44,7 +44,7 @@ enum ClientManagerError: Error {
 class ClientManager {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: PromptManager? = nil
-    private let scriptManager = ScriptManager()
+    var appContextManager: AppContextManager? = nil
 
     private let session: URLSession
 
@@ -64,29 +64,28 @@ class ClientManager {
         self.session = session
     }
 
-    deinit {
-        Task {
-            self.scriptManager.stopAccessingDirectory()
-        }
-    }
-
     /// Easier to use this wrapper function.
     func predict(
         id: UUID,
         copiedText: String,
         incognitoMode: Bool,
+        userObjective: String? = nil,
         timeout: TimeInterval = 10,
         stream: Bool = false,
+        streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
-        getActiveApplicationInfo { (appName, bundleIdentifier, url) in
+        // If objective is not specified in the request, fall back on the active prompt.
+        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "look this up" : "respond to this")
+
+        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
             if stream {
                 Task {
                     await self.sendStreamRequest(
                         id: id,
                         username: NSUserName(),
                         userFullName: NSFullUserName(),
-                        userObjective: self.promptManager?.getActivePrompt() ?? "",
+                        userObjective: objective,
                         userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: copiedText,
@@ -95,7 +94,8 @@ class ClientManager {
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
                         incognitoMode: incognitoMode,
-                        streamHandler: completion
+                        streamHandler: streamHandler,
+                        completion: completion
                     )
                 }
             } else {
@@ -112,7 +112,8 @@ class ClientManager {
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
                         incognitoMode: incognitoMode,
-                        completion: completion)
+                        completion: completion
+                    )
                 }
             }
         }
@@ -123,7 +124,7 @@ class ClientManager {
         messages: [Message],
         incognitoMode: Bool,
         timeout: TimeInterval = 10,
-        completion: @escaping (Result<String, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void
     ) {
         guard let (key, _) = cached,
               let data = key.data(using: .utf8),
@@ -132,7 +133,7 @@ class ClientManager {
             return
         }
 
-        getActiveApplicationInfo { (appName, bundleIdentifier, url) in
+        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
             Task {
                 await self.sendStreamRequest(
                     id: UUID(),
@@ -147,7 +148,8 @@ class ClientManager {
                     activeAppName: appName ?? "unknown",
                     activeAppBundleIdentifier: bundleIdentifier ?? "",
                     incognitoMode: incognitoMode,
-                    streamHandler: completion
+                    streamHandler: streamHandler,
+                    completion: { _ in }
                 )
             }
         }
@@ -264,7 +266,8 @@ class ClientManager {
         activeAppBundleIdentifier: String,
         incognitoMode: Bool,
         timeout: TimeInterval = 10,
-        streamHandler: @escaping (Result<String, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<String, Error>) -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -289,6 +292,10 @@ class ClientManager {
             if let result: Result<String, Error> = (incognitoMode)
                     ? await self?.performStreamOfflineTask(payload: payload, timeout: timeout, streamHandler: streamHandler)
                     : await self?.performStreamOnlineTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
+
+                completion(result)
+
+                // Cache successful requests
                 switch result {
                 case .success(let output):
                     self?.cacheResponse(output, for: payload)
@@ -350,31 +357,6 @@ class ClientManager {
 
     func cancelStreamingTask() {
         currentStreamingTask?.cancel()
-    }
-
-    private func getActiveApplicationInfo(completion: @escaping (String?, String?, String?) -> Void) {
-        self.logger.debug("get active app")
-        if let activeApp = NSWorkspace.shared.frontmostApplication {
-            let appName = activeApp.localizedName
-            self.logger.debug("Detected active app: \(appName ?? "none")")
-            let bundleIdentifier = activeApp.bundleIdentifier
-
-            if bundleIdentifier == "com.google.Chrome" {
-                self.scriptManager.executeScript { (result, error) in
-                    if let error = error {
-                        self.logger.error("Failed to execute script: \(error.errorDescription ?? "Unknown error")")
-                        completion(appName, bundleIdentifier, nil)
-                    } else if let url = result?.stringValue {
-                        self.logger.info("Successfully executed script. URL: \(url)")
-                        completion(appName, bundleIdentifier, url)
-                    }
-                }
-            } else {
-                completion(appName, bundleIdentifier, nil)
-            }
-        } else {
-            completion(nil, nil, nil)
-        }
     }
 
     private func generateCacheKey(from payload: RequestPayload) -> String? {

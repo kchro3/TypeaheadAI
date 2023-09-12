@@ -103,18 +103,20 @@ actor SpecialCutActor {
                         id: UUID(),
                         copiedText: recognizedText,
                         incognitoMode: incognitoMode,
-                        stream: true
-                    ) { result in
-                        switch result {
-                        case .success(let chunk):
-                            DispatchQueue.main.async {
-                                self.modalManager.appendText(chunk)
+                        stream: true,
+                        streamHandler: { result in
+                            switch result {
+                            case .success(let chunk):
+                                DispatchQueue.main.async {
+                                    self.modalManager.appendText(chunk)
+                                }
+                                self.logger.info("Received chunk: \(chunk)")
+                            case .failure(let error):
+                                self.logger.error("An error occurred: \(error)")
                             }
-                            self.logger.info("Received chunk: \(chunk)")
-                        case .failure(let error):
-                            self.logger.error("An error occurred: \(error)")
-                        }
-                    }
+                        },
+                        completion: { _ in }
+                    )
                 }
             }
         } catch {

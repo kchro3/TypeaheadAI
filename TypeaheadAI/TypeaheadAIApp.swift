@@ -32,13 +32,14 @@ final class AppState: ObservableObject {
     @Published var llamaModelManager = LlamaModelManager()
     @Published var modalManager: ModalManager
     @Published var clientManager: ClientManager
-    private let scriptManager = ScriptManager()
     private let historyManager: HistoryManager
+    private let appContextManager: AppContextManager
 
     // Actors
     // TODO: See if paste can fit actor model
     private var specialCutActor: SpecialCutActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
+    private var specialSaveActor: SpecialSaveActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -55,27 +56,30 @@ final class AppState: ObservableObject {
         self.promptManager = PromptManager(context: context)
         self.clientManager = ClientManager()
         self.modalManager = ModalManager()
+        self.appContextManager = AppContextManager()
 
         // Initialize actors
         self.specialCopyActor = SpecialCopyActor(
-            mouseEventMonitor: mouseEventMonitor,
             clientManager: clientManager,
             modalManager: modalManager
         )
-
         self.specialCutActor = SpecialCutActor(
             mouseEventMonitor: mouseEventMonitor,
             clientManager: clientManager,
             modalManager: modalManager
+        )
+        self.specialSaveActor = SpecialSaveActor(
+            modalManager: modalManager,
+            clientManager: clientManager
         )
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
         self.clientManager.llamaModelManager = llamaModelManager
         self.clientManager.promptManager = promptManager
+        self.clientManager.appContextManager = appContextManager
         self.modalManager.clientManager = clientManager
 
-        checkAndRequestAccessibilityPermissions()
         checkAndRequestNotificationPermissions()
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
@@ -91,6 +95,12 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
                 await self.specialCutActor?.specialCut(incognitoMode: incognitoMode)
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .specialSave) { [self] in
+            Task {
+                await self.specialSaveActor?.specialSave(incognitoMode: incognitoMode)
             }
         }
 
@@ -171,42 +181,44 @@ final class AppState: ObservableObject {
         self.clientManager.predict(
             id: newEntry.id!,
             copiedText: combinedString,
-            incognitoMode: self.incognitoMode
-        ) { result in
-            switch result {
-            case .success(let response):
-                self.logger.debug("Response from server: \(response)")
-                pasteboard.setString(response, forType: .string)
-                // Simulate a paste of the lowercase string
-                if self.mouseEventMonitor.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
-                    self.sendClipboardNotification(status: .success)
-                } else {
-                    AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
-                    self.simulatePaste()
+            incognitoMode: self.incognitoMode,
+            streamHandler: { _ in },
+            completion: { result in
+                switch result {
+                case .success(let response):
+                    self.logger.debug("Response from server: \(response)")
+                    pasteboard.setString(response, forType: .string)
+                    // Simulate a paste of the lowercase string
+                    if self.mouseEventMonitor.mouseClicked || newEntry.id != self.historyManager.mostRecentPending() {
+                        self.sendClipboardNotification(status: .success)
+                    } else {
+                        AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
+                        self.simulatePaste()
+                    }
+                    self.historyManager.updateHistoryEntry(
+                        entry: newEntry,
+                        withResponse: response,
+                        andStatus: .success
+                    )
+                case .failure(let error):
+                    self.logger.debug("Error: \(error.localizedDescription)")
+                    self.historyManager.updateHistoryEntry(
+                        entry: newEntry,
+                        withResponse: nil,
+                        andStatus: .failure
+                    )
+                    self.sendClipboardNotification(status: .failure)
+                    AudioServicesPlaySystemSound(1306) // Funk sound
                 }
-                self.historyManager.updateHistoryEntry(
-                    entry: newEntry,
-                    withResponse: response,
-                    andStatus: .success
-                )
-            case .failure(let error):
-                self.logger.debug("Error: \(error.localizedDescription)")
-                self.historyManager.updateHistoryEntry(
-                    entry: newEntry,
-                    withResponse: nil,
-                    andStatus: .failure
-                )
-                self.sendClipboardNotification(status: .failure)
-                AudioServicesPlaySystemSound(1306) // Funk sound
-            }
 
-            DispatchQueue.main.async {
-                self.isLoading = false
-                if self.historyManager.pendingRequestCount() == 0 {
-                    self.stopBlinking()
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    if self.historyManager.pendingRequestCount() == 0 {
+                        self.stopBlinking()
+                    }
                 }
             }
-        }
+        )
     }
 
     private func startBlinking() {
