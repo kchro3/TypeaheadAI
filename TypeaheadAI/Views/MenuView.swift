@@ -31,6 +31,7 @@ struct MenuView: View {
                 Spacer()
 
                 Toggle("Incognito", isOn: $incognitoMode)
+                    .foregroundColor(Color.secondary)
                     .toggleStyle(.switch)
                     .accentColor(.blue)
             }
@@ -40,7 +41,7 @@ struct MenuView: View {
             Divider()
                 .padding(.horizontal, horizontalPadding)
 
-            TextField("Set a goal (e.g. summarize, translate, reply)", text: $currentPreset)
+            TextField("Toggle commands (e.g. summarize this)", text: $currentPreset)
                 .focused($isTextFieldFocused)
                 .onSubmit {
                     if !currentPreset.isEmpty {
