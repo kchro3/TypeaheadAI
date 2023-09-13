@@ -80,7 +80,7 @@ class ClientManager {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "look this up" : "respond to this")
+        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "describe this" : "respond to this")
 
         appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
             if stream {
@@ -147,7 +147,7 @@ class ClientManager {
                     userBio: payload.userBio,
                     userLang: payload.userLang,
                     copiedText: payload.copiedText,
-                    messages: messages,
+                    messages: self.sanitizeMessages(messages),
                     url: payload.url,
                     activeAppName: appName ?? "unknown",
                     activeAppBundleIdentifier: bundleIdentifier ?? "",
@@ -282,7 +282,7 @@ class ClientManager {
                 userBio: userBio,
                 userLang: userLang,
                 copiedText: copiedText,
-                messages: messages,
+                messages: self?.sanitizeMessages(messages),
                 url: url,
                 activeAppName: activeAppName,
                 activeAppBundleIdentifier: activeAppBundleIdentifier
@@ -399,6 +399,14 @@ class ClientManager {
     private func cacheResponse(_ response: String, for requestPayload: RequestPayload) {
         if let cacheKey = generateCacheKey(from: requestPayload) {
             cached = (cacheKey, response)
+        }
+    }
+
+    private func sanitizeMessages(_ messages: [Message]) -> [Message] {
+        return messages.map { originalMessage in
+            var messageCopy = originalMessage
+            messageCopy.attributed = nil
+            return messageCopy
         }
     }
 }

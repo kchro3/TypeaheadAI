@@ -6,22 +6,53 @@
 //
 
 import SwiftUI
+import Markdown
 
 struct MessageView: View {
-    let text: String
-    let isUser: Bool
+    let message: Message
 
     var body: some View {
-        Text(text)
-            .foregroundColor(isUser ? .white : .primary)
-            .textSelection(.enabled)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 15)
-            .background(
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(isUser ? Color.blue.opacity(0.8) : Color.clear)
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: isUser ? .trailing : .leading)
+        if let error = message.responseError, !message.isCurrentUser {
+            Text(error)
+                .foregroundColor(.primary)
+                .textSelection(.enabled)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 15)
+                .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.red.opacity(0.4))
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        } else if let attributed = message.attributed {
+            attributedView(results: attributed.results)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
+        } else {
+            Text(message.text)
+                .foregroundColor(message.isCurrentUser ? .white : .primary)
+                .textSelection(.enabled)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 15)
+                .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(message.isCurrentUser ? Color.blue.opacity(0.8) : Color.clear)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
+        }
+    }
+
+    func attributedView(results: [ParserResult]) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(results) { parsed in
+                if parsed.isCodeBlock {
+                    CodeBlockView(parserResult: parsed)
+                        .padding(.bottom, 24)
+                        .textSelection(.enabled)
+                } else {
+                    Text(parsed.attributedString)
+                        .textSelection(.enabled)
+                }
+            }
+        }
     }
 }
 
@@ -29,7 +60,7 @@ struct ModalView: View {
     @Binding var showModal: Bool
     @State var incognito: Bool
     @ObservedObject var modalManager: ModalManager
-    @State private var fontSize: CGFloat = 14.0
+    @State private var fontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
     @State private var text: String = ""
     @FocusState private var isTextFieldFocused: Bool
 
@@ -41,11 +72,8 @@ struct ModalView: View {
                 ScrollView {
                     VStack(spacing: 2) {
                         ForEach(modalManager.messages.indices, id: \.self) { index in
-                            MessageView(
-                                text: modalManager.messages[index].text,
-                                isUser: modalManager.messages[index].isCurrentUser
-                            )
-                            .padding(.trailing, 5)
+                            MessageView(message: modalManager.messages[index])
+                                .padding(5)
                         }
                     }
                     .onChange(of: modalManager.messages.last) { _ in
@@ -74,11 +102,6 @@ struct ModalView: View {
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
-        .onAppear {
-            if let savedFontSize = UserDefaults.standard.value(forKey: "UserFontSize") as? CGFloat {
-                fontSize = savedFontSize
-            }
-        }
         .foregroundColor(Color.secondary.opacity(0.2))
     }
 }
@@ -96,9 +119,45 @@ struct ModalView_Previews: PreviewProvider {
             Message(id: UUID(), text: "hello bot", isCurrentUser: true)
         ]
 
+        let modalManagerWithErrors = ModalManager()
+        modalManagerWithErrors.messages = [
+            Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Request took too long"),
+            Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+        ]
+
+        let modalManagerWithCodeblock = ModalManager()
+        modalManagerWithCodeblock.messages = [
+            Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: [parserResult]), isCurrentUser: false)
+        ]
+
         return Group {
             ModalView(showModal: $showModal, incognito: false, modalManager: modalManager)
             ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithMessages)
+            ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithErrors)
+            ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithCodeblock)
         }
     }
+
+    static var markdownString = """
+    ```swift
+    let api = ChatGPTAPI(apiKey: "API_KEY")
+
+    Task {
+        do {
+            let stream = try await api.sendMessageStream(text: "What is ChatGPT?")
+            for try await line in stream {
+                print(line)
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    ```
+    """
+
+    static let parserResult: ParserResult = {
+        let document = Document(parsing: markdownString)
+        var parser = MarkdownAttributedStringParser()
+        return parser.parserResults(from: document)[0]
+    }()
 }

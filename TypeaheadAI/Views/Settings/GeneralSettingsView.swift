@@ -41,18 +41,6 @@ struct GeneralSettingsView: View {
                     KeyboardShortcuts.Recorder("Smart Save:", name: .specialSave)
                     Text("Remembers what you've selected. (Work in Progress)")
                 }
-
-                Spacer()
-
-                Slider(value: $selectedFontSize, in: 14...28, step: 2) {
-                    Text("Font Size:")
-                }
-                .onChange(of: selectedFontSize, perform: { value in
-                    UserDefaults.standard.set(value, forKey: "UserFontSize")
-                })
-
-                Text("Sample Text")
-                    .font(.system(size: CGFloat(selectedFontSize)))
             }
             .padding(.horizontal, 10)
 

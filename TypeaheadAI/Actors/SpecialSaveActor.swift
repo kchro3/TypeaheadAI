@@ -39,7 +39,9 @@ actor SpecialSaveActor: CanSimulateCopy {
             // Clear the modal text and reissue request
             self.modalManager.clearText()
             self.modalManager.showModal(incognito: incognitoMode)
-            self.modalManager.appendText("Saving...\n\n")
+            Task {
+                await self.modalManager.appendText("Saving...\n\n")
+            }
             self.clientManager.predict(
                 id: UUID(),
                 copiedText: copiedText,
@@ -49,11 +51,14 @@ actor SpecialSaveActor: CanSimulateCopy {
                 streamHandler: { result in
                     switch result {
                     case .success(let chunk):
-                        DispatchQueue.main.async {
-                            self.modalManager.appendText(chunk)
+                        Task {
+                            await self.modalManager.appendText(chunk)
                         }
                         self.logger.info("Received chunk: \(chunk)")
                     case .failure(let error):
+                        DispatchQueue.main.async {
+                            self.modalManager.setError(error.localizedDescription)
+                        }
                         self.logger.error("An error occurred: \(error)")
                     }
                 },
@@ -61,9 +66,13 @@ actor SpecialSaveActor: CanSimulateCopy {
                     switch result {
                     case .success(let output):
                         _ = self.memoManager.createEntry(summary: output, content: copiedText)
-                        self.modalManager.appendText("\nStill a work in progress, but you can manage your saved content in your settings. Saved content will be used to contextualize future results.")
-                        self.logger.info("text: \(output)")
+                        Task {
+                            await self.modalManager.appendText("\n\n(This is still a work in progress, but you can manage your saved content in your settings. Saved content will be used to contextualize future results.)")
+                        }
                     case .failure(let error):
+                        DispatchQueue.main.async {
+                            self.modalManager.setError(error.localizedDescription)
+                        }
                         self.logger.error("An error occurred: \(error)")
                     }
                 }

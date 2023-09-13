@@ -119,7 +119,6 @@ final class AppState: ObservableObject {
 
                 if !windowRect.contains(mouseLocation) {
                     self?.modalManager.toastWindow?.close()
-                    self?.clientManager.cancelStreamingTask()
                 }
             }
         }
