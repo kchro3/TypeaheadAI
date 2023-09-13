@@ -33,7 +33,8 @@ enum MessageType: Codable, Equatable {
 // TODO: Add to persistence
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
-    var messageType: MessageType
+    var text: String
+    var attributed: AttributedOutput? = nil
     let isCurrentUser: Bool
     var responseError: String?
 }
@@ -45,6 +46,11 @@ class ModalManager: ObservableObject {
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ModalManager"
     )
+    // When streaming a result, we want to batch process tokens.
+    // Since we stream tokens one at a time, we need a global variable to
+    // track the token counts per batch.
+    private var currentTextCount = 0
+    private var currentOutput: AttributedOutput?
 
     init() {
         self.messages = []
@@ -56,8 +62,9 @@ class ModalManager: ObservableObject {
     var toastWindow: NSWindow?
 
     func hasText() -> Bool {
-        if let lastMessage = messages.last, !lastMessage.isCurrentUser {
-            return !lastMessage.messageType.text.isEmpty
+        if let lastMessage = messages.last,
+                !lastMessage.isCurrentUser {
+            return !lastMessage.text.isEmpty
         } else {
             return false
         }
@@ -65,13 +72,16 @@ class ModalManager: ObservableObject {
 
     func clearText() {
         messages = []
+        currentTextCount = 0
+        currentOutput = nil
     }
 
     func setText(_ text: String) {
-        if let idx = messages.indices.last, !messages[idx].isCurrentUser {
-            messages[idx].messageType = .rawText(messages[idx].messageType.text + text)
+        if let idx = messages.indices.last,
+                !messages[idx].isCurrentUser {
+            messages[idx].text += text
         } else {
-            messages.append(Message(id: UUID(), messageType: .rawText(text), isCurrentUser: false))
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
         }
     }
 
@@ -82,7 +92,7 @@ class ModalManager: ObservableObject {
         } else {
             messages.append(Message(
                 id: UUID(),
-                messageType: .rawText(""),
+                text: "",
                 isCurrentUser: false,
                 responseError: responseError)
             )
@@ -90,31 +100,95 @@ class ModalManager: ObservableObject {
     }
 
     /// Append text to the AI response. Creates a new message if there is nothing to append to.
-    func appendText(_ text: String) {
-        if let idx = messages.indices.last, !messages[idx].isCurrentUser {
-            messages[idx].text += text
-        } else {
-            messages.append(Message(id: UUID(), messageType: .rawText(text), isCurrentUser: false))
+    @MainActor
+    func appendText(_ text: String) async {
+        guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
+            // If the AI response doesn't exist yet, create one.
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            return
+        }
+
+        let parsingTask = ResponseParsingTask()
+        messages[idx].text += text
+        let streamText = messages[idx].text
+
+        do {
+            // Parse the text in batches of 128 characters for performance
+            let parserThresholdTextCount = 128
+            currentTextCount += text.count
+
+            if currentTextCount >= parserThresholdTextCount {
+                currentOutput = await parsingTask.parse(text: streamText)
+                try Task.checkCancellation()
+                currentTextCount = 0
+            }
+
+            // Check if the parser detected anything
+            if let currentOutput = currentOutput, !currentOutput.results.isEmpty {
+                let suffixText = streamText.trimmingPrefix(currentOutput.string)
+                var results = currentOutput.results
+                let lastResult = results[results.count - 1]
+                var lastAttrString = lastResult.attributedString
+                if lastResult.isCodeBlock, let font = NSFont.preferredFont(forTextStyle: .body).apply(newTraits: .monoSpace) {
+                    lastAttrString.append(
+                        AttributedString(
+                            String(suffixText),
+                            attributes: .init([
+                                .font: font,
+                                .foregroundColor: NSColor.white
+                            ])
+                        )
+                    )
+                } else {
+                    lastAttrString.append(AttributedString(String(suffixText)))
+                }
+
+                results[results.count - 1] = ParserResult(
+                    id: UUID(),
+                    attributedString: lastAttrString,
+                    isCodeBlock: lastResult.isCodeBlock,
+                    codeBlockLanguage: lastResult.codeBlockLanguage
+                )
+
+                messages[idx].attributed = AttributedOutput(string: streamText, results: results)
+            } else {
+                messages[idx].attributed = AttributedOutput(string: streamText, results: [
+                    ParserResult(
+                        id: UUID(),
+                        attributedString: AttributedString(stringLiteral: streamText),
+                        isCodeBlock: false,
+                        codeBlockLanguage: nil
+                    )
+                ])
+            }
+        } catch {
+            messages[idx].responseError = error.localizedDescription
+        }
+
+        // Check if the parsed string is different than the full string.
+        if let currentString = currentOutput?.string, currentString != streamText {
+            let output = await parsingTask.parse(text: streamText)
+            try? Task.checkCancellation()
+            messages[idx].attributed = output
         }
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     func setUserMessage(_ text: String) {
-        messages.append(Message(id: UUID(), messageType: .rawText(text), isCurrentUser: true))
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     func addUserMessage(_ text: String, incognito: Bool) {
         self.clientManager?.cancelStreamingTask()
 
-        messages.append(Message(id: UUID(), messageType: .rawText(text), isCurrentUser: true))
-        messages.append(Message(id: UUID(), messageType: .rawText(""), isCurrentUser: false))
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
 
         self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
             switch result {
             case .success(let chunk):
-                DispatchQueue.main.async {
-                    self.appendText(chunk)
+                Task {
+                    await self.appendText(chunk)
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):

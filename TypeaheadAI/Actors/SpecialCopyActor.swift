@@ -58,8 +58,8 @@ actor SpecialCopyActor: CanSimulateCopy {
                     streamHandler: { result in
                         switch result {
                         case .success(let chunk):
-                            DispatchQueue.main.async {
-                                self.modalManager.appendText(chunk)
+                            Task {
+                                await self.modalManager.appendText(chunk)
                             }
                             self.logger.info("Received chunk: \(chunk)")
                         case .failure(let error):

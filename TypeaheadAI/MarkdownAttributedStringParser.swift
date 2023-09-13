@@ -12,7 +12,6 @@ import Highlighter
 
 /// Based on the source code from Christian Selig
 /// https://github.com/christianselig/Markdownosaur/blob/main/Sources/Markdownosaur/Markdownosaur.swift
-
 public struct MarkdownAttributedStringParser: MarkupVisitor {
     let baseFontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
     let highlighter: Highlighter = {
@@ -314,8 +313,9 @@ extension NSMutableAttributedString {
         enumerateAttribute(.font, in: NSRange(location: 0, length: length), options: []) { value, range, stop in
             guard let font = value as? NSFont else { return }
 
-            let newFont = font.apply(newTraits: .italic)
-            addAttribute(.font, value: newFont!, range: range)
+            if let newFont = font.apply(newTraits: .italic) {
+                addAttribute(.font, value: newFont, range: range)
+            }
         }
     }
 
@@ -323,8 +323,9 @@ extension NSMutableAttributedString {
         enumerateAttribute(.font, in: NSRange(location: 0, length: length), options: []) { value, range, stop in
             guard let font = value as? NSFont else { return }
 
-            let newFont = font.apply(newTraits: .bold)
-            addAttribute(.font, value: newFont!, range: range)
+            if let newFont = font.apply(newTraits: .bold) {
+                addAttribute(.font, value: newFont, range: range)
+            }
         }
     }
 
@@ -344,8 +345,9 @@ extension NSMutableAttributedString {
         enumerateAttribute(.font, in: NSRange(location: 0, length: length), options: []) { value, range, stop in
             guard let font = value as? NSFont else { return }
 
-            let newFont = font.apply(newTraits: .bold, newPointSize: 28.0 - CGFloat(headingLevel * 2))
-            addAttribute(.font, value: newFont!, range: range)
+            if let newFont = font.apply(newTraits: .bold, newPointSize: 28.0 - CGFloat(headingLevel * 2)) {
+                addAttribute(.font, value: newFont, range: range)
+            }
         }
     }
 

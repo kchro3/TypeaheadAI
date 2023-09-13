@@ -23,22 +23,20 @@ struct MessageView: View {
                         .fill(Color.red.opacity(0.4))
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        } else if let attributed = message.attributed {
+            attributedView(results: attributed.results)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
         } else {
-            switch message.messageType {
-            case .attributed(let output):
-                attributedView(results: output.results)
-            case .rawText(let text):
-                Text(text)
-                    .foregroundColor(message.isCurrentUser ? .white : .primary)
-                    .textSelection(.enabled)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 15)
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(message.isCurrentUser ? Color.blue.opacity(0.8) : Color.clear)
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
-            }
+            Text(message.text)
+                .foregroundColor(message.isCurrentUser ? .white : .primary)
+                .textSelection(.enabled)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 15)
+                .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(message.isCurrentUser ? Color.blue.opacity(0.8) : Color.clear)
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
         }
     }
 
@@ -62,7 +60,7 @@ struct ModalView: View {
     @Binding var showModal: Bool
     @State var incognito: Bool
     @ObservedObject var modalManager: ModalManager
-    @State private var fontSize: CGFloat = 14.0
+    @State private var fontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
     @State private var text: String = ""
     @FocusState private var isTextFieldFocused: Bool
 
@@ -104,11 +102,11 @@ struct ModalView: View {
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
-        .onAppear {
-            if let savedFontSize = UserDefaults.standard.value(forKey: "UserFontSize") as? CGFloat {
-                fontSize = savedFontSize
-            }
-        }
+//        .onAppear {
+//            if let savedFontSize = UserDefaults.standard.value(forKey: "UserFontSize") as? CGFloat {
+//                fontSize = savedFontSize
+//            }
+//        }
         .foregroundColor(Color.secondary.opacity(0.2))
     }
 }
@@ -122,19 +120,19 @@ struct ModalView_Previews: PreviewProvider {
 
         let modalManagerWithMessages = ModalManager()
         modalManagerWithMessages.messages = [
-            Message(id: UUID(), messageType: .rawText("hello world"), isCurrentUser: false),
-            Message(id: UUID(), messageType: .rawText("hello bot"), isCurrentUser: true)
+            Message(id: UUID(), text: "hello world", isCurrentUser: false),
+            Message(id: UUID(), text: "hello bot", isCurrentUser: true)
         ]
 
         let modalManagerWithErrors = ModalManager()
         modalManagerWithErrors.messages = [
-            Message(id: UUID(), messageType: .rawText(""), isCurrentUser: false, responseError: "Request took too long"),
-            Message(id: UUID(), messageType: .rawText("hello bot"), isCurrentUser: true)
+            Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Request took too long"),
+            Message(id: UUID(), text: "hello bot", isCurrentUser: true)
         ]
 
         let modalManagerWithCodeblock = ModalManager()
         modalManagerWithCodeblock.messages = [
-            Message(id: UUID(), messageType: .attributed(AttributedOutput(string: markdownString, results: [parserResult])), isCurrentUser: false)
+            Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: [parserResult]), isCurrentUser: false)
         ]
 
         return Group {
