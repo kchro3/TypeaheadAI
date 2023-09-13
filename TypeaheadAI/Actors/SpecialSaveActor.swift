@@ -61,7 +61,7 @@ actor SpecialSaveActor: CanSimulateCopy {
                     switch result {
                     case .success(let output):
                         _ = self.memoManager.createEntry(summary: output, content: copiedText)
-                        self.modalManager.appendText("\nStill a work in progress, but you can manage your saved content in your settings. Saved content will be used to contextualize future results.")
+                        self.modalManager.appendText("\n\n(This is still a work in progress, but you can manage your saved content in your settings. Saved content will be used to contextualize future results.)")
                         self.logger.info("text: \(output)")
                     case .failure(let error):
                         self.logger.error("An error occurred: \(error)")

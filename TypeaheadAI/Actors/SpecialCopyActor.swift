@@ -48,8 +48,6 @@ actor SpecialCopyActor: CanSimulateCopy {
 
                 if let activePrompt = self.clientManager.getActivePrompt() {
                     self.modalManager.setUserMessage(activePrompt)
-                } else {
-                    
                 }
 
                 self.clientManager.predict(
