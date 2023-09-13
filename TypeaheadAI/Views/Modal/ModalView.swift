@@ -102,11 +102,6 @@ struct ModalView: View {
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
-//        .onAppear {
-//            if let savedFontSize = UserDefaults.standard.value(forKey: "UserFontSize") as? CGFloat {
-//                fontSize = savedFontSize
-//            }
-//        }
         .foregroundColor(Color.secondary.opacity(0.2))
     }
 }

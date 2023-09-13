@@ -112,15 +112,15 @@ final class AppState: ObservableObject {
             // If the toast window is open and the user clicks out,
             // we can close the window.
             // NOTE: If the user has chatted, then keep it open.
-//            if let window = self?.modalManager.toastWindow,
-//               (self?.modalManager.messages.count ?? 0) < 2 {
-//                let mouseLocation = NSEvent.mouseLocation
-//                let windowRect = window.frame
-//
-//                if !windowRect.contains(mouseLocation) {
-//                    self?.modalManager.toastWindow?.close()
-//                }
-//            }
+            if let window = self?.modalManager.toastWindow,
+               (self?.modalManager.messages.count ?? 0) < 2 {
+                let mouseLocation = NSEvent.mouseLocation
+                let windowRect = window.frame
+
+                if !windowRect.contains(mouseLocation) {
+                    self?.modalManager.toastWindow?.close()
+                }
+            }
         }
 
         mouseEventMonitor.startMonitoring()

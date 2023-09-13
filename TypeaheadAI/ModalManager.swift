@@ -16,20 +16,6 @@ struct AttributedOutput: Codable, Equatable {
     let results: [ParserResult]
 }
 
-enum MessageType: Codable, Equatable {
-    case attributed(AttributedOutput)
-    case rawText(String)
-
-    var text: String {
-        switch self {
-        case .attributed(let attributedOutput):
-            return attributedOutput.string
-        case .rawText(let string):
-            return string
-        }
-    }
-}
-
 // TODO: Add to persistence
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
@@ -50,7 +36,9 @@ class ModalManager: ObservableObject {
     // Since we stream tokens one at a time, we need a global variable to
     // track the token counts per batch.
     private var currentTextCount = 0
+    private let parserThresholdTextCount = 28
     private var currentOutput: AttributedOutput?
+    private let parsingTask = ResponseParsingTask()
 
     init() {
         self.messages = []
@@ -105,16 +93,15 @@ class ModalManager: ObservableObject {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
             // If the AI response doesn't exist yet, create one.
             messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            currentTextCount = 0
+            currentOutput = nil
             return
         }
 
-        let parsingTask = ResponseParsingTask()
         messages[idx].text += text
         let streamText = messages[idx].text
 
         do {
-            // Parse the text in batches of 128 characters for performance
-            let parserThresholdTextCount = 128
             currentTextCount += text.count
 
             if currentTextCount >= parserThresholdTextCount {
