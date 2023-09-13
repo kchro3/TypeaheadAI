@@ -13,12 +13,11 @@ import os.log
 // TODO: Add to persistence
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
-    let text: String
+    var text: String
     let isCurrentUser: Bool
 }
 
 class ModalManager: ObservableObject {
-    @Published var modalText: String = ""
     @Published var messages: [Message] = []
 
     private let logger = Logger(
@@ -32,20 +31,32 @@ class ModalManager: ObservableObject {
     var toastWindow: NSWindow?
 
     func hasText() -> Bool {
-        return !modalText.isEmpty
+        if let lastMessage = messages.last, !lastMessage.isCurrentUser {
+            return !lastMessage.text.isEmpty
+        } else {
+            return false
+        }
     }
 
     func clearText() {
-        modalText = ""
         messages = []
     }
 
     func setText(_ text: String) {
-        modalText = text
+        if let idx = messages.indices.last, !messages[idx].isCurrentUser {
+            messages[idx].text = text
+        } else {
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+        }
     }
 
+    /// Append text to the AI response. Creates a new message if there is nothing to append to.
     func appendText(_ text: String) {
-        modalText += text
+        if let idx = messages.indices.last, !messages[idx].isCurrentUser {
+            messages[idx].text += text
+        } else {
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+        }
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
@@ -55,9 +66,10 @@ class ModalManager: ObservableObject {
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     func addUserMessage(_ text: String, incognito: Bool) {
-        messages.append(Message(id: UUID(), text: modalText, isCurrentUser: false))
+        self.clientManager?.cancelStreamingTask()
+
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
-        modalText = ""
+        messages.append(Message(id: UUID(), text: "", isCurrentUser: false))
 
         self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
             switch result {
@@ -154,6 +166,7 @@ class ModalManager: ObservableObject {
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.level = .popUpMenu
         toastWindow?.makeKeyAndOrderFront(nil)
+        toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
         // Register for window moved notifications to save the new position
         NotificationCenter.default.addObserver(

@@ -107,13 +107,13 @@ final class AppState: ObservableObject {
             }
         }
 
-        startMonitoringCmdCAndV()
-
         // Configure mouse-click handler
         mouseEventMonitor.onLeftMouseDown = { [weak self] in
             // If the toast window is open and the user clicks out,
             // we can close the window.
-            if let window = self?.modalManager.toastWindow {
+            // NOTE: If the user has chatted, then keep it open.
+            if let window = self?.modalManager.toastWindow,
+               (self?.modalManager.messages.count ?? 0) < 2 {
                 let mouseLocation = NSEvent.mouseLocation
                 let windowRect = window.frame
 
@@ -129,7 +129,6 @@ final class AppState: ObservableObject {
 
     deinit {
         Task {
-            await stopMonitoringCmdCAndV()
             await mouseEventMonitor.stopMonitoring()
         }
     }
@@ -238,28 +237,6 @@ final class AppState: ObservableObject {
         blinkTimer?.invalidate()
         blinkTimer = nil
         DispatchQueue.main.async { self.isBlinking = false }
-    }
-
-    private func startMonitoringCmdCAndV() {
-        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyUp], handler: { event in
-            DispatchQueue.main.async {
-                let commandKeyUsed = event.modifierFlags.contains(.command)
-                if event.keyCode == 8 && commandKeyUsed { // 'C' key
-                                                          // Get the latest string content from the pasteboard
-                    if let _ = NSPasteboard.general.string(forType: .string) {
-                        self.logger.debug("copy detected")
-                    }
-                } else if event.keyCode == 9 && commandKeyUsed { // 'V' key
-                    self.logger.debug("paste detected")
-                }
-            }
-        })
-    }
-
-    private func stopMonitoringCmdCAndV() async {
-        if let globalEventMonitor = globalEventMonitor {
-            NSEvent.removeMonitor(globalEventMonitor)
-        }
     }
 
     private func simulatePaste() {

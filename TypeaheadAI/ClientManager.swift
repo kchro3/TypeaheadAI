@@ -335,6 +335,7 @@ class ClientManager {
                 let decodedResponse = try JSONDecoder().decode(ChunkPayload.self, from: line.data(using: .utf8)!)
                 if let text = decodedResponse.text {
                     output += text
+                    self.cacheResponse(output, for: payload)
                     streamHandler(.success(text))
                 }
             }

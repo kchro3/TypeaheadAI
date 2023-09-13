@@ -40,29 +40,37 @@ struct ModalView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: 2) {
-                        ForEach(modalManager.messages) { message in
-                            MessageView(text: message.text, isUser: message.isCurrentUser)
-                                .padding(.trailing, 5)
+                        ForEach(modalManager.messages.indices, id: \.self) { index in
+                            MessageView(
+                                text: modalManager.messages[index].text,
+                                isUser: modalManager.messages[index].isCurrentUser
+                            )
+                            .padding(.trailing, 5)
                         }
-                        MessageView(text: modalManager.modalText, isUser: false)
-                            .id(bottomID)
                     }
-                    .onChange(of: modalManager.modalText) { _ in
-                        proxy.scrollTo(bottomID, anchor: .bottom)
+                    .onChange(of: modalManager.messages.last) { _ in
+                        proxy.scrollTo(modalManager.messages.count - 1, anchor: .bottom)
                     }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            TextField("Refine your answer", text: $text)
+            TextField("Ask a follow-up question...", text: $text)
+                .textFieldStyle(.plain)
                 .focused($isTextFieldFocused)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+                )
                 .onSubmit {
                     if !text.isEmpty {
                         modalManager.addUserMessage(text, incognito: incognito)
                         text = ""
                     }
                 }
-                .padding(5)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 15)
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
