@@ -49,6 +49,7 @@
 		2BF929802AB13F3600FC105B /* CodeBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF9297F2AB13F3600FC105B /* CodeBlockView.swift */; };
 		2BF929822AB13F7900FC105B /* MarkdownAttributedStringParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */; };
 		2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF929842AB13FEC00FC105B /* Highlighter */; };
+		2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -113,6 +114,7 @@
 		2BF929782AB04D2600FC105B /* MemoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoManager.swift; sourceTree = "<group>"; };
 		2BF9297F2AB13F3600FC105B /* CodeBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBlockView.swift; sourceTree = "<group>"; };
 		2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownAttributedStringParser.swift; sourceTree = "<group>"; };
+		2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseParsingTask.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +154,7 @@
 				2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */,
 				2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */,
 				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
+				2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -452,6 +455,7 @@
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
+				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,

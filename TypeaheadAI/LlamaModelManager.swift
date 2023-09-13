@@ -224,13 +224,13 @@ class LlamaModelManager: ObservableObject {
             for message in messages {
                 if message.isCurrentUser {
                     refinements += """
-                    \(message.text)
+                    \(message.messageType.text)
 
                     ### Response:
                     """
                 } else {
                     refinements += """
-                    \(message.text)
+                    \(message.messageType.text)
 
                     ### Input:
 

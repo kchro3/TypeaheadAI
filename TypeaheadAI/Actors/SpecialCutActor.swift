@@ -117,6 +117,9 @@ actor SpecialCutActor {
                                 }
                                 self.logger.info("Received chunk: \(chunk)")
                             case .failure(let error):
+                                DispatchQueue.main.async {
+                                    self.modalManager.setError(error.localizedDescription)
+                                }
                                 self.logger.error("An error occurred: \(error)")
                             }
                         },

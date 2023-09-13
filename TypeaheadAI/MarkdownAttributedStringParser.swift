@@ -315,7 +315,7 @@ extension NSMutableAttributedString {
             guard let font = value as? NSFont else { return }
 
             let newFont = font.apply(newTraits: .italic)
-            addAttribute(.font, value: newFont, range: range)
+            addAttribute(.font, value: newFont!, range: range)
         }
     }
 
@@ -324,7 +324,7 @@ extension NSMutableAttributedString {
             guard let font = value as? NSFont else { return }
 
             let newFont = font.apply(newTraits: .bold)
-            addAttribute(.font, value: newFont, range: range)
+            addAttribute(.font, value: newFont!, range: range)
         }
     }
 
@@ -345,7 +345,7 @@ extension NSMutableAttributedString {
             guard let font = value as? NSFont else { return }
 
             let newFont = font.apply(newTraits: .bold, newPointSize: 28.0 - CGFloat(headingLevel * 2))
-            addAttribute(.font, value: newFont, range: range)
+            addAttribute(.font, value: newFont!, range: range)
         }
     }
 
