@@ -54,15 +54,22 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            TextField("Refine your answer", text: $text)
+            TextField("Ask a follow-up question...", text: $text)
+                .textFieldStyle(.plain)
                 .focused($isTextFieldFocused)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+                )
                 .onSubmit {
                     if !text.isEmpty {
                         modalManager.addUserMessage(text, incognito: incognito)
                         text = ""
                     }
                 }
-                .padding(5)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 15)
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)

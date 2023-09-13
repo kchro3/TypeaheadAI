@@ -55,6 +55,8 @@ class ModalManager: ObservableObject {
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     func addUserMessage(_ text: String, incognito: Bool) {
+        self.clientManager?.cancelStreamingTask()
+
         messages.append(Message(id: UUID(), text: modalText, isCurrentUser: false))
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
         modalText = ""
@@ -154,6 +156,7 @@ class ModalManager: ObservableObject {
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.level = .popUpMenu
         toastWindow?.makeKeyAndOrderFront(nil)
+        toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
         // Register for window moved notifications to save the new position
         NotificationCenter.default.addObserver(
