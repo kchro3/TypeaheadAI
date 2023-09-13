@@ -37,7 +37,7 @@ actor SpecialSaveActor: CanSimulateCopy {
 
             self.logger.debug("saved '\(copiedText)'")
             // Clear the modal text and reissue request
-            self.modalManager.clearText()
+            self.modalManager.clearText(stickyMode: false)
             self.modalManager.showModal(incognito: incognitoMode)
             Task {
                 await self.modalManager.appendText("Saving...\n\n")

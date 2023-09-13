@@ -84,7 +84,7 @@ actor SpecialCutActor {
         self.modalManager = modalManager
     }
 
-    func specialCut(incognitoMode: Bool) {
+    func specialCut(incognitoMode: Bool, stickyMode: Bool) {
         do {
             self.clipboardMonitor.stopMonitoring()
             try simulateScreengrab() {
@@ -97,11 +97,13 @@ actor SpecialCutActor {
 
                 self.performOCR(image: cgImage) { recognizedText, _ in
                     self.logger.info("OCRed text: \(recognizedText)")
-                    self.modalManager.clearText()
+                    self.modalManager.clearText(stickyMode: stickyMode)
                     self.modalManager.showModal(incognito: incognitoMode)
 
                     if let activePrompt = self.clientManager.getActivePrompt() {
                         self.modalManager.setUserMessage(activePrompt)
+                    } else {
+                        self.modalManager.setUserMessage("cut: \(recognizedText.prefix(280))...")
                     }
 
                     self.clientManager.predict(

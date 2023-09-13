@@ -89,7 +89,7 @@ struct ModalView: View {
                 .padding(.vertical, 5)
                 .padding(.horizontal, 10)
                 .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.white)
+                    .fill(.secondary.opacity(0.1))
                 )
                 .onSubmit {
                     if !text.isEmpty {

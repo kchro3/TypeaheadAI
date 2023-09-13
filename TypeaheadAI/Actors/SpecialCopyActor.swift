@@ -24,7 +24,7 @@ actor SpecialCopyActor: CanSimulateCopy {
         self.modalManager = modalManager
     }
     
-    func specialCopy(incognitoMode: Bool) {
+    func specialCopy(incognitoMode: Bool, stickyMode: Bool) {
         self.logger.debug("special copy")
 
         let initialCopiedText = NSPasteboard.general.string(forType: .string) ?? ""
@@ -43,11 +43,13 @@ actor SpecialCopyActor: CanSimulateCopy {
                 self.modalManager.toggleModal(incognito: incognitoMode)
             } else {
                 // Clear the modal text and reissue request
-                self.modalManager.clearText()
+                self.modalManager.clearText(stickyMode: stickyMode)
                 self.modalManager.showModal(incognito: incognitoMode)
 
                 if let activePrompt = self.clientManager.getActivePrompt() {
                     self.modalManager.setUserMessage(activePrompt)
+                } else {
+                    self.modalManager.setUserMessage("copied: \(copiedText.prefix(280))...")
                 }
 
                 self.clientManager.predict(
