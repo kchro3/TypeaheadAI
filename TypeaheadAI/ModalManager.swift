@@ -10,20 +10,45 @@ import SwiftUI
 import Foundation
 import os.log
 
+struct AttributedOutput: Codable, Equatable {
+    let string: String
+    let results: [ParserResult]
+}
+
+enum MessageType: Codable, Equatable {
+    case attributed(AttributedOutput)
+    case rawText(String)
+
+    var text: String {
+        switch self {
+        case .attributed(let attributedOutput):
+            return attributedOutput.string
+        case .rawText(let string):
+            return string
+        }
+    }
+}
+
 // TODO: Add to persistence
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
     var text: String
+    var messageType: MessageType
     let isCurrentUser: Bool
+    var responseError: String?
 }
 
 class ModalManager: ObservableObject {
-    @Published var messages: [Message] = []
+    @Published var messages: [Message]
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ModalManager"
     )
+
+    init() {
+        self.messages = []
+    }
 
     // TODO: Inject?
     var clientManager: ClientManager? = nil
@@ -45,8 +70,9 @@ class ModalManager: ObservableObject {
     func setText(_ text: String) {
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
             messages[idx].text = text
+            messages[idx].messageType = .rawText(messages[idx].messageType.text + text)
         } else {
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            messages.append(Message(id: UUID(), text: text, messageType: .rawText(text), isCurrentUser: false))
         }
     }
 
@@ -55,21 +81,21 @@ class ModalManager: ObservableObject {
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
             messages[idx].text += text
         } else {
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            messages.append(Message(id: UUID(), text: text, messageType: .rawText(text), isCurrentUser: false))
         }
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     func setUserMessage(_ text: String) {
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+        messages.append(Message(id: UUID(), text: text, messageType: .rawText(text), isCurrentUser: true))
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     func addUserMessage(_ text: String, incognito: Bool) {
         self.clientManager?.cancelStreamingTask()
 
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
-        messages.append(Message(id: UUID(), text: "", isCurrentUser: false))
+        messages.append(Message(id: UUID(), text: text, messageType: .rawText(text), isCurrentUser: true))
+        messages.append(Message(id: UUID(), text: "", messageType: .rawText(""), isCurrentUser: false))
 
         self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
             switch result {

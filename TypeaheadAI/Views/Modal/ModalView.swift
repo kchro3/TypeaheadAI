@@ -92,8 +92,8 @@ struct ModalView_Previews: PreviewProvider {
 
         let modalManagerWithMessages = ModalManager()
         modalManagerWithMessages.messages = [
-            Message(id: UUID(), text: "hello world", isCurrentUser: false),
-            Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+            Message(id: UUID(), text: "hello world", messageType: .rawText("hello world"), isCurrentUser: false),
+            Message(id: UUID(), text: "hello bot", messageType: .rawText("hello bot"), isCurrentUser: true)
         ]
 
         return Group {
