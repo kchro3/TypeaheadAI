@@ -20,6 +20,7 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var incognitoMode: Bool = false
+    @Published var triggerFocus: Bool = false
 
     private var blinkTimer: Timer?
     let logger = Logger(
@@ -376,10 +377,11 @@ struct TypeaheadAIApp: App {
             MenuView(
                 incognitoMode: $appState.incognitoMode,
                 promptManager: appState.promptManager,
+                modalManager: appState.modalManager,
                 isMenuVisible: $isMenuVisible
             )
-            .onAppear(perform: setup)
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            .onAppear(perform: setup)
         } label: {
             Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
@@ -389,8 +391,7 @@ struct TypeaheadAIApp: App {
     }
 
     func setup() {
-        if hasOnboarded {
-            self.isMenuVisible = false
+        if !hasOnboarded {
             self.appState.modalManager.showOnboardingModal()
             UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
         }

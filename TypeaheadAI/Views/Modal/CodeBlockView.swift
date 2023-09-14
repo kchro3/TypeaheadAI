@@ -58,7 +58,7 @@ struct CodeBlockView: View {
         HStack {
             if let codeBlockLanguage = parserResult.codeBlockLanguage {
                 Text(codeBlockLanguage.capitalized)
-                    .font(.headline.monospaced())
+                    .font(.headline)
                     .foregroundColor(.white)
             }
             Spacer()
@@ -72,7 +72,7 @@ struct CodeBlockView: View {
             HStack {
                 Text("Copied")
                     .foregroundColor(.white)
-                    .font(.subheadline.monospaced().bold())
+                    .font(.subheadline)
                 Image(systemName: "checkmark.circle")
                     .imageScale(.large)
                     .symbolRenderingMode(.multicolor)
@@ -80,18 +80,19 @@ struct CodeBlockView: View {
             .frame(alignment: .trailing)
         } else {
             Button {
-                NSPasteboard.general.setString(NSAttributedString(parserResult.attributedString).string, forType: .string)
+                DispatchQueue.main.async {
+                    NSPasteboard.general.setString(NSAttributedString(parserResult.attributedString).string, forType: .string)
+                }
 
-                // TODO: implement this properly. Right now, if this is
-                // uncommented, the text won't actually copy.
-//                withAnimation {
-//                    isCopied = true
-//                }
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//                    withAnimation {
-//                        isCopied = false
-//                    }
-//                }
+                withAnimation {
+                    isCopied = true
+                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    withAnimation {
+                        isCopied = false
+                    }
+                }
             } label: {
                 Image(systemName: "doc.on.doc")
             }

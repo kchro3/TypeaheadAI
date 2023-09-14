@@ -11,10 +11,13 @@ import CoreData
 struct MenuView: View {
     @Binding var incognitoMode: Bool
     @ObservedObject var promptManager: PromptManager
+    @ObservedObject var modalManager: ModalManager
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
 
     @State private var currentPreset: String = ""
+    @State private var isHoveringChat = false
+    @State private var isHoveringClearChat = false
     @State private var isHoveringSettings = false
     @State private var isHoveringQuit = false
     @State private var isEditingID: UUID?
@@ -41,7 +44,7 @@ struct MenuView: View {
             Divider()
                 .padding(.horizontal, horizontalPadding)
 
-            TextField("Toggle commands (e.g. summarize this)", text: $currentPreset)
+            TextField("Preset commands (e.g. summarize this)", text: $currentPreset)
                 .focused($isTextFieldFocused)
                 .onSubmit {
                     if !currentPreset.isEmpty {
@@ -90,19 +93,37 @@ struct MenuView: View {
                     }
                 }
             }
-            .frame(maxHeight: 200)
-
-            Divider()
-                .padding(.horizontal, horizontalPadding)
+            .frame(maxHeight: 300)
 
             VStack(spacing: 0) {
-                buttonRow(title: "Settings", isHovering: $isHoveringSettings, action: {    NSApp.activate(ignoringOtherApps: true)
+                Divider()
+                    .padding(.horizontal, horizontalPadding)
+
+                if let toast = modalManager.toastWindow, toast.isVisible {
+                    buttonRow(title: "Clear chat", isHovering: $isHoveringClearChat) {
+                        modalManager.forceRefresh()
+                        modalManager.focus()
+                        isMenuVisible = false
+                    }
+                } else {
+                    buttonRow(title: "Open chat", isHovering: $isHoveringChat) {
+                        modalManager.showModal(incognito: incognitoMode)
+                        modalManager.focus()
+                        isMenuVisible = false
+                    }
+                }
+
+                Divider()
+                    .padding(.horizontal, horizontalPadding)
+
+                buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
+                    NSApp.activate(ignoringOtherApps: true)
                     NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                     isMenuVisible = false
-                })
-                buttonRow(title: "Quit", isHovering: $isHoveringQuit, action: {
+                }
+                buttonRow(title: "Quit", isHovering: $isHoveringQuit) {
                     NSApplication.shared.terminate(self)
-                })
+                }
             }
         }
         .padding(4)
@@ -153,9 +174,12 @@ struct MenuView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt, context: context)
         }
 
+        let modalManager = ModalManager()
+
         return MenuView(
             incognitoMode: $incognitoMode,
             promptManager: promptManager,
+            modalManager: modalManager,
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, context)

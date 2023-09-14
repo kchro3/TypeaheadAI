@@ -122,6 +122,12 @@ struct ModalView: View {
                         text = ""
                     }
                 }
+                .onChange(of: modalManager.triggerFocus) { newValue in
+                    if newValue {
+                        isTextFieldFocused = true
+                        modalManager.triggerFocus = false
+                    }
+                }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 15)
         }

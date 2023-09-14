@@ -132,31 +132,50 @@ class ClientManager {
         timeout: TimeInterval = 10,
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) {
-        guard let (key, _) = cached,
-              let data = key.data(using: .utf8),
-              let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) else {
+        if let (key, _) = cached,
+           let data = key.data(using: .utf8),
+           let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
+            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+                Task {
+                    await self.sendStreamRequest(
+                        id: UUID(),
+                        username: payload.username,
+                        userFullName: payload.userFullName,
+                        userObjective: payload.userObjective,
+                        userBio: payload.userBio,
+                        userLang: payload.userLang,
+                        copiedText: payload.copiedText,
+                        messages: self.sanitizeMessages(messages),
+                        url: payload.url,
+                        activeAppName: appName ?? "unknown",
+                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        incognitoMode: incognitoMode,
+                        streamHandler: streamHandler,
+                        completion: { _ in }
+                    )
+                }
+            }
+        } else {
             logger.error("No cached request to refine")
-            return
-        }
-
-        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
-            Task {
-                await self.sendStreamRequest(
-                    id: UUID(),
-                    username: payload.username,
-                    userFullName: payload.userFullName,
-                    userObjective: payload.userObjective,
-                    userBio: payload.userBio,
-                    userLang: payload.userLang,
-                    copiedText: payload.copiedText,
-                    messages: self.sanitizeMessages(messages),
-                    url: payload.url,
-                    activeAppName: appName ?? "unknown",
-                    activeAppBundleIdentifier: bundleIdentifier ?? "",
-                    incognitoMode: incognitoMode,
-                    streamHandler: streamHandler,
-                    completion: { _ in }
-                )
+            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+                Task {
+                    await self.sendStreamRequest(
+                        id: UUID(),
+                        username: NSUserName(),
+                        userFullName: NSFullUserName(),
+                        userObjective: "",
+                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                        userLang: Locale.preferredLanguages.first ?? "",
+                        copiedText: "",
+                        messages: self.sanitizeMessages(messages),
+                        url: url ?? "unknown",
+                        activeAppName: appName ?? "unknown",
+                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        incognitoMode: false,
+                        streamHandler: streamHandler,
+                        completion: { _ in }
+                    )
+                }
             }
         }
     }

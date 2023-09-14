@@ -30,15 +30,12 @@ class MouseEventMonitor {
                 switch event.type {
                 case .leftMouseDown:
                     self?.initialClickPos = NSEvent.mouseLocation
-                    print("left mouse down \(NSEvent.mouseLocation)")
                     self?.mouseClicked = true
                     self?.onLeftMouseDown?()
                 case .leftMouseUp:
-                    print("left mouse up \(NSEvent.mouseLocation)")
                     if let initialClickPos = self?.initialClickPos {
                         if initialClickPos != NSEvent.mouseLocation {
                             self?.mouseDragged = true
-                            print("mouse dragged")
                         }
                     }
                 default:

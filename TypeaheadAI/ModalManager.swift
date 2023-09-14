@@ -27,6 +27,7 @@ struct Message: Codable, Identifiable, Equatable {
 
 class ModalManager: ObservableObject {
     @Published var messages: [Message]
+    @Published var triggerFocus: Bool
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -37,12 +38,13 @@ class ModalManager: ObservableObject {
     // track the token counts per batch.
     private var currentTextCount = 0
     private let parserThresholdTextCount = 5
-    private let maxMessages = 10
+    private let maxMessages = 20
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
 
     init() {
         self.messages = []
+        self.triggerFocus = false
     }
 
     // TODO: Inject?
@@ -59,6 +61,11 @@ class ModalManager: ObservableObject {
         }
     }
 
+    @MainActor
+    func focus() {
+        self.triggerFocus = true
+    }
+
     func clearText(stickyMode: Bool) {
         if stickyMode {
             // TODO: Should we do something smarter here?
@@ -71,6 +78,14 @@ class ModalManager: ObservableObject {
         }
         currentTextCount = 0
         currentOutput = nil
+    }
+
+    @MainActor
+    func forceRefresh() {
+        messages = []
+        currentTextCount = 0
+        currentOutput = nil
+        self.clientManager?.flushCache()
     }
 
     func setText(_ text: String) {
@@ -327,7 +342,7 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
-                Task {
+                DispatchQueue.main.async {
                     self.setError("Something went wrong... please restart the app!")
                 }
                 self.logger.error("An error occurred: \(error)")
