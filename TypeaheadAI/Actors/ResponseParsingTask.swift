@@ -10,9 +10,9 @@ import Foundation
 import Markdown
 
 actor ResponseParsingTask {
-    func parse(text: String) async -> AttributedOutput {
+    func parse(text: String, isDarkMode: Bool) async -> AttributedOutput {
         let document = Document(parsing: text)
-        var markdownParser = MarkdownAttributedStringParser()
+        var markdownParser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
         let results = markdownParser.parserResults(from: document)
         return AttributedOutput(string: text, results: results)
     }

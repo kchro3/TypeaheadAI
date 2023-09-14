@@ -25,7 +25,7 @@ extension CanSimulateCopy {
         cmdCUp.post(tap: .cghidEventTap)
 
         // Delay for the clipboard to update, then call the completion handler
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             completion()
         }
     }

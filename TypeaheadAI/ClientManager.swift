@@ -50,8 +50,8 @@ class ClientManager {
     private let session: URLSession
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
-    //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
-    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
+    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+//    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -60,7 +60,7 @@ class ClientManager {
 
     // Add a Task property to manage the streaming task
     private var currentStreamingTask: Task<Void, Error>? = nil
-    private var cached: (String, String)? = nil
+    private var cached: (String, String?)? = nil
 
     init(session: URLSession = .shared) {
         self.session = session
@@ -82,7 +82,7 @@ class ClientManager {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "describe this" : "respond to this")
+        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "respond to this in <20 words" : "respond to this")
 
         appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
             if stream {
@@ -370,6 +370,7 @@ class ClientManager {
                     self?.cacheResponse(output, for: payload)
                     break
                 case .failure(_):
+                    self?.cacheResponse(nil, for: payload)
                     break
                 }
             }
@@ -406,6 +407,7 @@ class ClientManager {
             }
         } catch {
             let err: Result<String, Error> = .failure(error)
+            self.cacheResponse(nil, for: payload)
             streamHandler(err)
             return err
         }
@@ -461,7 +463,7 @@ class ClientManager {
         }
     }
 
-    private func cacheResponse(_ response: String, for requestPayload: RequestPayload) {
+    private func cacheResponse(_ response: String?, for requestPayload: RequestPayload) {
         if let cacheKey = generateCacheKey(from: requestPayload) {
             cached = (cacheKey, response)
         }

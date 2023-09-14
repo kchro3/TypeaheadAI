@@ -37,6 +37,7 @@ class ModalManager: ObservableObject {
     // track the token counts per batch.
     private var currentTextCount = 0
     private let parserThresholdTextCount = 5
+    private let maxMessages = 10
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
 
@@ -60,8 +61,11 @@ class ModalManager: ObservableObject {
 
     func clearText(stickyMode: Bool) {
         if stickyMode {
-            messages.append(Message(id: UUID(), text: "", isCurrentUser: false))
-            messages = messages.suffix(10)
+            // TODO: Should we do something smarter here?
+            if let lastMessage = messages.last, !lastMessage.isCurrentUser {
+                messages.append(Message(id: UUID(), text: "", isCurrentUser: false))
+                messages = messages.suffix(maxMessages)
+            }
         } else {
             messages = []
         }
@@ -103,6 +107,8 @@ class ModalManager: ObservableObject {
             return
         }
 
+        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+
         messages[idx].text += text
         let streamText = messages[idx].text
 
@@ -110,7 +116,7 @@ class ModalManager: ObservableObject {
             currentTextCount += text.count
 
             if currentTextCount >= parserThresholdTextCount {
-                currentOutput = await parsingTask.parse(text: streamText)
+                currentOutput = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
                 try Task.checkCancellation()
                 currentTextCount = 0
             }
@@ -159,7 +165,7 @@ class ModalManager: ObservableObject {
 
         // Check if the parsed string is different than the full string.
         if let currentString = currentOutput?.string, currentString != streamText {
-            let output = await parsingTask.parse(text: streamText)
+            let output = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
             try? Task.checkCancellation()
             messages[idx].attributed = output
         }
@@ -184,6 +190,32 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
+                Task {
+                    self.setError(error.localizedDescription)
+                }
+                self.logger.error("An error occurred: \(error)")
+            }
+        }
+    }
+
+    /// Reply to the user
+    @MainActor
+    func replyToUserMessage(incognito: Bool) {
+        if let lastMessage = self.messages.last, let _ = lastMessage.responseError {
+            _ = self.messages.popLast()
+        }
+
+        self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
+            switch result {
+            case .success(let chunk):
+                Task {
+                    await self.appendText(chunk)
+                }
+                self.logger.info("Received chunk: \(chunk)")
+            case .failure(let error):
+                Task {
+                    self.setError(error.localizedDescription)
+                }
                 self.logger.error("An error occurred: \(error)")
             }
         }
@@ -309,7 +341,6 @@ class ModalManager: ObservableObject {
 
             UserDefaults.standard.set(origin.x, forKey: "toastX")
             UserDefaults.standard.set(origin.y, forKey: "toastY")
-            print("Saved origin.x: \(origin.x), origin.y: \(origin.y)")
         }
     }
 
@@ -319,7 +350,6 @@ class ModalManager: ObservableObject {
 
             UserDefaults.standard.set(size.width, forKey: "toastWidth")
             UserDefaults.standard.set(size.height, forKey: "toastHeight")
-            print("Saved width: \(size.width), height: \(size.height)")
         }
     }
 }
