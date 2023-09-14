@@ -20,9 +20,10 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var incognitoMode: Bool = false
+    @Published var triggerFocus: Bool = false
 
     private var blinkTimer: Timer?
-    private let logger = Logger(
+    let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "AppState"
     )
@@ -49,6 +50,7 @@ final class AppState: ObservableObject {
 
     // Constants
     private let maxConcurrentRequests = 5
+    private let stickyMode = true
 
     init(context: NSManagedObjectContext) {
 
@@ -87,7 +89,7 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             Task {
-                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode)
+                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode, stickyMode: stickyMode)
             }
         }
 
@@ -97,7 +99,7 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
-                await self.specialCutActor?.specialCut(incognitoMode: incognitoMode)
+                await self.specialCutActor?.specialCut(incognitoMode: incognitoMode, stickyMode: stickyMode)
             }
         }
 
@@ -350,11 +352,17 @@ final class AppState: ObservableObject {
 
 @main
 struct TypeaheadAIApp: App {
+    private var hasOnboarded: Bool
+
     let persistenceController = PersistenceController.shared
     @StateObject private var appState: AppState
     @State var isMenuVisible: Bool = false
+    @AppStorage("appLaunchCount") private var appLaunchCount: Int = 0
 
     init() {
+        let defaults = UserDefaults.standard
+        hasOnboarded = defaults.bool(forKey: "hasOnboarded")
+
         let context = persistenceController.container.viewContext
         _appState = StateObject(wrappedValue: AppState(context: context))
     }
@@ -369,14 +377,23 @@ struct TypeaheadAIApp: App {
             MenuView(
                 incognitoMode: $appState.incognitoMode,
                 promptManager: appState.promptManager,
+                modalManager: appState.modalManager,
                 isMenuVisible: $isMenuVisible
             )
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            .onAppear(perform: setup)
         } label: {
             Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
         }
         .menuBarExtraAccess(isPresented: $isMenuVisible)
         .menuBarExtraStyle(.window)
+    }
+
+    func setup() {
+        if !hasOnboarded {
+            self.appState.modalManager.showOnboardingModal()
+            UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
+        }
     }
 }

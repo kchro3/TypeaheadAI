@@ -10,22 +10,44 @@ import Markdown
 
 struct MessageView: View {
     let message: Message
+    var onButtonDown: (() -> Void)?
+
+    init(
+        message: Message,
+        onButtonDown: (() -> Void)? = nil
+    ) {
+        self.message = message
+        self.onButtonDown = onButtonDown
+    }
 
     var body: some View {
         if let error = message.responseError, !message.isCurrentUser {
-            Text(error)
-                .foregroundColor(.primary)
-                .textSelection(.enabled)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 15)
-                .background(
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.red.opacity(0.4))
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            HStack {
+                Text(error)
+                    .foregroundColor(.primary)
+                    .textSelection(.enabled)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 15)
+                    .background(
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.red.opacity(0.4))
+                    )
+
+                Button(action: {
+                    onButtonDown?()
+                }, label: {
+                    Image(systemName: "arrow.counterclockwise")
+                })
+                .buttonStyle(.plain)
+
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         } else if let attributed = message.attributed {
             attributedView(results: attributed.results)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
+        } else if message.text.isEmpty && !message.isCurrentUser {
+            Divider()
         } else {
             Text(message.text)
                 .foregroundColor(message.isCurrentUser ? .white : .primary)
@@ -72,8 +94,10 @@ struct ModalView: View {
                 ScrollView {
                     VStack(spacing: 2) {
                         ForEach(modalManager.messages.indices, id: \.self) { index in
-                            MessageView(message: modalManager.messages[index])
-                                .padding(5)
+                            MessageView(message: modalManager.messages[index]) {
+                                modalManager.replyToUserMessage(incognito: incognito)
+                            }
+                            .padding(5)
                         }
                     }
                     .onChange(of: modalManager.messages.last) { _ in
@@ -83,18 +107,25 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            TextField("Ask a follow-up question...", text: $text)
+            TextField("Ask a follow-up question...", text: $text, axis: .vertical)
                 .textFieldStyle(.plain)
+                .lineLimit(8)
                 .focused($isTextFieldFocused)
                 .padding(.vertical, 5)
                 .padding(.horizontal, 10)
                 .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.white)
+                    .fill(.secondary.opacity(0.1))
                 )
                 .onSubmit {
                     if !text.isEmpty {
                         modalManager.addUserMessage(text, incognito: incognito)
                         text = ""
+                    }
+                }
+                .onChange(of: modalManager.triggerFocus) { newValue in
+                    if newValue {
+                        isTextFieldFocused = true
+                        modalManager.triggerFocus = false
                     }
                 }
                 .padding(.horizontal, 10)
@@ -157,7 +188,8 @@ struct ModalView_Previews: PreviewProvider {
 
     static let parserResult: ParserResult = {
         let document = Document(parsing: markdownString)
-        var parser = MarkdownAttributedStringParser()
+        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+        var parser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
         return parser.parserResults(from: document)[0]
     }()
 }

@@ -24,10 +24,8 @@ actor SpecialCopyActor: CanSimulateCopy {
         self.modalManager = modalManager
     }
     
-    func specialCopy(incognitoMode: Bool) {
+    func specialCopy(incognitoMode: Bool, stickyMode: Bool) {
         self.logger.debug("special copy")
-
-        let initialCopiedText = NSPasteboard.general.string(forType: .string) ?? ""
 
         simulateCopy() {
             guard let copiedText = NSPasteboard.general.string(forType: .string) else {
@@ -35,43 +33,41 @@ actor SpecialCopyActor: CanSimulateCopy {
             }
 
             self.logger.debug("copied '\(copiedText)'")
-            if copiedText == initialCopiedText && self.modalManager.hasText() {
-                // If nothing changed, then toggle the modal.
-                // NOTE: If the modal is empty but the clipboard is not,
-                // whatever was in the clipboard initially is from a regular
-                // copy, in which case we just do the regular flow.
-                self.modalManager.toggleModal(incognito: incognitoMode)
-            } else {
-                // Clear the modal text and reissue request
-                self.modalManager.clearText()
-                self.modalManager.showModal(incognito: incognitoMode)
-
-                if let activePrompt = self.clientManager.getActivePrompt() {
-                    self.modalManager.setUserMessage(activePrompt)
-                }
-
-                self.clientManager.predict(
-                    id: UUID(),
-                    copiedText: copiedText,
-                    incognitoMode: incognitoMode,
-                    stream: true,
-                    streamHandler: { result in
-                        switch result {
-                        case .success(let chunk):
-                            Task {
-                                await self.modalManager.appendText(chunk)
-                            }
-                            self.logger.info("Received chunk: \(chunk)")
-                        case .failure(let error):
-                            DispatchQueue.main.async {
-                                self.modalManager.setError(error.localizedDescription)
-                            }
-                            self.logger.error("An error occurred: \(error)")
-                        }
-                    },
-                    completion: { _ in }
-                )
+            // Clear the modal text and reissue request
+            self.modalManager.clearText(stickyMode: stickyMode)
+            self.modalManager.showModal(incognito: incognitoMode)
+            var truncated: String = copiedText
+            if (copiedText.count > 280) {
+                truncated = "\(truncated.prefix(280))..."
             }
+
+            if let activePrompt = self.clientManager.getActivePrompt() {
+                self.modalManager.setUserMessage("\(activePrompt)\n:\(truncated)")
+            } else {
+                self.modalManager.setUserMessage("copied:\n\(truncated)")
+            }
+
+            self.clientManager.predict(
+                id: UUID(),
+                copiedText: copiedText,
+                incognitoMode: incognitoMode,
+                stream: true,
+                streamHandler: { result in
+                    switch result {
+                    case .success(let chunk):
+                        Task {
+                            await self.modalManager.appendText(chunk)
+                        }
+                        self.logger.info("Received chunk: \(chunk)")
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            self.modalManager.setError(error.localizedDescription)
+                        }
+                        self.logger.error("An error occurred: \(error)")
+                    }
+                },
+                completion: { _ in }
+            )
         }
     }
 }

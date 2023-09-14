@@ -36,12 +36,14 @@ actor SpecialSaveActor: CanSimulateCopy {
             }
 
             self.logger.debug("saved '\(copiedText)'")
-            // Clear the modal text and reissue request
-            self.modalManager.clearText()
+            // Force sticky-mode so that it saves the message to the session.
+            self.modalManager.clearText(stickyMode: true)
             self.modalManager.showModal(incognito: incognitoMode)
+
             Task {
-                await self.modalManager.appendText("Saving...\n\n")
+                await self.modalManager.appendText("Saving...\n")
             }
+
             self.clientManager.predict(
                 id: UUID(),
                 copiedText: copiedText,
@@ -66,9 +68,6 @@ actor SpecialSaveActor: CanSimulateCopy {
                     switch result {
                     case .success(let output):
                         _ = self.memoManager.createEntry(summary: output, content: copiedText)
-                        Task {
-                            await self.modalManager.appendText("\n\n(This is still a work in progress, but you can manage your saved content in your settings. Saved content will be used to contextualize future results.)")
-                        }
                     case .failure(let error):
                         DispatchQueue.main.async {
                             self.modalManager.setError(error.localizedDescription)

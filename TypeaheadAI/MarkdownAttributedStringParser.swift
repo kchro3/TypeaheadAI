@@ -14,15 +14,17 @@ import Highlighter
 /// https://github.com/christianselig/Markdownosaur/blob/main/Sources/Markdownosaur/Markdownosaur.swift
 public struct MarkdownAttributedStringParser: MarkupVisitor {
     let baseFontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
-    let highlighter: Highlighter = {
-        let highlighter = Highlighter()!
-        highlighter.setTheme("stackoverflow-dark")
-        return highlighter
-    }()
+    var highlighter: Highlighter = Highlighter()!
 
     let newLineFontSize: CGFloat = 12
 
-    public init() {}
+    public init(isDarkMode: Bool) {
+        if isDarkMode {
+            self.highlighter.setTheme(HighlighterConstants.darkTheme)
+        } else {
+            self.highlighter.setTheme(HighlighterConstants.lightTheme)
+        }
+    }
 
     public mutating func attributedString(from document: Document) -> NSAttributedString {
         return visit(document)

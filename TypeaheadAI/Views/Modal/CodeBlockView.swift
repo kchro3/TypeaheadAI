@@ -10,7 +10,13 @@ import SwiftUI
 import Markdown
 
 enum HighlighterConstants {
-    static let color = Color(red: 38/255, green: 38/255, blue: 38/255)
+    static let color = Color(red: 25/255, green: 38/255, blue: 38/255)
+
+    static let dark = Color(red: 34/255, green: 39/255, blue: 49/255)
+    static let darkTheme = "nord"
+
+    static let light = Color.white
+    static let lightTheme = "xcode"
 }
 
 struct ParserResult: Codable, Identifiable, Equatable {
@@ -29,8 +35,8 @@ struct CodeBlockView: View {
         VStack(alignment: .leading) {
             header
                 .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color(red: 9/255, green: 49/255, blue: 69/255))
+                .padding(.vertical, 4)
+                .background(.secondary.opacity(0.8))
 
             ScrollView(.horizontal, showsIndicators: true) {
                 Text(parserResult.attributedString)
@@ -38,7 +44,13 @@ struct CodeBlockView: View {
                     .textSelection(.enabled)
             }
         }
-        .background(HighlighterConstants.color)
+        .background {
+            if NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
+                HighlighterConstants.dark
+            } else {
+                HighlighterConstants.light
+            }
+        }
         .cornerRadius(8)
     }
 
@@ -46,7 +58,7 @@ struct CodeBlockView: View {
         HStack {
             if let codeBlockLanguage = parserResult.codeBlockLanguage {
                 Text(codeBlockLanguage.capitalized)
-                    .font(.headline.monospaced())
+                    .font(.headline)
                     .foregroundColor(.white)
             }
             Spacer()
@@ -60,19 +72,22 @@ struct CodeBlockView: View {
             HStack {
                 Text("Copied")
                     .foregroundColor(.white)
-                    .font(.subheadline.monospaced().bold())
-                Image(systemName: "checkmark.circle.fill")
+                    .font(.subheadline)
+                Image(systemName: "checkmark.circle")
                     .imageScale(.large)
                     .symbolRenderingMode(.multicolor)
             }
             .frame(alignment: .trailing)
         } else {
             Button {
-                let string = NSAttributedString(parserResult.attributedString).string
-                NSPasteboard.general.setString(string, forType: .string)
+                DispatchQueue.main.async {
+                    NSPasteboard.general.setString(NSAttributedString(parserResult.attributedString).string, forType: .string)
+                }
+
                 withAnimation {
                     isCopied = true
                 }
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     withAnimation {
                         isCopied = false
@@ -107,7 +122,10 @@ struct CodeBlockView_Previews: PreviewProvider {
 
     static let parserResult: ParserResult = {
         let document = Document(parsing: markdownString)
-        var parser = MarkdownAttributedStringParser()
+
+        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+
+        var parser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
         return parser.parserResults(from: document)[0]
     }()
 

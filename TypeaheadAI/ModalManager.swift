@@ -27,6 +27,7 @@ struct Message: Codable, Identifiable, Equatable {
 
 class ModalManager: ObservableObject {
     @Published var messages: [Message]
+    @Published var triggerFocus: Bool
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -36,12 +37,14 @@ class ModalManager: ObservableObject {
     // Since we stream tokens one at a time, we need a global variable to
     // track the token counts per batch.
     private var currentTextCount = 0
-    private let parserThresholdTextCount = 28
+    private let parserThresholdTextCount = 5
+    private let maxMessages = 20
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
 
     init() {
         self.messages = []
+        self.triggerFocus = false
     }
 
     // TODO: Inject?
@@ -58,10 +61,31 @@ class ModalManager: ObservableObject {
         }
     }
 
-    func clearText() {
+    @MainActor
+    func focus() {
+        self.triggerFocus = true
+    }
+
+    func clearText(stickyMode: Bool) {
+        if stickyMode {
+            // TODO: Should we do something smarter here?
+            if let lastMessage = messages.last, !lastMessage.isCurrentUser {
+                messages.append(Message(id: UUID(), text: "", isCurrentUser: false))
+                messages = messages.suffix(maxMessages)
+            }
+        } else {
+            messages = []
+        }
+        currentTextCount = 0
+        currentOutput = nil
+    }
+
+    @MainActor
+    func forceRefresh() {
         messages = []
         currentTextCount = 0
         currentOutput = nil
+        self.clientManager?.flushCache()
     }
 
     func setText(_ text: String) {
@@ -98,6 +122,8 @@ class ModalManager: ObservableObject {
             return
         }
 
+        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+
         messages[idx].text += text
         let streamText = messages[idx].text
 
@@ -105,7 +131,7 @@ class ModalManager: ObservableObject {
             currentTextCount += text.count
 
             if currentTextCount >= parserThresholdTextCount {
-                currentOutput = await parsingTask.parse(text: streamText)
+                currentOutput = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
                 try Task.checkCancellation()
                 currentTextCount = 0
             }
@@ -154,7 +180,7 @@ class ModalManager: ObservableObject {
 
         // Check if the parsed string is different than the full string.
         if let currentString = currentOutput?.string, currentString != streamText {
-            let output = await parsingTask.parse(text: streamText)
+            let output = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
             try? Task.checkCancellation()
             messages[idx].attributed = output
         }
@@ -179,6 +205,32 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
+                Task {
+                    self.setError(error.localizedDescription)
+                }
+                self.logger.error("An error occurred: \(error)")
+            }
+        }
+    }
+
+    /// Reply to the user
+    @MainActor
+    func replyToUserMessage(incognito: Bool) {
+        if let lastMessage = self.messages.last, let _ = lastMessage.responseError {
+            _ = self.messages.popLast()
+        }
+
+        self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
+            switch result {
+            case .success(let chunk):
+                Task {
+                    await self.appendText(chunk)
+                }
+                self.logger.info("Received chunk: \(chunk)")
+            case .failure(let error):
+                Task {
+                    self.setError(error.localizedDescription)
+                }
                 self.logger.error("An error occurred: \(error)")
             }
         }
@@ -249,15 +301,15 @@ class ModalManager: ObservableObject {
         ])
 
         // Set the x, y coordinates and the size to the user's last preference or the center by default
-        let x = UserDefaults.standard.value(forKey: "toastWindowX") as? CGFloat
-        let y = UserDefaults.standard.value(forKey: "toastWindowY") as? CGFloat
-        let width = UserDefaults.standard.value(forKey: "toastWindowSizeWidth") as? CGFloat
-        let height = UserDefaults.standard.value(forKey: "toastWindowSizeHeight") as? CGFloat
+        let x = UserDefaults.standard.value(forKey: "toastX") as? CGFloat
+        let y = UserDefaults.standard.value(forKey: "toastY") as? CGFloat
+        let width = UserDefaults.standard.value(forKey: "toastWidth") as? CGFloat
+        let height = UserDefaults.standard.value(forKey: "toastHeight") as? CGFloat
 
         if let x = x, let y = y, let width = width, let height = height {
             toastWindow?.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true)
         } else {
-            toastWindow?.setFrame(NSRect(x: 0, y: 0, width: 300, height: 200), display: true)
+            toastWindow?.setFrame(NSRect(x: 0, y: 0, width: 500, height: 300), display: true)
             toastWindow?.center()
         }
 
@@ -280,12 +332,30 @@ class ModalManager: ObservableObject {
             name: NSWindow.didResizeNotification, object: toastWindow)
     }
 
+    func showOnboardingModal() {
+        showModal(incognito: false)
+        self.clientManager?.onboarding(messages: messages) { result in
+            switch result {
+            case .success(let chunk):
+                Task {
+                    await self.appendText(chunk)
+                }
+                self.logger.info("Received chunk: \(chunk)")
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.setError("Something went wrong... please restart the app!")
+                }
+                self.logger.error("An error occurred: \(error)")
+            }
+        }
+    }
+
     @objc func windowDidMove(_ notification: Notification) {
         if let movedWindow = notification.object as? NSWindow {
             let origin = movedWindow.frame.origin
 
-            UserDefaults.standard.set(origin.x, forKey: "toastWindowX")
-            UserDefaults.standard.set(origin.y, forKey: "toastWindowY")
+            UserDefaults.standard.set(origin.x, forKey: "toastX")
+            UserDefaults.standard.set(origin.y, forKey: "toastY")
         }
     }
 
@@ -293,9 +363,8 @@ class ModalManager: ObservableObject {
         if let movedWindow = notification.object as? NSWindow {
             let size = movedWindow.frame.size
 
-            UserDefaults.standard.set(size.width, forKey: "toastWindowSizeWidth")
-            UserDefaults.standard.set(size.height, forKey: "toastWindowSizeHeight")
-            print("Saved width: \(size.width), height: \(size.height)")
+            UserDefaults.standard.set(size.width, forKey: "toastWidth")
+            UserDefaults.standard.set(size.height, forKey: "toastHeight")
         }
     }
 }

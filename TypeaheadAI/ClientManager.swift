@@ -20,6 +20,7 @@ struct RequestPayload: Codable {
     var url: String
     var activeAppName: String
     var activeAppBundleIdentifier: String
+    var onboarding: Bool = false
 }
 
 struct ResponsePayload: Codable {
@@ -50,6 +51,7 @@ class ClientManager {
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+//    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -58,7 +60,7 @@ class ClientManager {
 
     // Add a Task property to manage the streaming task
     private var currentStreamingTask: Task<Void, Error>? = nil
-    private var cached: (String, String)? = nil
+    private var cached: (String, String?)? = nil
 
     init(session: URLSession = .shared) {
         self.session = session
@@ -80,7 +82,7 @@ class ClientManager {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "describe this" : "respond to this")
+        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "respond to this in <20 words" : "respond to this")
 
         appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
             if stream {
@@ -130,31 +132,111 @@ class ClientManager {
         timeout: TimeInterval = 10,
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) {
-        guard let (key, _) = cached,
-              let data = key.data(using: .utf8),
-              let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) else {
+        if let (key, _) = cached,
+           let data = key.data(using: .utf8),
+           let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
+            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+                Task {
+                    await self.sendStreamRequest(
+                        id: UUID(),
+                        username: payload.username,
+                        userFullName: payload.userFullName,
+                        userObjective: payload.userObjective,
+                        userBio: payload.userBio,
+                        userLang: payload.userLang,
+                        copiedText: payload.copiedText,
+                        messages: self.sanitizeMessages(messages),
+                        url: payload.url,
+                        activeAppName: appName ?? "unknown",
+                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        incognitoMode: incognitoMode,
+                        streamHandler: streamHandler,
+                        completion: { _ in }
+                    )
+                }
+            }
+        } else {
             logger.error("No cached request to refine")
-            return
+            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+                Task {
+                    await self.sendStreamRequest(
+                        id: UUID(),
+                        username: NSUserName(),
+                        userFullName: NSFullUserName(),
+                        userObjective: "",
+                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                        userLang: Locale.preferredLanguages.first ?? "",
+                        copiedText: "",
+                        messages: self.sanitizeMessages(messages),
+                        url: url ?? "unknown",
+                        activeAppName: appName ?? "unknown",
+                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        incognitoMode: false,
+                        streamHandler: streamHandler,
+                        completion: { _ in }
+                    )
+                }
+            }
         }
+    }
 
-        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
-            Task {
-                await self.sendStreamRequest(
-                    id: UUID(),
-                    username: payload.username,
-                    userFullName: payload.userFullName,
-                    userObjective: payload.userObjective,
-                    userBio: payload.userBio,
-                    userLang: payload.userLang,
-                    copiedText: payload.copiedText,
-                    messages: self.sanitizeMessages(messages),
-                    url: payload.url,
-                    activeAppName: appName ?? "unknown",
-                    activeAppBundleIdentifier: bundleIdentifier ?? "",
-                    incognitoMode: incognitoMode,
-                    streamHandler: streamHandler,
-                    completion: { _ in }
-                )
+    /// Onboarding flow
+    func onboarding(
+        messages: [Message],
+        timeout: TimeInterval = 10,
+        streamHandler: @escaping (Result<String, Error>) -> Void
+    ) {
+        if messages.isEmpty {
+            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+                Task {
+                    await self.sendStreamRequest(
+                        id: UUID(),
+                        username: NSUserName(),
+                        userFullName: NSFullUserName(),
+                        userObjective: "",
+                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                        userLang: Locale.preferredLanguages.first ?? "",
+                        copiedText: "",
+                        messages: self.sanitizeMessages(messages),
+                        url: url ?? "unknown",
+                        activeAppName: appName ?? "unknown",
+                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        incognitoMode: false,
+                        onboardingMode: true,
+                        streamHandler: streamHandler,
+                        completion: { _ in }
+                    )
+                }
+            }
+        } else {
+            // Continue the conversation
+            guard let (key, _) = cached,
+                  let data = key.data(using: .utf8),
+                  let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) else {
+                logger.error("No cached request to refine")
+                return
+            }
+
+            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+                Task {
+                    await self.sendStreamRequest(
+                        id: UUID(),
+                        username: payload.username,
+                        userFullName: payload.userFullName,
+                        userObjective: payload.userObjective,
+                        userBio: payload.userBio,
+                        userLang: payload.userLang,
+                        copiedText: payload.copiedText,
+                        messages: self.sanitizeMessages(messages),
+                        url: payload.url,
+                        activeAppName: appName ?? "unknown",
+                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        incognitoMode: false,
+                        onboardingMode: true,
+                        streamHandler: streamHandler,
+                        completion: { _ in }
+                    )
+                }
             }
         }
     }
@@ -269,6 +351,7 @@ class ClientManager {
         activeAppName: String,
         activeAppBundleIdentifier: String,
         incognitoMode: Bool,
+        onboardingMode: Bool = false,
         timeout: TimeInterval = 10,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
@@ -285,7 +368,8 @@ class ClientManager {
                 messages: self?.sanitizeMessages(messages),
                 url: url,
                 activeAppName: activeAppName,
-                activeAppBundleIdentifier: activeAppBundleIdentifier
+                activeAppBundleIdentifier: activeAppBundleIdentifier,
+                onboarding: onboardingMode
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -305,6 +389,7 @@ class ClientManager {
                     self?.cacheResponse(output, for: payload)
                     break
                 case .failure(_):
+                    self?.cacheResponse(nil, for: payload)
                     break
                 }
             }
@@ -341,6 +426,7 @@ class ClientManager {
             }
         } catch {
             let err: Result<String, Error> = .failure(error)
+            self.cacheResponse(nil, for: payload)
             streamHandler(err)
             return err
         }
@@ -396,7 +482,7 @@ class ClientManager {
         }
     }
 
-    private func cacheResponse(_ response: String, for requestPayload: RequestPayload) {
+    private func cacheResponse(_ response: String?, for requestPayload: RequestPayload) {
         if let cacheKey = generateCacheKey(from: requestPayload) {
             cached = (cacheKey, response)
         }
@@ -408,5 +494,9 @@ class ClientManager {
             messageCopy.attributed = nil
             return messageCopy
         }
+    }
+
+    func flushCache() {
+        cached = nil
     }
 }
