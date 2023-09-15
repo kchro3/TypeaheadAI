@@ -26,8 +26,9 @@ struct Message: Codable, Identifiable, Equatable {
 }
 
 class ModalManager: ObservableObject {
-    @Published var messages: [Message]
-    @Published var triggerFocus: Bool
+    @Published var messages: [Message] = []
+    @Published var triggerFocus: Bool = false
+    @Published var isBlinking: Bool = false
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -42,10 +43,7 @@ class ModalManager: ObservableObject {
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
 
-    init() {
-        self.messages = []
-        self.triggerFocus = false
-    }
+    private var blinkTimer: Timer?
 
     // TODO: Inject?
     var clientManager: ClientManager? = nil
@@ -348,6 +346,22 @@ class ModalManager: ObservableObject {
                 self.logger.error("An error occurred: \(error)")
             }
         }
+    }
+
+    func startBlinking() {
+        // Invalidate the previous timer if it exists
+        blinkTimer?.invalidate()
+
+        // Create and schedule a new timer
+        blinkTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            DispatchQueue.main.async { self.isBlinking.toggle() }
+        }
+    }
+
+    func stopBlinking() {
+        blinkTimer?.invalidate()
+        blinkTimer = nil
+        DispatchQueue.main.async { self.isBlinking = false }
     }
 
     @objc func windowDidMove(_ notification: Notification) {

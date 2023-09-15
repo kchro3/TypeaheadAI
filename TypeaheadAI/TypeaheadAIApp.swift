@@ -17,7 +17,6 @@ import MenuBarExtraAccess
 
 @MainActor
 final class AppState: ObservableObject {
-    @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var incognitoMode: Bool = false
     @Published var triggerFocus: Bool = false
@@ -42,6 +41,7 @@ final class AppState: ObservableObject {
     private var specialCutActor: SpecialCutActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialSaveActor: SpecialSaveActor? = nil
+    private var specialPasteActor: SpecialPasteActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -77,6 +77,12 @@ final class AppState: ObservableObject {
             clientManager: clientManager,
             memoManager: memoManager
         )
+        self.specialPasteActor = SpecialPasteActor(
+            modalManager: modalManager,
+            memoManager: memoManager,
+            historyManager: historyManager,
+            mouseEventMonitor: mouseEventMonitor
+        )
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
@@ -94,7 +100,9 @@ final class AppState: ObservableObject {
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
-            self.specialPaste()
+            Task {
+                await self.specialPasteActor?.specialPaste(incognitoMode: incognitoMode)
+            }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
@@ -147,7 +155,6 @@ final class AppState: ObservableObject {
         let items = pasteboard.pasteboardItems ?? []
 
         if items.isEmpty {
-            DispatchQueue.main.async { self.isLoading = false }
             self.logger.debug("No items found")
             return
         }
@@ -163,7 +170,6 @@ final class AppState: ObservableObject {
         }
 
         if combinedString.isEmpty {
-            DispatchQueue.main.async { self.isLoading = false }
             self.logger.debug("No string found")
             return
         }
@@ -173,7 +179,6 @@ final class AppState: ObservableObject {
         let newEntry = self.historyManager.addHistoryEntry(query: combinedString)
 
         DispatchQueue.main.async {
-            self.isLoading = true
             self.startBlinking()
             self.mouseEventMonitor.mouseClicked = false
         }
@@ -215,7 +220,6 @@ final class AppState: ObservableObject {
                 }
 
                 DispatchQueue.main.async {
-                    self.isLoading = false
                     if self.historyManager.pendingRequestCount() == 0 {
                         self.stopBlinking()
                     }
@@ -352,16 +356,13 @@ final class AppState: ObservableObject {
 
 @main
 struct TypeaheadAIApp: App {
-    private var hasOnboarded: Bool
-
     let persistenceController = PersistenceController.shared
     @StateObject private var appState: AppState
     @State var isMenuVisible: Bool = false
     @AppStorage("appLaunchCount") private var appLaunchCount: Int = 0
 
     init() {
-        let defaults = UserDefaults.standard
-        hasOnboarded = defaults.bool(forKey: "hasOnboarded")
+        UserDefaults.standard.setValue(false, forKey: "hasOnboarded")
 
         let context = persistenceController.container.viewContext
         _appState = StateObject(wrappedValue: AppState(context: context))
@@ -383,7 +384,7 @@ struct TypeaheadAIApp: App {
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
             .onAppear(perform: setup)
         } label: {
-            Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
+            Image(systemName: appState.modalManager.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
         }
         .menuBarExtraAccess(isPresented: $isMenuVisible)
@@ -391,7 +392,7 @@ struct TypeaheadAIApp: App {
     }
 
     func setup() {
-        if !hasOnboarded {
+        if !UserDefaults.standard.bool(forKey: "hasOnboarded") {
             self.appState.modalManager.showOnboardingModal()
             UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
         }

@@ -41,6 +41,8 @@
 		2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84342A9DD90F00359841 /* HistoryManager.swift */; };
 		2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */; };
 		2BCF843E2A9DEA2E00359841 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */; };
+		2BD24C232AB4192300947DAD /* SpecialPasteActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD24C222AB4192300947DAD /* SpecialPasteActor.swift */; };
+		2BD24C252AB4193F00947DAD /* CanSimulatePaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD24C242AB4193F00947DAD /* CanSimulatePaste.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
 		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
 		2BE0EC2B2AA1D44000E47C52 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC2A2AA1D44000E47C52 /* SplashView.swift */; };
@@ -107,6 +109,8 @@
 		2BCF84342A9DD90F00359841 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
 		2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
+		2BD24C222AB4192300947DAD /* SpecialPasteActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialPasteActor.swift; sourceTree = "<group>"; };
+		2BD24C242AB4193F00947DAD /* CanSimulatePaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulatePaste.swift; sourceTree = "<group>"; };
 		2BE0EC212AA0956C00E47C52 /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
 		2BE0EC242AA17DB600E47C52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseClickMonitor.swift; sourceTree = "<group>"; };
@@ -155,6 +159,8 @@
 				2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */,
 				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
 				2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */,
+				2BD24C222AB4192300947DAD /* SpecialPasteActor.swift */,
+				2BD24C242AB4193F00947DAD /* CanSimulatePaste.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -456,6 +462,8 @@
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
+				2BD24C232AB4192300947DAD /* SpecialPasteActor.swift in Sources */,
+				2BD24C252AB4193F00947DAD /* CanSimulatePaste.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
