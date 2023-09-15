@@ -318,6 +318,8 @@ class ModalManager: ObservableObject {
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.level = .popUpMenu
         toastWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+
         toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
         // Register for window moved notifications to save the new position

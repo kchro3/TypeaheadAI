@@ -8,8 +8,8 @@
 import SwiftUI
 
 enum Tabs: String, CaseIterable, Identifiable {
-    case profile = "Profile"
     case general = "General"
+    case profile = "Profile"
     case history = "History"
     case incognito = "Incognito Mode"
     case about = "About"
