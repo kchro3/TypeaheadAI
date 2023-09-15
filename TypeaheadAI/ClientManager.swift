@@ -15,11 +15,9 @@ struct RequestPayload: Codable {
     var userObjective: String
     var userBio: String
     var userLang: String
-    var copiedText: String
+//    var copiedText: String? = nil
     var messages: [Message]?
-    var url: String
-    var activeAppName: String
-    var activeAppBundleIdentifier: String
+    var appContext: AppContext?
     var onboarding: Bool = false
 }
 
@@ -50,8 +48,8 @@ class ClientManager {
     private let session: URLSession
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -84,7 +82,7 @@ class ClientManager {
         // If objective is not specified in the request, fall back on the active prompt.
         let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "respond to this in <20 words" : "respond to this")
 
-        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+        appContextManager!.getContext { appContext in
             if stream {
                 Task {
                     await self.sendStreamRequest(
@@ -96,9 +94,7 @@ class ClientManager {
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: copiedText,
                         messages: [],
-                        url: url ?? "",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        appContext: appContext,
                         incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
                         completion: completion
@@ -114,9 +110,7 @@ class ClientManager {
                         userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: copiedText,
-                        url: url ?? "",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        appContext: appContext,
                         incognitoMode: incognitoMode,
                         completion: completion
                     )
@@ -135,7 +129,7 @@ class ClientManager {
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+            appContextManager!.getContext { appContext in
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
@@ -144,11 +138,9 @@ class ClientManager {
                         userObjective: payload.userObjective,
                         userBio: payload.userBio,
                         userLang: payload.userLang,
-                        copiedText: payload.copiedText,
+                        copiedText: nil, // payload.copiedText,
                         messages: self.sanitizeMessages(messages),
-                        url: payload.url,
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        appContext: appContext,
                         incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
                         completion: { _ in }
@@ -157,7 +149,7 @@ class ClientManager {
             }
         } else {
             logger.error("No cached request to refine")
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+            appContextManager!.getContext { appContext in
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
@@ -168,9 +160,7 @@ class ClientManager {
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: "",
                         messages: self.sanitizeMessages(messages),
-                        url: url ?? "unknown",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        appContext: appContext,
                         incognitoMode: false,
                         streamHandler: streamHandler,
                         completion: { _ in }
@@ -187,7 +177,7 @@ class ClientManager {
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) {
         if messages.isEmpty {
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+            appContextManager!.getContext { appContext in
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
@@ -198,9 +188,7 @@ class ClientManager {
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: "",
                         messages: self.sanitizeMessages(messages),
-                        url: url ?? "unknown",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        appContext: appContext,
                         incognitoMode: false,
                         onboardingMode: true,
                         streamHandler: streamHandler,
@@ -217,7 +205,7 @@ class ClientManager {
                 return
             }
 
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+            appContextManager!.getContext { appContext in
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
@@ -226,11 +214,9 @@ class ClientManager {
                         userObjective: payload.userObjective,
                         userBio: payload.userBio,
                         userLang: payload.userLang,
-                        copiedText: payload.copiedText,
+                        copiedText: nil, // payload.copiedText,
                         messages: self.sanitizeMessages(messages),
-                        url: payload.url,
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        appContext: appContext,
                         incognitoMode: false,
                         onboardingMode: true,
                         streamHandler: streamHandler,
@@ -251,9 +237,7 @@ class ClientManager {
     ///   - userBio: Details about the user.
     ///   - userLang: User's preferred language.
     ///   - copiedText: The text that the user has copied.
-    ///   - url: The URL that the user is currently viewing.
-    ///   - activeAppName: The name of the app that is currently active.
-    ///   - activeAppBundleIdentifier: The bundle identifier of the currently active app.
+    ///   - appContext: Currently active app context
     ///   - incognitoMode: Whether or not the request is sent to an online or offline model.
     ///   - timeout: The timeout for the request. Default is 10 seconds.
     ///   - completion: A closure to be executed once the request is complete.
@@ -265,9 +249,7 @@ class ClientManager {
         userBio: String,
         userLang: String,
         copiedText: String,
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
+        appContext: AppContext,
         incognitoMode: Bool,
         timeout: TimeInterval = 10,
         completion: @escaping (Result<String, Error>) -> Void
@@ -278,10 +260,7 @@ class ClientManager {
             userObjective: userObjective,
             userBio: userBio,
             userLang: userLang,
-            copiedText: copiedText,
-            url: url,
-            activeAppName: activeAppName,
-            activeAppBundleIdentifier: activeAppBundleIdentifier
+            appContext: appContext
         )
 
         if (incognitoMode) {
@@ -345,11 +324,9 @@ class ClientManager {
         userObjective: String,
         userBio: String,
         userLang: String,
-        copiedText: String,
+        copiedText: String?,
         messages: [Message],
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
+        appContext: AppContext,
         incognitoMode: Bool,
         onboardingMode: Bool = false,
         timeout: TimeInterval = 10,
@@ -364,11 +341,9 @@ class ClientManager {
                 userObjective: userObjective,
                 userBio: userBio,
                 userLang: userLang,
-                copiedText: copiedText,
+//                copiedText: copiedText,
                 messages: self?.sanitizeMessages(messages),
-                url: url,
-                activeAppName: activeAppName,
-                activeAppBundleIdentifier: activeAppBundleIdentifier,
+                appContext: appContext,
                 onboarding: onboardingMode
             )
 
@@ -455,9 +430,7 @@ class ClientManager {
 
         do {
             var payloadCopy = payload
-            payloadCopy.url = ""
-            payloadCopy.activeAppName = ""
-            payloadCopy.activeAppBundleIdentifier = ""
+            payloadCopy.appContext = nil
 
             let jsonData = try encoder.encode(payloadCopy)
             if let jsonString = String(data: jsonData, encoding: .utf8) {

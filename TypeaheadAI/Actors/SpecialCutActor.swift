@@ -102,13 +102,15 @@ actor SpecialCutActor {
                         truncated = "\(truncated.prefix(280))..."
                     }
 
-                    self.modalManager.clearText(stickyMode: stickyMode)
                     self.modalManager.showModal(incognito: incognitoMode)
 
-                    if let activePrompt = self.clientManager.getActivePrompt() {
-                        self.modalManager.setUserMessage("\(activePrompt)\n:\(truncated)")
-                    } else {
-                        self.modalManager.setUserMessage("cut:\n\(truncated)")
+                    Task {
+                        await self.modalManager.clearText(stickyMode: stickyMode)
+                        if let activePrompt = self.clientManager.getActivePrompt() {
+                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(truncated)")
+                        } else {
+                            await self.modalManager.setUserMessage("cut:\n\(truncated)")
+                        }
                     }
 
                     self.clientManager.predict(

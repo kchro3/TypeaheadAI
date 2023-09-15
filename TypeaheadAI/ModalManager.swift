@@ -16,6 +16,12 @@ struct AttributedOutput: Codable, Equatable {
     let results: [ParserResult]
 }
 
+struct AppContext: Codable, Equatable {
+    var activeAppName: String?
+    var activeAppBundleIdentifier: String?
+    var url: String?
+}
+
 // TODO: Add to persistence
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
@@ -23,6 +29,7 @@ struct Message: Codable, Identifiable, Equatable {
     var attributed: AttributedOutput? = nil
     let isCurrentUser: Bool
     var responseError: String?
+    var appContext: AppContext?
 }
 
 class ModalManager: ObservableObject {
@@ -66,6 +73,7 @@ class ModalManager: ObservableObject {
         self.triggerFocus = true
     }
 
+    @MainActor
     func clearText(stickyMode: Bool) {
         if stickyMode {
             // TODO: Should we do something smarter here?
@@ -98,6 +106,7 @@ class ModalManager: ObservableObject {
     }
 
     /// Set an error message.
+    @MainActor
     func setError(_ responseError: String) {
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
             messages[idx].responseError = responseError
@@ -187,11 +196,22 @@ class ModalManager: ObservableObject {
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
+    @MainActor
     func setUserMessage(_ text: String) {
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+        self.clientManager?.appContextManager?.getContext { appContext in
+            self.messages.append(
+                Message(
+                    id: UUID(),
+                    text: text,
+                    isCurrentUser: true,
+                    appContext: appContext
+                )
+            )
+        }
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
+    @MainActor
     func addUserMessage(_ text: String, incognito: Bool) {
         self.clientManager?.cancelStreamingTask()
 
@@ -205,9 +225,7 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
-                Task {
-                    self.setError(error.localizedDescription)
-                }
+                self.setError(error.localizedDescription)
                 self.logger.error("An error occurred: \(error)")
             }
         }
