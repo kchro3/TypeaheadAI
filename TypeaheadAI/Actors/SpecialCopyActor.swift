@@ -33,41 +33,37 @@ actor SpecialCopyActor: CanSimulateCopy {
             }
 
             self.logger.debug("copied '\(copiedText)'")
+
             // Clear the modal text and reissue request
-            self.modalManager.clearText(stickyMode: stickyMode)
             self.modalManager.showModal(incognito: incognitoMode)
-            var truncated: String = copiedText
-            if (copiedText.count > 280) {
-                truncated = "\(truncated.prefix(280))..."
-            }
 
-            if let activePrompt = self.clientManager.getActivePrompt() {
-                self.modalManager.setUserMessage("\(activePrompt)\n:\(truncated)")
-            } else {
-                self.modalManager.setUserMessage("copied:\n\(truncated)")
-            }
+            Task {
+                await self.modalManager.clearText(stickyMode: stickyMode)
+                if let activePrompt = self.clientManager.getActivePrompt() {
+                    await self.modalManager.setUserMessage("\(activePrompt):\n\(copiedText)")
+                } else {
+                    await self.modalManager.setUserMessage("copied:\n\(copiedText)")
+                }
 
-            self.clientManager.predict(
-                id: UUID(),
-                copiedText: copiedText,
-                incognitoMode: incognitoMode,
-                stream: true,
-                streamHandler: { result in
-                    switch result {
-                    case .success(let chunk):
-                        Task {
-                            await self.modalManager.appendText(chunk)
+                self.clientManager.refine(
+                    messages: self.modalManager.messages,
+                    incognitoMode: incognitoMode,
+                    streamHandler: { result in
+                        switch result {
+                        case .success(let chunk):
+                            Task {
+                                await self.modalManager.appendText(chunk)
+                            }
+                            self.logger.info("Received chunk: \(chunk)")
+                        case .failure(let error):
+                            DispatchQueue.main.async {
+                                self.modalManager.setError(error.localizedDescription)
+                            }
+                            self.logger.error("An error occurred: \(error)")
                         }
-                        self.logger.info("Received chunk: \(chunk)")
-                    case .failure(let error):
-                        DispatchQueue.main.async {
-                            self.modalManager.setError(error.localizedDescription)
-                        }
-                        self.logger.error("An error occurred: \(error)")
                     }
-                },
-                completion: { _ in }
-            )
+                )
+            }
         }
     }
 }

@@ -37,7 +37,10 @@ actor SpecialSaveActor: CanSimulateCopy {
 
             self.logger.debug("saved '\(copiedText)'")
             // Force sticky-mode so that it saves the message to the session.
-            self.modalManager.clearText(stickyMode: true)
+            Task {
+                await self.modalManager.clearText(stickyMode: true)
+            }
+
             self.modalManager.showModal(incognito: incognitoMode)
 
             Task {

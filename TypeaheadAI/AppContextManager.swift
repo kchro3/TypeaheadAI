@@ -17,7 +17,7 @@ class AppContextManager {
         category: "AppContextManager"
     )
 
-    func getActiveAppInfo(completion: @escaping (String?, String?, String?) -> Void) {
+    func getContext(completion: @escaping (AppContext) -> Void) {
         self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
             let appName = activeApp.localizedName
@@ -28,17 +28,33 @@ class AppContextManager {
                 self.scriptManager.executeScript { (result, error) in
                     if let error = error {
                         self.logger.error("Failed to execute script: \(error.errorDescription ?? "Unknown error")")
-                        completion(appName, bundleIdentifier, nil)
+                        completion(AppContext(
+                            activeAppName: appName,
+                            activeAppBundleIdentifier: bundleIdentifier,
+                            url: nil
+                        ))
                     } else if let url = result?.stringValue {
                         self.logger.info("Successfully executed script. URL: \(url)")
-                        completion(appName, bundleIdentifier, url)
+                        completion(AppContext(
+                            activeAppName: appName,
+                            activeAppBundleIdentifier: bundleIdentifier,
+                            url: url
+                        ))
                     }
                 }
             } else {
-                completion(appName, bundleIdentifier, nil)
+                completion(AppContext(
+                    activeAppName: appName,
+                    activeAppBundleIdentifier: bundleIdentifier,
+                    url: nil
+                ))
             }
         } else {
-            completion(nil, nil, nil)
+            completion(AppContext(
+                activeAppName: nil,
+                activeAppBundleIdentifier: nil,
+                url: nil
+            ))
         }
     }
 }
