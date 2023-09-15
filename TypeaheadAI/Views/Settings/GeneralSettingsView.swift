@@ -25,26 +25,55 @@ struct GeneralSettingsView: View {
                 .padding(.bottom, 5)
 
             Form {
-                HStack {
-                    KeyboardShortcuts.Recorder("Smart Copy:", name: .specialCopy)
-                    Text("Responds to what you've selected.")
-                }
-                HStack {
-                    KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
-                    Text("Responds to what you've copied.")
-                }
-                HStack {
-                    KeyboardShortcuts.Recorder("Smart Cut:", name: .specialCut)
-                    Text("Responds to what you've screen-captured.")
-                }
-                HStack {
-                    KeyboardShortcuts.Recorder("Smart Save:", name: .specialSave)
-                    Text("Remembers what you've selected. (Work in Progress)")
+                VStack(alignment: .trailing) {
+                    HStack {
+                        KeyboardShortcuts.Recorder("Smart Copy:", name: .specialCopy)
+                        Text("Responds to what you've selected.")
+                            .frame(width: 325, alignment: .leading)
+                    }
+                    HStack {
+                        KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
+                        Text("Responds to what you've copied.")
+                            .frame(width: 325, alignment: .leading)
+                    }
+                    HStack {
+                        KeyboardShortcuts.Recorder("Smart Cut:", name: .specialCut)
+                        Text("Responds to what you've screen-captured.")
+                            .frame(width: 325, alignment: .leading)
+                    }
+                    HStack {
+                        KeyboardShortcuts.Recorder("Smart Save:", name: .specialSave)
+                        Text("Remembers what you've selected. (Work in Progress)")
+                            .frame(width: 325, alignment: .leading)
+                    }
                 }
             }
             .padding(.horizontal, 10)
 
-            Spacer()
+            Divider()
+
+            Text("Navigational Shortcuts")
+                .font(.headline)
+                .padding(.bottom, 5)
+
+            Form {
+                HStack {
+                    KeyboardShortcuts.Recorder("New Chat:", name: .chatNew)
+                    Text("Opens a new chat window")
+                        .frame(width: 325, alignment: .leading)
+                }
+                HStack {
+                    KeyboardShortcuts.Recorder("Refresh Chat:", name: .chatRefresh)
+                    Text("Clears a chat window")
+                        .frame(width: 325, alignment: .leading)
+                }
+                HStack {
+                    KeyboardShortcuts.Recorder("Open Chat:", name: .chatOpen)
+                    Text("Opens an existing chat window")
+                        .frame(width: 325, alignment: .leading)
+                }
+            }
+            .padding(.horizontal, 10)
 
             Divider()
 

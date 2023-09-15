@@ -105,12 +105,14 @@ struct MenuView: View {
                         modalManager.focus()
                         isMenuVisible = false
                     }
+                    .padding(.vertical, verticalPadding)
                 } else {
                     buttonRow(title: "Open chat", isHovering: $isHoveringChat) {
                         modalManager.showModal(incognito: incognitoMode)
                         modalManager.focus()
                         isMenuVisible = false
                     }
+                    .padding(.vertical, verticalPadding)
                 }
 
                 Divider()
@@ -138,7 +140,7 @@ struct MenuView: View {
             Text(title)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(4)
-                .background(isHovering.wrappedValue ? Color.gray : Color.clear)
+                .background(isHovering.wrappedValue ? .primary.opacity(0.2) : Color.clear)
                 .cornerRadius(4)
                 .contentShape(Rectangle())
         }

@@ -65,7 +65,7 @@ struct MenuPromptView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(isHovering ? Color.gray : Color.clear)
+        .background(isHovering ? .primary.opacity(0.2) : Color.clear)
         .cornerRadius(4)
         .onHover { hovering in
             isHovering = hovering

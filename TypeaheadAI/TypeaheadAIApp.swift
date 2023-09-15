@@ -20,7 +20,6 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var incognitoMode: Bool = false
-    @Published var triggerFocus: Bool = false
 
     private var blinkTimer: Timer?
     let logger = Logger(
@@ -107,6 +106,19 @@ final class AppState: ObservableObject {
             Task {
                 await self.specialSaveActor?.specialSave(incognitoMode: incognitoMode)
             }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .chatRefresh) { [self] in
+            self.modalManager.clearText(stickyMode: false)
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
+            self.modalManager.showModal(incognito: self.incognitoMode)
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
+            self.modalManager.clearText(stickyMode: false)
+            self.modalManager.showModal(incognito: self.incognitoMode)
         }
 
         // Configure mouse-click handler

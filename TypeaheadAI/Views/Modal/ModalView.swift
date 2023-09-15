@@ -130,6 +130,9 @@ struct ModalView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 15)
+                .onAppear {
+                    isTextFieldFocused = true
+                }
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
