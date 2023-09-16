@@ -9,6 +9,59 @@ import SwiftUI
 import AppKit
 import CoreData
 
+struct MemoView: View {
+    private let memoEntry: MemoEntry
+    private var onDelete: (() -> Void)?
+
+    init(_ memoEntry: MemoEntry, onDelete: (() -> Void)? = nil) {
+        self.memoEntry = memoEntry
+        self.onDelete = onDelete
+    }
+
+    var body: some View {
+        HStack {
+            Text("Date: \(formattedDate(for: memoEntry.createdAt))")
+                .font(.footnote)
+                .foregroundColor(.primary)
+
+            Spacer()
+
+            Menu {
+                Button {
+                    onDelete?()
+                } label: {
+                    Text("Delete")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 15)
+                    .imageScale(.large)
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+
+        Text(memoEntry.summary!)
+            .font(.headline)
+            .foregroundColor(.primary)
+
+        Text("\(String(memoEntry.content!.prefix(280)))...")
+            .font(.body)
+            .foregroundColor(.secondary)
+    }
+
+    private func formattedDate(for date: Date?) -> String {
+        guard let date = date else { return "N/A" }
+
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+
+        return formatter.string(from: date)
+    }
+}
+
 struct ProfileView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var isShowingMenu = false
@@ -39,13 +92,14 @@ struct ProfileView: View {
                 Text("What should TypeaheadAI know about you to provide better responses?").font(.headline)
 
                 TextEditor(text: $bio)
+                    .scrollContentBackground(.hidden)
                     .onChange(of: bio) { newValue in
                         if newValue.count > maxCharacterCount {
                             bio = String(newValue.prefix(maxCharacterCount))
                         }
                     }
                     .padding(10)
-                    .background(Color.white)
+                    .background(.primary.opacity(0.1))
                     .cornerRadius(5)
                     .lineSpacing(5)
                     .frame(minHeight: 50, maxHeight: 200)
@@ -60,47 +114,21 @@ struct ProfileView: View {
 
                 ForEach(memoEntries, id: \.self) { memoEntry in
                     VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("Date: \(formattedDate(for: memoEntry.createdAt))")
-                                .font(.footnote)
-                                .foregroundColor(.primary)
+                        MemoView(memoEntry) {
+                            // Perform the deletion logic here
+                            viewContext.delete(memoEntry)
 
-                            Spacer()
-
-                            Menu {
-                                Button(action: {
-                                    // Perform the deletion logic here
-                                    viewContext.delete(memoEntry)
-
-                                    // Save the changes to the managed object context
-                                    do {
-                                        try viewContext.save()
-                                    } catch {
-                                        // Handle the error, if any
-                                        print("Error deleting memo entry: \(error)")
-                                    }
-                                }) {
-                                    Text("Delete")
-                                }
-                            } label: {
-                                Image(systemName: "ellipsis")
-                                    .padding(.vertical, 5)
-                                    .imageScale(.large)
-                                    .foregroundColor(.secondary)
+                            // Save the changes to the managed object context
+                            do {
+                                try viewContext.save()
+                            } catch {
+                                // Handle the error, if any
+                                print("Error deleting memo entry: \(error)")
                             }
-                            .buttonStyle(.plain)
                         }
-
-                        Text(memoEntry.summary!)
-                            .font(.headline)
-                            .foregroundColor(.primary)
-
-                        Text("\(String(memoEntry.content!.prefix(280)))...")
-                            .font(.body)
-                            .foregroundColor(.secondary)
                     }
                     .padding()
-                    .background(.white)
+                    .background(.primary.opacity(0.1))
                     .cornerRadius(8)
                     .padding(.bottom, 8)
                 }
@@ -117,16 +145,6 @@ struct ProfileView: View {
         } else {
             hasMore = false
         }
-    }
-
-    private func formattedDate(for date: Date?) -> String {
-        guard let date = date else { return "N/A" }
-
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-
-        return formatter.string(from: date)
     }
 }
 
