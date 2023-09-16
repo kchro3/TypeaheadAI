@@ -44,8 +44,15 @@ struct MenuView: View {
             Divider()
                 .padding(.horizontal, horizontalPadding)
 
-            TextField("Preset commands (e.g. summarize this)", text: $currentPreset)
+            TextField("Tell me what to do when you copy-paste.", text: $currentPreset, axis: .vertical)
+                .textFieldStyle(.plain)
+                .lineLimit(4)
                 .focused($isTextFieldFocused)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(.secondary.opacity(0.1))
+                )
                 .onSubmit {
                     if !currentPreset.isEmpty {
                         promptManager.addPrompt(currentPreset, context: viewContext)
