@@ -82,7 +82,7 @@ class ClientManager {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "respond to this in <20 words" : "respond to this")
+        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "respond to this in <20 words" : "paste generated content")
 
         appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
             if stream {
