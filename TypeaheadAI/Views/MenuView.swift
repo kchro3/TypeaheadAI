@@ -7,6 +7,8 @@
 
 import SwiftUI
 import CoreData
+import AuthenticationServices
+
 
 struct MenuView: View {
     @Binding var incognitoMode: Bool
@@ -15,10 +17,13 @@ struct MenuView: View {
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
 
+    @AppStorage("token") var token: String?
+
     @State private var currentPreset: String = ""
     @State private var isHoveringChat = false
     @State private var isHoveringClearChat = false
     @State private var isHoveringSettings = false
+    @State private var isHoveringSignOut = false
     @State private var isHoveringQuit = false
     @State private var isEditingID: UUID?
     @FocusState private var isTextFieldFocused: Bool
@@ -44,82 +49,103 @@ struct MenuView: View {
             Divider()
                 .padding(.horizontal, horizontalPadding)
 
-            TextField("Tell me what to do when you copy-paste.", text: $currentPreset, axis: .vertical)
-                .textFieldStyle(.plain)
-                .lineLimit(4)
-                .focused($isTextFieldFocused)
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(.secondary.opacity(0.1))
-                )
-                .onSubmit {
-                    if !currentPreset.isEmpty {
-                        promptManager.addPrompt(currentPreset, context: viewContext)
-                        currentPreset = ""
-                    }
-                }
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-            ScrollView {
-                VStack(spacing: 0) {
-                    ForEach(promptManager.savedPrompts, id: \.id) { prompt in
-                        Button(action: {
-                            if promptManager.activePromptID == prompt.id {
-                                promptManager.activePromptID = nil
-                            } else {
-                                promptManager.activePromptID = prompt.id
-                            }
-                        }) {
-                            MenuPromptView(
-                                prompt: prompt,
-                                isActive: prompt.id == promptManager.activePromptID,
-                                isEditing: .init(
-                                    get: { self.isEditingID == prompt.id },
-                                    set: { _ in
-                                        self.isEditingID = (self.isEditingID == prompt.id ? nil : prompt.id)
-                                        promptManager.activePromptID = prompt.id
-                                    }
-                                ),
-                                onDelete: {
-                                    promptManager.removePrompt(with: prompt.id!, context: viewContext)
-                                    if promptManager.activePromptID == prompt.id {
-                                        promptManager.activePromptID = nil
-                                    }
-                                },
-                                onUpdate: { newContent in
-                                    promptManager.updatePrompt(
-                                        with: prompt.id!,
-                                        newContent: newContent,
-                                        context: viewContext
-                                    )
-                                }
-                            )
+            if token == nil && !incognitoMode {
+                SignInWithAppleButton(.signIn) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { result in
+                    switch result {
+                    case .success(let authResults):
+                        if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
+                           let authorizationToken = appleIDCredential.authorizationCode,
+                           let tokenString = String(data: authorizationToken, encoding: .utf8) {
+                            token = tokenString
                         }
-                        .buttonStyle(PlainButtonStyle())
+                    case .failure(let error):
+                        // TODO: Show some error message
+                        print("Authorisation failed: \(error.localizedDescription)")
                     }
                 }
+                .signInWithAppleButtonStyle(.white)
+            } else {
+                TextField("Tell me what to do when you copy-paste.", text: $currentPreset, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .lineLimit(4)
+                    .focused($isTextFieldFocused)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(.secondary.opacity(0.1))
+                    )
+                    .onSubmit {
+                        if !currentPreset.isEmpty {
+                            promptManager.addPrompt(currentPreset, context: viewContext)
+                            currentPreset = ""
+                        }
+                    }
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(promptManager.savedPrompts, id: \.id) { prompt in
+                            Button(action: {
+                                if promptManager.activePromptID == prompt.id {
+                                    promptManager.activePromptID = nil
+                                } else {
+                                    promptManager.activePromptID = prompt.id
+                                }
+                            }) {
+                                MenuPromptView(
+                                    prompt: prompt,
+                                    isActive: prompt.id == promptManager.activePromptID,
+                                    isEditing: .init(
+                                        get: { self.isEditingID == prompt.id },
+                                        set: { _ in
+                                            self.isEditingID = (self.isEditingID == prompt.id ? nil : prompt.id)
+                                            promptManager.activePromptID = prompt.id
+                                        }
+                                    ),
+                                    onDelete: {
+                                        promptManager.removePrompt(with: prompt.id!, context: viewContext)
+                                        if promptManager.activePromptID == prompt.id {
+                                            promptManager.activePromptID = nil
+                                        }
+                                    },
+                                    onUpdate: { newContent in
+                                        promptManager.updatePrompt(
+                                            with: prompt.id!,
+                                            newContent: newContent,
+                                            context: viewContext
+                                        )
+                                    }
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+                .frame(maxHeight: 300)
             }
-            .frame(maxHeight: 300)
 
             VStack(spacing: 0) {
-                Divider()
-                    .padding(.horizontal, horizontalPadding)
+                if token != nil && !incognitoMode {
+                    Divider()
+                        .padding(.horizontal, horizontalPadding)
 
-                if let toast = modalManager.toastWindow, toast.isVisible {
-                    buttonRow(title: "Clear chat", isHovering: $isHoveringClearChat) {
-                        modalManager.forceRefresh()
-                        modalManager.focus()
-                        isMenuVisible = false
+                    if let toast = modalManager.toastWindow, toast.isVisible {
+                        buttonRow(title: "Clear chat", isHovering: $isHoveringClearChat) {
+                            modalManager.forceRefresh()
+                            modalManager.focus()
+                            isMenuVisible = false
+                        }
+                        .padding(.vertical, verticalPadding)
+                    } else {
+                        buttonRow(title: "Open chat", isHovering: $isHoveringChat) {
+                            modalManager.showModal(incognito: incognitoMode)
+                            modalManager.focus()
+                            isMenuVisible = false
+                        }
+                        .padding(.vertical, verticalPadding)
                     }
-                    .padding(.vertical, verticalPadding)
-                } else {
-                    buttonRow(title: "Open chat", isHovering: $isHoveringChat) {
-                        modalManager.showModal(incognito: incognitoMode)
-                        modalManager.focus()
-                        isMenuVisible = false
-                    }
-                    .padding(.vertical, verticalPadding)
                 }
 
                 Divider()
@@ -130,6 +156,14 @@ struct MenuView: View {
                     NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                     isMenuVisible = false
                 }
+
+                if token != nil {
+                    buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
+                        token = nil
+                        isMenuVisible = false
+                    }
+                }
+
                 buttonRow(title: "Quit", isHovering: $isHoveringQuit) {
                     NSApplication.shared.terminate(self)
                 }

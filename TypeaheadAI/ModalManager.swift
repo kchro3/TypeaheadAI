@@ -98,6 +98,7 @@ class ModalManager: ObservableObject {
     }
 
     /// Set an error message.
+    @MainActor
     func setError(_ responseError: String) {
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
             messages[idx].responseError = responseError
@@ -206,7 +207,7 @@ class ModalManager: ObservableObject {
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
                 Task {
-                    self.setError(error.localizedDescription)
+                    await self.setError(error.localizedDescription)
                 }
                 self.logger.error("An error occurred: \(error)")
             }
@@ -228,6 +229,7 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
+                // TODO: If it's a cancellation error, don't do anything
                 Task {
                     self.setError(error.localizedDescription)
                 }
