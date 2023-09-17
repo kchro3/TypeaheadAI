@@ -109,16 +109,18 @@ final class AppState: ObservableObject {
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatRefresh) { [self] in
-            self.modalManager.clearText(stickyMode: false)
+            self.modalManager.forceRefresh()
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
             self.modalManager.showModal(incognito: self.incognitoMode)
+            NSApp.activate(ignoringOtherApps: true)
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
-            self.modalManager.clearText(stickyMode: false)
+            self.modalManager.forceRefresh()
             self.modalManager.showModal(incognito: self.incognitoMode)
+            NSApp.activate(ignoringOtherApps: true)
         }
 
         // Configure mouse-click handler
@@ -376,11 +378,9 @@ struct TypeaheadAIApp: App {
         _appState = StateObject(wrappedValue: AppState(context: context))
 
         // NOTE: uncomment for testing
-        token = nil
-        hasOnboarded = false
-        numCopies = 0
-
-        print(KeyboardShortcuts.Name.allCases)
+//        token = nil
+//        hasOnboarded = false
+//        numCopies = 0
     }
 
     var body: some Scene {

@@ -109,12 +109,7 @@ struct MenuView: View {
             .frame(minHeight: 200)
 
             VStack(spacing: 0) {
-                if token != nil {
-                    buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
-                        token = nil
-                        isMenuVisible = false
-                    }
-                } else {
+                if token == nil {
                     SignInWithAppleButton(.signIn) { request in
                         request.requestedScopes = [.fullName, .email]
                     } onCompletion: { result in
@@ -155,7 +150,6 @@ struct MenuView: View {
                     shortcut: KeyboardShortcuts.Name.chatRefresh
                 ) {
                     modalManager.forceRefresh()
-                    NSApp.activate(ignoringOtherApps: true)
                     isMenuVisible = false
                 }
 
@@ -163,6 +157,13 @@ struct MenuView: View {
                     NSApp.activate(ignoringOtherApps: true)
                     NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                     isMenuVisible = false
+                }
+
+                if token != nil {
+                    buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
+                        token = nil
+                        isMenuVisible = false
+                    }
                 }
 
                 buttonRow(title: "Quit", isHovering: $isHoveringQuit) {

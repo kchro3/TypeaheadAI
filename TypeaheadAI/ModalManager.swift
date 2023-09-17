@@ -91,6 +91,10 @@ class ModalManager: ObservableObject {
         messages = []
         currentTextCount = 0
         currentOutput = nil
+
+        if (toastWindow?.isVisible ?? false) {
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
     func setText(_ text: String) {
@@ -213,7 +217,9 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
-                self.setError(error.localizedDescription)
+                Task {
+                    self.setError(error.localizedDescription)
+                }
                 self.logger.error("An error occurred: \(error)")
             }
         }
