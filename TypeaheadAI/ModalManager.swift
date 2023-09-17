@@ -57,7 +57,7 @@ class ModalManager: ObservableObject {
     // TODO: Inject?
     var clientManager: ClientManager? = nil
 
-    var toastWindow: NSWindow?
+    var toastWindow: CustomModalWindow?
 
     func hasText() -> Bool {
         if let lastMessage = messages.last,
@@ -280,6 +280,7 @@ class ModalManager: ObservableObject {
             backing: .buffered,
             defer: false
         )
+        toastWindow?.modalManager = self
 
         // Set the base effect view as the window's content view
         toastWindow?.contentView = baseView
