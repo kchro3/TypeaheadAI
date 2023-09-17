@@ -108,6 +108,9 @@ struct MenuView: View {
             }
             .frame(minHeight: 200)
 
+            Divider()
+                .padding(.horizontal, horizontalPadding)
+
             VStack(spacing: 0) {
                 if token == nil {
                     SignInWithAppleButton(.signIn) { request in
@@ -134,23 +137,25 @@ struct MenuView: View {
                         .padding(.horizontal, horizontalPadding)
                 }
 
-                buttonRow(
-                    title: "Open chat",
-                    isHovering: $isHoveringChat,
-                    shortcut: KeyboardShortcuts.Name.chatOpen
-                ) {
-                    modalManager.showModal(incognito: incognitoMode)
-                    NSApp.activate(ignoringOtherApps: true)
-                    isMenuVisible = false
-                }
-
-                buttonRow(
-                    title: "Clear chat",
-                    isHovering: $isHoveringClearChat,
-                    shortcut: KeyboardShortcuts.Name.chatRefresh
-                ) {
-                    modalManager.forceRefresh()
-                    isMenuVisible = false
+                if modalManager.isVisible {
+                    buttonRow(
+                        title: "Clear chat",
+                        isHovering: $isHoveringClearChat,
+                        shortcut: KeyboardShortcuts.Name.chatRefresh
+                    ) {
+                        modalManager.forceRefresh()
+                        isMenuVisible = false
+                    }
+                } else {
+                    buttonRow(
+                        title: "Open chat",
+                        isHovering: $isHoveringChat,
+                        shortcut: KeyboardShortcuts.Name.chatOpen
+                    ) {
+                        modalManager.showModal(incognito: incognitoMode)
+                        NSApp.activate(ignoringOtherApps: true)
+                        isMenuVisible = false
+                    }
                 }
 
                 buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
