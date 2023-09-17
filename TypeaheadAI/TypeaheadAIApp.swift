@@ -364,19 +364,18 @@ final class AppState: ObservableObject {
 
 @main
 struct TypeaheadAIApp: App {
-    private var hasOnboarded: Bool
-
     let persistenceController = PersistenceController.shared
     @StateObject private var appState: AppState
     @State var isMenuVisible: Bool = false
-    @AppStorage("appLaunchCount") private var appLaunchCount: Int = 0
+    @AppStorage("token") var token: String?
+    @AppStorage("hasOnboarded") var hasOnboarded: Bool?
 
     init() {
-        let defaults = UserDefaults.standard
-        hasOnboarded = defaults.bool(forKey: "hasOnboarded")
-
         let context = persistenceController.container.viewContext
         _appState = StateObject(wrappedValue: AppState(context: context))
+
+        // NOTE: uncomment for testing
+        hasOnboarded = false
     }
 
     var body: some Scene {
@@ -403,9 +402,9 @@ struct TypeaheadAIApp: App {
     }
 
     func setup() {
-        if !hasOnboarded {
+        if let _hasOnboarded = hasOnboarded, !_hasOnboarded {
             self.appState.modalManager.showOnboardingModal()
-            UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
+            self.hasOnboarded = true
         }
     }
 }

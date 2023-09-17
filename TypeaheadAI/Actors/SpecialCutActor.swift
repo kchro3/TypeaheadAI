@@ -116,20 +116,7 @@ actor SpecialCutActor {
                         copiedText: recognizedText,
                         incognitoMode: incognitoMode,
                         stream: true,
-                        streamHandler: { result in
-                            switch result {
-                            case .success(let chunk):
-                                Task {
-                                    await self.modalManager.appendText(chunk)
-                                }
-                                self.logger.info("Received chunk: \(chunk)")
-                            case .failure(let error):
-                                DispatchQueue.main.async {
-                                    self.modalManager.setError(error.localizedDescription)
-                                }
-                                self.logger.error("An error occurred: \(error)")
-                            }
-                        },
+                        streamHandler: self.modalManager.defaultHandler,
                         completion: { _ in }
                     )
                 }

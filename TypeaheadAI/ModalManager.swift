@@ -221,21 +221,11 @@ class ModalManager: ObservableObject {
             _ = self.messages.popLast()
         }
 
-        self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
-            switch result {
-            case .success(let chunk):
-                Task {
-                    await self.appendText(chunk)
-                }
-                self.logger.info("Received chunk: \(chunk)")
-            case .failure(let error):
-                // TODO: If it's a cancellation error, don't do anything
-                Task {
-                    self.setError(error.localizedDescription)
-                }
-                self.logger.error("An error occurred: \(error)")
-            }
-        }
+        self.clientManager?.refine(
+            messages: self.messages,
+            incognitoMode: incognito,
+            streamHandler: defaultHandler
+        )
     }
 
     func toggleModal(incognito: Bool) {
@@ -338,20 +328,7 @@ class ModalManager: ObservableObject {
 
     func showOnboardingModal() {
         showModal(incognito: false)
-        self.clientManager?.onboarding(messages: messages) { result in
-            switch result {
-            case .success(let chunk):
-                Task {
-                    await self.appendText(chunk)
-                }
-                self.logger.info("Received chunk: \(chunk)")
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.setError("Something went wrong... please restart the app!")
-                }
-                self.logger.error("An error occurred: \(error)")
-            }
-        }
+        self.clientManager?.onboarding(messages: messages, streamHandler: defaultHandler)
     }
 
     @objc func windowDidMove(_ notification: Notification) {
@@ -369,6 +346,31 @@ class ModalManager: ObservableObject {
 
             UserDefaults.standard.set(size.width, forKey: "toastWidth")
             UserDefaults.standard.set(size.height, forKey: "toastHeight")
+        }
+    }
+
+    func defaultHandler(result: Result<String, Error>) {
+        switch result {
+        case .success(let chunk):
+            Task {
+                await self.appendText(chunk)
+            }
+            self.logger.info("Received chunk: \(chunk)")
+        case .failure(let error as ClientManagerError):
+            self.logger.error("Error: \(error.localizedDescription)")
+            switch error {
+            case .badRequest(let message):
+                DispatchQueue.main.async {
+                    self.setError(message)
+                }
+            default:
+                DispatchQueue.main.async {
+                    self.setError("Something went wrong. Please try again.")
+                }
+                self.logger.error("Something went wrong.")
+            }
+        default:
+            self.logger.error("Unknown error")
         }
     }
 }
