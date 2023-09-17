@@ -189,7 +189,8 @@ class ClientManager {
     func onboarding(
         messages: [Message],
         timeout: TimeInterval = 10,
-        streamHandler: @escaping (Result<String, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<String, Error>) -> Void
     ) {
         if messages.isEmpty {
             appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
@@ -210,7 +211,7 @@ class ClientManager {
                         incognitoMode: false,
                         onboardingMode: true,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }
@@ -241,7 +242,7 @@ class ClientManager {
                         incognitoMode: false,
                         onboardingMode: true,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }

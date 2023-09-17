@@ -132,7 +132,7 @@ final class AppState: ObservableObject {
                 let windowRect = window.frame
 
                 if !windowRect.contains(mouseLocation) {
-                    self?.modalManager.toastWindow?.close()
+                    self?.modalManager.closeModal()
                 }
             }
         }
@@ -369,13 +369,18 @@ struct TypeaheadAIApp: App {
     @State var isMenuVisible: Bool = false
     @AppStorage("token") var token: String?
     @AppStorage("hasOnboarded") var hasOnboarded: Bool?
+    @AppStorage("numCopies") var numCopies: Int?
 
     init() {
         let context = persistenceController.container.viewContext
         _appState = StateObject(wrappedValue: AppState(context: context))
 
         // NOTE: uncomment for testing
+        token = nil
         hasOnboarded = false
+        numCopies = 0
+
+        print(KeyboardShortcuts.Name.allCases)
     }
 
     var body: some Scene {
@@ -404,7 +409,6 @@ struct TypeaheadAIApp: App {
     func setup() {
         if let _hasOnboarded = hasOnboarded, !_hasOnboarded {
             self.appState.modalManager.showOnboardingModal()
-            self.hasOnboarded = true
         }
     }
 }

@@ -28,6 +28,8 @@ struct Message: Codable, Identifiable, Equatable {
 class ModalManager: ObservableObject {
     @Published var messages: [Message]
     @Published var triggerFocus: Bool
+    @Published var onboardingMode: Bool
+    @Published var isVisible: Bool
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -42,9 +44,14 @@ class ModalManager: ObservableObject {
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
 
+    private var signinTimer: Timer?
+    private var copyTimer: Timer?
+
     init() {
         self.messages = []
         self.triggerFocus = false
+        self.onboardingMode = false
+        self.isVisible = false
     }
 
     // TODO: Inject?
@@ -62,10 +69,6 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func focus() {
-        self.triggerFocus = true
-    }
-
     func clearText(stickyMode: Bool) {
         if stickyMode {
             // TODO: Should we do something smarter here?
@@ -82,10 +85,12 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func forceRefresh() {
+        self.clientManager?.cancelStreamingTask()
+        self.clientManager?.flushCache()
+        onboardingMode = false
         messages = []
         currentTextCount = 0
         currentOutput = nil
-        self.clientManager?.flushCache()
     }
 
     func setText(_ text: String) {
@@ -188,11 +193,13 @@ class ModalManager: ObservableObject {
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
+    @MainActor
     func setUserMessage(_ text: String) {
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
+    @MainActor
     func addUserMessage(_ text: String, incognito: Bool) {
         self.clientManager?.cancelStreamingTask()
 
@@ -206,9 +213,7 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
-                Task {
-                    await self.setError(error.localizedDescription)
-                }
+                self.setError(error.localizedDescription)
                 self.logger.error("An error occurred: \(error)")
             }
         }
@@ -228,14 +233,13 @@ class ModalManager: ObservableObject {
         )
     }
 
-    func toggleModal(incognito: Bool) {
-        if toastWindow?.isVisible ?? false {
-            toastWindow?.close()
-        } else {
-            showModal(incognito: incognito)
-        }
+    @MainActor
+    func closeModal() {
+        toastWindow?.close()
+        isVisible = false
     }
 
+    @MainActor
     func showModal(incognito: Bool) {
         toastWindow?.close()
 
@@ -310,7 +314,6 @@ class ModalManager: ObservableObject {
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.level = .popUpMenu
         toastWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
 
         toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
@@ -324,11 +327,45 @@ class ModalManager: ObservableObject {
             self,
             selector: #selector(windowDidResize(_:)),
             name: NSWindow.didResizeNotification, object: toastWindow)
+
+        self.isVisible = true
     }
 
+    @MainActor
     func showOnboardingModal() {
+        self.onboardingMode = true
         showModal(incognito: false)
-        self.clientManager?.onboarding(messages: messages, streamHandler: defaultHandler)
+        self.clientManager?.onboarding(messages: messages, streamHandler: defaultHandler) { _ in
+            Task {
+                self.startSigninTimer()
+            }
+        }
+    }
+
+    @MainActor
+    private func startSigninTimer() {
+        // Invalidate the previous timer if it exists
+        signinTimer?.invalidate()
+
+        // Create and schedule a new timer
+        signinTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            self.logger.info("signin timer pending")
+            if let _ = UserDefaults.standard.value(forKey: "token") {
+                self.logger.info("signin timer done")
+                self.clientManager?.onboarding(
+                    messages: self.messages,
+                    streamHandler: self.defaultHandler,
+                    completion: { _ in
+                        UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
+                        DispatchQueue.main.async {
+                            self.onboardingMode = false
+                        }
+                    }
+                )
+                self.signinTimer?.invalidate()
+                self.signinTimer = nil
+            }
+        }
     }
 
     @objc func windowDidMove(_ notification: Notification) {

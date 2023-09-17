@@ -85,6 +85,7 @@ struct ModalView: View {
     @State private var fontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
     @State private var text: String = ""
     @FocusState private var isTextFieldFocused: Bool
+    @State private var isReplyLocked: Bool = false
 
     @Namespace var bottomID
 
@@ -107,7 +108,7 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            TextField("Ask a follow-up question...", text: $text, axis: .vertical)
+            TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text, axis: .vertical)
                 .textFieldStyle(.plain)
                 .lineLimit(8)
                 .focused($isTextFieldFocused)
@@ -133,6 +134,7 @@ struct ModalView: View {
                 .onAppear {
                     isTextFieldFocused = true
                 }
+                .disabled(modalManager.onboardingMode)
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
