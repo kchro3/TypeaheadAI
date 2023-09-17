@@ -36,46 +36,32 @@ actor SpecialSaveActor: CanSimulateCopy {
             }
 
             self.logger.debug("saved '\(copiedText)'")
-            // Force sticky-mode so that it saves the message to the session.
-            self.modalManager.clearText(stickyMode: true)
-            self.modalManager.showModal(incognito: incognitoMode)
-
             Task {
+                // Force sticky-mode so that it saves the message to the session.
+                await self.modalManager.clearText(stickyMode: true)
+                await self.modalManager.showModal(incognito: incognitoMode)
                 await self.modalManager.appendText("Saving...\n")
-            }
 
-            self.clientManager.predict(
-                id: UUID(),
-                copiedText: copiedText,
-                incognitoMode: incognitoMode,
-                userObjective: "tldr the copied text in 20 words or less",
-                stream: true,
-                streamHandler: { result in
-                    switch result {
-                    case .success(let chunk):
-                        Task {
-                            await self.modalManager.appendText(chunk)
+                self.clientManager.predict(
+                    id: UUID(),
+                    copiedText: copiedText,
+                    incognitoMode: incognitoMode,
+                    userObjective: "tldr the copied text in 20 words or less",
+                    stream: true,
+                    streamHandler: self.modalManager.defaultHandler,
+                    completion: { result in
+                        switch result {
+                        case .success(let output):
+                            _ = self.memoManager.createEntry(summary: output, content: copiedText)
+                        case .failure(let error):
+                            DispatchQueue.main.async {
+                                self.modalManager.setError(error.localizedDescription)
+                            }
+                            self.logger.error("An error occurred: \(error)")
                         }
-                        self.logger.info("Received chunk: \(chunk)")
-                    case .failure(let error):
-                        DispatchQueue.main.async {
-                            self.modalManager.setError(error.localizedDescription)
-                        }
-                        self.logger.error("An error occurred: \(error)")
                     }
-                },
-                completion: { result in
-                    switch result {
-                    case .success(let output):
-                        _ = self.memoManager.createEntry(summary: output, content: copiedText)
-                    case .failure(let error):
-                        DispatchQueue.main.async {
-                            self.modalManager.setError(error.localizedDescription)
-                        }
-                        self.logger.error("An error occurred: \(error)")
-                    }
-                }
-            )
+                )
+            }
         }
     }
 }

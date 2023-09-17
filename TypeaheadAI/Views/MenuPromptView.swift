@@ -41,7 +41,7 @@ struct MenuPromptView: View {
                 .foregroundStyle(isActive ? .white : .secondary, .blue)
 
             if isEditing {
-                TextField("To remove, delete all and press enter.", text: $localPromptContent)
+                TextField("To delete, clear text and enter.", text: $localPromptContent)
                     .textFieldStyle(.plain)
                     .lineLimit(4)
                     .padding(.vertical, 5)

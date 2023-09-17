@@ -102,36 +102,25 @@ actor SpecialCutActor {
                         truncated = "\(truncated.prefix(280))..."
                     }
 
-                    self.modalManager.clearText(stickyMode: stickyMode)
-                    self.modalManager.showModal(incognito: incognitoMode)
+                    Task {
+                        await self.modalManager.clearText(stickyMode: stickyMode)
+                        await self.modalManager.showModal(incognito: incognitoMode)
 
-                    if let activePrompt = self.clientManager.getActivePrompt() {
-                        self.modalManager.setUserMessage("\(activePrompt)\n:\(truncated)")
-                    } else {
-                        self.modalManager.setUserMessage("cut:\n\(truncated)")
+                        if let activePrompt = self.clientManager.getActivePrompt() {
+                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(truncated)")
+                        } else {
+                            await self.modalManager.setUserMessage("cut:\n\(truncated)")
+                        }
+
+                        self.clientManager.predict(
+                            id: UUID(),
+                            copiedText: recognizedText,
+                            incognitoMode: incognitoMode,
+                            stream: true,
+                            streamHandler: self.modalManager.defaultHandler,
+                            completion: { _ in }
+                        )
                     }
-
-                    self.clientManager.predict(
-                        id: UUID(),
-                        copiedText: recognizedText,
-                        incognitoMode: incognitoMode,
-                        stream: true,
-                        streamHandler: { result in
-                            switch result {
-                            case .success(let chunk):
-                                Task {
-                                    await self.modalManager.appendText(chunk)
-                                }
-                                self.logger.info("Received chunk: \(chunk)")
-                            case .failure(let error):
-                                DispatchQueue.main.async {
-                                    self.modalManager.setError(error.localizedDescription)
-                                }
-                                self.logger.error("An error occurred: \(error)")
-                            }
-                        },
-                        completion: { _ in }
-                    )
                 }
             }
         } catch {

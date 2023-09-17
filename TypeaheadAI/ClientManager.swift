@@ -10,6 +10,7 @@ import Foundation
 import os.log
 
 struct RequestPayload: Codable {
+    var token: String?
     var username: String
     var userFullName: String
     var userObjective: String
@@ -89,6 +90,7 @@ class ClientManager {
                 Task {
                     await self.sendStreamRequest(
                         id: id,
+                        token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: NSUserName(),
                         userFullName: NSFullUserName(),
                         userObjective: objective,
@@ -108,6 +110,7 @@ class ClientManager {
                 DispatchQueue.main.async {
                     self.sendRequest(
                         id: id,
+                        token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: NSUserName(),
                         userFullName: NSFullUserName(),
                         userObjective: self.promptManager?.getActivePrompt() ?? "",
@@ -139,6 +142,7 @@ class ClientManager {
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
+                        token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: payload.username,
                         userFullName: payload.userFullName,
                         userObjective: payload.userObjective,
@@ -161,6 +165,7 @@ class ClientManager {
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
+                        token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: NSUserName(),
                         userFullName: NSFullUserName(),
                         userObjective: "",
@@ -184,13 +189,15 @@ class ClientManager {
     func onboarding(
         messages: [Message],
         timeout: TimeInterval = 10,
-        streamHandler: @escaping (Result<String, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<String, Error>) -> Void
     ) {
         if messages.isEmpty {
             appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
+                        token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: NSUserName(),
                         userFullName: NSFullUserName(),
                         userObjective: "",
@@ -204,7 +211,7 @@ class ClientManager {
                         incognitoMode: false,
                         onboardingMode: true,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }
@@ -221,6 +228,7 @@ class ClientManager {
                 Task {
                     await self.sendStreamRequest(
                         id: UUID(),
+                        token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: payload.username,
                         userFullName: payload.userFullName,
                         userObjective: payload.userObjective,
@@ -234,7 +242,7 @@ class ClientManager {
                         incognitoMode: false,
                         onboardingMode: true,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }
@@ -245,6 +253,7 @@ class ClientManager {
     ///
     /// - Parameters:
     ///   - identifier: A UUID to uniquely identify this request.
+    ///   - token: The authentication token for the user.
     ///   - username: The username of the user.
     ///   - userFullName: The full name of the user.
     ///   - userObjective: The objective of the user.
@@ -259,6 +268,7 @@ class ClientManager {
     ///   - completion: A closure to be executed once the request is complete.
     private func sendRequest(
         id: UUID,
+        token: String?,
         username: String,
         userFullName: String,
         userObjective: String,
@@ -273,6 +283,7 @@ class ClientManager {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         let payload = RequestPayload(
+            token: token,
             username: username,
             userFullName: userFullName,
             userObjective: userObjective,
@@ -286,6 +297,14 @@ class ClientManager {
 
         if (incognitoMode) {
             completion(.success("[work in progress...]"))
+            return
+        }
+
+        guard let _ = UserDefaults.standard.string(forKey: "token") else {
+            self.logger.error("User is not logged in.")
+            let error: Result<String, Error> = .failure(
+                ClientManagerError.badRequest("Please sign-in to use online mode. You can use incognito mode without signing in."))
+            completion(error)
             return
         }
 
@@ -340,6 +359,7 @@ class ClientManager {
     ///   - streamHandler: A closure to be executed for each chunk of data received.
     private func sendStreamRequest(
         id: UUID,
+        token: String?,
         username: String,
         userFullName: String,
         userObjective: String,
@@ -359,6 +379,7 @@ class ClientManager {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
             let payload = RequestPayload(
+                token: token,
                 username: username,
                 userFullName: userFullName,
                 userObjective: userObjective,
@@ -401,6 +422,17 @@ class ClientManager {
         timeout: TimeInterval,
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) async -> Result<String, Error> {
+        if !payload.onboarding {
+            // Let onboarding users have a grace-period
+            guard let _ = UserDefaults.standard.string(forKey: "token") else {
+                self.logger.error("User is not logged in.")
+                let error: Result<String, Error> = .failure(
+                    ClientManagerError.badRequest("Please sign-in to use online mode. You can use incognito mode without signing in."))
+                streamHandler(error)
+                return error
+            }
+        }
+
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             let error: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
             streamHandler(error)

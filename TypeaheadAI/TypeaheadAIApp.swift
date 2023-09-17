@@ -109,16 +109,18 @@ final class AppState: ObservableObject {
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatRefresh) { [self] in
-            self.modalManager.clearText(stickyMode: false)
+            self.modalManager.forceRefresh()
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
             self.modalManager.showModal(incognito: self.incognitoMode)
+            NSApp.activate(ignoringOtherApps: true)
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
-            self.modalManager.clearText(stickyMode: false)
+            self.modalManager.forceRefresh()
             self.modalManager.showModal(incognito: self.incognitoMode)
+            NSApp.activate(ignoringOtherApps: true)
         }
 
         // Configure mouse-click handler
@@ -132,7 +134,7 @@ final class AppState: ObservableObject {
                 let windowRect = window.frame
 
                 if !windowRect.contains(mouseLocation) {
-                    self?.modalManager.toastWindow?.close()
+                    self?.modalManager.closeModal()
                 }
             }
         }
@@ -364,17 +366,11 @@ final class AppState: ObservableObject {
 
 @main
 struct TypeaheadAIApp: App {
-    private var hasOnboarded: Bool
-
     let persistenceController = PersistenceController.shared
     @StateObject private var appState: AppState
     @State var isMenuVisible: Bool = false
-    @AppStorage("appLaunchCount") private var appLaunchCount: Int = 0
 
     init() {
-        let defaults = UserDefaults.standard
-        hasOnboarded = defaults.bool(forKey: "hasOnboarded")
-
         let context = persistenceController.container.viewContext
         _appState = StateObject(wrappedValue: AppState(context: context))
     }
@@ -393,19 +389,14 @@ struct TypeaheadAIApp: App {
                 isMenuVisible: $isMenuVisible
             )
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
-            .onAppear(perform: setup)
+            .onAppear(perform: {
+                appState.modalManager.showOnboardingModal()
+            })
         } label: {
             Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
         }
         .menuBarExtraAccess(isPresented: $isMenuVisible)
         .menuBarExtraStyle(.window)
-    }
-
-    func setup() {
-        if !hasOnboarded {
-            self.appState.modalManager.showOnboardingModal()
-            UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
-        }
     }
 }

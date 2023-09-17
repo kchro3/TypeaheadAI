@@ -18,3 +18,15 @@ extension KeyboardShortcuts.Name {
     static let chatOpen = KeyboardShortcuts.Name("chatOpen", default: Shortcut(.o, modifiers: [.command, .control]))
     static let chatRefresh = KeyboardShortcuts.Name("chatRefresh", default: Shortcut(.r, modifiers: [.command, .control]))
 }
+
+extension KeyboardShortcuts.Name: CaseIterable {
+    public static let allCases: [Self] = [
+        .specialCopy,
+        .specialPaste,
+        .specialCut,
+        .specialSave,
+        .chatNew,
+        .chatOpen,
+        .chatRefresh,
+    ]
+}

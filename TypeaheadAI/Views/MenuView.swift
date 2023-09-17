@@ -7,6 +7,8 @@
 
 import SwiftUI
 import CoreData
+import KeyboardShortcuts
+import AuthenticationServices
 
 struct MenuView: View {
     @Binding var incognitoMode: Bool
@@ -14,11 +16,15 @@ struct MenuView: View {
     @ObservedObject var modalManager: ModalManager
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.colorScheme) private var colorScheme
+
+    @AppStorage("token") var token: String?
 
     @State private var currentPreset: String = ""
     @State private var isHoveringChat = false
     @State private var isHoveringClearChat = false
     @State private var isHoveringSettings = false
+    @State private var isHoveringSignOut = false
     @State private var isHoveringQuit = false
     @State private var isEditingID: UUID?
     @FocusState private var isTextFieldFocused: Bool
@@ -100,36 +106,71 @@ struct MenuView: View {
                     }
                 }
             }
-            .frame(maxHeight: 300)
+            .frame(minHeight: 200)
+
+            Divider()
+                .padding(.horizontal, horizontalPadding)
 
             VStack(spacing: 0) {
-                Divider()
-                    .padding(.horizontal, horizontalPadding)
+                if token == nil {
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = [.fullName, .email]
+                    } onCompletion: { result in
+                        switch result {
+                        case .success(let authResults):
+                            if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
+                               let authorizationToken = appleIDCredential.authorizationCode,
+                               let tokenString = String(data: authorizationToken, encoding: .utf8) {
+                                token = tokenString
+                                isMenuVisible = false
+                            }
+                        case .failure(let error):
+                            // TODO: Show some error message
+                            print("Authorization failed: \(error.localizedDescription)")
+                        }
+                    }
+                    .signInWithAppleButtonStyle((colorScheme == .dark) ? .white : .black)
+                    .cornerRadius(25)
 
-                if let toast = modalManager.toastWindow, toast.isVisible {
-                    buttonRow(title: "Clear chat", isHovering: $isHoveringClearChat) {
-                        modalManager.forceRefresh()
-                        modalManager.focus()
-                        isMenuVisible = false
-                    }
-                    .padding(.vertical, verticalPadding)
-                } else {
-                    buttonRow(title: "Open chat", isHovering: $isHoveringChat) {
-                        modalManager.showModal(incognito: incognitoMode)
-                        modalManager.focus()
-                        isMenuVisible = false
-                    }
-                    .padding(.vertical, verticalPadding)
+                    Divider()
+                        .padding(.top, verticalPadding)
+                        .padding(.horizontal, horizontalPadding)
                 }
 
-                Divider()
-                    .padding(.horizontal, horizontalPadding)
+                if modalManager.isVisible {
+                    buttonRow(
+                        title: "Clear chat",
+                        isHovering: $isHoveringClearChat,
+                        shortcut: KeyboardShortcuts.Name.chatRefresh
+                    ) {
+                        modalManager.forceRefresh()
+                        isMenuVisible = false
+                    }
+                } else {
+                    buttonRow(
+                        title: "Open chat",
+                        isHovering: $isHoveringChat,
+                        shortcut: KeyboardShortcuts.Name.chatOpen
+                    ) {
+                        modalManager.showModal(incognito: incognitoMode)
+                        NSApp.activate(ignoringOtherApps: true)
+                        isMenuVisible = false
+                    }
+                }
 
                 buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
                     NSApp.activate(ignoringOtherApps: true)
                     NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                     isMenuVisible = false
                 }
+
+                if token != nil {
+                    buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
+                        token = nil
+                        isMenuVisible = false
+                    }
+                }
+
                 buttonRow(title: "Quit", isHovering: $isHoveringQuit) {
                     NSApplication.shared.terminate(self)
                 }
@@ -141,15 +182,20 @@ struct MenuView: View {
     private func buttonRow(
         title: String,
         isHovering: Binding<Bool>,
+        shortcut: KeyboardShortcuts.Name? = nil,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            Text(title)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(4)
-                .background(isHovering.wrappedValue ? .primary.opacity(0.2) : Color.clear)
-                .cornerRadius(4)
-                .contentShape(Rectangle())
+            HStack {
+                Text(title)
+                Spacer()
+                Text(shortcut?.shortcut?.description ?? "")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(4)
+            .background(isHovering.wrappedValue ? .primary.opacity(0.2) : Color.clear)
+            .cornerRadius(4)
+            .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
         .onHover { hovering in
