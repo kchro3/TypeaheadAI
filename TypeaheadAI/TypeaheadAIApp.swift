@@ -369,18 +369,10 @@ struct TypeaheadAIApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var appState: AppState
     @State var isMenuVisible: Bool = false
-    @AppStorage("token") var token: String?
-    @AppStorage("hasOnboarded") var hasOnboarded: Bool?
-    @AppStorage("numCopies") var numCopies: Int?
 
     init() {
         let context = persistenceController.container.viewContext
         _appState = StateObject(wrappedValue: AppState(context: context))
-
-        // NOTE: uncomment for testing
-//        token = nil
-//        hasOnboarded = false
-//        numCopies = 0
     }
 
     var body: some Scene {
@@ -397,18 +389,14 @@ struct TypeaheadAIApp: App {
                 isMenuVisible: $isMenuVisible
             )
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
-            .onAppear(perform: setup)
+            .onAppear(perform: {
+                appState.modalManager.showOnboardingModal()
+            })
         } label: {
             Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
         }
         .menuBarExtraAccess(isPresented: $isMenuVisible)
         .menuBarExtraStyle(.window)
-    }
-
-    func setup() {
-        if let _hasOnboarded = hasOnboarded, !_hasOnboarded {
-            self.appState.modalManager.showOnboardingModal()
-        }
     }
 }

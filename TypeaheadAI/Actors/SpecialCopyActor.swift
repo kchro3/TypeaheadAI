@@ -12,7 +12,6 @@ import os.log
 actor SpecialCopyActor: CanSimulateCopy {
     private let clientManager: ClientManager
     private let modalManager: ModalManager
-    @AppStorage("numCopies") var numCopies: Int?
     
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -67,13 +66,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                             incognitoMode: incognitoMode,
                             stream: true,
                             streamHandler: self.modalManager.defaultHandler,
-                            completion: { _ in
-                                if let nCopies = self.numCopies {
-                                    self.numCopies = nCopies + 1
-                                } else {
-                                    self.numCopies = 0
-                                }
-                            }
+                            completion: { _ in }
                         )
                     }
                 }

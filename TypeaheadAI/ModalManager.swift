@@ -339,11 +339,13 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func showOnboardingModal() {
-        self.onboardingMode = true
-        showModal(incognito: false)
-        self.clientManager?.onboarding(messages: messages, streamHandler: defaultHandler) { _ in
-            Task {
-                self.startSigninTimer()
+        if !UserDefaults.standard.bool(forKey: "hasOnboarded") {
+            self.onboardingMode = true
+            showModal(incognito: false)
+            self.clientManager?.onboarding(messages: messages, streamHandler: defaultHandler) { _ in
+                Task {
+                    self.startSigninTimer()
+                }
             }
         }
     }
