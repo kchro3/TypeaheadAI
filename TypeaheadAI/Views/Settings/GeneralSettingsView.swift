@@ -8,7 +8,6 @@
 import SwiftUI
 import KeyboardShortcuts
 import CoreData
-import LaunchAtLogin
 
 struct GeneralSettingsView: View {
     @ObservedObject var promptManager: PromptManager
@@ -79,13 +78,12 @@ struct GeneralSettingsView: View {
             Divider()
 
             Form {
-                HStack(spacing: 40) {
+                HStack {
                     Spacer()
-                    LaunchAtLogin.Toggle()
-
                     Button("Reset User Prompts", action: {
                         promptManager.clearPrompts(context: viewContext)
                     })
+                    Spacer()
                     Button("Reset User Settings", action: clearUserDefaults)
                     Spacer()
                 }
