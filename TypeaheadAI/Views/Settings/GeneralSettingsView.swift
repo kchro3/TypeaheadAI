@@ -79,13 +79,14 @@ struct GeneralSettingsView: View {
             Divider()
 
             Form {
-                HStack(spacing: 40) {
+                HStack {
                     Spacer()
                     LaunchAtLogin.Toggle()
-
+                    Spacer()
                     Button("Reset User Prompts", action: {
                         promptManager.clearPrompts(context: viewContext)
                     })
+                    Spacer()
                     Button("Reset User Settings", action: clearUserDefaults)
                     Spacer()
                 }

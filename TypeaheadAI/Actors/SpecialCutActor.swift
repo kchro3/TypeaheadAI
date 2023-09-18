@@ -117,7 +117,7 @@ actor SpecialCutActor {
                             copiedText: recognizedText,
                             incognitoMode: incognitoMode,
                             stream: true,
-                            streamHandler: self.modalManager.defaultStreamHandler,
+                            streamHandler: self.modalManager.defaultHandler,
                             completion: { _ in }
                         )
                     }

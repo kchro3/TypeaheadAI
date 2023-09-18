@@ -19,7 +19,6 @@ struct AttributedOutput: Codable, Equatable {
 // TODO: Add to persistence
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
-    let createdAt: Date
     var text: String
     var attributed: AttributedOutput? = nil
     let isCurrentUser: Bool
@@ -36,7 +35,6 @@ class ModalManager: ObservableObject {
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ModalManager"
     )
-
     // When streaming a result, we want to batch process tokens.
     // Since we stream tokens one at a time, we need a global variable to
     // track the token counts per batch.
@@ -46,22 +44,18 @@ class ModalManager: ObservableObject {
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
 
-    private let context: NSManagedObjectContext
-
     private var signinTimer: Timer?
     private var copyTimer: Timer?
 
-    init(context: NSManagedObjectContext) {
+    init() {
         self.messages = []
         self.triggerFocus = false
         self.onboardingMode = false
         self.isVisible = false
-        self.context = context
     }
 
     // TODO: Inject?
     var clientManager: ClientManager? = nil
-    var messageManager: MessageManager? = nil
 
     var toastWindow: CustomModalWindow?
 
@@ -79,7 +73,7 @@ class ModalManager: ObservableObject {
         if stickyMode {
             // TODO: Should we do something smarter here?
             if let lastMessage = messages.last, !lastMessage.isCurrentUser {
-                messages.append(Message(id: UUID(), createdAt: Date(), text: "", isCurrentUser: false))
+                messages.append(Message(id: UUID(), text: "", isCurrentUser: false))
                 messages = messages.suffix(maxMessages)
             }
         } else {
@@ -108,7 +102,7 @@ class ModalManager: ObservableObject {
                 !messages[idx].isCurrentUser {
             messages[idx].text += text
         } else {
-            messages.append(Message(id: UUID(), createdAt: Date(), text: text, isCurrentUser: false))
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
         }
     }
 
@@ -120,7 +114,6 @@ class ModalManager: ObservableObject {
         } else {
             messages.append(Message(
                 id: UUID(),
-                createdAt: Date(),
                 text: "",
                 isCurrentUser: false,
                 responseError: responseError)
@@ -133,7 +126,7 @@ class ModalManager: ObservableObject {
     func appendText(_ text: String) async {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
             // If the AI response doesn't exist yet, create one.
-            messages.append(Message(id: UUID(), createdAt: Date(), text: text, isCurrentUser: false))
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
             currentTextCount = 0
             currentOutput = nil
             return
@@ -192,17 +185,11 @@ class ModalManager: ObservableObject {
                 ])
             }
         } catch {
-            if let lastIndex = messages.indices.last {
-                messages[lastIndex].responseError = error.localizedDescription
-            } else {
-                self.logger.info("task cancelled")
-            }
+            messages[idx].responseError = error.localizedDescription
         }
 
         // Check if the parsed string is different than the full string.
-        if let currentString = currentOutput?.string,
-           let lastIndex = messages.indices.last,
-           (currentString != streamText) {
+        if let currentString = currentOutput?.string, currentString != streamText {
             let output = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
             try? Task.checkCancellation()
             messages[idx].attributed = output
@@ -212,7 +199,7 @@ class ModalManager: ObservableObject {
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String) {
-        messages.append(Message(id: UUID(), createdAt: Date(), text: text, isCurrentUser: true))
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
@@ -220,13 +207,22 @@ class ModalManager: ObservableObject {
     func addUserMessage(_ text: String, incognito: Bool) {
         self.clientManager?.cancelStreamingTask()
 
-        guard let message = try? messageManager?.createEntry(text: text, attributed: nil, isCurrentUser: true, responseError: nil) else {
-            self.logger.error("Could not create message")
-            return
-        }
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
 
-        messages.append(Message(id: message.id!, createdAt: message.createdAt!, text: text, isCurrentUser: true))
-        self.clientManager?.refine(messages: self.messages, incognitoMode: incognito, streamHandler: defaultStreamHandler)
+        self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
+            switch result {
+            case .success(let chunk):
+                Task {
+                    await self.appendText(chunk)
+                }
+                self.logger.info("Received chunk: \(chunk)")
+            case .failure(let error):
+                Task {
+                    self.setError(error.localizedDescription)
+                }
+                self.logger.error("An error occurred: \(error)")
+            }
+        }
     }
 
     /// Reply to the user
@@ -239,7 +235,7 @@ class ModalManager: ObservableObject {
         self.clientManager?.refine(
             messages: self.messages,
             incognitoMode: incognito,
-            streamHandler: defaultStreamHandler
+            streamHandler: defaultHandler
         )
     }
 
@@ -265,7 +261,6 @@ class ModalManager: ObservableObject {
             incognito: incognito,
             modalManager: self
         )
-        .environment(\.managedObjectContext, context)
 
         let hostingView = NSHostingView(rootView: contentView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
@@ -348,7 +343,7 @@ class ModalManager: ObservableObject {
         if !UserDefaults.standard.bool(forKey: "hasOnboarded") {
             self.onboardingMode = true
             showModal(incognito: false)
-            self.clientManager?.onboarding(messages: messages, streamHandler: defaultStreamHandler) { _ in
+            self.clientManager?.onboarding(messages: messages, streamHandler: defaultHandler) { _ in
                 Task {
                     self.startSigninTimer()
                 }
@@ -368,7 +363,7 @@ class ModalManager: ObservableObject {
                 self.logger.info("signin timer done")
                 self.clientManager?.onboarding(
                     messages: self.messages,
-                    streamHandler: self.defaultStreamHandler,
+                    streamHandler: self.defaultHandler,
                     completion: { _ in
                         UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
                         DispatchQueue.main.async {
@@ -400,7 +395,7 @@ class ModalManager: ObservableObject {
         }
     }
 
-    func defaultStreamHandler(result: Result<String, Error>) {
+    func defaultHandler(result: Result<String, Error>) {
         switch result {
         case .success(let chunk):
             Task {

@@ -228,7 +228,7 @@ struct MenuView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt, context: context)
         }
 
-        let modalManager = ModalManager(context: context)
+        let modalManager = ModalManager()
 
         return MenuView(
             incognitoMode: $incognitoMode,
