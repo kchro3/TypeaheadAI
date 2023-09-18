@@ -80,9 +80,9 @@ struct CodeBlockView: View {
             .frame(alignment: .trailing)
         } else {
             Button {
-                DispatchQueue.main.async {
-                    NSPasteboard.general.setString(NSAttributedString(parserResult.attributedString).string, forType: .string)
-                }
+                let pasteboard = NSPasteboard.general
+                pasteboard.prepareForNewContents()
+                pasteboard.setString(NSAttributedString(parserResult.attributedString).string, forType: .string)
 
                 withAnimation {
                     isCopied = true
