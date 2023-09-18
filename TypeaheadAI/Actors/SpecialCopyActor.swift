@@ -39,11 +39,6 @@ actor SpecialCopyActor: CanSimulateCopy {
                 await self.modalManager.clearText(stickyMode: stickyMode)
                 await self.modalManager.showModal(incognito: incognitoMode)
 
-                var truncated: String = copiedText
-                if (copiedText.count > 280) {
-                    truncated = "\(truncated.prefix(280))..."
-                }
-
                 self.clientManager.appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
                     var userMessage = ""
                     if let url = url {
@@ -53,9 +48,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                     }
 
                     if let activePrompt = self.clientManager.getActivePrompt() {
-                        userMessage += "\(activePrompt):\n\(truncated)"
+                        userMessage += "\(activePrompt):\n\(copiedText)"
                     } else {
-                        userMessage += "copied:\n\(truncated)"
+                        userMessage += "copied:\n\(copiedText)"
                     }
 
                     Task {

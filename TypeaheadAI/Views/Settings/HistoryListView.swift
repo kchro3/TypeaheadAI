@@ -56,7 +56,7 @@ struct HistoryListView: View {
             Text("History").font(.headline)
 
             ScrollView {
-                VStack(spacing: 0) {
+                LazyVStack(spacing: 0) {
                     ForEach(historyEntries, id: \.id) { entry in
                         HistoryListItemView(entry: entry)
                             .padding(10)

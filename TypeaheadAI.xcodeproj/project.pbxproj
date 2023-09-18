@@ -12,6 +12,8 @@
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
 		2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D87C2AAC3330001193A2 /* ProfileView.swift */; };
 		2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */; };
+		2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */; };
+		2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3792302AB83739008D812F /* CanSimulatePaste.swift */; };
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
@@ -76,6 +78,8 @@
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
 		2B33D87C2AAC3330001193A2 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCutActor.swift; sourceTree = "<group>"; };
+		2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialPasteActor.swift; sourceTree = "<group>"; };
+		2B3792302AB83739008D812F /* CanSimulatePaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulatePaste.swift; sourceTree = "<group>"; };
 		2B3FAC1E2AAAF22400B2D405 /* TypeaheadAI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TypeaheadAI-Bridging-Header.h"; sourceTree = "<group>"; };
 		2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LlamaWrapper.cpp; sourceTree = "<group>"; };
 		2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LlamaWrapper.hpp; sourceTree = "<group>"; };
@@ -157,6 +161,8 @@
 				2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */,
 				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
 				2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */,
+				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
+				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -460,6 +466,8 @@
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
+				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
+				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,

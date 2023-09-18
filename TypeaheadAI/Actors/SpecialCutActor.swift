@@ -97,19 +97,15 @@ actor SpecialCutActor {
 
                 self.performOCR(image: cgImage) { recognizedText, _ in
                     self.logger.info("OCRed text: \(recognizedText)")
-                    var truncated: String = recognizedText
-                    if (recognizedText.count > 280) {
-                        truncated = "\(truncated.prefix(280))..."
-                    }
 
                     Task {
                         await self.modalManager.clearText(stickyMode: stickyMode)
                         await self.modalManager.showModal(incognito: incognitoMode)
 
                         if let activePrompt = self.clientManager.getActivePrompt() {
-                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(truncated)")
+                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
                         } else {
-                            await self.modalManager.setUserMessage("cut:\n\(truncated)")
+                            await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)")
                         }
 
                         self.clientManager.predict(
