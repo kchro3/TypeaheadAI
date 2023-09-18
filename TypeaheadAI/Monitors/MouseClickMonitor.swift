@@ -44,7 +44,7 @@ class MouseEventMonitor {
             })
     }
 
-    func stopMonitoring() async {
+    func stopMonitoring() {
         if let mouseEventMonitor = mouseEventMonitor {
             logger.debug("Stopping mouse click monitoring.")
             NSEvent.removeMonitor(mouseEventMonitor)

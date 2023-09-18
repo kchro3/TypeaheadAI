@@ -41,6 +41,7 @@ enum ClientManagerError: Error {
     case clientError(_ message: String)
     case serverError(_ message: String)
     case appError(_ message: String)
+    case networkError(_ message: String)
 }
 
 class ClientManager {
@@ -51,6 +52,7 @@ class ClientManager {
     private let session: URLSession
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
+//    private let apiUrl = URL(string: "http://localhost:8080/get_response")!
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
 //    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
 
@@ -61,6 +63,7 @@ class ClientManager {
 
     // Add a Task property to manage the streaming task
     private var currentStreamingTask: Task<Void, Error>? = nil
+    private var currentBatchTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
 
     init(session: URLSession = .shared) {
@@ -85,7 +88,13 @@ class ClientManager {
         // If objective is not specified in the request, fall back on the active prompt.
         let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "respond to this in <20 words" : "paste generated content")
 
-        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+        guard let appCtxManager = appContextManager else {
+            self.logger.error("Something is wrong with the initialization")
+            completion(.failure(ClientManagerError.appError("Something went wrong.")))
+            return
+        }
+
+        appCtxManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
             if stream {
                 Task {
                     await self.sendStreamRequest(
@@ -107,8 +116,8 @@ class ClientManager {
                     )
                 }
             } else {
-                DispatchQueue.main.async {
-                    self.sendRequest(
+                Task {
+                    await self.sendRequest(
                         id: id,
                         token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: NSUserName(),
@@ -281,75 +290,79 @@ class ClientManager {
         incognitoMode: Bool,
         timeout: TimeInterval = 10,
         completion: @escaping (Result<String, Error>) -> Void
-    ) {
-        let payload = RequestPayload(
-            token: token,
-            username: username,
-            userFullName: userFullName,
-            userObjective: userObjective,
-            userBio: userBio,
-            userLang: userLang,
-            copiedText: copiedText,
-            url: url,
-            activeAppName: activeAppName,
-            activeAppBundleIdentifier: activeAppBundleIdentifier
-        )
+    ) async {
+        currentBatchTask?.cancel()
+        currentBatchTask = Task.detached { [weak self] in
+            let payload = RequestPayload(
+                token: token,
+                username: username,
+                userFullName: userFullName,
+                userObjective: userObjective,
+                userBio: userBio,
+                userLang: userLang,
+                copiedText: copiedText,
+                url: url,
+                activeAppName: activeAppName,
+                activeAppBundleIdentifier: activeAppBundleIdentifier
+            )
 
-        if (incognitoMode) {
-            completion(.success("[work in progress...]"))
-            return
+            if let result: Result<String, Error> = (incognitoMode)
+                ? await self?.performBatchOfflineTask(payload: payload, timeout: timeout)
+                : await self?.performBatchOnlineTask(payload: payload, timeout: timeout) {
+                completion(result)
+            } else {
+                completion(.failure(ClientManagerError.appError("Something went wrong...")))
+            }
         }
+    }
 
+    private func performBatchOnlineTask(
+        payload: RequestPayload,
+        timeout: TimeInterval
+    ) async -> Result<String, Error> {
         guard let _ = UserDefaults.standard.string(forKey: "token") else {
             self.logger.error("User is not logged in.")
-            let error: Result<String, Error> = .failure(
+            return .failure(
                 ClientManagerError.badRequest("Please sign-in to use online mode. You can use incognito mode without signing in."))
-            completion(error)
-            return
         }
 
         // Encode the RequestPayload instance into JSON data.
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            completion(.failure(ClientManagerError.badRequest("Encoding error")))
-            return
+            return .failure(ClientManagerError.badRequest("Encoding error"))
         }
 
-        // Create an HTTP POST request with the API URL and encoded payload.
-        var request = URLRequest(url: self.apiUrl, timeoutInterval: timeout)
-        request.httpMethod = "POST"
-        request.httpBody = httpBody
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        do {
+            // Create an HTTP POST request with the API URL and encoded payload.
+            var request = URLRequest(url: self.apiUrl, timeoutInterval: timeout)
+            request.httpMethod = "POST"
+            request.httpBody = httpBody
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Initialize a URLSession data task with the request.
-        let task = self.session.dataTask(with: request) { (data, response, error) in
-            // Process the server's response.
-            if let data = data {
-                do {
-                    let decodedResponse = try JSONDecoder().decode(ResponsePayload.self, from: data)
-
-                    switch decodedResponse.responseCode {
-                    case 200:
-                        self.logger.debug("OK")
-                        completion(.success(decodedResponse.textToPaste))
-                    case 400:
-                        self.logger.debug("Client error")
-                        completion(.failure(ClientManagerError.clientError(decodedResponse.errorMessage ?? "")))
-                    default:
-                        self.logger.debug("Server error")
-                        completion(.failure(ClientManagerError.serverError(decodedResponse.errorMessage ?? "")))
-                    }
-                } catch {
-                    // An error occurred while decoding the response, invoke the completion handler with failure.
-                    self.logger.debug("Failed to process response: \(error.localizedDescription)")
-                    completion(.failure(error))
-                }
-            } else {
-                completion(.failure(ClientManagerError.serverError("unknown error")))
+            let (data, _) = try await self.session.data(for: request)
+            let decodedResponse = try JSONDecoder().decode(ResponsePayload.self, from: data)
+            switch decodedResponse.responseCode {
+            case 200:
+                self.logger.debug("OK")
+                return .success(decodedResponse.textToPaste)
+            case 400:
+                self.logger.debug("Client error")
+                return .failure(ClientManagerError.clientError(decodedResponse.errorMessage ?? ""))
+            default:
+                self.logger.debug("Server error")
+                return .failure(ClientManagerError.serverError(decodedResponse.errorMessage ?? ""))
             }
+        } catch {
+            self.logger.error("\(error.localizedDescription)")
+            return .failure(ClientManagerError.serverError(error.localizedDescription))
+        }
+    }
+
+    private func performBatchOfflineTask(payload: RequestPayload, timeout: TimeInterval) async -> Result<String, Error> {
+        guard let modelManager = self.llamaModelManager else {
+            return .failure(ClientManagerError.appError("Model Manager not found"))
         }
 
-        // Start the URLSession data task.
-        task.resume()
+        return modelManager.predict(payload: payload, streamHandler: { _ in })
     }
 
     /// Sends a request to the server with the given parameters and listens for a stream of data.
@@ -413,6 +426,8 @@ class ClientManager {
                     self?.cacheResponse(nil, for: payload)
                     break
                 }
+            } else {
+                completion(.failure(ClientManagerError.appError("Something went wrong...")))
             }
         }
     }
