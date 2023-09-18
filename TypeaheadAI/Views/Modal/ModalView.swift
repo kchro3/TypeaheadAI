@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Markdown
+import AudioToolbox
 
 struct MessageView: View {
     let message: Message
@@ -86,6 +87,7 @@ struct ModalView: View {
     @State private var text: String = ""
     @FocusState private var isTextFieldFocused: Bool
     @State private var isReplyLocked: Bool = false
+    @State private var isRecording: Bool = false
 
     @Namespace var bottomID
 
@@ -108,33 +110,66 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text, axis: .vertical)
-                .textFieldStyle(.plain)
-                .lineLimit(8)
-                .focused($isTextFieldFocused)
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(.secondary.opacity(0.1))
-                )
-                .onSubmit {
-                    if !text.isEmpty {
-                        modalManager.addUserMessage(text, incognito: incognito)
-                        text = ""
+            ZStack {
+                TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .lineLimit(8)
+                    .focused($isTextFieldFocused)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(.secondary.opacity(0.1))
+                    )
+                    .onSubmit {
+                        if !text.isEmpty {
+                            modalManager.addUserMessage(text, incognito: incognito)
+                            text = ""
+                        }
                     }
-                }
-                .onChange(of: modalManager.triggerFocus) { newValue in
-                    if newValue {
+                    .onChange(of: modalManager.triggerFocus) { newValue in
+                        if newValue {
+                            isTextFieldFocused = true
+                            modalManager.triggerFocus = false
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 15)
+                    .onAppear {
                         isTextFieldFocused = true
-                        modalManager.triggerFocus = false
                     }
+
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        if isRecording {
+                            // end_record.caf
+                            AudioServicesPlaySystemSound(SystemSoundID(1114))
+                            self.modalManager.cancelRecordingTask()
+                        } else {
+                            // begin_record.caf
+                            AudioServicesPlaySystemSound(SystemSoundID(1113))
+                            self.modalManager.startRecording { result in
+                                print(result)
+                                text = result
+                            }
+                        }
+                        isRecording.toggle()
+                    }, label: {
+                        if !isRecording {
+                            Image(systemName: "waveform")
+                                .imageScale(.large)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Image(systemName: "stop.circle")
+                                .imageScale(.large)
+                                .foregroundColor(.red)
+                        }
+                    })
+                    .buttonStyle(.borderless)
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 15)
-                .onAppear {
-                    isTextFieldFocused = true
-                }
-                .disabled(modalManager.onboardingMode)
+                .padding(.horizontal, 15)
+            }
+            .disabled(modalManager.onboardingMode)
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)

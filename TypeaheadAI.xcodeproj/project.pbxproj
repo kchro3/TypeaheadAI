@@ -17,6 +17,8 @@
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
 		2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B473E8B2AA860380042913D /* MenuBarExtraAccess */; };
+		2B5C2C832AB79EB800072D71 /* SpecialRecordActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5C2C822AB79EB800072D71 /* SpecialRecordActor.swift */; };
+		2B5C2C852AB7A0D100072D71 /* TranscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5C2C842AB7A0D100072D71 /* TranscriptionManager.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
@@ -81,6 +83,8 @@
 		2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaWrapper.swift; sourceTree = "<group>"; };
 		2B473E862AA85B9A0042913D /* IncognitoModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoModeView.swift; sourceTree = "<group>"; };
 		2B473E882AA85BDD0042913D /* LlamaModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaModelManager.swift; sourceTree = "<group>"; };
+		2B5C2C822AB79EB800072D71 /* SpecialRecordActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialRecordActor.swift; sourceTree = "<group>"; };
+		2B5C2C842AB7A0D100072D71 /* TranscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionManager.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
@@ -155,6 +159,7 @@
 				2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */,
 				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
 				2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */,
+				2B5C2C822AB79EB800072D71 /* SpecialRecordActor.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -224,6 +229,7 @@
 				2B473E882AA85BDD0042913D /* LlamaModelManager.swift */,
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
+				2B5C2C842AB7A0D100072D71 /* TranscriptionManager.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -455,10 +461,12 @@
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
+				2B5C2C852AB7A0D100072D71 /* TranscriptionManager.swift in Sources */,
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
+				2B5C2C832AB79EB800072D71 /* SpecialRecordActor.swift in Sources */,
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
@@ -653,6 +661,8 @@
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "We need to control Google Chrome to get the URL of the active tab.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to allow for audio interface";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "We need access to the speech recognition toolkit so that the user can interface with the LLM through voice input";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -693,6 +703,8 @@
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "We need to control Google Chrome to get the URL of the active tab.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to allow for audio interface";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "We need access to the speech recognition toolkit so that the user can interface with the LLM through voice input";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

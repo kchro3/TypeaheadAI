@@ -56,6 +56,7 @@ class ModalManager: ObservableObject {
 
     // TODO: Inject?
     var clientManager: ClientManager? = nil
+    var transcriptionManager: TranscriptionManager? = TranscriptionManager()
 
     var toastWindow: CustomModalWindow?
 
@@ -375,6 +376,15 @@ class ModalManager: ObservableObject {
                 self.signinTimer = nil
             }
         }
+    }
+
+    @MainActor
+    func cancelRecordingTask() {
+        transcriptionManager?.stopRecording()
+    }
+
+    func startRecording(completion: @escaping (String) -> Void) {
+        transcriptionManager?.startRecording(completion: completion)
     }
 
     @objc func windowDidMove(_ notification: Notification) {

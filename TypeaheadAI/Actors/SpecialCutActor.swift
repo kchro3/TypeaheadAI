@@ -56,6 +56,7 @@ class ClipboardMonitor {
     }
 
     func stopMonitoring() {
+        logger.debug("stop monitoring")
         timer?.invalidate()
         timer = nil
     }
