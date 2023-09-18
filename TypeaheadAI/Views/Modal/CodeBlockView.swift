@@ -36,7 +36,7 @@ struct CodeBlockView: View {
             header
                 .padding(.horizontal)
                 .padding(.vertical, 4)
-                .background(.secondary.opacity(0.8))
+                .background(.secondary.opacity(0.2))
 
             ScrollView(.horizontal, showsIndicators: true) {
                 Text(parserResult.attributedString)
@@ -46,9 +46,9 @@ struct CodeBlockView: View {
         }
         .background {
             if NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
-                HighlighterConstants.dark
+                HighlighterConstants.dark.opacity(0.2)
             } else {
-                HighlighterConstants.light
+                HighlighterConstants.light.opacity(0.2)
             }
         }
         .cornerRadius(8)
@@ -69,15 +69,9 @@ struct CodeBlockView: View {
     @ViewBuilder
     var button: some View {
         if isCopied {
-            HStack {
-                Text("Copied")
-                    .foregroundColor(.white)
-                    .font(.subheadline)
-                Image(systemName: "checkmark.circle")
-                    .imageScale(.large)
-                    .symbolRenderingMode(.multicolor)
-            }
-            .frame(alignment: .trailing)
+            Image(systemName: "checkmark.circle")
+                .imageScale(.large)
+                .symbolRenderingMode(.multicolor)
         } else {
             Button {
                 let pasteboard = NSPasteboard.general
@@ -96,6 +90,7 @@ struct CodeBlockView: View {
             } label: {
                 Image(systemName: "doc.on.doc")
             }
+            .buttonStyle(.plain)
             .foregroundColor(.white)
         }
     }
@@ -120,16 +115,22 @@ struct CodeBlockView_Previews: PreviewProvider {
     ```
     """
 
-    static let parserResult: ParserResult = {
+    static let lightParserResult: ParserResult = {
         let document = Document(parsing: markdownString)
+        var parser = MarkdownAttributedStringParser(isDarkMode: false)
+        return parser.parserResults(from: document)[0]
+    }()
 
-        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
-
-        var parser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
+    static let darkParserResult: ParserResult = {
+        let document = Document(parsing: markdownString)
+        var parser = MarkdownAttributedStringParser(isDarkMode: true)
         return parser.parserResults(from: document)[0]
     }()
 
     static var previews: some View {
-        CodeBlockView(parserResult: parserResult)
+        Group {
+            CodeBlockView(parserResult: lightParserResult)
+            CodeBlockView(parserResult: darkParserResult)
+        }
     }
 }
