@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2B2439092AB8098200F3A4F7 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2439082AB8098200F3A4F7 /* MessageView.swift */; };
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
@@ -41,6 +42,8 @@
 		2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84342A9DD90F00359841 /* HistoryManager.swift */; };
 		2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */; };
 		2BCF843E2A9DEA2E00359841 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */; };
+		2BD319472AB7F298006FA62C /* MessageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD319462AB7F298006FA62C /* MessageManager.swift */; };
+		2BD319492AB7FE35006FA62C /* MessageHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD319482AB7FE35006FA62C /* MessageHistoryView.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
 		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
 		2BE0EC2B2AA1D44000E47C52 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC2A2AA1D44000E47C52 /* SplashView.swift */; };
@@ -70,6 +73,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2B2439082AB8098200F3A4F7 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialSaveActor.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
@@ -107,6 +111,8 @@
 		2BCF84342A9DD90F00359841 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
 		2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
+		2BD319462AB7F298006FA62C /* MessageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageManager.swift; sourceTree = "<group>"; };
+		2BD319482AB7FE35006FA62C /* MessageHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageHistoryView.swift; sourceTree = "<group>"; };
 		2BE0EC212AA0956C00E47C52 /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
 		2BE0EC242AA17DB600E47C52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseClickMonitor.swift; sourceTree = "<group>"; };
@@ -147,6 +153,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2B2439072AB8097700F3A4F7 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				2B2439082AB8098200F3A4F7 /* MessageView.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
 		2B33D8812AAC4E0F001193A2 /* Actors */ = {
 			isa = PBXGroup;
 			children = (
@@ -256,6 +270,7 @@
 		2BA7F0AF2A9ABC62003D38BA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2B2439072AB8097700F3A4F7 /* Common */,
 				2BE0EC202AA0955C00E47C52 /* Modal */,
 				2BCF84362A9DE68200359841 /* Settings */,
 				2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */,
@@ -273,6 +288,7 @@
 				2BCF843D2A9DEA2E00359841 /* HistoryListView.swift */,
 				2B473E862AA85B9A0042913D /* IncognitoModeView.swift */,
 				2B33D87C2AAC3330001193A2 /* ProfileView.swift */,
+				2BD319482AB7FE35006FA62C /* MessageHistoryView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -298,6 +314,7 @@
 			isa = PBXGroup;
 			children = (
 				2BF929782AB04D2600FC105B /* MemoManager.swift */,
+				2BD319462AB7F298006FA62C /* MessageManager.swift */,
 			);
 			path = CrudManagers;
 			sourceTree = "<group>";
@@ -458,6 +475,8 @@
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
+				2BD319472AB7F298006FA62C /* MessageManager.swift in Sources */,
+				2B2439092AB8098200F3A4F7 /* MessageView.swift in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
@@ -468,6 +487,7 @@
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
 				2BCF843E2A9DEA2E00359841 /* HistoryListView.swift in Sources */,
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
+				2BD319492AB7FE35006FA62C /* MessageHistoryView.swift in Sources */,
 				2BF929792AB04D2600FC105B /* MemoManager.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,

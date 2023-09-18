@@ -65,7 +65,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                             copiedText: copiedText,
                             incognitoMode: incognitoMode,
                             stream: true,
-                            streamHandler: self.modalManager.defaultHandler,
+                            streamHandler: self.modalManager.defaultStreamHandler,
                             completion: { _ in }
                         )
                     }
