@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2B2439092AB8098200F3A4F7 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2439082AB8098200F3A4F7 /* MessageView.swift */; };
+		2B24390C2AB821FD00F3A4F7 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2B24390B2AB821FD00F3A4F7 /* LaunchAtLogin */; };
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
@@ -128,6 +129,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B24390C2AB821FD00F3A4F7 /* LaunchAtLogin in Frameworks */,
 				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
 				2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */,
@@ -341,6 +343,7 @@
 				2BA3C2342AADAC5700537F95 /* llama */,
 				2BF9297B2AB13EEA00FC105B /* Markdown */,
 				2BF929842AB13FEC00FC105B /* Highlighter */,
+				2B24390B2AB821FD00F3A4F7 /* LaunchAtLogin */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -421,6 +424,7 @@
 				2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */,
 				2BF9297A2AB13EEA00FC105B /* XCRemoteSwiftPackageReference "swift-markdown" */,
 				2BF929832AB13FEC00FC105B /* XCRemoteSwiftPackageReference "HighlighterSwift" */,
+				2B24390A2AB821FD00F3A4F7 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -842,6 +846,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2B24390A2AB821FD00F3A4F7 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
@@ -885,6 +897,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2B24390B2AB821FD00F3A4F7 /* LaunchAtLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B24390A2AB821FD00F3A4F7 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
+			productName = LaunchAtLogin;
+		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;
