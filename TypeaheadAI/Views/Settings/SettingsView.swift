@@ -11,7 +11,6 @@ enum Tabs: String, CaseIterable, Identifiable {
     case general = "General"
     case profile = "Profile"
     case history = "History"
-    case messages = "Messages"
     case incognito = "Incognito Mode"
     case about = "About"
 
@@ -43,8 +42,6 @@ struct SettingsView: View {
             return AnyView(GeneralSettingsView(promptManager: promptManager))
         case .history:
             return AnyView(HistoryListView())
-        case .messages:
-            return AnyView(MessageHistoryView())
         case .incognito:
             return AnyView(IncognitoModeView())
         case .about:

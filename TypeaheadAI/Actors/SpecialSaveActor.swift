@@ -48,7 +48,7 @@ actor SpecialSaveActor: CanSimulateCopy {
                     incognitoMode: incognitoMode,
                     userObjective: "tldr the copied text in 20 words or less",
                     stream: true,
-                    streamHandler: self.modalManager.defaultStreamHandler,
+                    streamHandler: self.modalManager.defaultHandler,
                     completion: { result in
                         switch result {
                         case .success(let output):
