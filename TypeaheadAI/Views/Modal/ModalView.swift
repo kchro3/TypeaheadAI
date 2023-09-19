@@ -108,33 +108,39 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text, axis: .vertical)
-                .textFieldStyle(.plain)
-                .lineLimit(8)
-                .focused($isTextFieldFocused)
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(.secondary.opacity(0.1))
-                )
-                .onSubmit {
-                    if !text.isEmpty {
-                        modalManager.addUserMessage(text, incognito: incognito)
-                        text = ""
-                    }
+            Group {
+                if #available(macOS 13.0, *) {
+                    TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text, axis: .vertical)
+                } else {
+                    TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text)
                 }
-                .onChange(of: modalManager.triggerFocus) { newValue in
-                    if newValue {
-                        isTextFieldFocused = true
-                        modalManager.triggerFocus = false
-                    }
+            }
+            .textFieldStyle(.plain)
+            .lineLimit(8)
+            .focused($isTextFieldFocused)
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .background(RoundedRectangle(cornerRadius: 15)
+                .fill(.secondary.opacity(0.1))
+            )
+            .onSubmit {
+                if !text.isEmpty {
+                    modalManager.addUserMessage(text, incognito: incognito)
+                    text = ""
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 15)
-                .onAppear {
+            }
+            .onChange(of: modalManager.triggerFocus) { newValue in
+                if newValue {
                     isTextFieldFocused = true
+                    modalManager.triggerFocus = false
                 }
-                .disabled(modalManager.onboardingMode)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 15)
+            .onAppear {
+                isTextFieldFocused = true
+            }
+            .disabled(modalManager.onboardingMode)
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)

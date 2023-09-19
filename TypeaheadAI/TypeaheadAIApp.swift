@@ -18,6 +18,7 @@ final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
     @Published var incognitoMode: Bool = false
+    @Published var isMenuVisible: Bool = false
 
     private var blinkTimer: Timer?
     let logger = Logger(
@@ -186,10 +187,83 @@ final class AppState: ObservableObject {
 }
 
 @main
-struct TypeaheadAIApp: App {
+struct TypeaheadAIApp {
+    static func main() {
+        if #available(macOS 13.0, *) {
+            MacOS13AndLaterApp.main()
+        } else {
+            MacOS12AndEarlierApp.main()
+        }
+    }
+}
+
+struct SettingsScene: Scene {
     let persistenceController = PersistenceController.shared
-    @StateObject private var appState: AppState
-    @State var isMenuVisible: Bool = false
+    @StateObject var appState: AppState
+
+    var body: some Scene {
+        Settings {
+            SettingsView(promptManager: appState.promptManager)
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+        }
+    }
+}
+
+struct MacOS12AndEarlierApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    var body: some Scene {
+        SettingsScene(appState: appDelegate.appState)
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var statusBarItem: NSStatusItem?
+    var application: NSApplication = NSApplication.shared
+
+    let persistenceController = PersistenceController.shared
+    @ObservedObject var appState: AppState = {
+        let context = PersistenceController.shared.container.viewContext
+        return AppState(context: context)
+    }()
+
+    override init() {
+        // Further customization if needed.
+        super.init()
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        let menu = NSMenu()
+        let menuItem = NSMenuItem()
+
+        // SwiftUI View
+        let subview = CommonMenuView(
+            incognitoMode: $appState.incognitoMode,
+            promptManager: appState.promptManager,
+            modalManager: appState.modalManager,
+            isMenuVisible: $appState.isMenuVisible
+        )
+
+        let view = NSHostingView(rootView: subview)
+        view.becomeFirstResponder()
+
+        // Very important! If you don't set the frame the menu won't appear to open.
+        view.frame = NSRect(x: 0, y: 0, width: 300, height: 400)
+        menuItem.view = view
+
+        menu.addItem(menuItem)
+
+        NSApp.activate(ignoringOtherApps: true)
+
+        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        statusBarItem?.button?.image = NSImage(systemSymbolName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard", accessibilityDescription: nil)
+        statusBarItem?.menu = menu
+    }
+}
+
+struct MacOS13AndLaterApp: App {
+    let persistenceController = PersistenceController.shared
+    @StateObject var appState: AppState
 
     init() {
         let context = persistenceController.container.viewContext
@@ -197,27 +271,42 @@ struct TypeaheadAIApp: App {
     }
 
     var body: some Scene {
-        Settings {
-            SettingsView(promptManager: appState.promptManager)
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
-        }
+        SettingsScene(appState: appState)
 
         MenuBarExtra {
-            MenuView(
+            CommonMenuView(
                 incognitoMode: $appState.incognitoMode,
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
-                isMenuVisible: $isMenuVisible
+                isMenuVisible: $appState.isMenuVisible
             )
-            .environment(\.managedObjectContext, persistenceController.container.viewContext)
-            .onAppear(perform: {
-                appState.modalManager.showOnboardingModal()
-            })
         } label: {
             Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
             // TODO: Add symbolEffect when available
         }
-        .menuBarExtraAccess(isPresented: $isMenuVisible)
+        .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
         .menuBarExtraStyle(.window)
+    }
+}
+
+struct CommonMenuView: View {
+    let persistenceController = PersistenceController.shared
+
+    @Binding var incognitoMode: Bool
+    @ObservedObject var promptManager: PromptManager
+    @ObservedObject var modalManager: ModalManager
+    @Binding var isMenuVisible: Bool
+
+    var body: some View {
+        MenuView(
+            incognitoMode: $incognitoMode,
+            promptManager: promptManager,
+            modalManager: modalManager,
+            isMenuVisible: $isMenuVisible
+        )
+        .environment(\.managedObjectContext, persistenceController.container.viewContext)
+        .onAppear(perform: {
+            modalManager.showOnboardingModal()
+        })
     }
 }

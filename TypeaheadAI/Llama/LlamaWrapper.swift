@@ -38,7 +38,11 @@ class LlamaWrapper {
         llama_backend_init(true)
         params = llama_context_default_params()
         params.n_gpu_layers = 32
-        model = llama_load_model_from_file(modelPath.path(), params)
+        if #available(macOS 13.0, *) {
+            model = llama_load_model_from_file(modelPath.path(), params)
+        } else {
+            model = llama_load_model_from_file(modelPath.path, params)
+        }
     }
 
     func isLoaded() -> Bool {
