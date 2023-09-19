@@ -92,7 +92,7 @@ struct ProfileView: View {
                 Text("What should TypeaheadAI know about you to provide better responses?").font(.headline)
 
                 TextEditor(text: $bio)
-                    .scrollContentBackground(.hidden)
+//                    .scrollContentBackground(.hidden)
                     .onChange(of: bio) { newValue in
                         if newValue.count > maxCharacterCount {
                             bio = String(newValue.prefix(maxCharacterCount))

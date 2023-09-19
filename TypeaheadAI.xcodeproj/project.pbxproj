@@ -14,6 +14,7 @@
 		2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */; };
 		2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */; };
 		2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3792302AB83739008D812F /* CanSimulatePaste.swift */; };
+		2B3792352AB977D7008D812F /* CustomMenuWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3792342AB977D7008D812F /* CustomMenuWindow.swift */; };
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
@@ -80,6 +81,7 @@
 		2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCutActor.swift; sourceTree = "<group>"; };
 		2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialPasteActor.swift; sourceTree = "<group>"; };
 		2B3792302AB83739008D812F /* CanSimulatePaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulatePaste.swift; sourceTree = "<group>"; };
+		2B3792342AB977D7008D812F /* CustomMenuWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomMenuWindow.swift; sourceTree = "<group>"; };
 		2B3FAC1E2AAAF22400B2D405 /* TypeaheadAI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TypeaheadAI-Bridging-Header.h"; sourceTree = "<group>"; };
 		2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LlamaWrapper.cpp; sourceTree = "<group>"; };
 		2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LlamaWrapper.hpp; sourceTree = "<group>"; };
@@ -232,6 +234,7 @@
 				2B473E882AA85BDD0042913D /* LlamaModelManager.swift */,
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
+				2B3792342AB977D7008D812F /* CustomMenuWindow.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -458,6 +461,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2BA7F0822A9ABBA8003D38BA /* Persistence.swift in Sources */,
+				2B3792352AB977D7008D812F /* CustomMenuWindow.swift in Sources */,
 				2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2BE0EC2B2AA1D44000E47C52 /* SplashView.swift in Sources */,
