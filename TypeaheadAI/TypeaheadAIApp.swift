@@ -261,6 +261,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+@available(macOS 13.0, *)
 struct MacOS13AndLaterApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
