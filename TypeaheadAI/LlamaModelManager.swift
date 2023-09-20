@@ -55,7 +55,7 @@ class LlamaModelManager: ObservableObject {
 
     private var model: LlamaWrapper?
 
-    init() {
+    func load() {
         loadModelDirectoryBookmark()
 
         // Load saved selected model from UserDefaults

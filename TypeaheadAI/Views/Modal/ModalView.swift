@@ -93,7 +93,7 @@ struct ModalView: View {
         VStack {
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(spacing: 2) {
+                    LazyVStack(spacing: 2) {
                         ForEach(modalManager.messages.indices, id: \.self) { index in
                             MessageView(message: modalManager.messages[index]) {
                                 modalManager.replyToUserMessage(incognito: incognito)

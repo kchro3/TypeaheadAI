@@ -100,7 +100,7 @@ class ScriptManager {
             DispatchQueue.main.async {
                 let panel = NSOpenPanel()
                 panel.title = "Choose the Application Scripts Directory"
-                panel.message = "Open this directory to authorize TypeaheadAI to save scripts here. Only needs to be done once."
+                panel.message = "Choose an install location"
                 panel.canCreateDirectories = true
                 panel.canChooseDirectories = true
                 panel.canChooseFiles = false

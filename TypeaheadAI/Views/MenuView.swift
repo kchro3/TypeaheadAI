@@ -40,6 +40,11 @@ struct MenuView: View {
                 Spacer()
 
                 Toggle("Incognito", isOn: $incognitoMode)
+                    .onChange(of: incognitoMode) { newValue in
+                        if let modelManager = modalManager.clientManager?.llamaModelManager, newValue, modelManager.modelDirectoryURL == nil {
+                            modalManager.clientManager?.llamaModelManager?.load()
+                        }
+                    }
                     .foregroundColor(Color.secondary)
                     .toggleStyle(.switch)
                     .accentColor(.blue)
