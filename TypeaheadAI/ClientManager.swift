@@ -67,10 +67,11 @@ class ClientManager {
     private let session: URLSession
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
-//    private let apiUrl = URL(string: "http://localhost:8080/get_response")!
-//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
-    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
-    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+    //    private let apiUrl = URL(string: "http://localhost:8080/get_response")!
+    //    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
+    //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",

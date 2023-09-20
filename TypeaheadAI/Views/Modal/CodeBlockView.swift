@@ -36,7 +36,7 @@ struct CodeBlockView: View {
             header
                 .padding(.horizontal)
                 .padding(.vertical, 4)
-                .background(.secondary.opacity(0.2))
+                .background(.secondary.opacity(0.4))
 
             ScrollView(.horizontal, showsIndicators: true) {
                 Text(parserResult.attributedString)
@@ -46,9 +46,9 @@ struct CodeBlockView: View {
         }
         .background {
             if NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
-                HighlighterConstants.dark.opacity(0.2)
+                HighlighterConstants.dark.opacity(0.4)
             } else {
-                HighlighterConstants.light.opacity(0.2)
+                HighlighterConstants.light.opacity(0.4)
             }
         }
         .cornerRadius(8)
