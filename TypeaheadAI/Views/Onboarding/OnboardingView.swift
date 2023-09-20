@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AuthenticationServices
 
 struct OnboardingView: View {
     @ObservedObject var modalManager: ModalManager
@@ -13,6 +14,7 @@ struct OnboardingView: View {
     @State private var isVisible: Bool = false
     @State private var isContinueVisible: Bool = false
     @State private var isTextEditorVisible: Bool = false
+    @State private var isSignInVisible: Bool = false
     @State private var isCloseVisible: Bool = false
     @State private var onboardingStep: Int = 0
     @State private var text: String = ""
@@ -25,6 +27,8 @@ struct OnboardingView: View {
     private let maxMessages = 20
     @State private var currentOutput: AttributedOutput? = nil
     private let parsingTask = ResponseParsingTask()
+
+    @AppStorage("token") var token: String?
 
     var body: some View {
         VStack {
@@ -49,44 +53,71 @@ struct OnboardingView: View {
                 }
             }
 
-            ScrollView {
-                VStack(spacing: 10) {
-                    ForEach(messages.indices, id: \.self) { index in
-                        MessageView(message: messages[index])
-                        .padding(5)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 10) {
+                        ForEach(messages.indices, id: \.self) { index in
+                            MessageView(message: messages[index])
+                                .padding(5)
+                        }
+                    }
+                    .onChange(of: messages.last) { _ in
+                        proxy.scrollTo(messages.count - 1, anchor: .bottom)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             Spacer()
 
             HStack {
-                VStack {
-                    if #available(macOS 13.0, *) {
-                        Text("Smart-paste the response here!")
-                        TextEditor(text: $text)
-                            .scrollContentBackground(.hidden)
-                            .padding(10)
-                            .background(.primary.opacity(0.1))
-                            .cornerRadius(5)
-                            .lineSpacing(5)
-                            .frame(maxHeight: isTextEditorVisible ? 200 : 0)
-                    } else {
-                        TextEditor(text: $text)
-                            .padding(10)
-                            .background(.primary)
-                            .cornerRadius(5)
-                            .lineSpacing(5)
-                            .frame(maxHeight: isTextEditorVisible ? 200 : 0)
+                if isSignInVisible {
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = [.fullName, .email]
+                    } onCompletion: { result in
+                        switch result {
+                        case .success(let authResults):
+                            if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
+                               let authorizationToken = appleIDCredential.authorizationCode,
+                               let tokenString = String(data: authorizationToken, encoding: .utf8) {
+                                token = tokenString
+                            }
+                        case .failure(let error):
+                            // TODO: Show some error message
+                            print("Authorization failed: \(error.localizedDescription)")
+                        }
                     }
+                    .signInWithAppleButtonStyle(.white)
+                    .cornerRadius(25)
                 }
-                .opacity(isTextEditorVisible ? 1 : 0)
-                .animation(.easeIn, value: isTextEditorVisible)
+
+                if isTextEditorVisible {
+                    VStack {
+                        if #available(macOS 13.0, *) {
+                            Text("Smart-paste the response here!")
+                            TextEditor(text: $text)
+                                .scrollContentBackground(.hidden)
+                                .padding(10)
+                                .background(.primary.opacity(0.1))
+                                .cornerRadius(5)
+                                .lineSpacing(5)
+                                .frame(maxHeight: isTextEditorVisible ? 200 : 0)
+                        } else {
+                            Text("Smart-paste the response here!")
+                            TextEditor(text: $text)
+                                .padding(10)
+                                .background(.primary)
+                                .cornerRadius(5)
+                                .lineSpacing(5)
+                                .frame(maxHeight: isTextEditorVisible ? 200 : 0)
+                        }
+                    }
+                    .opacity(isTextEditorVisible ? 1 : 0)
+                    .animation(.easeIn, value: isTextEditorVisible)
+                }
 
                 Spacer()
 
-                
                 if isCloseVisible {
                     Button {
                         NSApplication.shared.keyWindow?.close()
@@ -94,7 +125,8 @@ struct OnboardingView: View {
                         Text("Done")
                     }
                     .buttonStyle(.plain)
-                    .padding()
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
                     .background(Color.primary.opacity(0.2))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .opacity(isCloseVisible ? 1 : 0)
@@ -104,6 +136,7 @@ struct OnboardingView: View {
                         onboardingStep += 1
                         isContinueVisible = false
                         isTextEditorVisible = false
+                        isSignInVisible = false
                         modalManager.clientManager?.onboarding(
                             messages: [],
                             onboardingStep: onboardingStep,
@@ -114,7 +147,8 @@ struct OnboardingView: View {
                         Text("Continue")
                     }
                     .buttonStyle(.plain)
-                    .padding()
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
                     .background(Color.primary.opacity(0.2))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .opacity(isContinueVisible ? 1 : 0)
@@ -235,7 +269,12 @@ struct OnboardingView: View {
                     }
                 } else if suffix == "show_text_field" {
                     isTextEditorVisible = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        isContinueVisible = true
+                    }
+                } else if suffix == "apple_sign_in" {
+                    isSignInVisible = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         isContinueVisible = true
                     }
                 } else if suffix == "done" {

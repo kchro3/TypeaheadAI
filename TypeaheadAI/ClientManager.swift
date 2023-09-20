@@ -68,10 +68,10 @@ class ClientManager {
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
     //    private let apiUrl = URL(string: "http://localhost:8080/get_response")!
     //    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
-    //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -371,12 +371,6 @@ class ClientManager {
         payload: RequestPayload,
         timeout: TimeInterval
     ) async -> Result<String, Error> {
-        guard let _ = UserDefaults.standard.string(forKey: "token") else {
-            self.logger.error("User is not logged in.")
-            return .failure(
-                ClientManagerError.badRequest("Please sign-in to use online mode. You can use incognito mode without signing in."))
-        }
-
         // Encode the RequestPayload instance into JSON data.
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             return .failure(ClientManagerError.badRequest("Encoding error"))
@@ -411,6 +405,10 @@ class ClientManager {
     private func performBatchOfflineTask(payload: RequestPayload, timeout: TimeInterval) async -> Result<String, Error> {
         guard let modelManager = self.llamaModelManager else {
             return .failure(ClientManagerError.appError("Model Manager not found"))
+        }
+
+        if modelManager.modelDirectoryURL == nil {
+            modelManager.load()
         }
 
         return modelManager.predict(payload: payload, streamHandler: { _ in })
@@ -537,17 +535,6 @@ class ClientManager {
         timeout: TimeInterval,
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) async -> Result<String, Error> {
-        if !payload.onboarding {
-            // Let onboarding users have a grace-period
-            guard let _ = UserDefaults.standard.string(forKey: "token") else {
-                self.logger.error("User is not logged in.")
-                let error: Result<String, Error> = .failure(
-                    ClientManagerError.badRequest("Please sign-in to use online mode. You can use incognito mode without signing in."))
-                streamHandler(error)
-                return error
-            }
-        }
-
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             let error: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
             streamHandler(error)

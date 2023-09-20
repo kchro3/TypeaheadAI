@@ -273,6 +273,7 @@ class ModalManager: ObservableObject {
             contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
             styleMask: [
                 .closable,
+                .miniaturizable,
                 .fullSizeContentView,
                 .resizable,
                 .titled
@@ -297,7 +298,7 @@ class ModalManager: ObservableObject {
 
         // Add constraints to make the hosting view fill the base view
         NSLayoutConstraint.activate([
-            hostingView.topAnchor.constraint(equalTo: baseView.topAnchor),
+            hostingView.topAnchor.constraint(equalTo: baseView.safeAreaLayoutGuide.topAnchor),
             hostingView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor),
             hostingView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor),
             hostingView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor)
