@@ -338,7 +338,7 @@ class ClientManager {
         activeAppName: String,
         activeAppBundleIdentifier: String,
         incognitoMode: Bool,
-        timeout: TimeInterval = 10,
+        timeout: TimeInterval = 20,
         completion: @escaping (Result<String, Error>) -> Void
     ) async {
         currentBatchTask?.cancel()
@@ -457,18 +457,7 @@ class ClientManager {
             )
 
             if let result: Result<String, Error> = await self?.performOnboardingTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
-
                 completion(result)
-//
-//                // Cache successful requests
-//                switch result {
-//                case .success(let output):
-//                    self?.cacheResponse(output, for: payload)
-//                    break
-//                case .failure(_):
-//                    self?.cacheResponse(nil, for: payload)
-//                    break
-//                }
             } else {
                 completion(.failure(ClientManagerError.appError("Something went wrong...")))
             }

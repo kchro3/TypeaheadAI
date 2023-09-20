@@ -124,8 +124,12 @@ final class AppState: ObservableObject {
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
-            self.modalManager.showModal(incognito: self.incognitoMode)
-            NSApp.activate(ignoringOtherApps: true)
+            if let window = self.modalManager.toastWindow, !window.isVisible {
+                self.modalManager.showModal(incognito: self.incognitoMode)
+                NSApp.activate(ignoringOtherApps: true)
+            } else {
+                self.modalManager.closeModal()
+            }
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in

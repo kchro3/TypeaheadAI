@@ -13,6 +13,7 @@ struct OnboardingView: View {
     @State private var isVisible: Bool = false
     @State private var isContinueVisible: Bool = false
     @State private var isTextEditorVisible: Bool = false
+    @State private var isCloseVisible: Bool = false
     @State private var onboardingStep: Int = 0
     @State private var text: String = ""
 
@@ -48,48 +49,80 @@ struct OnboardingView: View {
                 }
             }
 
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 2) {
-                        ForEach(messages.indices, id: \.self) { index in
-                            MessageView(message: messages[index])
-                            .padding(5)
-                        }
-                        .onChange(of: messages.last) { _ in
-                            print("change")
-                            proxy.scrollTo(onboardingStep, anchor: .bottom)
-                        }
-
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(messages.indices, id: \.self) { index in
+                        MessageView(message: messages[index])
+                        .padding(5)
                     }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
+            Spacer()
+
             HStack {
+                VStack {
+                    if #available(macOS 13.0, *) {
+                        Text("Smart-paste the response here!")
+                        TextEditor(text: $text)
+                            .scrollContentBackground(.hidden)
+                            .padding(10)
+                            .background(.primary.opacity(0.1))
+                            .cornerRadius(5)
+                            .lineSpacing(5)
+                            .frame(maxHeight: isTextEditorVisible ? 200 : 0)
+                    } else {
+                        TextEditor(text: $text)
+                            .padding(10)
+                            .background(.primary)
+                            .cornerRadius(5)
+                            .lineSpacing(5)
+                            .frame(maxHeight: isTextEditorVisible ? 200 : 0)
+                    }
+                }
+                .opacity(isTextEditorVisible ? 1 : 0)
+                .animation(.easeIn, value: isTextEditorVisible)
+
                 Spacer()
 
-                Button {
-                    onboardingStep += 1
-                    isContinueVisible = false
-                    modalManager.clientManager?.onboarding(
-                        messages: [],
-                        onboardingStep: onboardingStep,
-                        streamHandler: self.streamHandler,
-                        completion: self.completionHandler
-                    )
-                } label: {
-                    Text("Continue")
+                
+                if isCloseVisible {
+                    Button {
+                        NSApplication.shared.keyWindow?.close()
+                    } label: {
+                        Text("Done")
+                    }
+                    .buttonStyle(.plain)
+                    .padding()
+                    .background(Color.primary.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .opacity(isCloseVisible ? 1 : 0)
+                    .animation(.easeIn, value: isCloseVisible)
+                } else {
+                    Button {
+                        onboardingStep += 1
+                        isContinueVisible = false
+                        isTextEditorVisible = false
+                        modalManager.clientManager?.onboarding(
+                            messages: [],
+                            onboardingStep: onboardingStep,
+                            streamHandler: self.streamHandler,
+                            completion: self.completionHandler
+                        )
+                    } label: {
+                        Text("Continue")
+                    }
+                    .buttonStyle(.plain)
+                    .padding()
+                    .background(Color.primary.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .opacity(isContinueVisible ? 1 : 0)
+                    .animation(.easeIn, value: isContinueVisible)
                 }
-                .buttonStyle(.plain)
-                .padding()
-                .background(Color.primary.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .opacity(isContinueVisible ? 1 : 0)
-                .animation(.easeIn, value: isContinueVisible)
             }
             .padding()
         }
-        .frame(width: 800, height: 400, alignment: .center)
     }
 
     /// Append text to the onboarding messages. Creates a new message if there is nothing to append to.
@@ -202,9 +235,12 @@ struct OnboardingView: View {
                     }
                 } else if suffix == "show_text_field" {
                     isTextEditorVisible = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
                         isContinueVisible = true
                     }
+                } else if suffix == "done" {
+                    isCloseVisible = true
+                    UserDefaults.standard.setValue(true, forKey: "hasOnboardedV2")
                 } else {
                     isContinueVisible = true
                 }
