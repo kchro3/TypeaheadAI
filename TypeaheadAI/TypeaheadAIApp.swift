@@ -190,7 +190,11 @@ final class AppState: ObservableObject {
 struct TypeaheadAIApp {
     static func main() {
         if #available(macOS 13.0, *) {
-            MacOS13AndLaterApp.main()
+            if UserDefaults.standard.bool(forKey: "hasOnboardedV2") {
+                MacOS13AndLaterApp.main()
+            } else {
+                MacOS13AndLaterAppWithOnboardingV2.main()
+            }
         } else {
             MacOS12AndEarlierApp.main()
         }
@@ -290,6 +294,41 @@ struct MacOS13AndLaterApp: App {
     }
 }
 
+@available(macOS 13.0, *)
+struct MacOS13AndLaterAppWithOnboardingV2: App {
+    let persistenceController = PersistenceController.shared
+    @StateObject var appState: AppState
+
+    init() {
+        let context = persistenceController.container.viewContext
+        _appState = StateObject(wrappedValue: AppState(context: context))
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            OnboardingView(
+                modalManager: appState.modalManager
+            )
+        }
+
+        SettingsScene(appState: appState)
+
+        MenuBarExtra {
+            CommonMenuView(
+                incognitoMode: $appState.incognitoMode,
+                promptManager: appState.promptManager,
+                modalManager: appState.modalManager,
+                isMenuVisible: $appState.isMenuVisible
+            )
+        } label: {
+            Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
+            // TODO: Add symbolEffect when available
+        }
+        .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
+        .menuBarExtraStyle(.window)
+    }
+}
+
 struct CommonMenuView: View {
     let persistenceController = PersistenceController.shared
 
@@ -306,8 +345,5 @@ struct CommonMenuView: View {
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, persistenceController.container.viewContext)
-        .onAppear(perform: {
-            modalManager.showOnboardingModal()
-        })
     }
 }

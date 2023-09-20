@@ -24,6 +24,21 @@ struct RequestPayload: Codable {
     var onboarding: Bool = false
 }
 
+struct OnboardingRequestPayload: Codable {
+    var token: String?
+    var username: String
+    var userFullName: String
+    var userObjective: String
+    var userBio: String
+    var userLang: String
+    var copiedText: String
+    var messages: [Message]?
+    var url: String
+    var activeAppName: String
+    var activeAppBundleIdentifier: String
+    var onboardingStep: Int
+}
+
 struct ResponsePayload: Codable {
     let textToPaste: String
     let responseCode: Int
@@ -53,8 +68,9 @@ class ClientManager {
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
 //    private let apiUrl = URL(string: "http://localhost:8080/get_response")!
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -63,6 +79,7 @@ class ClientManager {
 
     // Add a Task property to manage the streaming task
     private var currentStreamingTask: Task<Void, Error>? = nil
+    private var currentOnboardingTask: Task<Void, Error>? = nil
     private var currentBatchTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
 
@@ -194,9 +211,42 @@ class ClientManager {
         }
     }
 
+    /// Onboarding flow V2
+    func onboardingV2(
+        messages: [Message],
+        onboardingStep: Int,
+        timeout: TimeInterval = 10,
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+            Task {
+                await self.sendOnboardingRequest(
+                    id: UUID(),
+                    token: UserDefaults.standard.string(forKey: "token") ?? "",
+                    username: NSUserName(),
+                    userFullName: NSFullUserName(),
+                    userObjective: "",
+                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                    userLang: Locale.preferredLanguages.first ?? "",
+                    copiedText: "",
+                    messages: self.sanitizeMessages(messages),
+                    url: url ?? "unknown",
+                    activeAppName: appName ?? "unknown",
+                    activeAppBundleIdentifier: bundleIdentifier ?? "",
+                    incognitoMode: false,
+                    onboardingStep: onboardingStep,
+                    streamHandler: streamHandler,
+                    completion: completion
+                )
+            }
+        }
+    }
+
     /// Onboarding flow
     func onboarding(
         messages: [Message],
+        onboardingStep: Int,
         timeout: TimeInterval = 10,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
@@ -204,7 +254,7 @@ class ClientManager {
         if messages.isEmpty {
             appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
                 Task {
-                    await self.sendStreamRequest(
+                    await self.sendOnboardingRequest(
                         id: UUID(),
                         token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: NSUserName(),
@@ -218,7 +268,7 @@ class ClientManager {
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
                         incognitoMode: false,
-                        onboardingMode: true,
+                        onboardingStep: onboardingStep,
                         streamHandler: streamHandler,
                         completion: completion
                     )
@@ -370,6 +420,66 @@ class ClientManager {
     /// - Parameters:
     ///   - Same as sendRequest
     ///   - streamHandler: A closure to be executed for each chunk of data received.
+    private func sendOnboardingRequest(
+        id: UUID,
+        token: String?,
+        username: String,
+        userFullName: String,
+        userObjective: String,
+        userBio: String,
+        userLang: String,
+        copiedText: String,
+        messages: [Message],
+        url: String,
+        activeAppName: String,
+        activeAppBundleIdentifier: String,
+        incognitoMode: Bool,
+        onboardingStep: Int,
+        timeout: TimeInterval = 10,
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<String, Error>) -> Void
+    ) async {
+        currentOnboardingTask?.cancel()
+        currentOnboardingTask = Task.detached { [weak self] in
+            let payload = OnboardingRequestPayload(
+                token: token,
+                username: username,
+                userFullName: userFullName,
+                userObjective: userObjective,
+                userBio: userBio,
+                userLang: userLang,
+                copiedText: copiedText,
+                messages: self?.sanitizeMessages(messages),
+                url: url,
+                activeAppName: activeAppName,
+                activeAppBundleIdentifier: activeAppBundleIdentifier,
+                onboardingStep: onboardingStep
+            )
+
+            if let result: Result<String, Error> = await self?.performOnboardingTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
+
+                completion(result)
+//
+//                // Cache successful requests
+//                switch result {
+//                case .success(let output):
+//                    self?.cacheResponse(output, for: payload)
+//                    break
+//                case .failure(_):
+//                    self?.cacheResponse(nil, for: payload)
+//                    break
+//                }
+            } else {
+                completion(.failure(ClientManagerError.appError("Something went wrong...")))
+            }
+        }
+    }
+
+    /// Sends a request to the server with the given parameters and listens for a stream of data.
+    ///
+    /// - Parameters:
+    ///   - Same as sendRequest
+    ///   - streamHandler: A closure to be executed for each chunk of data received.
     private func sendStreamRequest(
         id: UUID,
         token: String?,
@@ -474,6 +584,42 @@ class ClientManager {
         } catch {
             let err: Result<String, Error> = .failure(error)
             self.cacheResponse(nil, for: payload)
+            streamHandler(err)
+            return err
+        }
+
+        return .success(output)
+    }
+
+    private func performOnboardingTask(
+        payload: OnboardingRequestPayload,
+        timeout: TimeInterval,
+        streamHandler: @escaping (Result<String, Error>) -> Void
+    ) async -> Result<String, Error> {
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            let error: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
+            streamHandler(error)
+            return error
+        }
+
+        var request = URLRequest(url: self.apiOnboarding, timeoutInterval: timeout)
+        request.httpMethod = "POST"
+        request.httpBody = httpBody
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        var output = ""
+        do {
+            let (stream, _) = try await URLSession.shared.bytes(for: request)
+
+            for try await line in stream.lines {
+                let decodedResponse = try JSONDecoder().decode(ChunkPayload.self, from: line.data(using: .utf8)!)
+                if let text = decodedResponse.text {
+                    output += text
+                    streamHandler(.success(text))
+                }
+            }
+        } catch {
+            let err: Result<String, Error> = .failure(error)
             streamHandler(err)
             return err
         }

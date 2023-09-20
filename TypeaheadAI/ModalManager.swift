@@ -338,45 +338,6 @@ class ModalManager: ObservableObject {
         self.isVisible = true
     }
 
-    @MainActor
-    func showOnboardingModal() {
-        if !UserDefaults.standard.bool(forKey: "hasOnboarded") {
-            self.onboardingMode = true
-            showModal(incognito: false)
-            self.clientManager?.onboarding(messages: messages, streamHandler: defaultHandler) { _ in
-                Task {
-                    self.startSigninTimer()
-                }
-            }
-        }
-    }
-
-    @MainActor
-    private func startSigninTimer() {
-        // Invalidate the previous timer if it exists
-        signinTimer?.invalidate()
-
-        // Create and schedule a new timer
-        signinTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            self.logger.info("signin timer pending")
-            if let _ = UserDefaults.standard.value(forKey: "token") {
-                self.logger.info("signin timer done")
-                self.clientManager?.onboarding(
-                    messages: self.messages,
-                    streamHandler: self.defaultHandler,
-                    completion: { _ in
-                        UserDefaults.standard.setValue(true, forKey: "hasOnboarded")
-                        DispatchQueue.main.async {
-                            self.onboardingMode = false
-                        }
-                    }
-                )
-                self.signinTimer?.invalidate()
-                self.signinTimer = nil
-            }
-        }
-    }
-
     @objc func windowDidMove(_ notification: Notification) {
         if let movedWindow = notification.object as? NSWindow {
             let origin = movedWindow.frame.origin
