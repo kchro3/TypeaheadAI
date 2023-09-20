@@ -16,6 +16,7 @@
 		2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3792302AB83739008D812F /* CanSimulatePaste.swift */; };
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
+		2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B44FA972ABA783F00C6B542 /* OnboardingView.swift */; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
 		2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B473E8B2AA860380042913D /* MenuBarExtraAccess */; };
@@ -84,6 +85,7 @@
 		2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LlamaWrapper.cpp; sourceTree = "<group>"; };
 		2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LlamaWrapper.hpp; sourceTree = "<group>"; };
 		2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaWrapper.swift; sourceTree = "<group>"; };
+		2B44FA972ABA783F00C6B542 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		2B473E862AA85B9A0042913D /* IncognitoModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoModeView.swift; sourceTree = "<group>"; };
 		2B473E882AA85BDD0042913D /* LlamaModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaModelManager.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
@@ -185,6 +187,14 @@
 			path = Llama;
 			sourceTree = "<group>";
 		};
+		2B44FA962ABA783200C6B542 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				2B44FA972ABA783F00C6B542 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		2BA7F06C2A9ABBA7003D38BA = {
 			isa = PBXGroup;
 			children = (
@@ -264,6 +274,7 @@
 		2BA7F0AF2A9ABC62003D38BA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2B44FA962ABA783200C6B542 /* Onboarding */,
 				2BE0EC202AA0955C00E47C52 /* Modal */,
 				2BCF84362A9DE68200359841 /* Settings */,
 				2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */,
@@ -478,6 +489,7 @@
 				2BF929802AB13F3600FC105B /* CodeBlockView.swift in Sources */,
 				2BA7F0852A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld in Sources */,
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
+				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
 				2BCF843E2A9DEA2E00359841 /* HistoryListView.swift in Sources */,
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
 				2BF929792AB04D2600FC105B /* MemoManager.swift in Sources */,
@@ -670,7 +682,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.12;
+				MARKETING_VERSION = 1.13;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -710,7 +722,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.12;
+				MARKETING_VERSION = 1.13;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
