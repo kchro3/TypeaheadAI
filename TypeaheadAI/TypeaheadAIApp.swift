@@ -194,7 +194,6 @@ final class AppState: ObservableObject {
 struct TypeaheadAIApp {
     static func main() {
         if #available(macOS 13.0, *) {
-            UserDefaults.standard.setValue(false, forKey: "hasOnboardedV2")
             if UserDefaults.standard.bool(forKey: "hasOnboardedV2") {
                 MacOS13AndLaterApp.main()
             } else {

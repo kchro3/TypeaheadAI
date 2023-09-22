@@ -41,8 +41,8 @@ struct OnboardingRequestPayload: Codable {
 
 struct ResponsePayload: Codable {
     let textToPaste: String
-    let responseCode: Int
-    let errorMessage: String?
+    let assumedIntent: String
+    let choices: [String]
 }
 
 struct ChunkPayload: Codable {
@@ -66,10 +66,10 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
+//    private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    //    private let apiUrl = URL(string: "http://localhost:8080/get_response")!
+    private let apiUrl = URL(string: "http://localhost:8080/v2/get_response")!
     //    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
     //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
@@ -104,7 +104,7 @@ class ClientManager {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? (stream ? "respond to this in <20 words" : "paste generated content")
+        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? ""
 
         guard let appCtxManager = appContextManager else {
             self.logger.error("Something is wrong with the initialization")
@@ -385,17 +385,7 @@ class ClientManager {
 
             let (data, _) = try await self.session.data(for: request)
             let decodedResponse = try JSONDecoder().decode(ResponsePayload.self, from: data)
-            switch decodedResponse.responseCode {
-            case 200:
-                self.logger.debug("OK")
-                return .success(decodedResponse.textToPaste)
-            case 400:
-                self.logger.debug("Client error")
-                return .failure(ClientManagerError.clientError(decodedResponse.errorMessage ?? ""))
-            default:
-                self.logger.debug("Server error")
-                return .failure(ClientManagerError.serverError(decodedResponse.errorMessage ?? ""))
-            }
+            return .success(decodedResponse.textToPaste)
         } catch {
             self.logger.error("\(error.localizedDescription)")
             return .failure(ClientManagerError.serverError(error.localizedDescription))
