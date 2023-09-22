@@ -67,9 +67,9 @@ final class AppState: ObservableObject {
         )
         self.specialPasteActor = SpecialPasteActor(
             historyManager: historyManager,
-            mouseEventMonitor: mouseEventMonitor,
-            clientManager: clientManager,
-            memoManager: memoManager
+            promptManager: promptManager,
+            modalManager: modalManager,
+            appContextManager: appContextManager
         )
         self.specialCutActor = SpecialCutActor(
             mouseEventMonitor: mouseEventMonitor,
@@ -93,23 +93,25 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             Task {
-                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode, stickyMode: stickyMode)
+                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode, stickyMode: false)
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .stickyCopy) { [self] in
+            Task {
+                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode, stickyMode: true)
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
-            self.startBlinking()
-            self.mouseEventMonitor.mouseClicked = false
             Task {
-                await specialPasteActor?.specialPaste(incognitoMode: incognitoMode) {
-                    self.stopBlinking()
-                }
+                await specialPasteActor?.specialPaste(incognitoMode: incognitoMode)
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
-                await self.specialCutActor?.specialCut(incognitoMode: incognitoMode, stickyMode: stickyMode)
+                await self.specialCutActor?.specialCut(incognitoMode: incognitoMode, stickyMode: false)
             }
         }
 
@@ -194,10 +196,10 @@ final class AppState: ObservableObject {
 struct TypeaheadAIApp {
     static func main() {
         if #available(macOS 13.0, *) {
-            UserDefaults.standard.setValue(false, forKey: "hasOnboardedV2")
-            if UserDefaults.standard.bool(forKey: "hasOnboardedV2") {
+            if UserDefaults.standard.bool(forKey: "hasOnboardedV3") {
                 MacOS13AndLaterApp.main()
             } else {
+                UserDefaults.standard.setValue(true, forKey: "hasOnboardedV3")
                 MacOS13AndLaterAppWithOnboardingV2.main()
             }
         } else {

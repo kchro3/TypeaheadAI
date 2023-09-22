@@ -188,6 +188,10 @@ actor SpecialCutActor {
             overlappingSets.append(set)
         }
 
+        if overlappingSets.count == 0 {
+            return []
+        }
+
         // Merge overlapping sets without replacement
         var mergedSets: [Set<Int>] = [overlappingSets.removeFirst()]
         while !overlappingSets.isEmpty {

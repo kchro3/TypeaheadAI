@@ -44,7 +44,6 @@ struct OnboardingView: View {
                     isVisible = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         modalManager.clientManager?.onboarding(
-                            messages: [],
                             onboardingStep: onboardingStep,
                             streamHandler: self.streamHandler,
                             completion: self.completionHandler
@@ -138,7 +137,6 @@ struct OnboardingView: View {
                         isTextEditorVisible = false
                         isSignInVisible = false
                         modalManager.clientManager?.onboarding(
-                            messages: [],
                             onboardingStep: onboardingStep,
                             streamHandler: self.streamHandler,
                             completion: self.completionHandler
@@ -279,7 +277,6 @@ struct OnboardingView: View {
                     }
                 } else if suffix == "done" {
                     isCloseVisible = true
-                    UserDefaults.standard.setValue(true, forKey: "hasOnboardedV2")
                 } else {
                     isContinueVisible = true
                 }
