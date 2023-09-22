@@ -13,7 +13,7 @@ struct RequestPayload: Codable {
     var token: String?
     var username: String
     var userFullName: String
-    var userObjective: String
+    var userObjective: String?
     var userBio: String
     var userLang: String
     var copiedText: String
@@ -25,18 +25,12 @@ struct RequestPayload: Codable {
 }
 
 struct OnboardingRequestPayload: Codable {
-    var token: String?
     var username: String
     var userFullName: String
-    var userObjective: String
     var userBio: String
     var userLang: String
-    var copiedText: String
-    var messages: [Message]?
-    var url: String
-    var activeAppName: String
-    var activeAppBundleIdentifier: String
     var onboardingStep: Int
+    var version: String
 }
 
 struct ResponsePayload: Codable {
@@ -66,12 +60,12 @@ class ClientManager {
 
     private let session: URLSession
 
-//    private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
+    private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiUrl = URL(string: "http://localhost:8080/v2/get_response")!
-    //    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
-    //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    //private let apiUrl = URL(string: "http://localhost:8080/v2/get_response")!
+    //private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
+    //private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -104,7 +98,7 @@ class ClientManager {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt() ?? ""
+        let objective = userObjective ?? self.promptManager?.getActivePrompt()
 
         guard let appCtxManager = appContextManager else {
             self.logger.error("Something is wrong with the initialization")
@@ -140,7 +134,7 @@ class ClientManager {
                         token: UserDefaults.standard.string(forKey: "token") ?? "",
                         username: NSUserName(),
                         userFullName: NSFullUserName(),
-                        userObjective: self.promptManager?.getActivePrompt() ?? "",
+                        userObjective: self.promptManager?.getActivePrompt(),
                         userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: copiedText,
@@ -212,100 +206,25 @@ class ClientManager {
         }
     }
 
-    /// Onboarding flow V2
-    func onboardingV2(
-        messages: [Message],
-        onboardingStep: Int,
-        timeout: TimeInterval = 10,
-        streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<String, Error>) -> Void
-    ) {
-        appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
-            Task {
-                await self.sendOnboardingRequest(
-                    id: UUID(),
-                    token: UserDefaults.standard.string(forKey: "token") ?? "",
-                    username: NSUserName(),
-                    userFullName: NSFullUserName(),
-                    userObjective: "",
-                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                    userLang: Locale.preferredLanguages.first ?? "",
-                    copiedText: "",
-                    messages: self.sanitizeMessages(messages),
-                    url: url ?? "unknown",
-                    activeAppName: appName ?? "unknown",
-                    activeAppBundleIdentifier: bundleIdentifier ?? "",
-                    incognitoMode: false,
-                    onboardingStep: onboardingStep,
-                    streamHandler: streamHandler,
-                    completion: completion
-                )
-            }
-        }
-    }
-
     /// Onboarding flow
     func onboarding(
-        messages: [Message],
         onboardingStep: Int,
         timeout: TimeInterval = 10,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
-        if messages.isEmpty {
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
-                Task {
-                    await self.sendOnboardingRequest(
-                        id: UUID(),
-                        token: UserDefaults.standard.string(forKey: "token") ?? "",
-                        username: NSUserName(),
-                        userFullName: NSFullUserName(),
-                        userObjective: "",
-                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                        userLang: Locale.preferredLanguages.first ?? "",
-                        copiedText: "",
-                        messages: self.sanitizeMessages(messages),
-                        url: url ?? "unknown",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
-                        incognitoMode: false,
-                        onboardingStep: onboardingStep,
-                        streamHandler: streamHandler,
-                        completion: completion
-                    )
-                }
-            }
-        } else {
-            // Continue the conversation
-            guard let (key, _) = cached,
-                  let data = key.data(using: .utf8),
-                  let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) else {
-                logger.error("No cached request to refine")
-                return
-            }
-
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
-                Task {
-                    await self.sendStreamRequest(
-                        id: UUID(),
-                        token: UserDefaults.standard.string(forKey: "token") ?? "",
-                        username: payload.username,
-                        userFullName: payload.userFullName,
-                        userObjective: payload.userObjective,
-                        userBio: payload.userBio,
-                        userLang: payload.userLang,
-                        copiedText: payload.copiedText,
-                        messages: self.sanitizeMessages(messages),
-                        url: payload.url,
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
-                        incognitoMode: false,
-                        onboardingMode: true,
-                        streamHandler: streamHandler,
-                        completion: completion
-                    )
-                }
-            }
+        Task {
+            await self.sendOnboardingRequest(
+                id: UUID(),
+                username: NSUserName(),
+                userFullName: NSFullUserName(),
+                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                userLang: Locale.preferredLanguages.first ?? "",
+                incognitoMode: false,
+                onboardingStep: onboardingStep,
+                streamHandler: streamHandler,
+                completion: completion
+            )
         }
     }
 
@@ -331,7 +250,7 @@ class ClientManager {
         token: String?,
         username: String,
         userFullName: String,
-        userObjective: String,
+        userObjective: String?,
         userBio: String,
         userLang: String,
         copiedText: String,
@@ -411,17 +330,10 @@ class ClientManager {
     ///   - streamHandler: A closure to be executed for each chunk of data received.
     private func sendOnboardingRequest(
         id: UUID,
-        token: String?,
         username: String,
         userFullName: String,
-        userObjective: String,
         userBio: String,
         userLang: String,
-        copiedText: String,
-        messages: [Message],
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
         incognitoMode: Bool,
         onboardingStep: Int,
         timeout: TimeInterval = 10,
@@ -431,18 +343,12 @@ class ClientManager {
         currentOnboardingTask?.cancel()
         currentOnboardingTask = Task.detached { [weak self] in
             let payload = OnboardingRequestPayload(
-                token: token,
                 username: username,
                 userFullName: userFullName,
-                userObjective: userObjective,
                 userBio: userBio,
                 userLang: userLang,
-                copiedText: copiedText,
-                messages: self?.sanitizeMessages(messages),
-                url: url,
-                activeAppName: activeAppName,
-                activeAppBundleIdentifier: activeAppBundleIdentifier,
-                onboardingStep: onboardingStep
+                onboardingStep: onboardingStep,
+                version: "onboarding_v3"
             )
 
             if let result: Result<String, Error> = await self?.performOnboardingTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
@@ -463,7 +369,7 @@ class ClientManager {
         token: String?,
         username: String,
         userFullName: String,
-        userObjective: String,
+        userObjective: String?,
         userBio: String,
         userLang: String,
         copiedText: String,

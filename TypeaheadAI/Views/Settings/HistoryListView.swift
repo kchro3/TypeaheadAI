@@ -8,59 +8,30 @@
 import SwiftUI
 import CoreData
 
-struct HistoryListItemView: View {
-    @State var entry: HistoryEntry
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text("\(entry.timestamp?.description(with: .autoupdatingCurrent) ?? "")")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                Text("Objective: \(entry.objective ?? "None")")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .textSelection(.enabled)
-                Text(entry.query ?? "")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .textSelection(.enabled)
-
-                switch entry.status {
-                case RequestStatus.failure.rawValue:
-                    Text("Paste: Failed").foregroundColor(.red)
-                case RequestStatus.pending.rawValue:
-                    Text("Paste: Pending").foregroundColor(.yellow)
-                default:
-                    Text(entry.response ?? "None")
-                        .textSelection(.enabled)
-                }
-            }
-            Spacer()
-        }
-    }
-}
-
 struct HistoryListView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-    @State private var refreshView: Bool = false
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \HistoryEntry.timestamp, ascending: false)],
-        animation: .default
-    )
-    private var historyEntries: FetchedResults<HistoryEntry>
+    @Environment(\.managedObjectContext) var managedObjectContext
+    @FetchRequest(entity: HistoryEntry.entity(), sortDescriptors: []) var history: FetchedResults<HistoryEntry>
+    @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("History").font(.headline)
+        VStack {
+            Text("WIP: This will look nice later...")
 
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(historyEntries, id: \.id) { entry in
-                        HistoryListItemView(entry: entry)
-                            .padding(10)
-                        Divider()
+            List {
+                ForEach(history, id: \.self) { history in
+                    LazyVStack(alignment: .leading) {
+                        Text("Timestamp: \(history.timestamp ?? Date())")
+                        Text("Pasted Response: \(history.pastedResponse ?? "")")
+                        Text("Num Messages: \(history.numMessages)")
+                        Text("ID: \(history.id ?? UUID())")
+                        Text("Copied Text: \(history.copiedText ?? "")")
+                        Text("Active URL: \(history.activeUrl ?? "")")
+                        Text("Active App Name: \(history.activeAppName ?? "")")
+                        Text("Active App Bundle Identifier: \(history.activeAppBundleIdentifier ?? "")")
+
+                        let quickActionId = history.quickActionId
+                        let quickAction = quickActions.first(where: { $0.id == quickActionId })
+                        Text("Quick Action Name: \(quickAction?.prompt ?? "")")
                     }
                 }
             }
@@ -70,7 +41,7 @@ struct HistoryListView: View {
             Divider()
 
             Button("Clear History") {
-                clearHistory(context: viewContext)
+                clearHistory(context: managedObjectContext)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -113,23 +84,14 @@ struct HistoryListView_Previews: PreviewProvider {
         for i in 0..<5 {
             let entry = HistoryEntry(context: context)
             entry.id = UUID()
-            entry.query = "Query \(i)"
-            entry.response = "Response \(i)"
-            entry.timestamp = Date()
-            entry.status = RequestStatus.success.rawValue
+            entry.copiedText = "copy \(i)"
+            entry.pastedResponse = "paste \(i)"
+            entry.quickActionId = UUID()
+
+            let prompt = PromptEntry(context: context)
+            prompt.id = entry.quickActionId
+            prompt.prompt = "prompt \(i)"
         }
-
-        let pendingEntry = HistoryEntry(context: context)
-        pendingEntry.id = UUID()
-        pendingEntry.query = "Query waiting"
-        pendingEntry.timestamp = Date()
-        pendingEntry.status = RequestStatus.pending.rawValue
-
-        let failedEntry = HistoryEntry(context: context)
-        failedEntry.id = UUID()
-        failedEntry.query = "Query bad"
-        failedEntry.timestamp = Date()
-        failedEntry.status = RequestStatus.failure.rawValue
 
         return HistoryListView()
             .environment(\.managedObjectContext, context)

@@ -9,7 +9,6 @@ import AppKit
 import Foundation
 import os.log
 
-@available(macOS 11.0, *)
 class AppContextManager {
     private let scriptManager: ScriptManager = ScriptManager()
 

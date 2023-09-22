@@ -14,9 +14,9 @@ import os.log
 
 actor SpecialPasteActor: CanSimulatePaste {
     private let historyManager: HistoryManager
-    private let mouseEventMonitor: MouseEventMonitor
-    private let clientManager: ClientManager
-    private let memoManager: MemoManager
+    private let promptManager: PromptManager
+    private let modalManager: ModalManager
+    private let appContextManager: AppContextManager
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -25,92 +25,55 @@ actor SpecialPasteActor: CanSimulatePaste {
 
     init(
         historyManager: HistoryManager,
-        mouseEventMonitor: MouseEventMonitor,
-        clientManager: ClientManager,
-        memoManager: MemoManager
+        promptManager: PromptManager,
+        modalManager: ModalManager,
+        appContextManager: AppContextManager
     ) {
         self.historyManager = historyManager
-        self.mouseEventMonitor = mouseEventMonitor
-        self.clientManager = clientManager
-        self.memoManager = memoManager
+        self.promptManager = promptManager
+        self.modalManager = modalManager
+        self.appContextManager = appContextManager
     }
 
-    func specialPaste(incognitoMode: Bool, completion: @escaping () -> Void) {
-        guard let copiedText = NSPasteboard.general.string(forType: .string) else {
-            AudioServicesPlaySystemSound(1306) // Funk sound
+    func specialPaste(incognitoMode: Bool) {
+        guard let lastMessage = self.modalManager.messages.last, !lastMessage.isCurrentUser else {
             return
         }
 
-        let newEntry = self.historyManager.addHistoryEntry(query: copiedText)
-        self.mouseEventMonitor.mouseClicked = false // Unset flag
+        let pasteboard = NSPasteboard.general
+        pasteboard.prepareForNewContents()
 
-        Task {
-            self.clientManager.predict(
-                id: newEntry.id!,
-                copiedText: copiedText,
-                incognitoMode: incognitoMode,
-                streamHandler: { _ in },
-                completion: { result in
-                    switch result {
-                    case .success(let response):
-                        self.logger.info("Response from server: \(response)")
-
-                        // Save to clipboard
-                        let pasteboard = NSPasteboard.general
-                        pasteboard.prepareForNewContents()
-                        pasteboard.setString(response, forType: .string)
-
-                        // Update history
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: response,
-                            andStatus: .success
-                        )
-
-                        if self.mouseEventMonitor.mouseClicked {
-                            self.sendClipboardNotification(status: .success)
-                        } else {
-                            AudioServicesPlaySystemSound(kSystemSoundID_UserPreferredAlert)
-                            self.simulatePaste(completion: {() in })
-                        }
-                    case .failure(let error):
-                        self.logger.error("\(error.localizedDescription)")
-                        self.historyManager.updateHistoryEntry(
-                            entry: newEntry,
-                            withResponse: nil,
-                            andStatus: .failure
-                        )
-
-                        self.sendClipboardNotification(status: .failure)
-                        AudioServicesPlaySystemSound(1306) // Funk sound
-                    }
-
-                    // Finish up
-                    DispatchQueue.main.async {
-                        completion()
-                    }
-                })
-        }
-    }
-
-    private func sendClipboardNotification(status: RequestStatus) {
-        let content = UNMutableNotificationContent()
-
-        if status == RequestStatus.success {
-            content.title = "Clipboard Ready"
-            content.body = "Paste with cmd-v."
-        } else {
-            content.title = "Failed to paste"
-            content.body = "Something went wrong... Please try again."
-        }
-        content.sound = UNNotificationSound.default
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                self.logger.error("Failed to send notification: \(error.localizedDescription)")
+        if let results = lastMessage.attributed?.results {
+            // If there's a code-block, then paste the code-block text.
+            for result in results {
+                if result.isCodeBlock {
+                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+                    break
+                }
             }
+
+            pasteboard.setString(lastMessage.text, forType: .string)
+        } else {
+            pasteboard.setString(lastMessage.text, forType: .string)
         }
+
+        self.simulatePaste(completion: { () in
+            guard let firstMessage = self.modalManager.messages.first else {
+                self.logger.error("Illegal state")
+                return
+            }
+
+            self.appContextManager.getActiveAppInfo(completion: { (appName, bundleIdentifier, url) in
+                _ = self.historyManager.addHistoryEntry(
+                    copiedText: firstMessage.text,
+                    pastedResponse: lastMessage.text,
+                    quickActionId: self.promptManager.activePromptID,
+                    activeUrl: url,
+                    activeAppName: appName,
+                    activeAppBundleIdentifier: bundleIdentifier,
+                    numMessages: self.modalManager.messages.count
+                )
+            })
+        })
     }
 }
