@@ -35,8 +35,8 @@ struct OnboardingRequestPayload: Codable {
 
 struct ResponsePayload: Codable {
     let textToPaste: String
-    let responseCode: Int
-    let errorMessage: String?
+    let assumedIntent: String
+    let choices: [String]
 }
 
 struct ChunkPayload: Codable {
@@ -62,10 +62,10 @@ class ClientManager {
 
     private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
-//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    //    private let apiUrl = URL(string: "http://localhost:8080/get_response")!
-    //    private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
-    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+    //private let apiUrl = URL(string: "http://localhost:8080/v2/get_response")!
+    //private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
+    //private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -304,17 +304,7 @@ class ClientManager {
 
             let (data, _) = try await self.session.data(for: request)
             let decodedResponse = try JSONDecoder().decode(ResponsePayload.self, from: data)
-            switch decodedResponse.responseCode {
-            case 200:
-                self.logger.debug("OK")
-                return .success(decodedResponse.textToPaste)
-            case 400:
-                self.logger.debug("Client error")
-                return .failure(ClientManagerError.clientError(decodedResponse.errorMessage ?? ""))
-            default:
-                self.logger.debug("Server error")
-                return .failure(ClientManagerError.serverError(decodedResponse.errorMessage ?? ""))
-            }
+            return .success(decodedResponse.textToPaste)
         } catch {
             self.logger.error("\(error.localizedDescription)")
             return .failure(ClientManagerError.serverError(error.localizedDescription))
