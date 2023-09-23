@@ -121,10 +121,6 @@ final class AppState: ObservableObject {
             }
         }
 
-        KeyboardShortcuts.onKeyUp(for: .chatRefresh) { [self] in
-            self.modalManager.forceRefresh()
-        }
-
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
             if let window = self.modalManager.toastWindow, !window.isVisible {
                 self.modalManager.showModal(incognito: self.incognitoMode)

@@ -21,17 +21,14 @@ struct HistoryListView: View {
                 ForEach(history, id: \.self) { history in
                     LazyVStack(alignment: .leading) {
                         Text("Timestamp: \(history.timestamp ?? Date())")
-                        Text("Pasted Response: \(history.pastedResponse ?? "")")
-                        Text("Num Messages: \(history.numMessages)")
-                        Text("ID: \(history.id ?? UUID())")
+                        let quickActionId = history.quickActionId
+                        let quickAction = quickActions.first(where: { $0.id == quickActionId })
+                        Text("Quick Action: \(quickAction?.prompt ?? "")")
                         Text("Copied Text: \(history.copiedText ?? "")")
+                        Text("Pasted Response: \(history.pastedResponse ?? "")")
                         Text("Active URL: \(history.activeUrl ?? "")")
                         Text("Active App Name: \(history.activeAppName ?? "")")
                         Text("Active App Bundle Identifier: \(history.activeAppBundleIdentifier ?? "")")
-
-                        let quickActionId = history.quickActionId
-                        let quickAction = quickActions.first(where: { $0.id == quickActionId })
-                        Text("Quick Action Name: \(quickAction?.prompt ?? "")")
                     }
                 }
             }

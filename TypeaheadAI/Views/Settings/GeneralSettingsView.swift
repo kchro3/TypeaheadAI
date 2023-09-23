@@ -34,7 +34,7 @@ struct GeneralSettingsView: View {
                     }
                     HStack {
                         KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
-                        Text("Responds to what you've copied.")
+                        Text("Pastes the most recent TypeaheadAI response.")
                             .frame(width: 325, alignment: .leading)
                     }
                     HStack {
@@ -61,11 +61,6 @@ struct GeneralSettingsView: View {
                 HStack {
                     KeyboardShortcuts.Recorder("New Chat:", name: .chatNew)
                     Text("Opens a new chat window")
-                        .frame(width: 325, alignment: .leading)
-                }
-                HStack {
-                    KeyboardShortcuts.Recorder("Refresh Chat:", name: .chatRefresh)
-                    Text("Clears a chat window")
                         .frame(width: 325, alignment: .leading)
                 }
                 HStack {
