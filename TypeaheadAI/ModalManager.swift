@@ -378,7 +378,9 @@ class ModalManager: ObservableObject {
                 self.logger.error("Something went wrong.")
             }
         default:
-            self.logger.error("Unknown error")
+            DispatchQueue.main.async {
+                self.setError("Something went wrong. Please quit the app and try again.")
+            }
         }
     }
 }

@@ -62,8 +62,11 @@ final class AppState: ObservableObject {
 
         // Initialize actors
         self.specialCopyActor = SpecialCopyActor(
+            historyManager: historyManager,
             clientManager: clientManager,
-            modalManager: modalManager
+            promptManager: promptManager,
+            modalManager: modalManager,
+            appContextManager: appContextManager
         )
         self.specialPasteActor = SpecialPasteActor(
             historyManager: historyManager,

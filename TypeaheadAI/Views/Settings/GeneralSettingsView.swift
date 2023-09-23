@@ -33,6 +33,11 @@ struct GeneralSettingsView: View {
                             .frame(width: 325, alignment: .leading)
                     }
                     HStack {
+                        KeyboardShortcuts.Recorder("Sticky Copy:", name: .stickyCopy)
+                        Text("Smart-copies text into an existing chat.")
+                            .frame(width: 325, alignment: .leading)
+                    }
+                    HStack {
                         KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
                         Text("Pastes the most recent TypeaheadAI response.")
                             .frame(width: 325, alignment: .leading)

@@ -21,7 +21,6 @@ class HistoryManager {
         self.managedObjectContext = context
     }
 
-    // TODO: add context
     // TODO: context other input/output types
     func addHistoryEntry(
         copiedText: String,
@@ -51,5 +50,50 @@ class HistoryManager {
         }
 
         return newEntry
+    }
+
+    func fetchHistoryEntries(
+        limit: Int,
+        quickActionId: UUID? = nil,
+        activeUrl: String? = nil,
+        activeAppName: String? = nil,
+        activeAppBundleIdentifier: String? = nil
+    ) -> [Message] {
+        let fetchRequest: NSFetchRequest<HistoryEntry> = HistoryEntry.fetchRequest()
+        var predicates = [NSPredicate]()
+
+        if let quickActionId = quickActionId {
+            predicates.append(NSPredicate(format: "quickActionId == %@", quickActionId as CVarArg))
+        }
+
+        if let activeUrl = activeUrl {
+            predicates.append(NSPredicate(format: "activeUrl == %@", activeUrl))
+        }
+
+        if let activeAppName = activeAppName {
+            predicates.append(NSPredicate(format: "activeAppName == %@", activeAppName))
+        }
+
+        if let activeAppBundleIdentifier = activeAppBundleIdentifier {
+            predicates.append(NSPredicate(format: "activeAppBundleIdentifier == %@", activeAppBundleIdentifier))
+        }
+
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "numMessages", ascending: true)]
+        fetchRequest.fetchLimit = limit
+
+        do {
+            let entries = try managedObjectContext.fetch(fetchRequest)
+            var messages = [Message]()
+            for entry in entries {
+                let userMessage = Message(id: entry.id!, text: entry.copiedText!, isCurrentUser: true)
+                let assistantMessage = Message(id: entry.id!, text: entry.pastedResponse!, isCurrentUser: false)
+                messages.append(contentsOf: [userMessage, assistantMessage])
+            }
+            return messages
+        } catch {
+            logger.error("Failed to fetch history entries: \(error.localizedDescription)")
+            return []
+        }
     }
 }
