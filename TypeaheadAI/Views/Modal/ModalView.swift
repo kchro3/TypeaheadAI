@@ -8,76 +8,6 @@
 import SwiftUI
 import Markdown
 
-struct MessageView: View {
-    let message: Message
-    var onButtonDown: (() -> Void)?
-
-    init(
-        message: Message,
-        onButtonDown: (() -> Void)? = nil
-    ) {
-        self.message = message
-        self.onButtonDown = onButtonDown
-    }
-
-    var body: some View {
-        if let error = message.responseError, !message.isCurrentUser {
-            HStack {
-                Text(error)
-                    .foregroundColor(.primary)
-                    .textSelection(.enabled)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 15)
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.red.opacity(0.4))
-                    )
-
-                Button(action: {
-                    onButtonDown?()
-                }, label: {
-                    Image(systemName: "arrow.counterclockwise")
-                })
-                .buttonStyle(.plain)
-
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        } else if let attributed = message.attributed {
-            attributedView(results: attributed.results)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
-        } else if message.text.isEmpty && !message.isCurrentUser {
-            Divider()
-        } else {
-            Text(message.text)
-                .foregroundColor(message.isCurrentUser ? .white : .primary)
-                .textSelection(.enabled)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 15)
-                .background(
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(message.isCurrentUser ? Color.blue.opacity(0.8) : Color.clear)
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
-        }
-    }
-
-    func attributedView(results: [ParserResult]) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(results) { parsed in
-                if parsed.isCodeBlock {
-                    CodeBlockView(parserResult: parsed)
-                        .padding(.bottom, 24)
-                        .textSelection(.enabled)
-                } else {
-                    Text(parsed.attributedString)
-                        .textSelection(.enabled)
-                }
-            }
-        }
-    }
-}
-
 struct ModalView: View {
     @Binding var showModal: Bool
     @State var incognito: Bool
@@ -172,11 +102,18 @@ struct ModalView_Previews: PreviewProvider {
             Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: [parserResult]), isCurrentUser: false)
         ]
 
+        let modalManagerWithLongMessages = ModalManager()
+        modalManagerWithLongMessages.messages = [
+            Message(id: UUID(), text: "hello world", isCurrentUser: false),
+            Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true)
+        ]
+
         return Group {
             ModalView(showModal: $showModal, incognito: false, modalManager: modalManager)
             ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithMessages)
             ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithErrors)
             ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithCodeblock)
+            ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithLongMessages)
         }
     }
 

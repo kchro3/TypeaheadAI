@@ -62,10 +62,10 @@ class ClientManager {
 
     private let session: URLSession
 
-//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
     private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-    //private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -252,7 +252,7 @@ class ClientManager {
     /// - Parameters:
     ///   - Same as sendRequest
     ///   - streamHandler: A closure to be executed for each chunk of data received.
-    private func sendStreamRequest(
+    func sendStreamRequest(
         id: UUID,
         token: String?,
         username: String,

@@ -65,7 +65,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                     }
 
                     let history = self.historyManager.fetchHistoryEntries(
-                        limit: 3,
+                        limit: 10,
                         quickActionId: self.promptManager.activePromptID,
                         activeUrl: url,
                         activeAppName: appName,
@@ -74,12 +74,21 @@ actor SpecialCopyActor: CanSimulateCopy {
 
                     Task {
                         await self.modalManager.setUserMessage(userMessage)
-                        self.clientManager.predict(
+                        await self.clientManager.sendStreamRequest(
                             id: UUID(),
+                            token: UserDefaults.standard.string(forKey: "token") ?? "",
+                            username: NSUserName(),
+                            userFullName: NSFullUserName(),
+                            userObjective: self.promptManager.getActivePrompt(),
+                            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                            userLang: Locale.preferredLanguages.first ?? "",
                             copiedText: copiedText,
-                            incognitoMode: incognitoMode,
+                            messages: [],
                             history: history,
-                            stream: true,
+                            url: url ?? "",
+                            activeAppName: appName ?? "unknown",
+                            activeAppBundleIdentifier: bundleIdentifier ?? "",
+                            incognitoMode: incognitoMode,
                             streamHandler: self.modalManager.defaultHandler,
                             completion: { _ in }
                         )
