@@ -57,7 +57,7 @@ actor SpecialPasteActor: CanSimulatePaste {
             pasteboard.setString(lastMessage.text, forType: .string)
         }
 
-        self.simulatePaste(completion: { () in
+        Task {
             guard let firstMessage = self.modalManager.messages.first else {
                 self.logger.error("Illegal state")
                 return
@@ -74,6 +74,8 @@ actor SpecialPasteActor: CanSimulatePaste {
                     numMessages: self.modalManager.messages.count
                 )
             })
-        })
+        }
+
+        self.simulatePaste(completion: { () in })
     }
 }

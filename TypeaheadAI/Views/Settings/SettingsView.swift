@@ -12,7 +12,6 @@ enum Tabs: String, CaseIterable, Identifiable {
     case profile = "Profile"
     case history = "History"
     case incognito = "Incognito Mode"
-    case about = "About"
 
     var id: String { self.rawValue }
 }
@@ -44,8 +43,6 @@ struct SettingsView: View {
             return AnyView(HistoryListView())
         case .incognito:
             return AnyView(IncognitoModeView())
-        case .about:
-            return AnyView(SplashView())
         }
     }
 }
@@ -99,11 +96,10 @@ struct SettingsView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt, context: context)
         }
 
-
         return Group {
             SettingsView(promptManager: promptManager)
                 .environment(\.managedObjectContext, context)
-            SettingsView(promptManager: promptManager, selectedTab: Tabs.about)
+            SettingsView(promptManager: promptManager, selectedTab: Tabs.general)
                 .environment(\.managedObjectContext, context)
         }
     }

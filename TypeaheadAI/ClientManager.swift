@@ -92,7 +92,7 @@ class ClientManager {
         incognitoMode: Bool,
         history: [Message]? = nil,
         userObjective: String? = nil,
-        timeout: TimeInterval = 10,
+        timeout: TimeInterval = 30,
         stream: Bool = false,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
@@ -134,7 +134,7 @@ class ClientManager {
     func refine(
         messages: [Message],
         incognitoMode: Bool,
-        timeout: TimeInterval = 10,
+        timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) {
         if let (key, _) = cached,
@@ -192,7 +192,7 @@ class ClientManager {
     /// Onboarding flow
     func onboarding(
         onboardingStep: Int,
-        timeout: TimeInterval = 10,
+        timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
@@ -224,7 +224,7 @@ class ClientManager {
         userLang: String,
         incognitoMode: Bool,
         onboardingStep: Int,
-        timeout: TimeInterval = 10,
+        timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
     ) async {
@@ -268,7 +268,7 @@ class ClientManager {
         activeAppBundleIdentifier: String,
         incognitoMode: Bool,
         onboardingMode: Bool = false,
-        timeout: TimeInterval = 10,
+        timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
     ) async {
