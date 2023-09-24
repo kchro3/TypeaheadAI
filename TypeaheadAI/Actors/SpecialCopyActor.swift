@@ -10,18 +10,29 @@ import SwiftUI
 import os.log
 
 actor SpecialCopyActor: CanSimulateCopy {
+    private let historyManager: HistoryManager
     private let clientManager: ClientManager
+    private let promptManager: PromptManager
     private let modalManager: ModalManager
-    
+    private let appContextManager: AppContextManager
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialCopyActor"
     )
 
-    init(clientManager: ClientManager,
-         modalManager: ModalManager) {
+    init(
+        historyManager: HistoryManager,
+        clientManager: ClientManager,
+        promptManager: PromptManager,
+        modalManager: ModalManager,
+        appContextManager: AppContextManager
+    ) {
+        self.historyManager = historyManager
         self.clientManager = clientManager
+        self.promptManager = promptManager
         self.modalManager = modalManager
+        self.appContextManager = appContextManager
     }
     
     func specialCopy(incognitoMode: Bool, stickyMode: Bool) {
@@ -39,7 +50,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                 await self.modalManager.clearText(stickyMode: stickyMode)
                 await self.modalManager.showModal(incognito: incognitoMode)
 
-                self.clientManager.appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+                self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
                     var userMessage = ""
                     if let url = url {
                         userMessage += "app: \(appName ?? "unknown") (\(url))\n"
@@ -47,19 +58,37 @@ actor SpecialCopyActor: CanSimulateCopy {
                         userMessage += "app: \(appName ?? "unknown")\n"
                     }
 
-                    if let activePrompt = self.clientManager.getActivePrompt() {
+                    if let activePrompt = self.promptManager.getActivePrompt() {
                         userMessage += "\(activePrompt):\n\(copiedText)"
                     } else {
                         userMessage += "copied:\n\(copiedText)"
                     }
 
+                    let history = self.historyManager.fetchHistoryEntries(
+                        limit: 10,
+                        quickActionId: self.promptManager.activePromptID,
+                        activeUrl: url,
+                        activeAppName: appName,
+                        activeAppBundleIdentifier: bundleIdentifier
+                    )
+
                     Task {
                         await self.modalManager.setUserMessage(userMessage)
-                        self.clientManager.predict(
+                        await self.clientManager.sendStreamRequest(
                             id: UUID(),
+                            token: UserDefaults.standard.string(forKey: "token") ?? "",
+                            username: NSUserName(),
+                            userFullName: NSFullUserName(),
+                            userObjective: self.promptManager.getActivePrompt(),
+                            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                            userLang: Locale.preferredLanguages.first ?? "",
                             copiedText: copiedText,
+                            messages: [],
+                            history: history,
+                            url: url ?? "",
+                            activeAppName: appName ?? "unknown",
+                            activeAppBundleIdentifier: bundleIdentifier ?? "",
                             incognitoMode: incognitoMode,
-                            stream: true,
                             streamHandler: self.modalManager.defaultHandler,
                             completion: { _ in }
                         )

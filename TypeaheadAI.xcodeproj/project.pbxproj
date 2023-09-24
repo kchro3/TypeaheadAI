@@ -44,6 +44,7 @@
 		2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */; };
 		2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84342A9DD90F00359841 /* HistoryManager.swift */; };
 		2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */; };
+		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
 		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
 		2BE0EC2B2AA1D44000E47C52 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC2A2AA1D44000E47C52 /* SplashView.swift */; };
@@ -114,6 +115,7 @@
 		2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestStatus.swift; sourceTree = "<group>"; };
 		2BCF84342A9DD90F00359841 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
 		2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		2BDA45C22ABEE840006128BC /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		2BE0EC212AA0956C00E47C52 /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
 		2BE0EC242AA17DB600E47C52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseClickMonitor.swift; sourceTree = "<group>"; };
@@ -300,6 +302,7 @@
 			children = (
 				2BE0EC212AA0956C00E47C52 /* ModalView.swift */,
 				2BF9297F2AB13F3600FC105B /* CodeBlockView.swift */,
+				2BDA45C22ABEE840006128BC /* MessageView.swift */,
 			);
 			path = Modal;
 			sourceTree = "<group>";
@@ -481,6 +484,7 @@
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
+				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,

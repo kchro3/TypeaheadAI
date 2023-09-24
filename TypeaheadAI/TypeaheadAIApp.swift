@@ -62,8 +62,11 @@ final class AppState: ObservableObject {
 
         // Initialize actors
         self.specialCopyActor = SpecialCopyActor(
+            historyManager: historyManager,
             clientManager: clientManager,
-            modalManager: modalManager
+            promptManager: promptManager,
+            modalManager: modalManager,
+            appContextManager: appContextManager
         )
         self.specialPasteActor = SpecialPasteActor(
             historyManager: historyManager,
@@ -119,10 +122,6 @@ final class AppState: ObservableObject {
             Task {
                 await self.specialSaveActor?.specialSave(incognitoMode: incognitoMode)
             }
-        }
-
-        KeyboardShortcuts.onKeyUp(for: .chatRefresh) { [self] in
-            self.modalManager.forceRefresh()
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in

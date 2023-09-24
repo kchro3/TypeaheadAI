@@ -148,11 +148,12 @@ struct MenuView: View {
 
                 if modalManager.isVisible {
                     buttonRow(
-                        title: "Clear chat",
+                        title: "New chat",
                         isHovering: $isHoveringClearChat,
-                        shortcut: KeyboardShortcuts.Name.chatRefresh
+                        shortcut: KeyboardShortcuts.Name.chatNew
                     ) {
                         modalManager.forceRefresh()
+                        NSApp.activate(ignoringOtherApps: true)
                         isMenuVisible = false
                     }
                 } else {

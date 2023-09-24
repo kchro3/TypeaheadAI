@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import CoreData
 import Foundation
 import os.log
 
@@ -18,6 +19,7 @@ struct RequestPayload: Codable {
     var userLang: String
     var copiedText: String
     var messages: [Message]?
+    var history: [Message]?
     var url: String
     var activeAppName: String
     var activeAppBundleIdentifier: String
@@ -60,12 +62,10 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let apiUrl = URL(string: "https://typeahead-ai.fly.dev/get_response")!
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/get_response_stream")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    //private let apiUrl = URL(string: "http://localhost:8080/v2/get_response")!
-    //private let apiUrlStreaming = URL(string: "http://localhost:8080/get_response_stream")!
-    //private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -75,7 +75,6 @@ class ClientManager {
     // Add a Task property to manage the streaming task
     private var currentStreamingTask: Task<Void, Error>? = nil
     private var currentOnboardingTask: Task<Void, Error>? = nil
-    private var currentBatchTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
 
     init(session: URLSession = .shared) {
@@ -91,6 +90,7 @@ class ClientManager {
         id: UUID,
         copiedText: String,
         incognitoMode: Bool,
+        history: [Message]? = nil,
         userObjective: String? = nil,
         timeout: TimeInterval = 10,
         stream: Bool = false,
@@ -107,44 +107,25 @@ class ClientManager {
         }
 
         appCtxManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
-            if stream {
-                Task {
-                    await self.sendStreamRequest(
-                        id: id,
-                        token: UserDefaults.standard.string(forKey: "token") ?? "",
-                        username: NSUserName(),
-                        userFullName: NSFullUserName(),
-                        userObjective: objective,
-                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                        userLang: Locale.preferredLanguages.first ?? "",
-                        copiedText: copiedText,
-                        messages: [],
-                        url: url ?? "",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
-                        incognitoMode: incognitoMode,
-                        streamHandler: streamHandler,
-                        completion: completion
-                    )
-                }
-            } else {
-                Task {
-                    await self.sendRequest(
-                        id: id,
-                        token: UserDefaults.standard.string(forKey: "token") ?? "",
-                        username: NSUserName(),
-                        userFullName: NSFullUserName(),
-                        userObjective: self.promptManager?.getActivePrompt(),
-                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                        userLang: Locale.preferredLanguages.first ?? "",
-                        copiedText: copiedText,
-                        url: url ?? "",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
-                        incognitoMode: incognitoMode,
-                        completion: completion
-                    )
-                }
+            Task {
+                await self.sendStreamRequest(
+                    id: id,
+                    token: UserDefaults.standard.string(forKey: "token") ?? "",
+                    username: NSUserName(),
+                    userFullName: NSFullUserName(),
+                    userObjective: objective,
+                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                    userLang: Locale.preferredLanguages.first ?? "",
+                    copiedText: copiedText,
+                    messages: [],
+                    history: history,
+                    url: url ?? "",
+                    activeAppName: appName ?? "unknown",
+                    activeAppBundleIdentifier: bundleIdentifier ?? "",
+                    incognitoMode: incognitoMode,
+                    streamHandler: streamHandler,
+                    completion: completion
+                )
             }
         }
     }
@@ -171,6 +152,7 @@ class ClientManager {
                         userLang: payload.userLang,
                         copiedText: payload.copiedText,
                         messages: self.sanitizeMessages(messages),
+                        history: nil,
                         url: payload.url,
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
@@ -194,6 +176,7 @@ class ClientManager {
                         userLang: Locale.preferredLanguages.first ?? "",
                         copiedText: "",
                         messages: self.sanitizeMessages(messages),
+                        history: nil,
                         url: url ?? "unknown",
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
@@ -226,101 +209,6 @@ class ClientManager {
                 completion: completion
             )
         }
-    }
-
-    /// Sends a request to the server with the given parameters.
-    ///
-    /// - Parameters:
-    ///   - identifier: A UUID to uniquely identify this request.
-    ///   - token: The authentication token for the user.
-    ///   - username: The username of the user.
-    ///   - userFullName: The full name of the user.
-    ///   - userObjective: The objective of the user.
-    ///   - userBio: Details about the user.
-    ///   - userLang: User's preferred language.
-    ///   - copiedText: The text that the user has copied.
-    ///   - url: The URL that the user is currently viewing.
-    ///   - activeAppName: The name of the app that is currently active.
-    ///   - activeAppBundleIdentifier: The bundle identifier of the currently active app.
-    ///   - incognitoMode: Whether or not the request is sent to an online or offline model.
-    ///   - timeout: The timeout for the request. Default is 10 seconds.
-    ///   - completion: A closure to be executed once the request is complete.
-    private func sendRequest(
-        id: UUID,
-        token: String?,
-        username: String,
-        userFullName: String,
-        userObjective: String?,
-        userBio: String,
-        userLang: String,
-        copiedText: String,
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
-        incognitoMode: Bool,
-        timeout: TimeInterval = 20,
-        completion: @escaping (Result<String, Error>) -> Void
-    ) async {
-        currentBatchTask?.cancel()
-        currentBatchTask = Task.detached { [weak self] in
-            let payload = RequestPayload(
-                token: token,
-                username: username,
-                userFullName: userFullName,
-                userObjective: userObjective,
-                userBio: userBio,
-                userLang: userLang,
-                copiedText: copiedText,
-                url: url,
-                activeAppName: activeAppName,
-                activeAppBundleIdentifier: activeAppBundleIdentifier
-            )
-
-            if let result: Result<String, Error> = (incognitoMode)
-                ? await self?.performBatchOfflineTask(payload: payload, timeout: timeout)
-                : await self?.performBatchOnlineTask(payload: payload, timeout: timeout) {
-                completion(result)
-            } else {
-                completion(.failure(ClientManagerError.appError("Something went wrong...")))
-            }
-        }
-    }
-
-    private func performBatchOnlineTask(
-        payload: RequestPayload,
-        timeout: TimeInterval
-    ) async -> Result<String, Error> {
-        // Encode the RequestPayload instance into JSON data.
-        guard let httpBody = try? JSONEncoder().encode(payload) else {
-            return .failure(ClientManagerError.badRequest("Encoding error"))
-        }
-
-        do {
-            // Create an HTTP POST request with the API URL and encoded payload.
-            var request = URLRequest(url: self.apiUrl, timeoutInterval: timeout)
-            request.httpMethod = "POST"
-            request.httpBody = httpBody
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            let (data, _) = try await self.session.data(for: request)
-            let decodedResponse = try JSONDecoder().decode(ResponsePayload.self, from: data)
-            return .success(decodedResponse.textToPaste)
-        } catch {
-            self.logger.error("\(error.localizedDescription)")
-            return .failure(ClientManagerError.serverError(error.localizedDescription))
-        }
-    }
-
-    private func performBatchOfflineTask(payload: RequestPayload, timeout: TimeInterval) async -> Result<String, Error> {
-        guard let modelManager = self.llamaModelManager else {
-            return .failure(ClientManagerError.appError("Model Manager not found"))
-        }
-
-        if modelManager.modelDirectoryURL == nil {
-            modelManager.load()
-        }
-
-        return modelManager.predict(payload: payload, streamHandler: { _ in })
     }
 
     /// Sends a request to the server with the given parameters and listens for a stream of data.
@@ -364,7 +252,7 @@ class ClientManager {
     /// - Parameters:
     ///   - Same as sendRequest
     ///   - streamHandler: A closure to be executed for each chunk of data received.
-    private func sendStreamRequest(
+    func sendStreamRequest(
         id: UUID,
         token: String?,
         username: String,
@@ -374,6 +262,7 @@ class ClientManager {
         userLang: String,
         copiedText: String,
         messages: [Message],
+        history: [Message]?,
         url: String,
         activeAppName: String,
         activeAppBundleIdentifier: String,
@@ -394,6 +283,7 @@ class ClientManager {
                 userLang: userLang,
                 copiedText: copiedText,
                 messages: self?.sanitizeMessages(messages),
+                history: history,
                 url: url,
                 activeAppName: activeAppName,
                 activeAppBundleIdentifier: activeAppBundleIdentifier,
