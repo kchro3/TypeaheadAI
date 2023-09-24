@@ -83,7 +83,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                             userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                             userLang: Locale.preferredLanguages.first ?? "",
                             copiedText: copiedText,
-                            messages: [],
+                            messages: self.modalManager.messages,
                             history: history,
                             url: url ?? "",
                             activeAppName: appName ?? "unknown",

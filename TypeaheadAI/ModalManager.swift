@@ -173,8 +173,10 @@ class ModalManager: ObservableObject {
                     codeBlockLanguage: lastResult.codeBlockLanguage
                 )
 
+                try Task.checkCancellation()
                 messages[idx].attributed = AttributedOutput(string: streamText, results: results)
             } else {
+                try Task.checkCancellation()
                 messages[idx].attributed = AttributedOutput(string: streamText, results: [
                     ParserResult(
                         id: UUID(),
@@ -185,6 +187,7 @@ class ModalManager: ObservableObject {
                 ])
             }
         } catch {
+            try? Task.checkCancellation()
             messages[idx].responseError = error.localizedDescription
         }
 
@@ -377,9 +380,10 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.error("Something went wrong.")
             }
-        default:
+        case .failure(let error):
+            self.logger.error("Error: \(error.localizedDescription)")
             DispatchQueue.main.async {
-                self.setError("Something went wrong. Please quit the app and try again.")
+                self.setError(error.localizedDescription)
             }
         }
     }
