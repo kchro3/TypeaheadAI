@@ -387,12 +387,6 @@ class ModalManager: ObservableObject {
             }
         }
     }
-
-    func defaultStreamHandler(chunk: String) {
-        Task {
-            await self.appendText(chunk)
-        }
-    }
 }
 
 extension String {
