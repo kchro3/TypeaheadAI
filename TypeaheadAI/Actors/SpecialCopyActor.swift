@@ -16,6 +16,8 @@ actor SpecialCopyActor: CanSimulateCopy {
     private let modalManager: ModalManager
     private let appContextManager: AppContextManager
 
+    @AppStorage("numSmartCopies") var numSmartCopies: Int?
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialCopyActor"
@@ -62,6 +64,12 @@ actor SpecialCopyActor: CanSimulateCopy {
                         userMessage += "\(activePrompt):\n\(copiedText)"
                     } else {
                         userMessage += "copied:\n\(copiedText)"
+                    }
+
+                    if let nCopies = self.numSmartCopies {
+                        self.numSmartCopies = nCopies + 1
+                    } else {
+                        self.numSmartCopies = 1
                     }
 
                     let history = self.historyManager.fetchHistoryEntries(

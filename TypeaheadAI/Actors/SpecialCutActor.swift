@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import Carbon.HIToolbox
 import AppKit
 import Cocoa
@@ -66,6 +67,8 @@ actor SpecialCutActor {
     private let clientManager: ClientManager
     private let modalManager: ModalManager
 
+    @AppStorage("numSmartCuts") var numSmartCuts: Int?
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialCutActor"
@@ -106,6 +109,12 @@ actor SpecialCutActor {
                             await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
                         } else {
                             await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)")
+                        }
+
+                        if let nCuts = self.numSmartCuts {
+                            self.numSmartCuts = nCuts + 1
+                        } else {
+                            self.numSmartCuts = 1
                         }
 
                         self.clientManager.predict(

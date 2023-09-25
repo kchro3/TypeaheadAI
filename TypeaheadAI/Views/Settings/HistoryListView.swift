@@ -13,9 +13,26 @@ struct HistoryListView: View {
     @FetchRequest(entity: HistoryEntry.entity(), sortDescriptors: []) var history: FetchedResults<HistoryEntry>
     @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
 
+    @State private var showAlert = false
+
+    @AppStorage("numSmartCopies") var numSmartCopies: Int?
+    @AppStorage("numSmartPastes") var numSmartPastes: Int?
+    @AppStorage("numSmartCuts") var numSmartCuts: Int?
+
     var body: some View {
-        VStack {
-            Text("WIP: This will look nice later...")
+        VStack(alignment: .leading, spacing: 10) {
+            Text("History").font(.title)
+
+            Text("Smart-paste function is a powerful feedback mechanism because you are implicitly telling TypeaheadAI how you like things to be done. Everyone is different, so the more you smart-copy and smart-paste, the better TypeaheadAI will be at predicting what you want and how you want it.")
+            Text("You can view and manage your history here.")
+
+            Divider()
+
+            HStack {
+                Text("^[\(numSmartCopies ?? 0) smart-copy](inflect: true)")
+                Text("^[\(numSmartCuts ?? 0) smart-cut](inflect: true)")
+                Text("^[\(numSmartPastes ?? 0) smart-paste](inflect: true)")
+            }
 
             List {
                 ForEach(history, id: \.self) { history in
@@ -38,7 +55,17 @@ struct HistoryListView: View {
             Divider()
 
             Button("Clear History") {
-                clearHistory(context: managedObjectContext)
+                showAlert = true
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Confirm clearing history"),
+                    message: Text("Are you sure you want to the history? This action cannot be undone."),
+                    primaryButton: .destructive(Text("Clear")) {
+                        clearHistory(context: managedObjectContext)
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -60,6 +87,10 @@ struct HistoryListView: View {
             // Handle the error
             print("Could not clear history: \(error), \(error.userInfo)")
         }
+
+        numSmartCopies = 0
+        numSmartCuts = 0
+        numSmartPastes = 0
     }
 }
 

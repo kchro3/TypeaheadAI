@@ -18,6 +18,8 @@ actor SpecialPasteActor: CanSimulatePaste {
     private let modalManager: ModalManager
     private let appContextManager: AppContextManager
 
+    @AppStorage("numSmartPastes") var numSmartPastes: Int?
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialPasteActor"
@@ -74,6 +76,12 @@ actor SpecialPasteActor: CanSimulatePaste {
                     numMessages: self.modalManager.messages.count
                 )
             })
+        }
+
+        if let nPastes = self.numSmartPastes {
+            self.numSmartPastes = nPastes + 1
+        } else {
+            self.numSmartPastes = 1
         }
 
         self.simulatePaste(completion: { () in })
