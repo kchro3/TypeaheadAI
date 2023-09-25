@@ -295,23 +295,54 @@ class ClientManager {
                 return
             }
 
-            if let result: Result<String, Error> = (incognitoMode)
-                    ? await self?.performStreamOfflineTask(payload: payload, timeout: timeout, streamHandler: streamHandler)
-                    : await self?.performStreamOnlineTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
+            if incognitoMode {
+                if let result: Result<String, Error> = await self?.performStreamOfflineTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
 
-                completion(result)
+                    completion(result)
 
-                // Cache successful requests
-                switch result {
-                case .success(let output):
-                    self?.cacheResponse(output, for: payload)
-                    break
-                case .failure(_):
-                    self?.cacheResponse(nil, for: payload)
-                    break
+                    // Cache successful requests
+                    switch result {
+                    case .success(let output):
+                        self?.cacheResponse(output, for: payload)
+                        break
+                    case .failure(_):
+                        self?.cacheResponse(nil, for: payload)
+                        break
+                    }
+                } else {
+                    completion(.failure(ClientManagerError.appError("Something went wrong...")))
                 }
             } else {
-                completion(.failure(ClientManagerError.appError("Something went wrong...")))
+                do {
+                    let stream = try await self?.performStreamOnlineTask(
+                        payload: payload,
+                        timeout: timeout,
+                        completion: { result in
+                            completion(result)
+
+                            // Cache successful response
+                            switch result {
+                            case .success(let output):
+                                self?.cacheResponse(output, for: payload)
+                            case .failure(let error):
+                                self?.logger.error("\(error.localizedDescription)")
+                            }
+                        }
+                    )
+
+                    guard let stream = stream else {
+                        self?.logger.debug("Failed to get stream")
+                        return
+                    }
+
+                    for try await text in stream {
+                        self?.logger.debug("stream: \(text)")
+                        streamHandler(.success(text))
+                    }
+                } catch {
+                    self?.cacheResponse(nil, for: payload)
+                    streamHandler(.failure(error))
+                }
             }
         }
     }
@@ -319,39 +350,42 @@ class ClientManager {
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>) -> Void
-    ) async -> Result<String, Error> {
+        completion: @escaping (Result<String, Error>) -> Void
+    ) async throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            let error: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
-            streamHandler(error)
-            return error
+            throw ClientManagerError.badRequest("Encoding error")
         }
 
-        var request = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
-        request.httpMethod = "POST"
-        request.httpBody = httpBody
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        var urlRequest = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        var output = ""
-        do {
-            let (stream, _) = try await URLSession.shared.bytes(for: request)
+        let (result, response) = try await URLSession.shared.bytes(for: urlRequest)
+        try Task.checkCancellation()
 
-            for try await line in stream.lines {
-                let decodedResponse = try JSONDecoder().decode(ChunkPayload.self, from: line.data(using: .utf8)!)
-                if let text = decodedResponse.text {
-                    output += text
-                    self.cacheResponse(output, for: payload)
-                    streamHandler(.success(text))
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Server error")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            throw ClientManagerError.serverError("Server error")
+        }
+
+        var responseText = ""
+        return AsyncThrowingStream {
+            for try await line in result.lines {
+                try Task.checkCancellation()
+                if let data = line.data(using: .utf8),
+                   let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
+                   let text = response.text {
+                    responseText += text
+                    return text
                 }
             }
-        } catch {
-            let err: Result<String, Error> = .failure(error)
-            self.cacheResponse(nil, for: payload)
-            streamHandler(err)
-            return err
-        }
 
-        return .success(output)
+            return nil
+        }
     }
 
     private func performOnboardingTask(
