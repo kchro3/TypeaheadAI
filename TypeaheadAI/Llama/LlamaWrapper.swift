@@ -14,6 +14,7 @@ typealias TokenCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
 
 func globalHandler(_ token: UnsafePointer<CChar>?) {
     if let token = token {
+        print("offline stream: \(token)")
         LlamaWrapper.handler?(.success(String(cString: token)))
     }
 }

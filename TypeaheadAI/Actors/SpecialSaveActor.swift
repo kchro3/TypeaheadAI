@@ -29,7 +29,7 @@ actor SpecialSaveActor: CanSimulateCopy {
         self.memoManager = memoManager
     }
 
-    func specialSave(incognitoMode: Bool) {
+    func specialSave() {
         simulateCopy() {
             guard let copiedText = NSPasteboard.general.string(forType: .string) else {
                 return
@@ -39,13 +39,13 @@ actor SpecialSaveActor: CanSimulateCopy {
             Task {
                 // Force sticky-mode so that it saves the message to the session.
                 await self.modalManager.clearText(stickyMode: true)
-                await self.modalManager.showModal(incognito: incognitoMode)
+                await self.modalManager.showModal()
                 await self.modalManager.appendText("Saving...\n")
 
                 self.clientManager.predict(
                     id: UUID(),
                     copiedText: copiedText,
-                    incognitoMode: incognitoMode,
+                    incognitoMode: !self.modalManager.online,
                     userObjective: "tldr the copied text in 20 words or less",
                     stream: true,
                     streamHandler: self.modalManager.defaultHandler,

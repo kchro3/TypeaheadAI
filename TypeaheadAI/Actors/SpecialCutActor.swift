@@ -87,7 +87,7 @@ actor SpecialCutActor {
         self.modalManager = modalManager
     }
 
-    func specialCut(incognitoMode: Bool, stickyMode: Bool) {
+    func specialCut(stickyMode: Bool) {
         do {
             self.clipboardMonitor.stopMonitoring()
             try simulateScreengrab() {
@@ -103,7 +103,7 @@ actor SpecialCutActor {
 
                     Task {
                         await self.modalManager.clearText(stickyMode: stickyMode)
-                        await self.modalManager.showModal(incognito: incognitoMode)
+                        await self.modalManager.showModal()
 
                         if let activePrompt = self.clientManager.getActivePrompt() {
                             await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
@@ -120,7 +120,7 @@ actor SpecialCutActor {
                         self.clientManager.predict(
                             id: UUID(),
                             copiedText: recognizedText,
-                            incognitoMode: incognitoMode,
+                            incognitoMode: !self.modalManager.online,
                             stream: true,
                             streamHandler: self.modalManager.defaultHandler,
                             completion: { _ in }

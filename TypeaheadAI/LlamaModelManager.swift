@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import SwiftUI
 import Foundation
 import os.log
 
@@ -38,9 +39,9 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
-    @Published var modelDirectoryURL: URL? {
+    @AppStorage("modelDirectory") private var directoryURL: URL? {
         didSet {
-            if let url = modelDirectoryURL {
+            if let url = directoryURL {
                 let success = url.startAccessingSecurityScopedResource()
                 if !success {
                     logger.debug("Failed to start accessing security-scoped resource.")
@@ -68,11 +69,11 @@ class LlamaModelManager: ObservableObject {
     }
 
     deinit {
-        modelDirectoryURL?.stopAccessingSecurityScopedResource()
+        directoryURL?.stopAccessingSecurityScopedResource()
     }
 
     private func loadModelFiles() -> [URL]? {
-        guard let dir = modelDirectoryURL else {
+        guard let dir = directoryURL else {
             logger.error("No model directory set.")
             return nil
         }
@@ -96,7 +97,7 @@ class LlamaModelManager: ObservableObject {
                 if isBookmarkStale {
                     // Handle stale bookmarks (rare)
                 } else {
-                    modelDirectoryURL = resolvedURL
+                    directoryURL = resolvedURL
                 }
             } catch {
                 logger.error("Failed to resolve security-scoped bookmark: \(error)")
@@ -151,7 +152,7 @@ class LlamaModelManager: ObservableObject {
 
         do {
             try contents.write(to: readmeURL, atomically: true, encoding: .utf8)
-            modelDirectoryURL = directoryURL // set only if writing is successful
+            self.directoryURL = directoryURL // set only if writing is successful
             logger.debug("readme saved successfully.")
         } catch {
             logger.error("Failed to save readme: \(error)")

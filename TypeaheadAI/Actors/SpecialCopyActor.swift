@@ -37,7 +37,7 @@ actor SpecialCopyActor: CanSimulateCopy {
         self.appContextManager = appContextManager
     }
     
-    func specialCopy(incognitoMode: Bool, stickyMode: Bool) {
+    func specialCopy(stickyMode: Bool) {
         self.logger.debug("special copy")
 
         simulateCopy() {
@@ -50,7 +50,7 @@ actor SpecialCopyActor: CanSimulateCopy {
             // Clear the modal text and reissue request
             Task {
                 await self.modalManager.clearText(stickyMode: stickyMode)
-                await self.modalManager.showModal(incognito: incognitoMode)
+                await self.modalManager.showModal()
 
                 self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
                     var userMessage = ""
@@ -96,7 +96,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                             url: url ?? "",
                             activeAppName: appName ?? "unknown",
                             activeAppBundleIdentifier: bundleIdentifier ?? "",
-                            incognitoMode: incognitoMode,
+                            incognitoMode: !self.modalManager.online,
                             streamHandler: self.modalManager.defaultHandler,
                             completion: { _ in }
                         )

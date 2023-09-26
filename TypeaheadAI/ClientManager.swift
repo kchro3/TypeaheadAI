@@ -97,6 +97,7 @@ class ClientManager {
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
+        self.logger.info("incognito: \(incognitoMode)")
         // If objective is not specified in the request, fall back on the active prompt.
         let objective = userObjective ?? self.promptManager?.getActivePrompt()
 
@@ -137,6 +138,7 @@ class ClientManager {
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void
     ) {
+        self.logger.info("incognito: \(incognitoMode)")
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
@@ -180,7 +182,7 @@ class ClientManager {
                         url: url ?? "unknown",
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
-                        incognitoMode: false,
+                        incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
                         completion: { _ in }
                     )
