@@ -24,7 +24,23 @@ struct CustomTextView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> NSTextView {
         let textView = NSTextView()
+
+        // Style adjustments
+        textView.backgroundColor = NSColor.clear
+        textView.focusRingType = .none
+        textView.font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+
         textView.delegate = context.coordinator
+
+        DispatchQueue.main.async {
+            // Initialize height
+            if let layoutManager = textView.layoutManager, let textContainer = textView.textContainer {
+                layoutManager.ensureLayout(for: textContainer)
+                let size = layoutManager.usedRect(for: textContainer).size
+                self.height = size.height
+            }
+        }
+
         return textView
     }
 
@@ -36,10 +52,6 @@ struct CustomTextView: NSViewRepresentable {
                 nsView.setSelectedRange(newRange)
                 suggestionSelected = false
             }
-        }
-
-        DispatchQueue.main.async {
-            self.height = max(nsView.intrinsicContentSize.height, 20)
         }
     }
 
@@ -86,7 +98,17 @@ struct CustomTextView: NSViewRepresentable {
             guard let textView = notification.object as? NSTextView else {
                 return
             }
-            self.parent.text = textView.string
+
+            DispatchQueue.main.async {
+                self.parent.text = textView.string
+                
+                // New code: Manually calculate the height of the text
+                if let layoutManager = textView.layoutManager, let textContainer = textView.textContainer {
+                    layoutManager.ensureLayout(for: textContainer)
+                    let size = layoutManager.usedRect(for: textContainer).size
+                    self.parent.height = size.height
+                }
+            }
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
@@ -119,7 +141,7 @@ struct CustomTextField: View {
     @State private var selectedIndex: Int? = nil
     @State private var caretRect: CGRect? = nil
     @State private var suggestionSelected = false
-    @State private var height: CGFloat = 20
+    @State private var height: CGFloat = 0
 
     var body: some View {
         ZStack {
@@ -138,6 +160,18 @@ struct CustomTextField: View {
                 onPlainEnter: {
                     print("Plain Enter pressed")  // Replace with your callback logic
                 }
+            )
+            .overlay(alignment: .topLeading) {
+                Text("Ask a follow-up question...")
+                    .foregroundStyle(Color.secondary)
+                    .padding(.horizontal, 5)
+                    .opacity(text.isEmpty ? 1 : 0)
+            }
+            .frame(height: height)
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .background(RoundedRectangle(cornerRadius: 15)
+                .fill(.secondary.opacity(0.1))
             )
             .onChange(of: text, perform: { value in
                 filterSuggestions(input: value)

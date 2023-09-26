@@ -37,7 +37,7 @@ struct ModalView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-
+//
 //            Group {
 //                if #available(macOS 13.0, *) {
 //                    TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text, axis: .vertical)
@@ -73,6 +73,8 @@ struct ModalView: View {
 //            .disabled(modalManager.onboardingMode)
 
             CustomTextField(text: $text, autoCompleteSuggestions: ["apple", "banana", "carrot"])
+                .padding(.horizontal, 10)
+                .padding(.vertical, 15)
                 .onAppear {
                     NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
                         if event.keyCode == 125 {  // Down arrow
