@@ -204,6 +204,13 @@ struct CustomTextField: View {
         } else {
             selectedIndex = nil  // clear selectedIndex
         }
+
+        // Populate inlineSuggestion
+        if let firstSuggestion = filteredSuggestions.first, showAutoComplete {
+            inlineSuggestion = String(firstSuggestion.dropFirst(lastWord.count))
+        } else {
+            inlineSuggestion = ""
+        }
     }
 
     private func applySuggestion(index: Int) {
