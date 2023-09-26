@@ -9,6 +9,8 @@ import SwiftUI
 import Markdown
 
 struct ModalView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+
     @Binding var showModal: Bool
     @State var incognito: Bool
     @ObservedObject var modalManager: ModalManager
@@ -16,8 +18,6 @@ struct ModalView: View {
     @State private var text: String = ""
     @FocusState private var isTextFieldFocused: Bool
     @State private var isReplyLocked: Bool = false
-
-    @Namespace var bottomID
 
     var body: some View {
         VStack {
@@ -37,61 +37,38 @@ struct ModalView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-//
-//            Group {
-//                if #available(macOS 13.0, *) {
-//                    TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text, axis: .vertical)
-//                } else {
-//                    TextField(modalManager.onboardingMode ? "Replies are turned off right now." : "Ask a follow-up question...", text: $text)
-//                }
-//            }
-//            .textFieldStyle(.plain)
-//            .lineLimit(8)
-//            .focused($isTextFieldFocused)
-//            .padding(.vertical, 5)
-//            .padding(.horizontal, 10)
-//            .background(RoundedRectangle(cornerRadius: 15)
-//                .fill(.secondary.opacity(0.1))
-//            )
-//            .onSubmit {
-//                if !text.isEmpty {
-//                    modalManager.addUserMessage(text, incognito: incognito)
-//                    text = ""
-//                }
-//            }
-//            .onChange(of: modalManager.triggerFocus) { newValue in
-//                if newValue {
-//                    isTextFieldFocused = true
-//                    modalManager.triggerFocus = false
-//                }
-//            }
-//            .padding(.horizontal, 10)
-//            .padding(.vertical, 15)
-//            .onAppear {
-//                isTextFieldFocused = true
-//            }
-//            .disabled(modalManager.onboardingMode)
 
-            CustomTextField(text: $text, autoCompleteSuggestions: ["apple", "banana", "carrot"])
-                .padding(.horizontal, 10)
-                .padding(.vertical, 15)
-                .onAppear {
-                    NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
-                        if event.keyCode == 125 {  // Down arrow
-                            NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
-                        } else if event.keyCode == 126 {  // Up arrow
-                            NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "up"])
-                        } else if event.keyCode == 36 {  // Enter key
-                            NotificationCenter.default.post(name: NSNotification.Name("EnterKeyPressed"), object: nil)
-                        }
-                        return event
-                    }
+            CustomTextField(text: $text, autoCompleteSuggestions: self.getPrompts()) { text in
+                if !text.isEmpty {
+                    modalManager.addUserMessage(text, incognito: incognito)
                 }
-
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 15)
+            .onAppear {
+                NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
+                    if event.keyCode == 125 {  // Down arrow
+                        NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
+                    } else if event.keyCode == 126 {  // Up arrow
+                        NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "up"])
+                    } else if event.keyCode == 36 {  // Enter key
+                        NotificationCenter.default.post(name: NSNotification.Name("EnterKeyPressed"), object: nil)
+                    }
+                    return event
+                }
+            }
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
         .foregroundColor(Color.secondary.opacity(0.2))
+    }
+
+    private func getPrompts() -> [String] {
+        if let prompts = modalManager.promptManager?.savedPrompts {
+            return prompts.map { $0.prompt! }
+        } else {
+            return []
+        }
     }
 }
 

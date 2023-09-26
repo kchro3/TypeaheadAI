@@ -12,11 +12,10 @@ struct CustomTextView: NSViewRepresentable {
     @Binding var selectedIndex: Int?
     @Binding var numberOfSuggestions: Int
     @Binding var caretRect: CGRect?
-    @Binding var suggestionSelected: Bool
     @Binding var height: CGFloat
 
-    var onEnter: () -> Void
-    var onPlainEnter: () -> Void
+    var onTab: () -> Void
+    var onEnter: (String) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -47,11 +46,6 @@ struct CustomTextView: NSViewRepresentable {
     func updateNSView(_ nsView: NSTextView, context: Context) {
         if nsView.string != text {
             nsView.string = text
-            if suggestionSelected {
-                let newRange = NSRange(location: text.count, length: 0)
-                nsView.setSelectedRange(newRange)
-                suggestionSelected = false
-            }
         }
     }
 
@@ -71,15 +65,14 @@ struct CustomTextView: NSViewRepresentable {
                     textView.insertNewline(nil)
                     return true
                 } else {
-                    // Plain Enter pressed
-                    if let index = parent.selectedIndex, index < suggestionCount {
-                        parent.onEnter()
-                        return true
-                    } else {
-                        parent.onPlainEnter()
-                        return true
-                    }
+                    // Enter pressed
+                    parent.onEnter(parent.text)
+                    parent.text = ""
+                    return true
                 }
+            } else if commandSelector == #selector(NSStandardKeyBindingResponding.insertTab(_:)) {
+                parent.onTab()
+                return true
             } else if commandSelector == #selector(NSStandardKeyBindingResponding.moveUp(_:)) {
                 if suggestionCount > 0 {
                     parent.selectedIndex = ((parent.selectedIndex ?? 0) + suggestionCount - 1) % suggestionCount
@@ -101,8 +94,8 @@ struct CustomTextView: NSViewRepresentable {
 
             DispatchQueue.main.async {
                 self.parent.text = textView.string
-                
-                // New code: Manually calculate the height of the text
+
+                // Manually calculate the height of the text
                 if let layoutManager = textView.layoutManager, let textContainer = textView.textContainer {
                     layoutManager.ensureLayout(for: textContainer)
                     let size = layoutManager.usedRect(for: textContainer).size
@@ -134,14 +127,15 @@ struct CustomTextView: NSViewRepresentable {
 struct CustomTextField: View {
     @Binding var text: String
     let autoCompleteSuggestions: [String]
+    var onEnter: (String) -> Void
 
     @State private var showAutoComplete = false
     @State private var filteredSuggestions: [String] = []
     @State private var numberOfSuggestions: Int = 0
     @State private var selectedIndex: Int? = nil
     @State private var caretRect: CGRect? = nil
-    @State private var suggestionSelected = false
     @State private var height: CGFloat = 0
+    @State private var inlineSuggestion: String = ""
 
     var body: some View {
         ZStack {
@@ -150,22 +144,26 @@ struct CustomTextField: View {
                 selectedIndex: $selectedIndex,
                 numberOfSuggestions: $numberOfSuggestions,
                 caretRect: $caretRect,
-                suggestionSelected: $suggestionSelected,
                 height: $height,
-                onEnter: {
+                onTab: {
                     if let index = selectedIndex {
                         applySuggestion(index: index)
                     }
                 },
-                onPlainEnter: {
-                    print("Plain Enter pressed")  // Replace with your callback logic
-                }
+                onEnter: onEnter
             )
             .overlay(alignment: .topLeading) {
-                Text("Ask a follow-up question...")
-                    .foregroundStyle(Color.secondary)
-                    .padding(.horizontal, 5)
-                    .opacity(text.isEmpty ? 1 : 0)
+                Group {
+                    if text.isEmpty {
+                        Text("Ask a follow-up question...")
+                    } else if !inlineSuggestion.isEmpty {
+                        Text("\(text)\(inlineSuggestion) [tab]")
+                    } else {
+                        Text("\(text)")
+                    }
+                }
+                .foregroundColor(Color.secondary.opacity(0.5))
+                .padding(.horizontal, 5)
             }
             .frame(height: height)
             .padding(.vertical, 5)
@@ -176,20 +174,14 @@ struct CustomTextField: View {
             .onChange(of: text, perform: { value in
                 filterSuggestions(input: value)
             })
-
-            if showAutoComplete {
-                GeometryReader { geometry in
-                    List(filteredSuggestions.indices, id: \.self) { index in
-                        Text(filteredSuggestions[index])
-                            .background(index == selectedIndex ? Color.gray.opacity(0.2) : Color.clear)
-                            .onTapGesture {
-                                applySuggestion(index: index)
-                            }
-                    }
-                    .frame(width: geometry.size.width, height: 100)
-                    .offset(x: caretRect?.origin.x ?? 0, y: (caretRect?.origin.y ?? 0)+25)
+            .onChange(of: selectedIndex ?? -1, perform: { value in
+                // Populate inlineSuggestion
+                if let lastWord = text.split(separator: " ").last, showAutoComplete {
+                    inlineSuggestion = String(filteredSuggestions[value].dropFirst(lastWord.count))
+                } else {
+                    inlineSuggestion = ""
                 }
-            }
+            })
         }
     }
 
@@ -197,14 +189,21 @@ struct CustomTextField: View {
         let words = input.split(separator: " ")
         guard let lastWord = words.last, lastWord.count >= 3 else {
             showAutoComplete = false
+            inlineSuggestion = ""
+            selectedIndex = nil  // clear selectedIndex
             return
         }
         filteredSuggestions = autoCompleteSuggestions.filter {
-            $0.lowercased().contains(lastWord.lowercased()) && $0.lowercased() != lastWord.lowercased()
+            $0.lowercased().starts(with: lastWord.lowercased()) && $0.lowercased() != lastWord.lowercased()
         }
         numberOfSuggestions = filteredSuggestions.count
         showAutoComplete = !filteredSuggestions.isEmpty
-        selectedIndex = nil
+
+        if showAutoComplete {
+            selectedIndex = 0  // set default selectedIndex
+        } else {
+            selectedIndex = nil  // clear selectedIndex
+        }
     }
 
     private func applySuggestion(index: Int) {
@@ -214,6 +213,8 @@ struct CustomTextField: View {
             self.text = words.joined(separator: " ")
             self.text += self.text.isEmpty ? self.filteredSuggestions[index] : " \(self.filteredSuggestions[index])"
             self.showAutoComplete = false
+            self.inlineSuggestion = ""
+            self.selectedIndex = nil
         }
     }
 }
@@ -222,5 +223,9 @@ struct CustomTextField: View {
     @State var text = ""
     let suggestions = ["apple", "banana", "orange", "grape", "watermelon"]
 
-    return CustomTextField(text: $text, autoCompleteSuggestions: suggestions)
+    return CustomTextField(
+        text: $text,
+        autoCompleteSuggestions: suggestions,
+        onEnter: { res in print(res) }
+    )
 }
