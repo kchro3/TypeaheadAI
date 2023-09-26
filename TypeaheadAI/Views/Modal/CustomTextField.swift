@@ -187,7 +187,7 @@ struct CustomTextField: View {
 
     private func filterSuggestions(input: String) {
         let words = input.split(separator: " ")
-        guard let lastWord = words.last, lastWord.count >= 3 else {
+        guard let lastWord = words.last else {
             showAutoComplete = false
             inlineSuggestion = ""
             selectedIndex = nil  // clear selectedIndex
