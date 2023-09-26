@@ -56,6 +56,7 @@ class ModalManager: ObservableObject {
 
     // TODO: Inject?
     var clientManager: ClientManager? = nil
+    var promptManager: PromptManager? = nil
 
     var toastWindow: CustomModalWindow?
 

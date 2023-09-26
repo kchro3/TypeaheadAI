@@ -91,6 +91,7 @@ final class AppState: ObservableObject {
         self.clientManager.promptManager = promptManager
         self.clientManager.appContextManager = appContextManager
         self.modalManager.clientManager = clientManager
+        self.modalManager.promptManager = promptManager
 
         checkAndRequestNotificationPermissions()
 
@@ -275,6 +276,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 struct MacOS13AndLaterApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
+    @State var text: String = ""
 
     init() {
         let context = persistenceController.container.viewContext
