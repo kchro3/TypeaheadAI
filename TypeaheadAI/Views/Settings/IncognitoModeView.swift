@@ -9,6 +9,17 @@ import SwiftUI
 struct IncognitoModeView: View {
     @ObservedObject var modelManager = LlamaModelManager()
 
+    @AppStorage("modelDirectory") private var directoryURL: URL?
+    @State private var isPickerPresented = false
+
+    init(modelManager: LlamaModelManager = LlamaModelManager(), directoryURL: URL? = nil, isPickerPresented: Bool = false) {
+        self.modelManager = modelManager
+        self.directoryURL = directoryURL
+        self.isPickerPresented = isPickerPresented
+
+        self.modelManager.load()
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Incognito Settings").font(.title).textSelection(.enabled)
@@ -32,10 +43,39 @@ struct IncognitoModeView: View {
             Spacer()
 
             HStack(spacing: 3) {
-                Text("Model files:").font(.headline)
-                Text(modelManager.modelDirectoryURL?.relativePath ?? "No model directory")
+                Text("Directory:").font(.headline)
+                Text(directoryURL?.relativePath ?? "Not configured")
             }
             .textSelection(.enabled)
+
+            HStack {
+                Spacer()
+
+                Button(directoryURL == nil ? "Choose folder" : "Choose different folder") {
+                    isPickerPresented = true
+                }
+                .fileImporter(
+                    isPresented: $isPickerPresented,
+                    allowedContentTypes: [.folder],
+                    allowsMultipleSelection: false
+                ) { result in
+                    switch result {
+                    case .success(let urls):
+                        directoryURL = urls.first
+                        self.modelManager.load()
+                    case .failure(let error):
+                        print("Error selecting directory: \(error.localizedDescription)")
+                    }
+                }
+
+                Button("Open in Finder") {
+                    guard let directoryURL = directoryURL else {
+                        return
+                    }
+                    NSWorkspace.shared.activateFileViewerSelecting([directoryURL])
+                }
+                .disabled(directoryURL == nil)
+            }
 
             List(modelManager.modelFiles ?? [], id: \.self) { url in
                 Button(action: {

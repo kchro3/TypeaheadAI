@@ -30,6 +30,7 @@ class ModalManager: ObservableObject {
     @Published var triggerFocus: Bool
     @Published var onboardingMode: Bool
     @Published var isVisible: Bool
+    @Published var online: Bool
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -52,6 +53,7 @@ class ModalManager: ObservableObject {
         self.triggerFocus = false
         self.onboardingMode = false
         self.isVisible = false
+        self.online = true
     }
 
     // TODO: Inject?
@@ -208,12 +210,13 @@ class ModalManager: ObservableObject {
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     @MainActor
-    func addUserMessage(_ text: String, incognito: Bool) {
+    func addUserMessage(_ text: String) {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
 
-        self.clientManager?.refine(messages: self.messages, incognitoMode: incognito) { result in
+        print(online)
+        self.clientManager?.refine(messages: self.messages, incognitoMode: !online) { result in
             switch result {
             case .success(let chunk):
                 Task {
@@ -231,14 +234,14 @@ class ModalManager: ObservableObject {
 
     /// Reply to the user
     @MainActor
-    func replyToUserMessage(incognito: Bool) {
+    func replyToUserMessage() {
         if let lastMessage = self.messages.last, let _ = lastMessage.responseError {
             _ = self.messages.popLast()
         }
 
         self.clientManager?.refine(
             messages: self.messages,
-            incognitoMode: incognito,
+            incognitoMode: !online,
             streamHandler: defaultHandler
         )
     }
@@ -250,7 +253,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func showModal(incognito: Bool) {
+    func showModal() {
         toastWindow?.close()
 
         // Create the visual effect view with frosted glass effect
@@ -262,7 +265,6 @@ class ModalManager: ObservableObject {
         // Create the content view
         let contentView = ModalView(
             showModal: .constant(true),
-            incognito: incognito,
             modalManager: self
         )
 
@@ -302,7 +304,7 @@ class ModalManager: ObservableObject {
 
         // Add constraints to make the hosting view fill the base view
         NSLayoutConstraint.activate([
-            hostingView.topAnchor.constraint(equalTo: baseView.safeAreaLayoutGuide.topAnchor),
+            hostingView.topAnchor.constraint(equalTo: baseView.topAnchor, constant: -22), // Offset by the size of the menu bar
             hostingView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor),
             hostingView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor),
             hostingView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor)

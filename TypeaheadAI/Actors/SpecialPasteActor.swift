@@ -37,7 +37,7 @@ actor SpecialPasteActor: CanSimulatePaste {
         self.appContextManager = appContextManager
     }
 
-    func specialPaste(incognitoMode: Bool) {
+    func specialPaste() {
         guard let lastMessage = self.modalManager.messages.last, !lastMessage.isCurrentUser else {
             return
         }

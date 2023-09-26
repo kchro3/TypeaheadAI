@@ -17,7 +17,6 @@ import MenuBarExtraAccess
 final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isBlinking: Bool = false
-    @Published var incognitoMode: Bool = false
     @Published var isMenuVisible: Bool = false
 
     private var blinkTimer: Timer?
@@ -97,37 +96,37 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             Task {
-                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode, stickyMode: false)
+                await self.specialCopyActor?.specialCopy(stickyMode: false)
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .stickyCopy) { [self] in
             Task {
-                await self.specialCopyActor?.specialCopy(incognitoMode: incognitoMode, stickyMode: true)
+                await self.specialCopyActor?.specialCopy(stickyMode: true)
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
             Task {
-                await specialPasteActor?.specialPaste(incognitoMode: incognitoMode)
+                await specialPasteActor?.specialPaste()
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
-                await self.specialCutActor?.specialCut(incognitoMode: incognitoMode, stickyMode: false)
+                await self.specialCutActor?.specialCut(stickyMode: false)
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialSave) { [self] in
             Task {
-                await self.specialSaveActor?.specialSave(incognitoMode: incognitoMode)
+                await self.specialSaveActor?.specialSave()
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
             if let window = self.modalManager.toastWindow, !window.isVisible {
-                self.modalManager.showModal(incognito: self.incognitoMode)
+                self.modalManager.showModal()
                 NSApp.activate(ignoringOtherApps: true)
             } else {
                 self.modalManager.closeModal()
@@ -136,7 +135,7 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
             self.modalManager.forceRefresh()
-            self.modalManager.showModal(incognito: self.incognitoMode)
+            self.modalManager.showModal()
             NSApp.activate(ignoringOtherApps: true)
         }
 
@@ -249,7 +248,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // SwiftUI View
         let subview = CommonMenuView(
-            incognitoMode: $appState.incognitoMode,
             promptManager: appState.promptManager,
             modalManager: appState.modalManager,
             isMenuVisible: $appState.isMenuVisible
@@ -288,7 +286,6 @@ struct MacOS13AndLaterApp: App {
 
         MenuBarExtra {
             CommonMenuView(
-                incognitoMode: $appState.incognitoMode,
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
                 isMenuVisible: $appState.isMenuVisible
@@ -323,7 +320,6 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
 
         MenuBarExtra {
             CommonMenuView(
-                incognitoMode: $appState.incognitoMode,
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
                 isMenuVisible: $appState.isMenuVisible
@@ -340,14 +336,12 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
 struct CommonMenuView: View {
     let persistenceController = PersistenceController.shared
 
-    @Binding var incognitoMode: Bool
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @Binding var isMenuVisible: Bool
 
     var body: some View {
         MenuView(
-            incognitoMode: $incognitoMode,
             promptManager: promptManager,
             modalManager: modalManager,
             isMenuVisible: $isMenuVisible

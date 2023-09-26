@@ -126,6 +126,7 @@ struct CustomTextView: NSViewRepresentable {
 
 struct CustomTextField: View {
     @Binding var text: String
+    let placeholderText: String
     let autoCompleteSuggestions: [String]
     var onEnter: (String) -> Void
 
@@ -155,7 +156,7 @@ struct CustomTextField: View {
             .overlay(alignment: .topLeading) {
                 Group {
                     if text.isEmpty {
-                        Text("Ask a follow-up question...")
+                        Text(placeholderText)
                     } else if !inlineSuggestion.isEmpty {
                         Text("\(text)\(inlineSuggestion) [tab]")
                     } else {
@@ -232,6 +233,7 @@ struct CustomTextField: View {
 
     return CustomTextField(
         text: $text,
+        placeholderText: "Placeholder",
         autoCompleteSuggestions: suggestions,
         onEnter: { res in print(res) }
     )

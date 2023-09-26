@@ -11,7 +11,6 @@ import KeyboardShortcuts
 import AuthenticationServices
 
 struct MenuView: View {
-    @Binding var incognitoMode: Bool
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @Binding var isMenuVisible: Bool
@@ -38,16 +37,6 @@ struct MenuView: View {
                 Text("TypeaheadAI").font(.headline)
 
                 Spacer()
-
-                Toggle("Incognito", isOn: $incognitoMode)
-                    .onChange(of: incognitoMode) { newValue in
-                        if let modelManager = modalManager.clientManager?.llamaModelManager, newValue, modelManager.modelDirectoryURL == nil {
-                            modalManager.clientManager?.llamaModelManager?.load()
-                        }
-                    }
-                    .foregroundColor(Color.secondary)
-                    .toggleStyle(.switch)
-                    .accentColor(.blue)
             }
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horizontalPadding)
@@ -162,7 +151,7 @@ struct MenuView: View {
                         isHovering: $isHoveringChat,
                         shortcut: KeyboardShortcuts.Name.chatOpen
                     ) {
-                        modalManager.showModal(incognito: incognitoMode)
+                        modalManager.showModal()
                         NSApp.activate(ignoringOtherApps: true)
                         isMenuVisible = false
                     }
@@ -242,7 +231,6 @@ struct MenuView_Previews: PreviewProvider {
         let modalManager = ModalManager()
 
         return MenuView(
-            incognitoMode: $incognitoMode,
             promptManager: promptManager,
             modalManager: modalManager,
             isMenuVisible: $isMenuVisible

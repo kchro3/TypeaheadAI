@@ -12,21 +12,51 @@ struct ModalView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @Binding var showModal: Bool
-    @State var incognito: Bool
     @ObservedObject var modalManager: ModalManager
     @State private var fontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
     @State private var text: String = ""
     @FocusState private var isTextFieldFocused: Bool
     @State private var isReplyLocked: Bool = false
+    @State private var isOnlineTooltipVisible: Bool = false
+
+    @AppStorage("modelDirectory") private var directoryURL: URL?
 
     var body: some View {
         VStack {
+            HStack(spacing: 0) {
+                Spacer()
+                Button(action: {
+                    isOnlineTooltipVisible.toggle()
+                }, label: {
+                    Image(systemName: "info.circle")
+                })
+                .buttonStyle(.plain)
+                .popover(isPresented: $isOnlineTooltipVisible, arrowEdge: .bottom) {
+                    Text("You can run TypeaheadAI in offline mode by running an LLM on your laptop locally, and you can toggle between online and offline modes here. Please see the Settings for detailed instructions on how to use offline mode.")
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 300, maxHeight: 100)
+                }
+
+                Toggle("Online", isOn: $modalManager.online)
+                    .scaleEffect(0.8)
+                    .onChange(of: modalManager.online) { newValue in
+                        if let _ = modalManager.clientManager?.llamaModelManager, newValue, directoryURL == nil {
+                            modalManager.clientManager?.llamaModelManager?.load()
+                        }
+                    }
+                    .foregroundColor(Color.secondary)
+                    .toggleStyle(.switch)
+                    .accentColor(.blue)
+                    .padding(0)
+            }
+
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 2) {
                         ForEach(modalManager.messages.indices, id: \.self) { index in
                             MessageView(message: modalManager.messages[index]) {
-                                modalManager.replyToUserMessage(incognito: incognito)
+                                modalManager.replyToUserMessage()
                             }
                             .padding(5)
                         }
@@ -38,9 +68,13 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            CustomTextField(text: $text, autoCompleteSuggestions: self.getPrompts()) { text in
+            CustomTextField(
+                text: $text,
+                placeholderText: modalManager.messages.isEmpty ? "Ask me anything!" : "Ask a follow-up question...",
+                autoCompleteSuggestions: self.getPrompts()
+            ) { text in
                 if !text.isEmpty {
-                    modalManager.addUserMessage(text, incognito: incognito)
+                    modalManager.addUserMessage(text)
                 }
             }
             .padding(.horizontal, 10)
@@ -74,6 +108,7 @@ struct ModalView: View {
 
 struct ModalView_Previews: PreviewProvider {
     @State static var showModal = true
+    @State static var incognito = false
 
     static var previews: some View {
         let modalManager = ModalManager()
@@ -103,11 +138,11 @@ struct ModalView_Previews: PreviewProvider {
         ]
 
         return Group {
-            ModalView(showModal: $showModal, incognito: false, modalManager: modalManager)
-            ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithMessages)
-            ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithErrors)
-            ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithCodeblock)
-            ModalView(showModal: $showModal, incognito: false, modalManager: modalManagerWithLongMessages)
+            ModalView(showModal: $showModal, modalManager: modalManager)
+            ModalView(showModal: $showModal, modalManager: modalManagerWithMessages)
+            ModalView(showModal: $showModal, modalManager: modalManagerWithErrors)
+            ModalView(showModal: $showModal, modalManager: modalManagerWithCodeblock)
+            ModalView(showModal: $showModal, modalManager: modalManagerWithLongMessages)
         }
     }
 
