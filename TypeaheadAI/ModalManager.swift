@@ -31,6 +31,7 @@ class ModalManager: ObservableObject {
     @Published var onboardingMode: Bool
     @Published var isVisible: Bool
     @Published var online: Bool
+    @Published var isPending: Bool
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -54,6 +55,7 @@ class ModalManager: ObservableObject {
         self.onboardingMode = false
         self.isVisible = false
         self.online = true
+        self.isPending = false
     }
 
     // TODO: Inject?
@@ -84,6 +86,7 @@ class ModalManager: ObservableObject {
         }
         currentTextCount = 0
         currentOutput = nil
+        isPending = false
     }
 
     @MainActor
@@ -94,6 +97,7 @@ class ModalManager: ObservableObject {
         messages = []
         currentTextCount = 0
         currentOutput = nil
+        isPending = false
 
         if (toastWindow?.isVisible ?? false) {
             NSApp.activate(ignoringOtherApps: true)
@@ -112,6 +116,8 @@ class ModalManager: ObservableObject {
     /// Set an error message.
     @MainActor
     func setError(_ responseError: String) {
+        isPending = false
+
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
             messages[idx].responseError = responseError
         } else {
@@ -132,6 +138,7 @@ class ModalManager: ObservableObject {
             messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
             currentTextCount = 0
             currentOutput = nil
+            isPending = false
             return
         }
 
@@ -215,7 +222,7 @@ class ModalManager: ObservableObject {
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
 
-        print(online)
+        isPending = true
         self.clientManager?.refine(messages: self.messages, incognitoMode: !online) { result in
             switch result {
             case .success(let chunk):
@@ -235,6 +242,8 @@ class ModalManager: ObservableObject {
     /// Reply to the user
     @MainActor
     func replyToUserMessage() {
+        isPending = true
+
         if let lastMessage = self.messages.last, let _ = lastMessage.responseError {
             _ = self.messages.popLast()
         }

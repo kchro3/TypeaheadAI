@@ -23,6 +23,8 @@ struct ModalView: View {
     @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL?
 
+    @Namespace var bottomID
+
     var body: some View {
         VStack {
             HStack(spacing: 0) {
@@ -68,9 +70,19 @@ struct ModalView: View {
                             }
                             .padding(5)
                         }
+
+                        if modalManager.isPending {
+                            MessagePendingView()
+                                .padding(5)
+                                .id(bottomID)
+                        }
                     }
                     .onChange(of: modalManager.messages.last) { _ in
-                        proxy.scrollTo(modalManager.messages.count - 1, anchor: .bottom)
+                        if modalManager.isPending {
+                            proxy.scrollTo(bottomID, anchor: .bottom)
+                        } else {
+                            proxy.scrollTo(modalManager.messages.count - 1, anchor: .bottom)
+                        }
                     }
                 }
             }
