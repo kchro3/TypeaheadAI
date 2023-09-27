@@ -18,6 +18,7 @@ struct ModalView: View {
     @FocusState private var isTextFieldFocused: Bool
     @State private var isReplyLocked: Bool = false
     @State private var isOnlineTooltipVisible: Bool = false
+    @State private var isOnlineTooltipHovering: Bool = false
 
     @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL?
@@ -30,6 +31,10 @@ struct ModalView: View {
                     isOnlineTooltipVisible.toggle()
                 }, label: {
                     Image(systemName: "info.circle")
+                        .foregroundStyle(isOnlineTooltipHovering ? Color.blue : Color.secondary)
+                        .onHover(perform: { hovering in
+                            isOnlineTooltipHovering = hovering
+                        })
                 })
                 .buttonStyle(.plain)
                 .popover(isPresented: $isOnlineTooltipVisible, arrowEdge: .bottom) {
