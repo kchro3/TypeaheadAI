@@ -29,16 +29,7 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
-    @Published var selectedModel: URL? {
-        didSet {
-            if let url = selectedModel {
-                UserDefaults.standard.set(url.absoluteString, forKey: selectedModelKey)
-            } else {
-                UserDefaults.standard.removeObject(forKey: selectedModelKey)
-            }
-        }
-    }
-
+    @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL? {
         didSet {
             if let url = directoryURL {
@@ -60,9 +51,8 @@ class LlamaModelManager: ObservableObject {
         loadModelDirectoryBookmark()
 
         // Load saved selected model from UserDefaults
-        if let urlString = UserDefaults.standard.string(forKey: selectedModelKey),
-           let url = URL(string: urlString) {
-            self.loadModel(from: url)
+        if let urlString = selectedModelURL {
+            self.loadModel(from: urlString)
         }
 
         self.modelFiles = loadModelFiles()
@@ -180,14 +170,14 @@ class LlamaModelManager: ObservableObject {
                 DispatchQueue.main.async {
                     self.logger.info("model loaded successfully: \(url.lastPathComponent)")
                     self.isLoading = false
-                    self.selectedModel = url
+                    self.selectedModelURL = url
                     self.currentlyLoadingModel = nil
                 }
             } else {
                 DispatchQueue.main.async {
                     self.logger.info("model failed to load: \(url.lastPathComponent)")
                     self.isLoading = false
-                    self.selectedModel = nil
+                    self.selectedModelURL = nil
                     self.currentlyLoadingModel = nil
                     self.showAlert = true
                 }
@@ -198,7 +188,7 @@ class LlamaModelManager: ObservableObject {
     func unloadModel() {
         self.logger.info("unloading model")
         DispatchQueue.main.async {
-            self.selectedModel = nil
+            self.selectedModelURL = nil
             self.model = nil
         }
     }

@@ -9,14 +9,12 @@ import SwiftUI
 struct IncognitoModeView: View {
     @ObservedObject var modelManager = LlamaModelManager()
 
+    @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL?
     @State private var isPickerPresented = false
 
-    init(modelManager: LlamaModelManager = LlamaModelManager(), directoryURL: URL? = nil, isPickerPresented: Bool = false) {
+    init(modelManager: LlamaModelManager = LlamaModelManager()) {
         self.modelManager = modelManager
-        self.directoryURL = directoryURL
-        self.isPickerPresented = isPickerPresented
-
         self.modelManager.load()
     }
 
@@ -79,7 +77,7 @@ struct IncognitoModeView: View {
 
             List(modelManager.modelFiles ?? [], id: \.self) { url in
                 Button(action: {
-                    if modelManager.selectedModel == url {
+                    if selectedModelURL == url {
                         modelManager.unloadModel()
                     } else {
                         modelManager.isLoading = true
@@ -94,9 +92,9 @@ struct IncognitoModeView: View {
                                 .scaleEffect(0.5, anchor: .center)
                                 .frame(width: 24, height: 24, alignment: .center)
                         } else {
-                            Image(systemName: modelManager.selectedModel == url ? "doc.circle.fill" : "doc.circle")
+                            Image(systemName: selectedModelURL == url ? "doc.circle.fill" : "doc.circle")
                                 .font(.system(size: 24))
-                                .foregroundColor(modelManager.selectedModel == url ? .blue : .primary)
+                                .foregroundColor(selectedModelURL == url ? .blue : .primary)
                                 .frame(width: 24, height: 24, alignment: .center)
                         }
 
