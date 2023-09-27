@@ -155,10 +155,10 @@ struct CustomTextField: View {
             )
             .overlay(alignment: .topLeading) {
                 Group {
-                    if text.isEmpty {
+                    if text.isEmpty && selectedIndex == nil {
                         Text(placeholderText)
-                    } else if !inlineSuggestion.isEmpty {
-                        Text("\(text)\(inlineSuggestion) [tab]")
+                    } else if let idx = selectedIndex {
+                        Text("\(filteredSuggestions[idx]) [tab]")
                     } else {
                         Text("\(text)")
                     }
@@ -177,49 +177,38 @@ struct CustomTextField: View {
             })
             .onChange(of: selectedIndex ?? -1, perform: { value in
                 // Populate inlineSuggestion
-                if let lastWord = text.split(separator: " ").last, showAutoComplete {
-                    inlineSuggestion = String(filteredSuggestions[value].dropFirst(lastWord.count))
+                if showAutoComplete {
+                    inlineSuggestion = String(filteredSuggestions[value].dropFirst(text.count))
                 } else {
                     inlineSuggestion = ""
                 }
+            })
+            .onAppear(perform: {
+                filterSuggestions(input: text)
             })
         }
     }
 
     private func filterSuggestions(input: String) {
-        let words = input.split(separator: " ")
-        guard let lastWord = words.last else {
-            showAutoComplete = false
-            inlineSuggestion = ""
-            selectedIndex = nil  // clear selectedIndex
-            return
-        }
+        // Check for direct prefix-match
         filteredSuggestions = autoCompleteSuggestions.filter {
-            $0.lowercased().starts(with: lastWord.lowercased()) && $0.lowercased() != lastWord.lowercased()
+            $0.lowercased().starts(with: input.lowercased()) && $0.lowercased() != input.lowercased()
         }
         numberOfSuggestions = filteredSuggestions.count
-        showAutoComplete = !filteredSuggestions.isEmpty
+        showAutoComplete = !filteredSuggestions.isEmpty && !input.isEmpty
 
-        if showAutoComplete {
+        if let firstSuggestion = filteredSuggestions.first, showAutoComplete {
             selectedIndex = 0  // set default selectedIndex
+            inlineSuggestion = String(firstSuggestion.dropFirst(input.count))
         } else {
             selectedIndex = nil  // clear selectedIndex
-        }
-
-        // Populate inlineSuggestion
-        if let firstSuggestion = filteredSuggestions.first, showAutoComplete {
-            inlineSuggestion = String(firstSuggestion.dropFirst(lastWord.count))
-        } else {
             inlineSuggestion = ""
         }
     }
 
     private func applySuggestion(index: Int) {
         DispatchQueue.main.async {
-            var words = self.text.split(separator: " ")
-            _ = words.popLast()
-            self.text = words.joined(separator: " ")
-            self.text += self.text.isEmpty ? self.filteredSuggestions[index] : " \(self.filteredSuggestions[index])"
+            self.text = self.filteredSuggestions[index]
             self.showAutoComplete = false
             self.inlineSuggestion = ""
             self.selectedIndex = nil
