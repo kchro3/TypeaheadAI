@@ -13,8 +13,7 @@ struct IncognitoModeView: View {
     @AppStorage("modelDirectory") private var directoryURL: URL?
     @State private var isPickerPresented = false
 
-    init(modelManager: LlamaModelManager = LlamaModelManager()) {
-        self.modelManager = modelManager
+    init() {
         self.modelManager.load()
     }
 
@@ -123,7 +122,6 @@ struct IncognitoModeView: View {
 
 struct IncognitoModeView_Previews: PreviewProvider {
     static var previews: some View {
-        let llamaModelManager = LlamaModelManager()
-        return IncognitoModeView(modelManager: llamaModelManager)
+        return IncognitoModeView()
     }
 }
