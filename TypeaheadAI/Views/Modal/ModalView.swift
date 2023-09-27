@@ -19,6 +19,7 @@ struct ModalView: View {
     @State private var isReplyLocked: Bool = false
     @State private var isOnlineTooltipVisible: Bool = false
 
+    @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL?
 
     var body: some View {
@@ -40,9 +41,11 @@ struct ModalView: View {
 
                 Toggle("Online", isOn: $modalManager.online)
                     .scaleEffect(0.8)
-                    .onChange(of: modalManager.online) { newValue in
-                        if let _ = modalManager.clientManager?.llamaModelManager, newValue, directoryURL == nil {
-                            modalManager.clientManager?.llamaModelManager?.load()
+                    .onChange(of: modalManager.online) { online in
+                        if let manager = modalManager.clientManager?.llamaModelManager,
+                           !online,
+                           let _ = selectedModelURL {
+                            manager.load()
                         }
                     }
                     .foregroundColor(Color.secondary)
