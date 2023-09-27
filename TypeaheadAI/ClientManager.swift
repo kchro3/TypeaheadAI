@@ -46,6 +46,20 @@ struct ChunkPayload: Codable {
     let finishReason: String?
 }
 
+struct StreamCompletionResponse: Decodable {
+    let choices: [StreamChoice]
+}
+
+struct StreamChoice: Decodable {
+    let finishReason: String?
+    let delta: StreamMessage
+}
+
+struct StreamMessage: Decodable {
+    let role: String?
+    let content: String?
+}
+
 enum ClientManagerError: Error {
     case badRequest(_ message: String)
     case retriesExceeded(_ message: String)
@@ -62,9 +76,9 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v3/get_stream")!
 //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
@@ -76,6 +90,12 @@ class ClientManager {
     private var currentStreamingTask: Task<Void, Error>? = nil
     private var currentOnboardingTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
+
+    private let jsonDecoder: JSONDecoder = {
+        let jsonDecoder = JSONDecoder()
+        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+        return jsonDecoder
+    }()
 
     init(session: URLSession = .shared) {
         self.session = session
@@ -377,15 +397,18 @@ class ClientManager {
         var responseText = ""
         return AsyncThrowingStream {
             for try await line in result.lines {
+                print(line)
                 try Task.checkCancellation()
-                if let data = line.data(using: .utf8),
-                   let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
-                   let text = response.text {
+                if line.hasPrefix("data: "),
+                   let data = line.dropFirst(6).data(using: .utf8),
+                   let response = try? self.jsonDecoder.decode(StreamCompletionResponse.self, from: data),
+                   let text = response.choices.first?.delta.content {
                     responseText += text
                     return text
                 }
             }
 
+            print(responseText)
             return nil
         }
     }

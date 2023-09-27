@@ -41,7 +41,7 @@ class ModalManager: ObservableObject {
     // Since we stream tokens one at a time, we need a global variable to
     // track the token counts per batch.
     private var currentTextCount = 0
-    private let parserThresholdTextCount = 5
+    private let parserThresholdTextCount = 20
     private let maxMessages = 20
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
@@ -378,7 +378,6 @@ class ModalManager: ObservableObject {
             Task {
                 await self.appendText(chunk)
             }
-            self.logger.info("Received chunk: \(chunk)")
         case .failure(let error as ClientManagerError):
             self.logger.error("Error: \(error.localizedDescription)")
             switch error {
