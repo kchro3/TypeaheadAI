@@ -316,7 +316,7 @@ class ClientManager {
                 }
             } else {
                 do {
-                    let stream = try await self?.performStreamOnlineTask(
+                    let stream = try self?.performStreamOnlineTask(
                         payload: payload,
                         timeout: timeout,
                         completion: { result in
@@ -353,40 +353,29 @@ class ClientManager {
         payload: RequestPayload,
         timeout: TimeInterval,
         completion: @escaping (Result<String, Error>) -> Void
-    ) async throws -> AsyncThrowingStream<String, Error> {
+    ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
         }
-
-        var urlRequest = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
-        urlRequest.httpMethod = "POST"
-        urlRequest.httpBody = httpBody
-        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let (result, response) = try await URLSession.shared.bytes(for: urlRequest)
-        try Task.checkCancellation()
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw ClientManagerError.serverError("Server error")
-        }
-
-        guard 200...299 ~= httpResponse.statusCode else {
-            throw ClientManagerError.serverError("Server error")
-        }
-
-        var responseText = ""
-        return AsyncThrowingStream {
-            for try await line in result.lines {
-                try Task.checkCancellation()
-                if let data = line.data(using: .utf8),
-                   let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
-                   let text = response.text {
-                    responseText += text
-                    return text
+        
+        return AsyncThrowingStream { continuation in
+            Task {
+                var urlRequest = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
+                urlRequest.httpMethod = "POST"
+                urlRequest.httpBody = httpBody
+                urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                
+                let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
+                for try await line in result.lines {
+                    if let data = line.data(using: .utf8),
+                       let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
+                       let text = response.text {
+                        continuation.yield(text)
+                    }
                 }
+                
+                continuation.finish()
             }
-
-            return nil
         }
     }
 
