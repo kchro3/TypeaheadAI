@@ -47,13 +47,23 @@ struct MessageView: View {
             attributedView(results: attributed.results)
         } else if message.text.isEmpty && !message.isCurrentUser {
             Divider()
-        } else {
-            ChatBubble(direction: message.isCurrentUser ? .right : .left) {
+        } else if message.isCurrentUser {
+            ChatBubble(direction: .right) {
                 Text(message.text)
                     .padding(.vertical, 10)
                     .padding(.horizontal, 15)
-                    .foregroundColor(message.isCurrentUser ? .white : .primary)
-                    .background(message.isCurrentUser ? Color.blue.opacity(0.8) : Color.secondary.opacity(0.2))
+                    .foregroundColor(.white)
+                    .background(Color.blue.opacity(0.8))
+                    .textSelection(.enabled)
+            }
+            .padding(.leading, 100)
+        } else {
+            ChatBubble(direction: .left) {
+                Text(message.text)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.primary)
+                    .background(Color.secondary.opacity(0.2))
                     .textSelection(.enabled)
             }
         }
