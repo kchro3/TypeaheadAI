@@ -162,7 +162,7 @@ struct CustomTextField: View {
                     } else if let idx = selectedIndex {
                         Text("\(filteredSuggestions[idx]) [tab]")
                     } else {
-                        Text("\(text)")
+                        Text("")
                     }
                 }
                 .foregroundColor(Color.secondary.opacity(0.5))
