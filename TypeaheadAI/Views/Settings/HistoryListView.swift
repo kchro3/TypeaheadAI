@@ -34,23 +34,30 @@ struct HistoryListView: View {
                 Text("^[\(numSmartPastes ?? 0) smart-paste](inflect: true)")
             }
 
-            List {
-                ForEach(history, id: \.self) { history in
-                    LazyVStack(alignment: .leading) {
-                        Text("Timestamp: \(history.timestamp ?? Date())")
-                        let quickActionId = history.quickActionId
-                        let quickAction = quickActions.first(where: { $0.id == quickActionId })
-                        Text("Quick Action: \(quickAction?.prompt ?? "")")
-                        Text("Copied Text: \(history.copiedText ?? "")")
-                        Text("Pasted Response: \(history.pastedResponse ?? "")")
-                        Text("Active URL: \(history.activeUrl ?? "")")
-                        Text("Active App Name: \(history.activeAppName ?? "")")
-                        Text("Active App Bundle Identifier: \(history.activeAppBundleIdentifier ?? "")")
-                    }
+            Table(history) {
+                TableColumn("Date") { entry in
+                    Text(entry.timestamp?.formatted() ?? "unknown")
+                }
+                TableColumn("Quick Action") { entry in
+                    let quickAction = quickActions.first(where: {
+                        $0.id == entry.quickActionId
+                    })
+
+                    Text(quickAction?.prompt ?? "none")
+                }
+                TableColumn("Copied Text") { entry in
+                    Text(entry.copiedText ?? "none")
+                }
+                TableColumn("Pasted Text") { entry in
+                    Text(entry.pastedResponse ?? "none")
+                }
+                TableColumn("Active App") { entry in
+                    Text(entry.activeAppName ?? "unknown")
+                }
+                TableColumn("Active URL") { entry in
+                    Text(entry.activeUrl ?? "none")
                 }
             }
-            .frame(maxHeight: 300)
-            .cornerRadius(15)
 
             Divider()
 
