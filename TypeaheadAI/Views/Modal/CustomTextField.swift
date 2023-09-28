@@ -30,6 +30,8 @@ struct CustomTextView: NSViewRepresentable {
         textView.font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
 
         textView.delegate = context.coordinator
+        textView.allowsUndo = true
+        textView.isRichText = false
 
         DispatchQueue.main.async {
             // Initialize height
@@ -165,6 +167,7 @@ struct CustomTextField: View {
                 }
                 .foregroundColor(Color.secondary.opacity(0.5))
                 .padding(.horizontal, 5)
+                .allowsHitTesting(false)
             }
             .frame(height: height)
             .padding(.vertical, 5)
