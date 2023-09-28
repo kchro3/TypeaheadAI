@@ -33,6 +33,11 @@ class ModalManager: ObservableObject {
     @Published var online: Bool
     @Published var isPending: Bool
 
+    @AppStorage("toastX") var toastX: Double?
+    @AppStorage("toastY") var toastY: Double?
+    @AppStorage("toastWidth") var toastWidth: Double = 300.0
+    @AppStorage("toastHeight") var toastHeight: Double = 500.0
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ModalManager"
@@ -212,6 +217,7 @@ class ModalManager: ObservableObject {
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String) {
+        isPending = true
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
     }
 
@@ -320,15 +326,10 @@ class ModalManager: ObservableObject {
         ])
 
         // Set the x, y coordinates and the size to the user's last preference or the center by default
-        let x = UserDefaults.standard.value(forKey: "toastX") as? CGFloat
-        let y = UserDefaults.standard.value(forKey: "toastY") as? CGFloat
-        let width = UserDefaults.standard.value(forKey: "toastWidth") as? CGFloat
-        let height = UserDefaults.standard.value(forKey: "toastHeight") as? CGFloat
-
-        if let x = x, let y = y, let width = width, let height = height {
-            toastWindow?.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true)
+        if let x = toastX, let y = toastY {
+            toastWindow?.setFrame(NSRect(x: x, y: y, width: toastWidth, height: toastHeight), display: true)
         } else {
-            toastWindow?.setFrame(NSRect(x: 0, y: 0, width: 500, height: 300), display: true)
+            toastWindow?.setFrame(NSRect(x: 0, y: 0, width: toastWidth, height: toastHeight), display: true)
             toastWindow?.center()
         }
 
@@ -358,8 +359,8 @@ class ModalManager: ObservableObject {
         if let movedWindow = notification.object as? NSWindow {
             let origin = movedWindow.frame.origin
 
-            UserDefaults.standard.set(origin.x, forKey: "toastX")
-            UserDefaults.standard.set(origin.y, forKey: "toastY")
+            toastX = origin.x
+            toastY = origin.y
         }
     }
 
@@ -367,8 +368,8 @@ class ModalManager: ObservableObject {
         if let movedWindow = notification.object as? NSWindow {
             let size = movedWindow.frame.size
 
-            UserDefaults.standard.set(size.width, forKey: "toastWidth")
-            UserDefaults.standard.set(size.height, forKey: "toastHeight")
+            toastWidth = size.width
+            toastHeight = size.height
         }
     }
 

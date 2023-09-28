@@ -55,15 +55,15 @@ actor SpecialCopyActor: CanSimulateCopy {
                 self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
                     var userMessage = ""
                     if let url = url {
-                        userMessage += "app: \(appName ?? "unknown") (\(url))\n"
+                        userMessage += "Copied from url: \(url)\n"
                     } else {
-                        userMessage += "app: \(appName ?? "unknown")\n"
+                        userMessage += "Copied from app: \(appName ?? "unknown")\n"
                     }
 
                     if let activePrompt = self.promptManager.getActivePrompt() {
-                        userMessage += "\(activePrompt):\n\(copiedText)"
+                        userMessage += "Quick Action: \(activePrompt)\n\(copiedText)"
                     } else {
-                        userMessage += "copied:\n\(copiedText)"
+                        userMessage += copiedText
                     }
 
                     if let nCopies = self.numSmartCopies {
