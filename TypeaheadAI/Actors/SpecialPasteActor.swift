@@ -45,13 +45,19 @@ actor SpecialPasteActor: CanSimulatePaste {
         let pasteboard = NSPasteboard.general
         pasteboard.prepareForNewContents()
 
+        // just a proof of concept
         if let results = lastMessage.attributed?.results {
-            // If there's a code-block, then paste the code-block text.
             pasteboard.setString(lastMessage.text, forType: .string)
             for result in results {
-                if result.isCodeBlock {
-                    // Overwrite with the code block if it exists
-                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+                if case .codeBlock(_) = result.parsedType {
+                    if shouldPasteHTML(result: result) {
+                        // Overwrite with the html string if conditions are met
+                        pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .html)
+                    } else {
+                        // Overwrite with the code block if it exists
+                        pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+                    }
+
                     break
                 }
             }
@@ -85,5 +91,26 @@ actor SpecialPasteActor: CanSimulatePaste {
         }
 
         self.simulatePaste(completion: { () in })
+    }
+
+    private func shouldPasteHTML(result: ParserResult) -> Bool {
+        guard case .codeBlock(let langOpt) = result.parsedType,
+              let lang = langOpt, lang.lowercased() == "html" else {
+            // If the result isn't an HTML codeblock, then false
+            return false
+        }
+
+        guard let firstMessage = self.modalManager.messages.first,
+              firstMessage.isCurrentUser else {
+            // If the first messages isn't the user, then false (could be relaxed)
+            return false
+        }
+
+        guard case .html(_) = firstMessage.messageType else {
+            // If the first message isn't HTML, then false (could be relaxed)
+            return false
+        }
+
+        return true
     }
 }

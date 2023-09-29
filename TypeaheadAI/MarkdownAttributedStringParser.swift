@@ -37,7 +37,7 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
         func appendCurrentAttrString() {
             if !currentAttrString.string.isEmpty {
                 let currentAttrStringToAppend = (try? AttributedString(currentAttrString, including: \.appKit)) ?? AttributedString(stringLiteral: currentAttrString.string)
-                results.append(.init(id: UUID(), attributedString: currentAttrStringToAppend, isCodeBlock: false, codeBlockLanguage: nil))
+                results.append(.init(id: UUID(), attributedString: currentAttrStringToAppend, parsedType: .plaintext))
             }
         }
 
@@ -46,7 +46,12 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
             if let codeBlock = markup as? CodeBlock {
                 appendCurrentAttrString()
                 let attrStringToAppend = (try? AttributedString(attrString, including: \.appKit)) ?? AttributedString(stringLiteral: attrString.string)
-                results.append(.init(id: UUID(), attributedString: attrStringToAppend, isCodeBlock: true, codeBlockLanguage: codeBlock.language))
+                results.append(.init(id: UUID(), attributedString: attrStringToAppend, parsedType: .codeBlock(language: codeBlock.language)))
+                currentAttrString = NSMutableAttributedString()
+            } else if let table = markup as? Table {
+                appendCurrentAttrString()
+                let attrStringToAppend = (try? AttributedString(attrString, including: \.appKit)) ?? AttributedString(stringLiteral: attrString.string)
+                results.append(.init(id: UUID(), attributedString: attrStringToAppend, parsedType: .table))
                 currentAttrString = NSMutableAttributedString()
             } else {
                 currentAttrString.append(attrString)
@@ -104,6 +109,38 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
 
         if paragraph.hasSuccessor {
             result.append(paragraph.isContainedInList ? .singleNewline(withFontSize: newLineFontSize) : .doubleNewline(withFontSize: newLineFontSize))
+        }
+
+        return result
+    }
+
+    mutating public func visitTable(_ table: Table) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+
+        // Headers
+        let headers = table.head.cells.map { $0.plainText }
+        let headerString = "|" + headers.joined(separator: " | ") + "|\n"
+        let headerAttributedString = NSAttributedString(
+            string: headerString,
+            attributes: [NSAttributedString.Key.font: baseFontSize]
+        )
+        result.append(headerAttributedString)
+
+        // Divider (at least 3 hyphens for each cell for valid syntax)
+        let divider = "|" + headers.map { _ in "---" }.joined(separator: " | ") + "|\n"
+        let dividerAttributedString = NSAttributedString(string: divider)
+        result.append(dividerAttributedString)
+
+        // Rows
+        for row in table.body.rows {
+            let cells = row.cells.map { $0.plainText }
+            let rowString = "|" + cells.joined(separator: " | ") + "|\n"
+            let rowAttributedString = NSAttributedString(string: rowString)
+            result.append(rowAttributedString)
+        }
+
+        if table.hasSuccessor {
+            result.append(.doubleNewline(withFontSize: baseFontSize))
         }
 
         return result

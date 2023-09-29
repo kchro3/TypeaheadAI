@@ -19,11 +19,16 @@ enum HighlighterConstants {
     static let lightTheme = "xcode"
 }
 
+enum ParsedType: Codable, Equatable {
+    case plaintext
+    case codeBlock(language: String?)
+    case table
+}
+
 struct ParserResult: Codable, Identifiable, Equatable {
     let id: UUID
     let attributedString: AttributedString
-    let isCodeBlock: Bool
-    let codeBlockLanguage: String?
+    let parsedType: ParsedType
 }
 
 struct CodeBlockView: View {
@@ -56,8 +61,9 @@ struct CodeBlockView: View {
 
     var header: some View {
         HStack {
-            if let codeBlockLanguage = parserResult.codeBlockLanguage {
-                Text(codeBlockLanguage.capitalized)
+            if case .codeBlock(let languageOpt) = parserResult.parsedType,
+               let language = languageOpt {
+                Text(language.capitalized)
                     .font(.headline)
                     .foregroundColor(.white)
             }

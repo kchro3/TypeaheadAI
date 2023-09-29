@@ -11,6 +11,11 @@ import Foundation
 import Markdown
 import os.log
 
+enum MessageType: Codable, Equatable {
+    case string
+    case html(data: String)
+}
+
 struct AttributedOutput: Codable, Equatable {
     let string: String
     let results: [ParserResult]
@@ -23,6 +28,7 @@ struct Message: Codable, Identifiable, Equatable {
     var attributed: AttributedOutput? = nil
     let isCurrentUser: Bool
     var responseError: String?
+    var messageType: MessageType = .string
 }
 
 class ModalManager: ObservableObject {
@@ -167,7 +173,8 @@ class ModalManager: ObservableObject {
                 var results = currentOutput.results
                 let lastResult = results[results.count - 1]
                 var lastAttrString = lastResult.attributedString
-                if lastResult.isCodeBlock, let font = NSFont.preferredFont(forTextStyle: .body).apply(newTraits: .monoSpace) {
+                if case .codeBlock(_) = lastResult.parsedType,
+                   let font = NSFont.preferredFont(forTextStyle: .body).apply(newTraits: .monoSpace) {
                     lastAttrString.append(
                         AttributedString(
                             String(suffixText),
@@ -184,8 +191,7 @@ class ModalManager: ObservableObject {
                 results[results.count - 1] = ParserResult(
                     id: UUID(),
                     attributedString: lastAttrString,
-                    isCodeBlock: lastResult.isCodeBlock,
-                    codeBlockLanguage: lastResult.codeBlockLanguage
+                    parsedType: lastResult.parsedType
                 )
 
                 try Task.checkCancellation()
@@ -196,8 +202,7 @@ class ModalManager: ObservableObject {
                     ParserResult(
                         id: UUID(),
                         attributedString: AttributedString(stringLiteral: streamText),
-                        isCodeBlock: false,
-                        codeBlockLanguage: nil
+                        parsedType: .plaintext
                     )
                 ])
             }
@@ -216,9 +221,16 @@ class ModalManager: ObservableObject {
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
-    func setUserMessage(_ text: String) {
+    func setUserMessage(_ text: String, messageType: MessageType = .string) {
         isPending = true
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+        messages.append(
+            Message(
+                id: UUID(),
+                text: text,
+                isCurrentUser: true,
+                messageType: messageType
+            )
+        )
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts

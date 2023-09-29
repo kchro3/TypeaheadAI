@@ -41,8 +41,16 @@ actor SpecialCopyActor: CanSimulateCopy {
         self.logger.debug("special copy")
 
         simulateCopy() {
-            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
+            var messageType: MessageType = .string
+            guard var copiedText = NSPasteboard.general.string(forType: .string) else {
                 return
+            }
+
+            // TODO: Only support HTML tables for now
+            if let html = NSPasteboard.general.data(forType: .html),
+               let htmlString = String(data: html, encoding: .utf8),
+               htmlString.contains("</table>") {
+                messageType = .html(data: htmlString)
             }
 
             self.logger.debug("copied '\(copiedText)'")
@@ -53,19 +61,6 @@ actor SpecialCopyActor: CanSimulateCopy {
                 await self.modalManager.showModal()
 
                 self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
-                    var userMessage = ""
-                    if let url = url {
-                        userMessage += "Copied from url: \(url)\n"
-                    } else {
-                        userMessage += "Copied from app: \(appName ?? "unknown")\n"
-                    }
-
-                    if let activePrompt = self.promptManager.getActivePrompt() {
-                        userMessage += "Quick Action: \(activePrompt)\n\(copiedText)"
-                    } else {
-                        userMessage += copiedText
-                    }
-
                     if let nCopies = self.numSmartCopies {
                         self.numSmartCopies = nCopies + 1
                     } else {
@@ -81,7 +76,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                     )
 
                     Task {
-                        await self.modalManager.setUserMessage(userMessage)
+                        await self.modalManager.setUserMessage(copiedText, messageType: messageType)
                         await self.clientManager.sendStreamRequest(
                             id: UUID(),
                             token: UserDefaults.standard.string(forKey: "token") ?? "",
