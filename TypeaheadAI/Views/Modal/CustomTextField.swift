@@ -48,6 +48,15 @@ struct CustomTextView: NSViewRepresentable {
     func updateNSView(_ nsView: NSTextView, context: Context) {
         if nsView.string != text {
             nsView.string = text
+
+            DispatchQueue.main.async {
+                // Initialize height
+                if let layoutManager = nsView.layoutManager, let textContainer = nsView.textContainer {
+                    layoutManager.ensureLayout(for: textContainer)
+                    let size = layoutManager.usedRect(for: textContainer).size
+                    self.height = size.height
+                }
+            }
         }
     }
 

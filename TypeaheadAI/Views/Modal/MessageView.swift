@@ -7,10 +7,49 @@
 
 import SwiftUI
 import Markdown
+import WebKit
+
+struct WebView: NSViewRepresentable {
+    var html: String
+    @Binding var dynamicHeight: CGFloat
+
+    func makeNSView(context: Context) -> WKWebView  {
+        let webView = WKWebView()
+        webView.navigationDelegate = context.coordinator
+        return webView
+    }
+
+    func updateNSView(_ nsView: WKWebView, context: Context) {
+        nsView.loadHTMLString(html, baseURL: nil)
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, WKNavigationDelegate {
+        var parent: WebView
+
+        init(_ parent: WebView) {
+            self.parent = parent
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            webView.evaluateJavaScript("document.documentElement.scrollHeight") { (height, error) in
+                if let height = height as? CGFloat {
+                    DispatchQueue.main.async {
+                        self.parent.dynamicHeight = height
+                    }
+                }
+            }
+        }
+    }
+}
 
 struct MessageView: View {
     let message: Message
     var onButtonDown: (() -> Void)?
+    @State private var webViewHeight: CGFloat = .zero
 
     init(
         message: Message,
@@ -49,12 +88,19 @@ struct MessageView: View {
             Divider()
         } else if message.isCurrentUser {
             ChatBubble(direction: .right) {
-                Text(message.text)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .foregroundColor(.white)
-                    .background(Color.blue.opacity(0.8))
-                    .textSelection(.enabled)
+                switch message.messageType {
+                case .string:
+                    Text(message.text)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 15)
+                        .foregroundColor(.white)
+                        .background(Color.blue.opacity(0.8))
+                        .textSelection(.enabled)
+                case .html(let data):
+                    WebView(html: data, dynamicHeight: $webViewHeight)
+                        .frame(width: 400, height: webViewHeight)
+                        .background(Color.blue.opacity(0.8))
+                }
             }
             .padding(.leading, 100)
         } else {
@@ -119,6 +165,9 @@ Task {
     }
 }
 ```
+
+| table | of | test |
+| 1     | 2  | 3    |
 """
 
     let parserResult: ParserResult = {

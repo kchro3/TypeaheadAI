@@ -45,13 +45,20 @@ actor SpecialPasteActor: CanSimulatePaste {
         let pasteboard = NSPasteboard.general
         pasteboard.prepareForNewContents()
 
+        // just a proof of concept
         if let results = lastMessage.attributed?.results {
-            // If there's a code-block, then paste the code-block text.
             pasteboard.setString(lastMessage.text, forType: .string)
             for result in results {
                 if result.isCodeBlock {
-                    // Overwrite with the code block if it exists
-                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+                    if let firstMessage = self.modalManager.messages.first,
+                       firstMessage.isCurrentUser,
+                       case .html(_) = firstMessage.messageType {
+                        pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .html)
+                    } else {
+                        // Overwrite with the code block if it exists
+                        pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+                    }
+
                     break
                 }
             }

@@ -109,6 +109,26 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
         return result
     }
 
+    mutating public func visitTable(_ table: Table) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+        // Draw the header
+        result.append(NSAttributedString(string: "|" + table.head.cells.map { $0.plainText }.joined(separator: " | ") + "|\n"))
+
+        // Draw the body
+        for row in table.body.rows {
+            let rowCells = row.cells.map { $0.plainText }
+            let rowString = "|" + rowCells.joined(separator: "\t|\t") + "|"
+            result.append(NSAttributedString(string: rowString + "\n"))
+        }
+
+        if table.hasSuccessor {
+            result.append(.doubleNewline(withFontSize: baseFontSize))
+        }
+
+        return result
+    }
+
+
     mutating public func visitHeading(_ heading: Heading) -> NSAttributedString {
         let result = NSMutableAttributedString()
 
