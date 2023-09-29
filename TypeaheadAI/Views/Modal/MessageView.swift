@@ -119,9 +119,11 @@ struct MessageView: View {
         ChatBubble(direction: .left) {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(results) { parsed in
-                    if parsed.isCodeBlock {
+                    if case .codeBlock(_) = parsed.parsedType {
                         CodeBlockView(parserResult: parsed)
                             .padding(.bottom, 24)
+                    } else if case .table = parsed.parsedType {
+                        TableView(parserResult: parsed)
                             .textSelection(.enabled)
                     } else {
                         Text(parsed.attributedString)
@@ -166,16 +168,17 @@ Task {
 }
 ```
 
-| table | of | test |
-| 1     | 2  | 3    |
+| table | of  | test |
+| ----- | --- | ---- |
+| 1     | 2   | 3    |
 """
 
-    let parserResult: ParserResult = {
+    let parserResults: [ParserResult] = {
         let document = Document(parsing: markdownString)
         let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
         var parser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
-        return parser.parserResults(from: document)[0]
+        return parser.parserResults(from: document)
     }()
 
-    return MessageView(message: Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: [parserResult]), isCurrentUser: false))
+    return MessageView(message: Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: parserResults), isCurrentUser: false))
 }

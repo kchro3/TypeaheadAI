@@ -37,7 +37,7 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
         func appendCurrentAttrString() {
             if !currentAttrString.string.isEmpty {
                 let currentAttrStringToAppend = (try? AttributedString(currentAttrString, including: \.appKit)) ?? AttributedString(stringLiteral: currentAttrString.string)
-                results.append(.init(id: UUID(), attributedString: currentAttrStringToAppend, isCodeBlock: false, codeBlockLanguage: nil))
+                results.append(.init(id: UUID(), attributedString: currentAttrStringToAppend, parsedType: .plaintext))
             }
         }
 
@@ -46,7 +46,12 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
             if let codeBlock = markup as? CodeBlock {
                 appendCurrentAttrString()
                 let attrStringToAppend = (try? AttributedString(attrString, including: \.appKit)) ?? AttributedString(stringLiteral: attrString.string)
-                results.append(.init(id: UUID(), attributedString: attrStringToAppend, isCodeBlock: true, codeBlockLanguage: codeBlock.language))
+                results.append(.init(id: UUID(), attributedString: attrStringToAppend, parsedType: .codeBlock(language: codeBlock.language)))
+                currentAttrString = NSMutableAttributedString()
+            } else if let table = markup as? Table {
+                appendCurrentAttrString()
+                let attrStringToAppend = (try? AttributedString(attrString, including: \.appKit)) ?? AttributedString(stringLiteral: attrString.string)
+                results.append(.init(id: UUID(), attributedString: attrStringToAppend, parsedType: .table))
                 currentAttrString = NSMutableAttributedString()
             } else {
                 currentAttrString.append(attrString)
@@ -111,14 +116,27 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
 
     mutating public func visitTable(_ table: Table) -> NSAttributedString {
         let result = NSMutableAttributedString()
-        // Draw the header
-        result.append(NSAttributedString(string: "|" + table.head.cells.map { $0.plainText }.joined(separator: " | ") + "|\n"))
 
-        // Draw the body
+        // Headers
+        let headers = table.head.cells.map { $0.plainText }
+        let headerString = "|" + headers.joined(separator: " | ") + "|\n"
+        let headerAttributedString = NSAttributedString(
+            string: headerString,
+            attributes: [NSAttributedString.Key.font: baseFontSize]
+        )
+        result.append(headerAttributedString)
+
+        // Divider (at least 3 hyphens for each cell for valid syntax)
+        let divider = "|" + headers.map { _ in "---" }.joined(separator: " | ") + "|\n"
+        let dividerAttributedString = NSAttributedString(string: divider)
+        result.append(dividerAttributedString)
+
+        // Rows
         for row in table.body.rows {
-            let rowCells = row.cells.map { $0.plainText }
-            let rowString = "|" + rowCells.joined(separator: "\t|\t") + "|"
-            result.append(NSAttributedString(string: rowString + "\n"))
+            let cells = row.cells.map { $0.plainText }
+            let rowString = "|" + cells.joined(separator: " | ") + "|\n"
+            let rowAttributedString = NSAttributedString(string: rowString)
+            result.append(rowAttributedString)
         }
 
         if table.hasSuccessor {
@@ -127,7 +145,6 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
 
         return result
     }
-
 
     mutating public func visitHeading(_ heading: Heading) -> NSAttributedString {
         let result = NSMutableAttributedString()

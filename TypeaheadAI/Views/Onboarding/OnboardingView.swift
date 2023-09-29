@@ -191,7 +191,8 @@ struct OnboardingView: View {
                 var results = currentOutput.results
                 let lastResult = results[results.count - 1]
                 var lastAttrString = lastResult.attributedString
-                if lastResult.isCodeBlock, let font = NSFont.preferredFont(forTextStyle: .body).apply(newTraits: .monoSpace) {
+                if case .codeBlock(_) = lastResult.parsedType,
+                   let font = NSFont.preferredFont(forTextStyle: .body).apply(newTraits: .monoSpace) {
                     lastAttrString.append(
                         AttributedString(
                             String(suffixText),
@@ -208,8 +209,7 @@ struct OnboardingView: View {
                 results[results.count - 1] = ParserResult(
                     id: UUID(),
                     attributedString: lastAttrString,
-                    isCodeBlock: lastResult.isCodeBlock,
-                    codeBlockLanguage: lastResult.codeBlockLanguage
+                    parsedType: lastResult.parsedType
                 )
 
                 messages[idx].attributed = AttributedOutput(string: streamText, results: results)
@@ -218,8 +218,7 @@ struct OnboardingView: View {
                     ParserResult(
                         id: UUID(),
                         attributedString: AttributedString(stringLiteral: streamText),
-                        isCodeBlock: false,
-                        codeBlockLanguage: nil
+                        parsedType: .plaintext
                     )
                 ])
             }
