@@ -8,7 +8,6 @@
 import SwiftUI
 import CoreData
 import KeyboardShortcuts
-import AuthenticationServices
 
 struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
@@ -18,6 +17,7 @@ struct MenuView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     @AppStorage("token") var token: String?
+    @AppStorage("settingsTab") var settingsTab: String?
 
     @State private var currentPreset: String = ""
     @State private var isHoveringChat = false
@@ -42,31 +42,6 @@ struct MenuView: View {
             .padding(.horizontal, horizontalPadding)
 
             VStack(spacing: 0) {
-                if token == nil {
-                    SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        switch result {
-                        case .success(let authResults):
-                            if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
-                               let authorizationToken = appleIDCredential.authorizationCode,
-                               let tokenString = String(data: authorizationToken, encoding: .utf8) {
-                                token = tokenString
-                                isMenuVisible = false
-                            }
-                        case .failure(let error):
-                            // TODO: Show some error message
-                            print("Authorization failed: \(error.localizedDescription)")
-                        }
-                    }
-                    .signInWithAppleButtonStyle((colorScheme == .dark) ? .white : .black)
-                    .cornerRadius(25)
-
-                    Divider()
-                        .padding(.top, verticalPadding)
-                        .padding(.horizontal, horizontalPadding)
-                }
-
                 if modalManager.isVisible {
                     buttonRow(
                         title: "New chat",
@@ -98,6 +73,12 @@ struct MenuView: View {
                 if token != nil {
                     buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
                         token = nil
+                        isMenuVisible = false
+                    }
+                } else {
+                    buttonRow(title: "Sign in", isHovering: $isHoveringSignOut) {
+                        settingsTab = Tab.account.id
+                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                         isMenuVisible = false
                     }
                 }

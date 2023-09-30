@@ -132,7 +132,7 @@ struct ModalView: View {
                     attachmentAnchor: .rect(.bounds),
                     arrowEdge: .trailing
                 ) {
-                    AuxiliaryMenuView(promptManager: modalManager.promptManager!)
+                    AuxiliaryMenuView(modalManager: modalManager)
                 }
             }
             .padding(.horizontal, 10)

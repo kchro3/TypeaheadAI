@@ -48,7 +48,7 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
                 let attrStringToAppend = (try? AttributedString(attrString, including: \.appKit)) ?? AttributedString(stringLiteral: attrString.string)
                 results.append(.init(id: UUID(), attributedString: attrStringToAppend, parsedType: .codeBlock(language: codeBlock.language)))
                 currentAttrString = NSMutableAttributedString()
-            } else if let table = markup as? Table {
+            } else if let _ = markup as? Table {
                 appendCurrentAttrString()
                 let attrStringToAppend = (try? AttributedString(attrString, including: \.appKit)) ?? AttributedString(stringLiteral: attrString.string)
                 results.append(.init(id: UUID(), attributedString: attrStringToAppend, parsedType: .table))
