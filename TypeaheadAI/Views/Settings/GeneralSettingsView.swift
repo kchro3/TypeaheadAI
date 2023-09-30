@@ -84,7 +84,7 @@ struct GeneralSettingsView: View {
 //                    LaunchAtLogin.Toggle()
 //                    Spacer()
                     Button("Reset User Prompts", action: {
-                        promptManager.clearPrompts(context: viewContext)
+                        promptManager.clearPrompts()
                     })
                     Spacer()
                     Button("Reset User Settings", action: clearUserDefaults)
@@ -121,7 +121,7 @@ struct GeneralSettingsView_Previews: PreviewProvider {
         for prompt in samplePrompts {
             let newPrompt = PromptEntry(context: context)
             newPrompt.prompt = prompt
-            promptManager.addPrompt(prompt, context: context)
+            promptManager.addPrompt(prompt)
         }
 
         return GeneralSettingsView(

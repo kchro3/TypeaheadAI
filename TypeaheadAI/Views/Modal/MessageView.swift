@@ -152,7 +152,7 @@ struct MessageView: View {
 
 
 #Preview {
-    var markdownString = """
+    let markdownString = """
 ```swift
 let api = ChatGPTAPI(apiKey: "API_KEY")
 

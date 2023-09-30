@@ -8,7 +8,6 @@
 import SwiftUI
 import CoreData
 import KeyboardShortcuts
-import AuthenticationServices
 
 struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
@@ -18,6 +17,7 @@ struct MenuView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     @AppStorage("token") var token: String?
+    @AppStorage("settingsTab") var settingsTab: String?
 
     @State private var currentPreset: String = ""
     @State private var isHoveringChat = false
@@ -29,7 +29,7 @@ struct MenuView: View {
     @FocusState private var isTextFieldFocused: Bool
 
     private let verticalPadding: CGFloat = 5
-    private let horizontalPadding: CGFloat = 10
+    private let horizontalPadding: CGFloat = 5
 
     var body: some View {
         VStack(spacing: verticalPadding) {
@@ -41,100 +41,7 @@ struct MenuView: View {
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horizontalPadding)
 
-            Divider()
-                .padding(.horizontal, horizontalPadding)
-
-            if #available(macOS 13.0, *) {
-                TextField("Tell me what to do when you copy-paste.", text: $currentPreset)
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .textFieldStyle(.plain)
-                    .focused($isTextFieldFocused)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(.secondary.opacity(0.1))
-                    )
-                    .onSubmit {
-                        if !currentPreset.isEmpty {
-                            promptManager.addPrompt(currentPreset, context: viewContext)
-                            currentPreset = ""
-                        }
-                    }
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                ScrollView {
-                    VStack(spacing: 0) {
-                        ForEach(promptManager.savedPrompts, id: \.id) { prompt in
-                            Button(action: {
-                                if promptManager.activePromptID == prompt.id {
-                                    promptManager.activePromptID = nil
-                                } else {
-                                    promptManager.activePromptID = prompt.id
-                                }
-                            }) {
-                                MenuPromptView(
-                                    prompt: prompt,
-                                    isActive: prompt.id == promptManager.activePromptID,
-                                    isEditing: .init(
-                                        get: { self.isEditingID == prompt.id },
-                                        set: { _ in
-                                            self.isEditingID = (self.isEditingID == prompt.id ? nil : prompt.id)
-                                            promptManager.activePromptID = prompt.id
-                                        }
-                                    ),
-                                    onDelete: {
-                                        promptManager.removePrompt(with: prompt.id!, context: viewContext)
-                                        if promptManager.activePromptID == prompt.id {
-                                            promptManager.activePromptID = nil
-                                        }
-                                    },
-                                    onUpdate: { newContent in
-                                        promptManager.updatePrompt(
-                                            with: prompt.id!,
-                                            newContent: newContent,
-                                            context: viewContext
-                                        )
-                                    }
-                                )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                }
-                .frame(minHeight: 200)
-            } else {
-                Text("Custom prompts are not supported in MacOS <13.0")
-                Spacer()
-            }
-
-            Divider()
-                .padding(.horizontal, horizontalPadding)
-
             VStack(spacing: 0) {
-                if token == nil {
-                    SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        switch result {
-                        case .success(let authResults):
-                            if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
-                               let authorizationToken = appleIDCredential.authorizationCode,
-                               let tokenString = String(data: authorizationToken, encoding: .utf8) {
-                                token = tokenString
-                                isMenuVisible = false
-                            }
-                        case .failure(let error):
-                            // TODO: Show some error message
-                            print("Authorization failed: \(error.localizedDescription)")
-                        }
-                    }
-                    .signInWithAppleButtonStyle((colorScheme == .dark) ? .white : .black)
-                    .cornerRadius(25)
-
-                    Divider()
-                        .padding(.top, verticalPadding)
-                        .padding(.horizontal, horizontalPadding)
-                }
-
                 if modalManager.isVisible {
                     buttonRow(
                         title: "New chat",
@@ -166,6 +73,12 @@ struct MenuView: View {
                 if token != nil {
                     buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
                         token = nil
+                        isMenuVisible = false
+                    }
+                } else {
+                    buttonRow(title: "Sign in", isHovering: $isHoveringSignOut) {
+                        settingsTab = Tab.account.id
+                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                         isMenuVisible = false
                     }
                 }
@@ -225,7 +138,7 @@ struct MenuView_Previews: PreviewProvider {
         for prompt in samplePrompts {
             let newPrompt = PromptEntry(context: context)
             newPrompt.prompt = prompt
-            promptManager.addPrompt(prompt, context: context)
+            promptManager.addPrompt(prompt)
         }
 
         let modalManager = ModalManager()

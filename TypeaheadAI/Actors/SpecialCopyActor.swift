@@ -42,7 +42,7 @@ actor SpecialCopyActor: CanSimulateCopy {
 
         simulateCopy() {
             var messageType: MessageType = .string
-            guard var copiedText = NSPasteboard.general.string(forType: .string) else {
+            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
                 return
             }
 

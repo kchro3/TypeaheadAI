@@ -7,11 +7,13 @@
 
 import SwiftUI
 
-enum Tabs: String, CaseIterable, Identifiable {
+enum Tab: String, CaseIterable, Identifiable {
     case general = "General"
     case profile = "Profile"
     case history = "History"
     case incognito = "Incognito Mode"
+    case account = "Account Settings"
+    case feedback = "Feedback"
 
     var id: String { self.rawValue }
 }
@@ -19,21 +21,25 @@ enum Tabs: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     var promptManager: PromptManager
 
-    @State var selectedTab: Tabs = .general
+    @AppStorage("settingsTab") var settingsTab: String = Tab.general.rawValue
 
     var body: some View {
         NavigationView {
-            List(Tabs.allCases, id: \.self) { tab in
-                ItemRow(tab: tab, selectedTab: $selectedTab)
+            List(Tab.allCases, id: \.self) { tab in
+                ItemRow(tab: tab, settingsTab: $settingsTab)
             }
             .listStyle(SidebarListStyle())
             .frame(minWidth: 200)
 
-            viewForTab(selectedTab)
+            viewForTab(settingsTab)
         }
     }
 
-    private func viewForTab(_ tab: Tabs) -> some View {
+    private func viewForTab(_ tab: String) -> some View {
+        guard let tab = Tab.init(rawValue: tab) else {
+            return AnyView(GeneralSettingsView(promptManager: promptManager))
+        }
+
         switch tab {
         case .profile:
             return AnyView(ProfileView())
@@ -43,13 +49,17 @@ struct SettingsView: View {
             return AnyView(HistoryListView())
         case .incognito:
             return AnyView(IncognitoModeView())
+        case .account:
+            return AnyView(AccountView())
+        case .feedback:
+            return AnyView(Text("Work in progress!"))
         }
     }
 }
 
 struct ItemRow: View {
-    var tab: Tabs
-    @Binding var selectedTab: Tabs
+    var tab: Tab
+    @Binding var settingsTab: String
     @State private var isHovered = false
 
     var body: some View {
@@ -61,7 +71,7 @@ struct ItemRow: View {
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(
-                    selectedTab == tab ? .accentColor : (isHovered ? Color.gray.opacity(0.2) : Color.clear)
+                    settingsTab == tab.id ? .accentColor : (isHovered ? Color.gray.opacity(0.2) : Color.clear)
                 )
         )
         .contentShape(RoundedRectangle(cornerRadius: 10))
@@ -69,7 +79,7 @@ struct ItemRow: View {
             isHovered = hovering
         }
         .onTapGesture {
-            selectedTab = tab
+            settingsTab = tab.id
         }
     }
 }
@@ -93,13 +103,13 @@ struct SettingsView_Previews: PreviewProvider {
         for prompt in samplePrompts {
             let newPrompt = PromptEntry(context: context)
             newPrompt.prompt = prompt
-            promptManager.addPrompt(prompt, context: context)
+            promptManager.addPrompt(prompt)
         }
 
         return Group {
             SettingsView(promptManager: promptManager)
                 .environment(\.managedObjectContext, context)
-            SettingsView(promptManager: promptManager, selectedTab: Tabs.general)
+            SettingsView(promptManager: promptManager)
                 .environment(\.managedObjectContext, context)
         }
     }
