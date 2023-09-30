@@ -10,6 +10,7 @@ import SwiftUI
 
 struct AuxiliaryMenuView: View {
     @ObservedObject var modalManager: ModalManager
+    @ObservedObject var promptManager: PromptManager
 
     @State private var currentPreset: String = ""
     @FocusState private var isTextFieldFocused: Bool
@@ -55,34 +56,34 @@ struct AuxiliaryMenuView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(modalManager.promptManager?.savedPrompts ?? [], id: \.id) { prompt in
+                        ForEach(promptManager.savedPrompts, id: \.id) { prompt in
                             Button(action: {
-                                if let activePromptId = modalManager.promptManager?.activePromptID,
+                                if let activePromptId = promptManager.activePromptID,
                                    activePromptId == prompt.id {
-                                    modalManager.promptManager?.activePromptID = nil
+                                    promptManager.activePromptID = nil
                                 } else {
-                                    modalManager.promptManager?.activePromptID = prompt.id
+                                    promptManager.activePromptID = prompt.id
                                 }
                             }, label: {
                                 MenuPromptView(
                                     prompt: prompt,
-                                    isActive: prompt.id == modalManager.promptManager?.activePromptID,
+                                    isActive: prompt.id == promptManager.activePromptID,
                                     isEditing: .init(
                                         get: { self.isEditingID == prompt.id },
                                         set: { _ in
                                             self.isEditingID = (self.isEditingID == prompt.id ? nil : prompt.id)
-                                            modalManager.promptManager?.activePromptID = prompt.id
+                                            promptManager.activePromptID = prompt.id
                                         }
                                     ),
                                     onDelete: {
-                                        modalManager.promptManager?.removePrompt(with: prompt.id!)
-                                        if let activePromptId = modalManager.promptManager?.activePromptID,
+                                        promptManager.removePrompt(with: prompt.id!)
+                                        if let activePromptId = promptManager.activePromptID,
                                            activePromptId == prompt.id {
-                                            modalManager.promptManager?.activePromptID = nil
+                                            promptManager.activePromptID = nil
                                         }
                                     },
                                     onUpdate: { newContent in
-                                        modalManager.promptManager?.updatePrompt(
+                                        promptManager.updatePrompt(
                                             with: prompt.id!,
                                             newContent: newContent
                                         )
@@ -103,7 +104,7 @@ struct AuxiliaryMenuView: View {
                         .fill(.secondary.opacity(0.1)))
                     .onSubmit {
                         if !currentPreset.isEmpty {
-                            modalManager.promptManager?.addPrompt(currentPreset)
+                            promptManager.addPrompt(currentPreset)
                             currentPreset = ""
                         }
                     }
@@ -169,5 +170,5 @@ struct AuxiliaryMenuView: View {
     let modalManager = ModalManager()
     modalManager.promptManager = promptManager
 
-    return AuxiliaryMenuView(modalManager: modalManager)
+    return AuxiliaryMenuView(modalManager: modalManager, promptManager: promptManager)
 }
