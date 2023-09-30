@@ -19,9 +19,11 @@ struct ModalView: View {
     @State private var isReplyLocked: Bool = false
     @State private var isOnlineTooltipVisible: Bool = false
     @State private var isOnlineTooltipHovering: Bool = false
+    @State private var isAuxiliaryMenuVisible: Bool = false
 
     @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL?
+    @Environment(\.colorScheme) var colorScheme
 
     @Namespace var bottomID
 
@@ -88,29 +90,53 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            CustomTextField(
-                text: $text,
-                placeholderText: modalManager.messages.isEmpty ? "Ask me anything!" : "Ask a follow-up question...",
-                autoCompleteSuggestions: self.getPrompts()
-            ) { text in
-                if !text.isEmpty {
-                    modalManager.addUserMessage(text)
+            HStack {
+                CustomTextField(
+                    text: $text,
+                    placeholderText: modalManager.messages.isEmpty ? "Ask me anything!" : "Ask a follow-up question...",
+                    autoCompleteSuggestions: self.getPrompts()
+                ) { text in
+                    if !text.isEmpty {
+                        modalManager.addUserMessage(text)
+                    }
+                }
+                .onAppear {
+                    NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
+                        if event.keyCode == 125 {  // Down arrow
+                            NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
+                        } else if event.keyCode == 126 {  // Up arrow
+                            NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "up"])
+                        } else if event.keyCode == 36 {  // Enter key
+                            NotificationCenter.default.post(name: NSNotification.Name("EnterKeyPressed"), object: nil)
+                        }
+                        return event
+                    }
+                }
+
+                Button(action: {
+                    isAuxiliaryMenuVisible.toggle()
+                }, label: {
+                    if colorScheme == .dark {
+                        Image(systemName: "ellipsis.circle")
+                            .font(.title)
+                            .foregroundColor(.blue)
+                    } else {
+                        Image(systemName: "ellipsis.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.blue)
+                    }
+                })
+                .buttonStyle(.plain)
+                .popover(
+                    isPresented: $isAuxiliaryMenuVisible,
+                    attachmentAnchor: .rect(.bounds),
+                    arrowEdge: .trailing
+                ) {
+                    AuxiliaryMenuView(promptManager: modalManager.promptManager!)
                 }
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 15)
-            .onAppear {
-                NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
-                    if event.keyCode == 125 {  // Down arrow
-                        NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
-                    } else if event.keyCode == 126 {  // Up arrow
-                        NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "up"])
-                    } else if event.keyCode == 36 {  // Enter key
-                        NotificationCenter.default.post(name: NSNotification.Name("EnterKeyPressed"), object: nil)
-                    }
-                    return event
-                }
-            }
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
@@ -156,6 +182,18 @@ struct ModalView_Previews: PreviewProvider {
             Message(id: UUID(), text: "hello world", isCurrentUser: false),
             Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true)
         ]
+
+        // Create an in-memory Core Data store
+        let container = NSPersistentContainer(name: "TypeaheadAI")
+        container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        container.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        }
+
+        let promptManager = PromptManager(context: container.viewContext)
+        modalManager.promptManager = promptManager
 
         return Group {
             ModalView(showModal: $showModal, modalManager: modalManager)

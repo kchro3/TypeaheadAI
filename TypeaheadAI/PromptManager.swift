@@ -11,6 +11,7 @@ import Foundation
 class PromptManager: ObservableObject {
     @Published var savedPrompts: [PromptEntry]
     @Published var activePromptID: UUID?
+    private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
         // Fetch saved prompts from Core Data
@@ -22,6 +23,7 @@ class PromptManager: ObservableObject {
             self.savedPrompts = []
         }
         self.activePromptID = nil
+        self.context = context
     }
 
     func getActivePrompt() -> String? {
@@ -33,7 +35,7 @@ class PromptManager: ObservableObject {
         }
     }
 
-    func addPrompt(_ prompt: String, context: NSManagedObjectContext) {
+    func addPrompt(_ prompt: String) {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
         newPrompt.prompt = prompt
@@ -41,14 +43,14 @@ class PromptManager: ObservableObject {
 
         do {
             try context.save()
-            self.savedPrompts.insert(newPrompt, at: 0)
+            self.savedPrompts.append(newPrompt)
             self.activePromptID = newPrompt.id
         } catch {
             print("Failed to save prompt: \(error)")
         }
     }
 
-    func updatePrompt(with id: UUID, newContent: String, context: NSManagedObjectContext) {
+    func updatePrompt(with id: UUID, newContent: String) {
         if let index = savedPrompts.firstIndex(where: { $0.id == id }) {
             let promptToUpdate = savedPrompts[index]
             promptToUpdate.prompt = newContent
@@ -62,7 +64,7 @@ class PromptManager: ObservableObject {
         }
     }
 
-    func removePrompt(with id: UUID, context: NSManagedObjectContext) {
+    func removePrompt(with id: UUID) {
         if let index = savedPrompts.firstIndex(where: { $0.id == id }) {
             let promptToRemove = savedPrompts[index]
             context.delete(promptToRemove)
@@ -78,7 +80,7 @@ class PromptManager: ObservableObject {
         }
     }
 
-    func clearPrompts(context: NSManagedObjectContext) {
+    func clearPrompts() {
         for entry in savedPrompts {
             context.delete(entry)
         }

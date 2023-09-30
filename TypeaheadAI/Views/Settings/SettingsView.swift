@@ -93,7 +93,7 @@ struct SettingsView_Previews: PreviewProvider {
         for prompt in samplePrompts {
             let newPrompt = PromptEntry(context: context)
             newPrompt.prompt = prompt
-            promptManager.addPrompt(prompt, context: context)
+            promptManager.addPrompt(prompt)
         }
 
         return Group {
