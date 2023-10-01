@@ -14,7 +14,7 @@ import os.log
 enum MessageType: Codable, Equatable {
     case string
     case html(data: String)
-    case image(data: Data)
+    case image(data: ImageData)
 }
 
 struct AttributedOutput: Codable, Equatable {
@@ -221,10 +221,11 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func appendImage(_ image: Data) {
+    func appendImage(_ image: ImageData, prompt: String) {
+        isPending = false
         messages.append(Message(
             id: UUID(),
-            text: "placeholder",
+            text: "<image placeholder> prompt used: \(prompt)",
             isCurrentUser: false,
             messageType: .image(data: image)
         ))
@@ -398,10 +399,6 @@ class ModalManager: ObservableObject {
     }
 
     func defaultCompletionHandler(result: Result<ChunkPayload, Error>) {
-        DispatchQueue.main.async {
-            self.isPending = false
-        }
-
         switch result {
         case .success(let success):
             guard let text = success.text else {
@@ -413,8 +410,24 @@ class ModalManager: ObservableObject {
                 return // no-op
             case .image:
                 Task {
-                    if let image = await self.clientManager?.generateImage(serializedRequest: text) {
-                        await self.appendImage(image)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.isPending = true
+                    }
+
+                    do {
+                        if let data = text.data(using: .utf8),
+                           let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
+                           let image = try await self.clientManager?.generateImage(payload: imageRequest) {
+                            await self.appendImage(image, prompt: imageRequest.prompt)
+                        }
+                    } catch let error as ClientManagerError {
+                        DispatchQueue.main.async {
+                            self.setError(error.localizedDescription)
+                        }
+                    } catch {
+                        DispatchQueue.main.async {
+                            self.setError(error.localizedDescription)
+                        }
                     }
                 }
             }

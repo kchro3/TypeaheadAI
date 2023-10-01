@@ -91,7 +91,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                             incognitoMode: !self.modalManager.online,
                             streamHandler: self.modalManager.defaultHandler,
                             completion: { _ in
-                                self.modalManager.isPending = false
+                                DispatchQueue.main.async {
+                                    self.modalManager.isPending = false
+                                }
                             }
                         )
                     }

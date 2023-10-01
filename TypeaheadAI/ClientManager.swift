@@ -39,6 +39,53 @@ struct ImageRequestPayload: Codable {
     let prompt: String
 }
 
+struct ErrorResponse: Codable {
+    let detail: String
+}
+
+/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Enums/Images/ImageData.swift
+public enum ImageData: Codable, Equatable {
+    enum CodingKeys: String, CodingKey {
+        case url
+        case b64Json = "b64_json"
+    }
+
+    /// The image is stored as a URL string.
+    case url(String)
+
+    /// The image is stored as a Base64 binary.
+    case b64Json(String)
+
+    /// The image itself.
+    public var image: String {
+        switch self {
+        case let .b64Json(b64Json): return b64Json
+        case let .url(url): return url
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        do {
+            let urlAssociate = try container.decode(String.self, forKey: .url)
+            self = .url(urlAssociate)
+        } catch {
+            let b64Associate = try container.decode(String.self, forKey: .b64Json)
+            self = .b64Json(b64Associate)
+        }
+    }
+}
+
+/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Structs/Schemas/Images/ImageResponse.swift
+public struct ImageResponse: Codable {
+    /// The creation date of the response.
+    public let created: Int
+
+    /// The data sent within the response containing either `URL` or `Base64` data.
+    public let data: [ImageData]
+}
+
 struct ResponsePayload: Codable {
     let textToPaste: String
     let assumedIntent: String
@@ -63,6 +110,19 @@ enum ClientManagerError: Error {
     case serverError(_ message: String)
     case appError(_ message: String)
     case networkError(_ message: String)
+    case corruptedDataError(_ message: String)
+
+    var localizedDescription: String {
+        switch self {
+        case .badRequest(let message): message
+        case .retriesExceeded(let message): message
+        case .clientError(let message): message
+        case .serverError(let message): message
+        case .appError(let message): message
+        case .networkError(let message): message
+        case .corruptedDataError(let message): message
+        }
+    }
 }
 
 class ClientManager {
@@ -72,10 +132,12 @@ class ClientManager {
 
     private let session: URLSession
 
-//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
 //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -361,10 +423,32 @@ class ClientManager {
         }
     }
 
-    func generateImage(serializedRequest: String) async -> Data? {
-        try? await Task.sleep(nanoseconds: 1 * 1_000_000_000)
-        let data = NSImage(named: "SplashIcon")?.tiffRepresentation
-        return data
+    func generateImage(payload: ImageRequestPayload, timeout: TimeInterval = 10.0) async throws -> ImageData? {
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            throw ClientManagerError.badRequest("Something went wrong...")
+        }
+
+        var urlRequest = URLRequest(url: self.apiImage, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, resp) = try await self.session.data(for: urlRequest)
+
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Something went wrong...")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw ClientManagerError.serverError(errorResponse.detail)
+            } else {
+                throw ClientManagerError.serverError("Something went wrong...")
+            }
+        }
+
+        let response = try JSONDecoder().decode(ImageResponse.self, from: data)
+        return response.data[0]
     }
 
     private func performStreamOnlineTask(
@@ -384,7 +468,12 @@ class ClientManager {
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 
                 let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
-                var bufferedPayload = ChunkPayload(finishReason: nil)
+
+                // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
+                // but also making a function call. To support this, if the first payload is something other than .text,
+                // it is a special payload and should be cached separately.
+                // In the future, we can think about how to support completions with a full response, but worry about that later.
+                var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
                 for try await line in result.lines {
                     if let data = line.data(using: .utf8),
                        let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
@@ -393,11 +482,12 @@ class ClientManager {
                         switch response.mode ?? .text {
                         case .text:
                             continuation.yield(text)
-                            bufferedPayload.text = (bufferedPayload.text ?? "") + text
-                            bufferedPayload.mode = .text
+                            if bufferedPayload.mode != .image {
+                                bufferedPayload.text = (bufferedPayload.text ?? "") + text
+                                bufferedPayload.mode = .text
+                            }
                         case .image:
-                            bufferedPayload.text = (bufferedPayload.text ?? "") + text
-                            bufferedPayload.mode = .image
+                            bufferedPayload = response
                         }
                     }
                 }
@@ -502,6 +592,9 @@ class ClientManager {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
             messageCopy.attributed = nil
+            if case .image(_) = messageCopy.messageType {
+                messageCopy.messageType = .string
+            }
             return messageCopy
         }
     }

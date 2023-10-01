@@ -61,6 +61,10 @@ actor SpecialPasteActor: CanSimulatePaste {
                     break
                 }
             }
+        } else if case .image(let imageData) = lastMessage.messageType {
+            if let data = Data(base64Encoded: imageData.image) {
+                pasteboard.setData(data, forType: .tiff)
+            }
         } else {
             pasteboard.setString(lastMessage.text, forType: .string)
         }
