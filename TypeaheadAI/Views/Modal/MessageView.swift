@@ -100,17 +100,32 @@ struct MessageView: View {
                     WebView(html: data, dynamicHeight: $webViewHeight)
                         .frame(width: 400, height: webViewHeight)
                         .background(Color.blue.opacity(0.8))
+                case .image(let data):
+                    if let imageData = try? self.decodeBase64Image(data.image) {
+                        Image(nsImage: imageData)
+                    }
                 }
             }
             .padding(.leading, 100)
         } else {
             ChatBubble(direction: .left) {
-                Text(message.text)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .foregroundColor(.primary)
-                    .background(Color.secondary.opacity(0.2))
-                    .textSelection(.enabled)
+                switch message.messageType {
+                case .string:
+                    Text(message.text)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 15)
+                        .foregroundColor(.primary)
+                        .background(Color.secondary.opacity(0.2))
+                        .textSelection(.enabled)
+                case .html(let data):
+                    WebView(html: data, dynamicHeight: $webViewHeight)
+                        .frame(width: 400, height: webViewHeight)
+                        .background(Color.blue.opacity(0.8))
+                case .image(let data):
+                    if let imageData = try? self.decodeBase64Image(data.image) {
+                        Image(nsImage: imageData)
+                    }
+                }
             }
         }
     }
@@ -135,6 +150,18 @@ struct MessageView: View {
             .padding(.horizontal, 15)
             .background(Color.secondary.opacity(0.2))
         }
+    }
+
+    private func decodeBase64Image(_ b64Data: String) throws -> NSImage? {
+        guard let data = Data(base64Encoded: b64Data) else {
+            return nil
+        }
+
+        guard let image = NSImage(data: data) else {
+            return nil
+        }
+
+        return image
     }
 }
 
