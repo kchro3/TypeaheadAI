@@ -52,7 +52,9 @@ actor SpecialSaveActor: CanSimulateCopy {
                     completion: { result in
                         switch result {
                         case .success(let output):
-                            _ = self.memoManager.createEntry(summary: output, content: copiedText)
+                            if let text = output.text {
+                                _ = self.memoManager.createEntry(summary: text, content: copiedText)
+                            }
                         case .failure(let error):
                             DispatchQueue.main.async {
                                 self.modalManager.setError(error.localizedDescription)

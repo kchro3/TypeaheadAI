@@ -41,8 +41,14 @@ struct ResponsePayload: Codable {
     let choices: [String]
 }
 
+enum PayloadType: String, Codable {
+    case text
+    case fn
+}
+
 struct ChunkPayload: Codable {
-    let text: String?
+    var text: String?
+    var type: PayloadType = PayloadType.text
     let finishReason: String?
 }
 
@@ -62,9 +68,9 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
 //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 
     private let logger = Logger(
@@ -95,7 +101,7 @@ class ClientManager {
         timeout: TimeInterval = 30,
         stream: Bool = false,
         streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<String, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) {
         self.logger.info("incognito: \(incognitoMode)")
         // If objective is not specified in the request, fall back on the active prompt.
@@ -272,7 +278,7 @@ class ClientManager {
         onboardingMode: Bool = false,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<String, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -298,14 +304,15 @@ class ClientManager {
             }
 
             if incognitoMode {
-                if let result: Result<String, Error> = await self?.performStreamOfflineTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
+                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
+                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
 
                     completion(result)
 
                     // Cache successful requests
                     switch result {
                     case .success(let output):
-                        self?.cacheResponse(output, for: payload)
+                        self?.cacheResponse(output.text, for: payload)
                         break
                     case .failure(_):
                         self?.cacheResponse(nil, for: payload)
@@ -325,7 +332,7 @@ class ClientManager {
                             // Cache successful response
                             switch result {
                             case .success(let output):
-                                self?.cacheResponse(output, for: payload)
+                                self?.cacheResponse(output.text, for: payload)
                             case .failure(let error):
                                 self?.logger.error("\(error.localizedDescription)")
                             }
@@ -352,7 +359,7 @@ class ClientManager {
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        completion: @escaping (Result<String, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
@@ -366,14 +373,25 @@ class ClientManager {
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 
                 let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
+                var bufferedPayload = ChunkPayload(finishReason: nil)
                 for try await line in result.lines {
                     if let data = line.data(using: .utf8),
                        let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
                        let text = response.text {
-                        continuation.yield(text)
+
+                        switch response.type {
+                        case .text:
+                            continuation.yield(text)
+                            bufferedPayload.text = (bufferedPayload.text ?? "") + text
+                            bufferedPayload.type = .text
+                        case .fn:
+                            bufferedPayload.text = (bufferedPayload.text ?? "") + text
+                            bufferedPayload.type = .fn
+                        }
                     }
                 }
                 
+                completion(.success(bufferedPayload))
                 continuation.finish()
             }
         }
@@ -419,7 +437,7 @@ class ClientManager {
         payload: RequestPayload,
         timeout: TimeInterval,
         streamHandler: @escaping (Result<String, Error>) -> Void
-    ) async -> Result<String, Error> {
+    ) async -> Result<ChunkPayload, Error> {
         guard let modelManager = self.llamaModelManager else {
             return .failure(ClientManagerError.appError("Model Manager not found"))
         }
