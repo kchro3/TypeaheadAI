@@ -40,27 +40,24 @@ actor SpecialCopyActor: CanSimulateCopy {
     func specialCopy(stickyMode: Bool) {
         self.logger.debug("special copy")
 
-        simulateCopy() {
-            var messageType: MessageType = .string
-            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
-                return
-            }
+        self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
+            self.simulateCopy() {
+                var messageType: MessageType = .string
+                guard let copiedText = NSPasteboard.general.string(forType: .string) else {
+                    return
+                }
 
-            // TODO: Only support HTML tables for now
-            if let html = NSPasteboard.general.data(forType: .html),
-               let htmlString = String(data: html, encoding: .utf8),
-               htmlString.contains("</table>") {
-                messageType = .html(data: htmlString)
-            }
+                if let htmlString = self.extractHTML(appName: appName, bundleIdentifier: bundleIdentifier, url: url) {
+                    messageType = .html(data: htmlString)
+                }
 
-            self.logger.debug("copied '\(copiedText)'")
+                self.logger.debug("copied '\(copiedText)'")
 
-            // Clear the modal text and reissue request
-            Task {
-                await self.modalManager.clearText(stickyMode: stickyMode)
-                await self.modalManager.showModal()
+                // Clear the modal text and reissue request
+                Task {
+                    await self.modalManager.clearText(stickyMode: stickyMode)
+                    await self.modalManager.showModal()
 
-                self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
                     if let nCopies = self.numSmartCopies {
                         self.numSmartCopies = nCopies + 1
                     } else {
@@ -93,7 +90,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                             activeAppBundleIdentifier: bundleIdentifier ?? "",
                             incognitoMode: !self.modalManager.online,
                             streamHandler: self.modalManager.defaultHandler,
-                            completion: { _ in }
+                            completion: { _ in
+                                self.modalManager.isPending = false
+                            }
                         )
                     }
                 }

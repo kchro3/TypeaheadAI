@@ -23,7 +23,7 @@ struct RequestPayload: Codable {
     var url: String
     var activeAppName: String
     var activeAppBundleIdentifier: String
-    var onboarding: Bool = false
+    var vision: Bool
 }
 
 struct OnboardingRequestPayload: Codable {
@@ -35,20 +35,24 @@ struct OnboardingRequestPayload: Codable {
     var version: String
 }
 
+struct ImageRequestPayload: Codable {
+    let prompt: String
+}
+
 struct ResponsePayload: Codable {
     let textToPaste: String
     let assumedIntent: String
     let choices: [String]
 }
 
-enum PayloadType: String, Codable {
+enum Mode: String, Codable {
     case text
-    case fn
+    case image
 }
 
 struct ChunkPayload: Codable {
     var text: String?
-    var type: PayloadType = PayloadType.text
+    var mode: Mode?
     let finishReason: String?
 }
 
@@ -142,7 +146,8 @@ class ClientManager {
         messages: [Message],
         incognitoMode: Bool,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) {
         self.logger.info("incognito: \(incognitoMode)")
         if let (key, _) = cached,
@@ -166,7 +171,7 @@ class ClientManager {
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
                         incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }
@@ -190,7 +195,7 @@ class ClientManager {
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
                         incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }
@@ -295,7 +300,7 @@ class ClientManager {
                 url: url,
                 activeAppName: activeAppName,
                 activeAppBundleIdentifier: activeAppBundleIdentifier,
-                onboarding: onboardingMode
+                vision: true
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -356,6 +361,12 @@ class ClientManager {
         }
     }
 
+    func generateImage(serializedRequest: String) async -> Data? {
+        try? await Task.sleep(nanoseconds: 1 * 1_000_000_000)
+        let data = NSImage(named: "SplashIcon")?.tiffRepresentation
+        return data
+    }
+
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
@@ -379,14 +390,14 @@ class ClientManager {
                        let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
                        let text = response.text {
 
-                        switch response.type {
+                        switch response.mode ?? .text {
                         case .text:
                             continuation.yield(text)
                             bufferedPayload.text = (bufferedPayload.text ?? "") + text
-                            bufferedPayload.type = .text
-                        case .fn:
+                            bufferedPayload.mode = .text
+                        case .image:
                             bufferedPayload.text = (bufferedPayload.text ?? "") + text
-                            bufferedPayload.type = .fn
+                            bufferedPayload.mode = .image
                         }
                     }
                 }

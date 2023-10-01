@@ -14,6 +14,7 @@ import os.log
 enum MessageType: Codable, Equatable {
     case string
     case html(data: String)
+    case image(data: Data)
 }
 
 struct AttributedOutput: Codable, Equatable {
@@ -219,6 +220,16 @@ class ModalManager: ObservableObject {
         }
     }
 
+    @MainActor
+    func appendImage(_ image: Data) {
+        messages.append(Message(
+            id: UUID(),
+            text: "placeholder",
+            isCurrentUser: false,
+            messageType: .image(data: image)
+        ))
+    }
+
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string) {
@@ -241,7 +252,7 @@ class ModalManager: ObservableObject {
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
 
         isPending = true
-        self.clientManager?.refine(messages: self.messages, incognitoMode: !online) { result in
+        self.clientManager?.refine(messages: self.messages, incognitoMode: !online, streamHandler: { result in
             switch result {
             case .success(let chunk):
                 Task {
@@ -254,7 +265,7 @@ class ModalManager: ObservableObject {
                 }
                 self.logger.error("An error occurred: \(error)")
             }
-        }
+        }, completion: defaultCompletionHandler)
     }
 
     /// Reply to the user
@@ -269,7 +280,8 @@ class ModalManager: ObservableObject {
         self.clientManager?.refine(
             messages: self.messages,
             incognitoMode: !online,
-            streamHandler: defaultHandler
+            streamHandler: defaultHandler,
+            completion: defaultCompletionHandler
         )
     }
 
@@ -382,6 +394,47 @@ class ModalManager: ObservableObject {
 
             toastWidth = size.width
             toastHeight = size.height
+        }
+    }
+
+    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) {
+        DispatchQueue.main.async {
+            self.isPending = false
+        }
+
+        switch result {
+        case .success(let success):
+            guard let text = success.text else {
+                return
+            }
+
+            switch success.mode ?? .text {
+            case .text:
+                return // no-op
+            case .image:
+                Task {
+                    if let image = await self.clientManager?.generateImage(serializedRequest: text) {
+                        await self.appendImage(image)
+                    }
+                }
+            }
+        case .failure(let error as ClientManagerError):
+            switch error {
+            case .badRequest(let message):
+                DispatchQueue.main.async {
+                    self.setError(message)
+                }
+            default:
+                DispatchQueue.main.async {
+                    self.setError("Something went wrong. Please try again.")
+                }
+                self.logger.error("Something went wrong.")
+            }
+        case .failure(let error):
+            self.logger.error("Error: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                self.setError(error.localizedDescription)
+            }
         }
     }
 

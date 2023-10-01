@@ -62,7 +62,7 @@ class LlamaWrapper {
 
         let token = String(cString: cstr)
         free(UnsafeMutableRawPointer(mutating: cstr)) // Needs to be manually freed
-        return .success(ChunkPayload(text: token, type: .text, finishReason: nil))
+        return .success(ChunkPayload(text: token, mode: .text, finishReason: nil))
     }
 
     deinit {
