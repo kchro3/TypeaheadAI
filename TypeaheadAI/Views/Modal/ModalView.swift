@@ -79,7 +79,7 @@ struct ModalView: View {
                                 .id(bottomID)
                         }
                     }
-                    .onChange(of: modalManager.messages.last) { _ in
+                    .onChange(of: modalManager.messages) { _ in
                         if modalManager.isPending {
                             proxy.scrollTo(bottomID, anchor: .bottom)
                         } else {
