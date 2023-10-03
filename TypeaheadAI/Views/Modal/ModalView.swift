@@ -67,9 +67,15 @@ struct ModalView: View {
                 ScrollView {
                     LazyVStack(spacing: 2) {
                         ForEach(modalManager.messages.indices, id: \.self) { index in
-                            MessageView(message: modalManager.messages[index]) {
-                                modalManager.replyToUserMessage()
-                            }
+                            MessageView(
+                                message: modalManager.messages[index],
+                                onButtonDown: {
+                                    modalManager.replyToUserMessage()
+                                },
+                                onTruncate: {
+                                    modalManager.messages[index].isTruncated.toggle()
+                                }
+                            )
                             .padding(5)
                         }
 

@@ -30,6 +30,7 @@ struct Message: Codable, Identifiable, Equatable {
     let isCurrentUser: Bool
     var responseError: String?
     var messageType: MessageType = .string
+    var isTruncated: Bool = true
 }
 
 class ModalManager: ObservableObject {

@@ -47,8 +47,10 @@ struct WebView: NSViewRepresentable {
 }
 
 struct MessageView: View {
-    let message: Message
+    var message: Message
     var onButtonDown: (() -> Void)?
+    var onTruncate: (() -> Void)?
+
     @State private var webViewHeight: CGFloat = .zero
     @State private var isMessageTruncated = true
 
@@ -56,10 +58,12 @@ struct MessageView: View {
 
     init(
         message: Message,
-        onButtonDown: (() -> Void)? = nil
+        onButtonDown: (() -> Void)? = nil,
+        onTruncate: (() -> Void)? = nil
     ) {
         self.message = message
         self.onButtonDown = onButtonDown
+        self.onTruncate = onTruncate
     }
 
     var body: some View {
@@ -95,7 +99,7 @@ struct MessageView: View {
                 case .string:
                     if message.text.count > maxMessageLength {
                         VStack {
-                            if isMessageTruncated {
+                            if message.isTruncated {
                                 Text(message.text.prefix(maxMessageLength))
                             } else {
                                 Text(message.text)
@@ -103,9 +107,9 @@ struct MessageView: View {
                             HStack {
                                 Spacer()
                                 Button(action: {
-                                    isMessageTruncated.toggle()
+                                    onTruncate?()
                                 }, label: {
-                                    if isMessageTruncated {
+                                    if message.isTruncated {
                                         Text("See more")
                                     } else {
                                         Text("See less")
