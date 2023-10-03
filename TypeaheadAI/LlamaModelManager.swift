@@ -195,19 +195,21 @@ class LlamaModelManager: ObservableObject {
 
     func predict(
         payload: RequestPayload,
-        streamHandler: @escaping (Result<String, Error>) async -> Void
-    ) async -> Result<String, Error> {
+        streamHandler: @escaping (Result<String, Error>) -> Void
+    ) -> Result<ChunkPayload, Error> {
         var payloadCopy = payload
         payloadCopy.messages = []
 
         guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
-            let result: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
-            await streamHandler(result)
-            return result
+            let error = ClientManagerError.badRequest("Encoding error")
+            streamHandler(.failure(error))
+            return .failure(error)
         }
 
         guard let model = self.model else {
-            return .failure(ClientManagerError.serverError("Model not found"))
+            let error = ClientManagerError.serverError("Model not found")
+            streamHandler(.failure(error))
+            return .failure(error)
         }
 
         var refinements = ""

@@ -23,7 +23,7 @@ struct RequestPayload: Codable {
     var url: String
     var activeAppName: String
     var activeAppBundleIdentifier: String
-    var onboarding: Bool = false
+    var vision: Bool
 }
 
 struct OnboardingRequestPayload: Codable {
@@ -35,14 +35,71 @@ struct OnboardingRequestPayload: Codable {
     var version: String
 }
 
+struct ImageRequestPayload: Codable {
+    let prompt: String
+}
+
+struct ErrorResponse: Codable {
+    let detail: String
+}
+
+/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Enums/Images/ImageData.swift
+public enum ImageData: Codable, Equatable {
+    enum CodingKeys: String, CodingKey {
+        case url
+        case b64Json = "b64_json"
+    }
+
+    /// The image is stored as a URL string.
+    case url(String)
+
+    /// The image is stored as a Base64 binary.
+    case b64Json(String)
+
+    /// The image itself.
+    public var image: String {
+        switch self {
+        case let .b64Json(b64Json): return b64Json
+        case let .url(url): return url
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        do {
+            let urlAssociate = try container.decode(String.self, forKey: .url)
+            self = .url(urlAssociate)
+        } catch {
+            let b64Associate = try container.decode(String.self, forKey: .b64Json)
+            self = .b64Json(b64Associate)
+        }
+    }
+}
+
+/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Structs/Schemas/Images/ImageResponse.swift
+public struct ImageResponse: Codable {
+    /// The creation date of the response.
+    public let created: Int
+
+    /// The data sent within the response containing either `URL` or `Base64` data.
+    public let data: [ImageData]
+}
+
 struct ResponsePayload: Codable {
     let textToPaste: String
     let assumedIntent: String
     let choices: [String]
 }
 
+enum Mode: String, Codable {
+    case text
+    case image
+}
+
 struct ChunkPayload: Codable {
-    let text: String?
+    var text: String?
+    var mode: Mode?
     let finishReason: String?
 }
 
@@ -53,19 +110,42 @@ enum ClientManagerError: Error {
     case serverError(_ message: String)
     case appError(_ message: String)
     case networkError(_ message: String)
+    case corruptedDataError(_ message: String)
+
+    var localizedDescription: String {
+        switch self {
+        case .badRequest(let message): message
+        case .retriesExceeded(let message): message
+        case .clientError(let message): message
+        case .serverError(let message): message
+        case .appError(let message): message
+        case .networkError(let message): message
+        case .corruptedDataError(let message): message
+        }
+    }
+}
+
+struct SuggestIntentsPayload: Codable {
+    let intents: [String]
 }
 
 class ClientManager {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: PromptManager? = nil
     var appContextManager: AppContextManager? = nil
+    var intentManager: IntentManager? = nil
 
     private let session: URLSession
 
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+
 //    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
 //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -85,6 +165,68 @@ class ClientManager {
         return self.promptManager?.getActivePrompt()
     }
 
+    func suggestIntents(
+        id: UUID,
+        token: String,
+        username: String,
+        userFullName: String,
+        userObjective: String?,
+        userBio: String,
+        userLang: String,
+        copiedText: String,
+        messages: [Message],
+        history: [Message]?,
+        url: String,
+        activeAppName: String,
+        activeAppBundleIdentifier: String,
+        incognitoMode: Bool,
+        timeout: TimeInterval = 30
+    ) async throws -> SuggestIntentsPayload? {
+        let payload = RequestPayload(
+            token: token,
+            username: username,
+            userFullName: userFullName,
+            userObjective: userObjective,
+            userBio: userBio,
+            userLang: userLang,
+            copiedText: copiedText,
+            messages: self.sanitizeMessages(messages),
+            history: history,
+            url: url,
+            activeAppName: activeAppName,
+            activeAppBundleIdentifier: activeAppBundleIdentifier,
+            vision: true
+        )
+
+        // NOTE: Cache the payload so we know what text was copied
+        self.cacheResponse(nil, for: payload)
+
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            throw ClientManagerError.badRequest("Something went wrong...")
+        }
+
+        var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, resp) = try await self.session.data(for: urlRequest)
+
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Something went wrong...")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw ClientManagerError.serverError(errorResponse.detail)
+            } else {
+                throw ClientManagerError.serverError("Something went wrong...")
+            }
+        }
+
+        return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
+    }
+
     /// Easier to use this wrapper function.
     func predict(
         id: UUID,
@@ -95,7 +237,7 @@ class ClientManager {
         timeout: TimeInterval = 30,
         stream: Bool = false,
         streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<String, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) {
         self.logger.info("incognito: \(incognitoMode)")
         // If objective is not specified in the request, fall back on the active prompt.
@@ -135,15 +277,37 @@ class ClientManager {
     func refine(
         messages: [Message],
         incognitoMode: Bool,
+        userIntent: String? = nil,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) {
         self.logger.info("incognito: \(incognitoMode)")
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
             appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+
                 Task {
+                    var history: [Message]? = nil
+                    if let userIntent = userIntent {
+                        // NOTE: We cached the copiedText earlier
+                        _ = self.intentManager?.upsertIntentEntry(
+                            prompt: userIntent,
+                            copiedText: payload.copiedText,
+                            activeUrl: url,
+                            activeAppName: appName,
+                            activeAppBundleIdentifier: bundleIdentifier
+                        )
+
+                        history = self.intentManager?.fetchIntents(
+                            limit: 10,
+                            url: url,
+                            appName: appName,
+                            bundleIdentifier: bundleIdentifier
+                        )
+                    }
+
                     await self.sendStreamRequest(
                         id: UUID(),
                         token: UserDefaults.standard.string(forKey: "token") ?? "",
@@ -154,13 +318,13 @@ class ClientManager {
                         userLang: payload.userLang,
                         copiedText: payload.copiedText,
                         messages: self.sanitizeMessages(messages),
-                        history: nil,
+                        history: history,
                         url: payload.url,
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
                         incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }
@@ -184,7 +348,7 @@ class ClientManager {
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
                         incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
-                        completion: { _ in }
+                        completion: completion
                     )
                 }
             }
@@ -286,8 +450,8 @@ class ClientManager {
         incognitoMode: Bool,
         onboardingMode: Bool = false,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<String, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>) -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -304,7 +468,7 @@ class ClientManager {
                 url: url,
                 activeAppName: activeAppName,
                 activeAppBundleIdentifier: activeAppBundleIdentifier,
-                onboarding: onboardingMode
+                vision: true
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -313,14 +477,15 @@ class ClientManager {
             }
 
             if incognitoMode {
-                if let result: Result<String, Error> = await self?.performStreamOfflineTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
+                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
+                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
 
                     completion(result)
 
                     // Cache successful requests
                     switch result {
                     case .success(let output):
-                        self?.cacheResponse(output, for: payload)
+                        self?.cacheResponse(output.text, for: payload)
                         break
                     case .failure(_):
                         self?.cacheResponse(nil, for: payload)
@@ -340,7 +505,7 @@ class ClientManager {
                             // Cache successful response
                             switch result {
                             case .success(let output):
-                                self?.cacheResponse(output, for: payload)
+                                self?.cacheResponse(output.text, for: payload)
                             case .failure(let error):
                                 self?.logger.error("\(error.localizedDescription)")
                             }
@@ -364,10 +529,38 @@ class ClientManager {
         }
     }
 
+    func generateImage(payload: ImageRequestPayload, timeout: TimeInterval = 10.0) async throws -> ImageData? {
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            throw ClientManagerError.badRequest("Something went wrong...")
+        }
+
+        var urlRequest = URLRequest(url: self.apiImage, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, resp) = try await self.session.data(for: urlRequest)
+
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Something went wrong...")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw ClientManagerError.serverError(errorResponse.detail)
+            } else {
+                throw ClientManagerError.serverError("Something went wrong...")
+            }
+        }
+
+        let response = try JSONDecoder().decode(ImageResponse.self, from: data)
+        return response.data[0]
+    }
+
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        completion: @escaping (Result<String, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
@@ -381,14 +574,31 @@ class ClientManager {
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 
                 let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
+
+                // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
+                // but also making a function call. To support this, if the first payload is something other than .text,
+                // it is a special payload and should be cached separately.
+                // In the future, we can think about how to support completions with a full response, but worry about that later.
+                var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
                 for try await line in result.lines {
                     if let data = line.data(using: .utf8),
                        let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
                        let text = response.text {
-                        continuation.yield(text)
+
+                        switch response.mode ?? .text {
+                        case .text:
+                            continuation.yield(text)
+                            if bufferedPayload.mode != .image {
+                                bufferedPayload.text = (bufferedPayload.text ?? "") + text
+                                bufferedPayload.mode = .text
+                            }
+                        case .image:
+                            bufferedPayload = response
+                        }
                     }
                 }
                 
+                completion(.success(bufferedPayload))
                 continuation.finish()
             }
         }
@@ -430,8 +640,8 @@ class ClientManager {
     private func performStreamOfflineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>) async -> Void
-    ) async -> Result<String, Error> {
+        streamHandler: @escaping (Result<String, Error>) -> Void
+    ) async -> Result<ChunkPayload, Error> {
         guard let modelManager = self.llamaModelManager else {
             return .failure(ClientManagerError.appError("Model Manager not found"))
         }
@@ -485,6 +695,9 @@ class ClientManager {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
             messageCopy.attributed = nil
+            if case .image(_) = messageCopy.messageType {
+                messageCopy.messageType = .string
+            }
             return messageCopy
         }
     }

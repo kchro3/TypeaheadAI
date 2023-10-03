@@ -14,6 +14,7 @@ import os.log
 enum MessageType: Codable, Equatable {
     case string
     case html(data: String)
+    case image(data: ImageData)
 }
 
 struct AttributedOutput: Codable, Equatable {
@@ -29,10 +30,13 @@ struct Message: Codable, Identifiable, Equatable {
     let isCurrentUser: Bool
     var responseError: String?
     var messageType: MessageType = .string
+    var isTruncated: Bool = true
 }
 
 class ModalManager: ObservableObject {
     @Published var messages: [Message]
+    @Published var userIntents: [String]
+
     @Published var triggerFocus: Bool
     @Published var onboardingMode: Bool
     @Published var isVisible: Bool
@@ -62,6 +66,7 @@ class ModalManager: ObservableObject {
 
     init() {
         self.messages = []
+        self.userIntents = []
         self.triggerFocus = false
         self.onboardingMode = false
         self.isVisible = false
@@ -72,6 +77,7 @@ class ModalManager: ObservableObject {
     // TODO: Inject?
     var clientManager: ClientManager? = nil
     var promptManager: PromptManager? = nil
+    var intentManager: IntentManager? = nil
 
     var toastWindow: CustomModalWindow?
 
@@ -98,6 +104,7 @@ class ModalManager: ObservableObject {
         currentTextCount = 0
         currentOutput = nil
         isPending = false
+        userIntents = []
     }
 
     @MainActor
@@ -109,6 +116,7 @@ class ModalManager: ObservableObject {
         currentTextCount = 0
         currentOutput = nil
         isPending = false
+        userIntents = []
 
         if (toastWindow?.isVisible ?? false) {
             NSApp.activate(ignoringOtherApps: true)
@@ -147,6 +155,8 @@ class ModalManager: ObservableObject {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
             // If the AI response doesn't exist yet, create one.
             messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            userIntents = []
+
             currentTextCount = 0
             currentOutput = nil
             isPending = false
@@ -219,10 +229,25 @@ class ModalManager: ObservableObject {
         }
     }
 
+    @MainActor
+    func appendImage(_ image: ImageData, prompt: String) {
+        isPending = false
+        userIntents = []
+
+        messages.append(Message(
+            id: UUID(),
+            text: "<image placeholder> prompt used: \(prompt)",
+            isCurrentUser: false,
+            messageType: .image(data: image)
+        ))
+    }
+
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string) {
         isPending = true
+        userIntents = []
+
         messages.append(
             Message(
                 id: UUID(),
@@ -234,14 +259,22 @@ class ModalManager: ObservableObject {
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
+    /// 
+    /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String) async {
+    func addUserMessage(_ text: String, implicit: Bool = false) {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+        userIntents = []
 
         isPending = true
-        self.clientManager?.refine(messages: self.messages, incognitoMode: !online) { result in
+        self.clientManager?.refine(
+            messages: self.messages,
+            incognitoMode: !online,
+            userIntent: implicit ? text : nil,
+            streamHandler: { result in
+
             switch result {
             case .success(let chunk):
                 self.logger.info("Received chunk: \(chunk)")
@@ -250,13 +283,14 @@ class ModalManager: ObservableObject {
                 self.logger.error("An error occurred: \(error)")
                 await self.setError(error.localizedDescription)
             }
-        }
+        }, completion: defaultCompletionHandler)
     }
 
     /// Reply to the user
     @MainActor
     func replyToUserMessage() {
         isPending = true
+        userIntents = []
 
         if let lastMessage = self.messages.last, let _ = lastMessage.responseError {
             _ = self.messages.popLast()
@@ -265,8 +299,15 @@ class ModalManager: ObservableObject {
         self.clientManager?.refine(
             messages: self.messages,
             incognitoMode: !online,
-            streamHandler: defaultHandler
+            streamHandler: defaultHandler,
+            completion: defaultCompletionHandler
         )
+    }
+
+    @MainActor
+    func setUserIntents(intents: [String]) {
+        isPending = false
+        userIntents = intents
     }
 
     @MainActor
@@ -381,7 +422,60 @@ class ModalManager: ObservableObject {
         }
     }
 
-    func defaultHandler(result: Result<String, Error>) async {
+    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) {
+        switch result {
+        case .success(let success):
+            guard let text = success.text else {
+                return
+            }
+
+            switch success.mode ?? .text {
+            case .text:
+                return // no-op
+            case .image:
+                Task {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.isPending = true
+                    }
+
+                    do {
+                        if let data = text.data(using: .utf8),
+                           let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
+                           let image = try await self.clientManager?.generateImage(payload: imageRequest) {
+                            await self.appendImage(image, prompt: imageRequest.prompt)
+                        }
+                    } catch let error as ClientManagerError {
+                        DispatchQueue.main.async {
+                            self.setError(error.localizedDescription)
+                        }
+                    } catch {
+                        DispatchQueue.main.async {
+                            self.setError(error.localizedDescription)
+                        }
+                    }
+                }
+            }
+        case .failure(let error as ClientManagerError):
+            switch error {
+            case .badRequest(let message):
+                DispatchQueue.main.async {
+                    self.setError(message)
+                }
+            default:
+                DispatchQueue.main.async {
+                    self.setError("Something went wrong. Please try again.")
+                }
+                self.logger.error("Something went wrong.")
+            }
+        case .failure(let error):
+            self.logger.error("Error: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                self.setError(error.localizedDescription)
+            }
+        }
+    }
+
+    func defaultHandler(result: Result<String, Error>) {
         switch result {
         case .success(let chunk):
             self.logger.info("Received chunk: \(chunk)")

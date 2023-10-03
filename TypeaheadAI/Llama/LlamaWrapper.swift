@@ -74,9 +74,9 @@ class LlamaWrapper {
 
     func predict(
         _ prompt: String,
-        handler: @escaping (Result<String, Error>) async -> Void
-    ) -> Result<String, Error> {
-        LlamaWrapper.handler = Task handler
+        handler: @escaping (Result<String, Error>) -> Void
+    ) -> Result<ChunkPayload, Error> {
+        LlamaWrapper.handler = handler
         ctx = llama_new_context_with_model(model, params)
         guard let cstr = simple_predict(ctx, prompt, 1, globalHandler) else {
             return .failure(LlamaWrapperError.serverError("Failed to run simple_predict"))
@@ -84,7 +84,7 @@ class LlamaWrapper {
 
         let token = String(cString: cstr)
         free(UnsafeMutableRawPointer(mutating: cstr)) // Needs to be manually freed
-        return .success(token)
+        return .success(ChunkPayload(text: token, mode: .text, finishReason: nil))
     }
 
     deinit {

@@ -40,61 +40,100 @@ actor SpecialCopyActor: CanSimulateCopy {
     func specialCopy(stickyMode: Bool) {
         self.logger.debug("special copy")
 
-        simulateCopy() {
-            var messageType: MessageType = .string
-            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
-                return
-            }
+        self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
+            self.simulateCopy() {
+                var messageType: MessageType = .string
+                guard let copiedText = NSPasteboard.general.string(forType: .string) else {
+                    return
+                }
 
-            // TODO: Only support HTML tables for now
-            if let html = NSPasteboard.general.data(forType: .html),
-               let htmlString = String(data: html, encoding: .utf8),
-               htmlString.contains("</table>") {
-                messageType = .html(data: htmlString)
-            }
+                if let htmlString = self.extractHTML(appName: appName, bundleIdentifier: bundleIdentifier, url: url) {
+                    messageType = .html(data: htmlString)
+                }
 
-            self.logger.debug("copied '\(copiedText)'")
+                self.logger.debug("copied '\(copiedText)'")
 
-            // Clear the modal text and reissue request
-            Task {
-                await self.modalManager.clearText(stickyMode: stickyMode)
-                await self.modalManager.showModal()
+                // Clear the modal text and reissue request
+                Task {
+                    await self.modalManager.clearText(stickyMode: stickyMode)
+                    await self.modalManager.showModal()
 
-                self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
                     if let nCopies = self.numSmartCopies {
                         self.numSmartCopies = nCopies + 1
                     } else {
                         self.numSmartCopies = 1
                     }
 
-                    let history = self.historyManager.fetchHistoryEntries(
-                        limit: 10,
-                        quickActionId: self.promptManager.activePromptID,
-                        activeUrl: url,
-                        activeAppName: appName,
-                        activeAppBundleIdentifier: bundleIdentifier
-                    )
+                    if let quickActionId = self.promptManager.activePromptID {
 
-                    Task {
-                        await self.modalManager.setUserMessage(copiedText, messageType: messageType)
-                        await self.clientManager.sendStreamRequest(
-                            id: UUID(),
-                            token: UserDefaults.standard.string(forKey: "token") ?? "",
-                            username: NSUserName(),
-                            userFullName: NSFullUserName(),
-                            userObjective: self.promptManager.getActivePrompt(),
-                            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                            userLang: Locale.preferredLanguages.first ?? "",
-                            copiedText: copiedText,
-                            messages: self.modalManager.messages,
-                            history: history,
-                            url: url ?? "",
-                            activeAppName: appName ?? "unknown",
-                            activeAppBundleIdentifier: bundleIdentifier ?? "",
-                            incognitoMode: !self.modalManager.online,
-                            streamHandler: self.modalManager.defaultHandler,
-                            completion: { _ in }
+                        // NOTE: If the user has specified a quick action, execute the quick action. Use the few-shot mode to reference previously successful copy-pastes.
+                        let history = self.historyManager.fetchHistoryEntries(
+                            limit: 10,
+                            quickActionId: quickActionId,
+                            activeUrl: url,
+                            activeAppName: appName,
+                            activeAppBundleIdentifier: bundleIdentifier
                         )
+
+                        Task {
+                            await self.modalManager.setUserMessage(copiedText, messageType: messageType)
+
+                            await self.clientManager.sendStreamRequest(
+                                id: UUID(),
+                                token: UserDefaults.standard.string(forKey: "token") ?? "",
+                                username: NSUserName(),
+                                userFullName: NSFullUserName(),
+                                userObjective: self.promptManager.getActivePrompt(),
+                                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                                userLang: Locale.preferredLanguages.first ?? "",
+                                copiedText: copiedText,
+                                messages: self.modalManager.messages,
+                                history: history,
+                                url: url ?? "",
+                                activeAppName: appName ?? "unknown",
+                                activeAppBundleIdentifier: bundleIdentifier ?? "",
+                                incognitoMode: !self.modalManager.online,
+                                streamHandler: self.modalManager.defaultHandler,
+                                completion: { _ in
+                                    DispatchQueue.main.async {
+                                        self.modalManager.isPending = false
+                                    }
+                                }
+                            )
+                        }
+                    } else {
+                        let previousPrompts = self.clientManager.intentManager?.fetchIntents(
+                            limit: 10,
+                            url: url,
+                            appName: appName,
+                            bundleIdentifier: bundleIdentifier
+                        )
+
+                        Task {
+                            await self.modalManager.setUserMessage(copiedText, messageType: messageType)
+                            do {
+                                if let intents = try await self.clientManager.suggestIntents(
+                                    id: UUID(),
+                                    token: UserDefaults.standard.string(forKey: "token") ?? "",
+                                    username: NSUserName(),
+                                    userFullName: NSFullUserName(),
+                                    userObjective: self.promptManager.getActivePrompt(),
+                                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                                    userLang: Locale.preferredLanguages.first ?? "",
+                                    copiedText: copiedText,
+                                    messages: self.modalManager.messages,
+                                    history: previousPrompts,
+                                    url: url ?? "",
+                                    activeAppName: appName ?? "unknown",
+                                    activeAppBundleIdentifier: bundleIdentifier ?? "",
+                                    incognitoMode: !self.modalManager.online
+                                ) {
+                                    await self.modalManager.setUserIntents(intents: intents.intents)
+                                }
+                            } catch {
+                                self.logger.error("\(error.localizedDescription)")
+                            }
+                        }
                     }
                 }
             }

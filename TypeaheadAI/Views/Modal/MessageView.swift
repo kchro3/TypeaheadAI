@@ -47,16 +47,23 @@ struct WebView: NSViewRepresentable {
 }
 
 struct MessageView: View {
-    let message: Message
+    var message: Message
     var onButtonDown: (() -> Void)?
+    var onTruncate: (() -> Void)?
+
     @State private var webViewHeight: CGFloat = .zero
+    @State private var isMessageTruncated = true
+
+    private let maxMessageLength = 280
 
     init(
         message: Message,
-        onButtonDown: (() -> Void)? = nil
+        onButtonDown: (() -> Void)? = nil,
+        onTruncate: (() -> Void)? = nil
     ) {
         self.message = message
         self.onButtonDown = onButtonDown
+        self.onTruncate = onTruncate
     }
 
     var body: some View {
@@ -90,27 +97,71 @@ struct MessageView: View {
             ChatBubble(direction: .right) {
                 switch message.messageType {
                 case .string:
-                    Text(message.text)
+                    if message.text.count > maxMessageLength {
+                        VStack {
+                            if message.isTruncated {
+                                Text(message.text.prefix(maxMessageLength))
+                            } else {
+                                Text(message.text)
+                            }
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    onTruncate?()
+                                }, label: {
+                                    if message.isTruncated {
+                                        Text("See more")
+                                    } else {
+                                        Text("See less")
+                                    }
+                                })
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .frame(minWidth: 400)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 15)
                         .foregroundColor(.white)
                         .background(Color.blue.opacity(0.8))
                         .textSelection(.enabled)
+                    } else {
+                        Text(message.text)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 15)
+                            .foregroundColor(.white)
+                            .background(Color.blue.opacity(0.8))
+                            .textSelection(.enabled)
+                    }
                 case .html(let data):
                     WebView(html: data, dynamicHeight: $webViewHeight)
                         .frame(width: 400, height: webViewHeight)
                         .background(Color.blue.opacity(0.8))
+                case .image(let data):
+                    if let imageData = try? self.decodeBase64Image(data.image) {
+                        Image(nsImage: imageData)
+                    }
                 }
             }
             .padding(.leading, 100)
         } else {
             ChatBubble(direction: .left) {
-                Text(message.text)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .foregroundColor(.primary)
-                    .background(Color.secondary.opacity(0.2))
-                    .textSelection(.enabled)
+                switch message.messageType {
+                case .string:
+                    Text(message.text)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 15)
+                        .foregroundColor(.primary)
+                        .background(Color.secondary.opacity(0.2))
+                        .textSelection(.enabled)
+                case .html(let data):
+                    WebView(html: data, dynamicHeight: $webViewHeight)
+                        .frame(width: 400, height: webViewHeight)
+                        .background(Color.blue.opacity(0.8))
+                case .image(let data):
+                    if let imageData = try? self.decodeBase64Image(data.image) {
+                        Image(nsImage: imageData)
+                    }
+                }
             }
         }
     }
@@ -135,6 +186,18 @@ struct MessageView: View {
             .padding(.horizontal, 15)
             .background(Color.secondary.opacity(0.2))
         }
+    }
+
+    private func decodeBase64Image(_ b64Data: String) throws -> NSImage? {
+        guard let data = Data(base64Encoded: b64Data) else {
+            return nil
+        }
+
+        guard let image = NSImage(data: data) else {
+            return nil
+        }
+
+        return image
     }
 }
 
