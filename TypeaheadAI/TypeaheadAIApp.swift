@@ -33,6 +33,7 @@ final class AppState: ObservableObject {
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager
     private let memoManager: MemoManager
+    private let intentManager: IntentManager
 
     // Actors
     private var specialCutActor: SpecialCutActor? = nil
@@ -55,6 +56,7 @@ final class AppState: ObservableObject {
         self.memoManager = MemoManager(context: context)
         self.historyManager = HistoryManager(context: context)
         self.promptManager = PromptManager(context: context)
+        self.intentManager = IntentManager(context: context)
         self.clientManager = ClientManager()
         self.modalManager = ModalManager()
         self.appContextManager = AppContextManager()
@@ -89,6 +91,7 @@ final class AppState: ObservableObject {
         self.clientManager.llamaModelManager = llamaModelManager
         self.clientManager.promptManager = promptManager
         self.clientManager.appContextManager = appContextManager
+        self.clientManager.intentManager = intentManager
         self.modalManager.clientManager = clientManager
         self.modalManager.promptManager = promptManager
 

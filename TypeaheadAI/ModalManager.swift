@@ -35,6 +35,8 @@ struct Message: Codable, Identifiable, Equatable {
 
 class ModalManager: ObservableObject {
     @Published var messages: [Message]
+    @Published var userIntents: [String]
+
     @Published var triggerFocus: Bool
     @Published var onboardingMode: Bool
     @Published var isVisible: Bool
@@ -64,6 +66,7 @@ class ModalManager: ObservableObject {
 
     init() {
         self.messages = []
+        self.userIntents = []
         self.triggerFocus = false
         self.onboardingMode = false
         self.isVisible = false
@@ -74,6 +77,7 @@ class ModalManager: ObservableObject {
     // TODO: Inject?
     var clientManager: ClientManager? = nil
     var promptManager: PromptManager? = nil
+    var intentManager: IntentManager? = nil
 
     var toastWindow: CustomModalWindow?
 
@@ -100,6 +104,7 @@ class ModalManager: ObservableObject {
         currentTextCount = 0
         currentOutput = nil
         isPending = false
+        userIntents = []
     }
 
     @MainActor
@@ -111,6 +116,7 @@ class ModalManager: ObservableObject {
         currentTextCount = 0
         currentOutput = nil
         isPending = false
+        userIntents = []
 
         if (toastWindow?.isVisible ?? false) {
             NSApp.activate(ignoringOtherApps: true)
@@ -149,6 +155,8 @@ class ModalManager: ObservableObject {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
             // If the AI response doesn't exist yet, create one.
             messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            userIntents = []
+
             currentTextCount = 0
             currentOutput = nil
             isPending = false
@@ -224,6 +232,8 @@ class ModalManager: ObservableObject {
     @MainActor
     func appendImage(_ image: ImageData, prompt: String) {
         isPending = false
+        userIntents = []
+
         messages.append(Message(
             id: UUID(),
             text: "<image placeholder> prompt used: \(prompt)",
@@ -236,6 +246,8 @@ class ModalManager: ObservableObject {
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string) {
         isPending = true
+        userIntents = []
+
         messages.append(
             Message(
                 id: UUID(),
@@ -247,14 +259,22 @@ class ModalManager: ObservableObject {
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
+    /// 
+    /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String) {
+    func addUserMessage(_ text: String, implicit: Bool = false) {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+        userIntents = []
 
         isPending = true
-        self.clientManager?.refine(messages: self.messages, incognitoMode: !online, streamHandler: { result in
+        self.clientManager?.refine(
+            messages: self.messages,
+            incognitoMode: !online,
+            userIntent: implicit ? text : nil,
+            streamHandler: { result in
+
             switch result {
             case .success(let chunk):
                 Task {
@@ -274,6 +294,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func replyToUserMessage() {
         isPending = true
+        userIntents = []
 
         if let lastMessage = self.messages.last, let _ = lastMessage.responseError {
             _ = self.messages.popLast()
@@ -285,6 +306,12 @@ class ModalManager: ObservableObject {
             streamHandler: defaultHandler,
             completion: defaultCompletionHandler
         )
+    }
+
+    @MainActor
+    func setUserIntents(intents: [String]) {
+        isPending = false
+        userIntents = intents
     }
 
     @MainActor

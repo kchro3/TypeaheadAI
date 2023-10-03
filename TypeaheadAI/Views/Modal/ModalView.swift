@@ -97,6 +97,27 @@ struct ModalView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             HStack {
+                ForEach(modalManager.userIntents.indices, id: \.self) { index in
+
+                    Button(action: {
+                        modalManager.addUserMessage(modalManager.userIntents[index], implicit: true)
+                        modalManager.userIntents = []
+                    }) {
+                        Text(modalManager.userIntents[index])
+                            .foregroundColor(.primary)
+                            .textSelection(.enabled)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 15)
+                            .background(
+                                RoundedRectangle(cornerRadius: 15)
+                                    .fill(Color.blue.opacity(0.4))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            HStack {
                 CustomTextField(
                     text: $text,
                     placeholderText: modalManager.messages.isEmpty ? "Ask me anything!" : "Ask a follow-up question...",
@@ -104,6 +125,7 @@ struct ModalView: View {
                 ) { text in
                     if !text.isEmpty {
                         modalManager.addUserMessage(text)
+                        modalManager.userIntents = []
                     }
                 }
                 .onAppear {
