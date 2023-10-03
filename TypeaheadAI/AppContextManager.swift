@@ -29,9 +29,12 @@ class AppContextManager {
                     if let error = error {
                         self.logger.error("Failed to execute script: \(error.errorDescription ?? "Unknown error")")
                         completion(appName, bundleIdentifier, nil)
-                    } else if let url = result?.stringValue {
-                        self.logger.info("Successfully executed script. URL: \(url)")
-                        completion(appName, bundleIdentifier, url)
+                    } else if let urlString = result?.stringValue,
+                              let url = URL(string: urlString),
+                              let strippedUrl = self.stripQueryParameters(from: url)?.absoluteString {
+
+                        self.logger.info("Successfully executed script. URL: \(strippedUrl)")
+                        completion(appName, bundleIdentifier, strippedUrl)
                     }
                 }
             } else {
@@ -40,5 +43,12 @@ class AppContextManager {
         } else {
             completion(nil, nil, nil)
         }
+    }
+
+    private func stripQueryParameters(from url: URL) -> URL? {
+        var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        urlComponents?.query = nil
+        urlComponents?.fragment = nil
+        return urlComponents?.url
     }
 }

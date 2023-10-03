@@ -125,19 +125,27 @@ enum ClientManagerError: Error {
     }
 }
 
+struct SuggestIntentsPayload: Codable {
+    let intents: [String]
+}
+
 class ClientManager {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: PromptManager? = nil
     var appContextManager: AppContextManager? = nil
+    var intentManager: IntentManager? = nil
 
     private let session: URLSession
 
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+
 //    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
 //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 //    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -155,6 +163,68 @@ class ClientManager {
 
     func getActivePrompt() -> String? {
         return self.promptManager?.getActivePrompt()
+    }
+
+    func suggestIntents(
+        id: UUID,
+        token: String,
+        username: String,
+        userFullName: String,
+        userObjective: String?,
+        userBio: String,
+        userLang: String,
+        copiedText: String,
+        messages: [Message],
+        history: [Message]?,
+        url: String,
+        activeAppName: String,
+        activeAppBundleIdentifier: String,
+        incognitoMode: Bool,
+        timeout: TimeInterval = 30
+    ) async throws -> SuggestIntentsPayload? {
+        let payload = RequestPayload(
+            token: token,
+            username: username,
+            userFullName: userFullName,
+            userObjective: userObjective,
+            userBio: userBio,
+            userLang: userLang,
+            copiedText: copiedText,
+            messages: self.sanitizeMessages(messages),
+            history: history,
+            url: url,
+            activeAppName: activeAppName,
+            activeAppBundleIdentifier: activeAppBundleIdentifier,
+            vision: true
+        )
+
+        // NOTE: Cache the payload so we know what text was copied
+        self.cacheResponse(nil, for: payload)
+
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            throw ClientManagerError.badRequest("Something went wrong...")
+        }
+
+        var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, resp) = try await self.session.data(for: urlRequest)
+
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Something went wrong...")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw ClientManagerError.serverError(errorResponse.detail)
+            } else {
+                throw ClientManagerError.serverError("Something went wrong...")
+            }
+        }
+
+        return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
     }
 
     /// Easier to use this wrapper function.
@@ -207,6 +277,7 @@ class ClientManager {
     func refine(
         messages: [Message],
         incognitoMode: Bool,
+        userIntent: String? = nil,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void,
         completion: @escaping (Result<ChunkPayload, Error>) -> Void
@@ -216,7 +287,27 @@ class ClientManager {
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
             appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
+
                 Task {
+                    var history: [Message]? = nil
+                    if let userIntent = userIntent {
+                        // NOTE: We cached the copiedText earlier
+                        _ = self.intentManager?.upsertIntentEntry(
+                            prompt: userIntent,
+                            copiedText: payload.copiedText,
+                            activeUrl: url,
+                            activeAppName: appName,
+                            activeAppBundleIdentifier: bundleIdentifier
+                        )
+
+                        history = self.intentManager?.fetchIntents(
+                            limit: 10,
+                            url: url,
+                            appName: appName,
+                            bundleIdentifier: bundleIdentifier
+                        )
+                    }
+
                     await self.sendStreamRequest(
                         id: UUID(),
                         token: UserDefaults.standard.string(forKey: "token") ?? "",
@@ -227,7 +318,7 @@ class ClientManager {
                         userLang: payload.userLang,
                         copiedText: payload.copiedText,
                         messages: self.sanitizeMessages(messages),
-                        history: nil,
+                        history: history,
                         url: payload.url,
                         activeAppName: appName ?? "unknown",
                         activeAppBundleIdentifier: bundleIdentifier ?? "",
