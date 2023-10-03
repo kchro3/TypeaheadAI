@@ -10,6 +10,7 @@
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
+		2B285D852ACA22FB000C5BDE /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2B285D842ACA22FB000C5BDE /* LaunchAtLogin */; };
 		2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */; };
 		2B2EF1502AC40C8F00EF2BD4 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2EF14F2AC40C8F00EF2BD4 /* ChatBubble.swift */; };
 		2B2EF1522AC40CB500EF2BD4 /* MessagePendingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */; };
@@ -55,7 +56,6 @@
 		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
 		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
-		2BF558BE2AB8353B002F2008 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF558BD2AB8353B002F2008 /* LaunchAtLogin */; };
 		2BF929792AB04D2600FC105B /* MemoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF929782AB04D2600FC105B /* MemoManager.swift */; };
 		2BF9297C2AB13EEA00FC105B /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF9297B2AB13EEA00FC105B /* Markdown */; };
 		2BF929802AB13F3600FC105B /* CodeBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF9297F2AB13F3600FC105B /* CodeBlockView.swift */; };
@@ -144,8 +144,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B285D852ACA22FB000C5BDE /* LaunchAtLogin in Frameworks */,
 				2B4BDB892ACBED2100E55D78 /* SettingsAccess in Frameworks */,
-				2BF558BE2AB8353B002F2008 /* LaunchAtLogin in Frameworks */,
 				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
 				2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */,
@@ -366,7 +366,7 @@
 				2BA3C2342AADAC5700537F95 /* llama */,
 				2BF9297B2AB13EEA00FC105B /* Markdown */,
 				2BF929842AB13FEC00FC105B /* Highlighter */,
-				2BF558BD2AB8353B002F2008 /* LaunchAtLogin */,
+				2B285D842ACA22FB000C5BDE /* LaunchAtLogin */,
 				2B4BDB882ACBED2100E55D78 /* SettingsAccess */,
 			);
 			productName = TypeaheadAI;
@@ -448,7 +448,7 @@
 				2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */,
 				2BF9297A2AB13EEA00FC105B /* XCRemoteSwiftPackageReference "swift-markdown" */,
 				2BF929832AB13FEC00FC105B /* XCRemoteSwiftPackageReference "HighlighterSwift" */,
-				2BF558BC2AB8353B002F2008 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
+				2B285D832ACA22FB000C5BDE /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
@@ -888,6 +888,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2B285D832ACA22FB000C5BDE /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
@@ -920,14 +928,6 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		2BF558BC2AB8353B002F2008 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		2BF9297A2AB13EEA00FC105B /* XCRemoteSwiftPackageReference "swift-markdown" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-markdown";
@@ -947,6 +947,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2B285D842ACA22FB000C5BDE /* LaunchAtLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B285D832ACA22FB000C5BDE /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
+			productName = LaunchAtLogin;
+		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;
@@ -966,11 +971,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
-		};
-		2BF558BD2AB8353B002F2008 /* LaunchAtLogin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2BF558BC2AB8353B002F2008 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
-			productName = LaunchAtLogin;
 		};
 		2BF9297B2AB13EEA00FC105B /* Markdown */ = {
 			isa = XCSwiftPackageProductDependency;

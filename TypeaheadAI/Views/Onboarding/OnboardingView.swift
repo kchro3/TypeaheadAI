@@ -8,6 +8,11 @@
 import SwiftUI
 import AuthenticationServices
 
+struct VisualEffect: NSViewRepresentable {
+    func makeNSView(context: Self.Context) -> NSView { return NSVisualEffectView() }
+    func updateNSView(_ nsView: NSView, context: Context) { }
+}
+
 struct OnboardingView: View {
     @ObservedObject var modalManager: ModalManager
     @State private var messages: [Message] = []
@@ -155,6 +160,7 @@ struct OnboardingView: View {
             }
             .padding()
         }
+        .background(VisualEffect().ignoresSafeArea())
     }
 
     /// Append text to the onboarding messages. Creates a new message if there is nothing to append to.

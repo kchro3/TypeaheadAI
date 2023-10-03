@@ -50,6 +50,28 @@ class LlamaWrapper {
         return model != nil
     }
 
+    func stream(
+        _ prompt: String
+    ) -> AsyncThrowingStream<String, Error> {
+        ctx = llama_new_context_with_model(model, params)
+        return AsyncThrowingStream { continuation in
+            do {
+                try simple_predict(ctx, prompt, 1) { string in
+                    continuation.yield(string)
+                }
+                continuation.finish()
+            } catch {
+                continuation.finish(throwing: error)
+            }
+        }
+
+        guard let cstr = simple_predict(ctx, prompt, 1, globalHandler) else {
+            throw LlamaWrapperError.serverError("Failed to run simple_predict")
+        }
+
+
+    }
+
     func predict(
         _ prompt: String,
         handler: @escaping (Result<String, Error>) -> Void

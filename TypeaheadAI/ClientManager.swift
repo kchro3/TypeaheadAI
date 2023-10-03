@@ -405,10 +405,25 @@ class ClientManager {
                 version: "onboarding_v3"
             )
 
-            if let result: Result<String, Error> = await self?.performOnboardingTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
-                completion(result)
-            } else {
-                completion(.failure(ClientManagerError.appError("Something went wrong...")))
+            do {
+                let stream = try self?.performOnboardingTask(
+                    payload: payload,
+                    timeout: timeout,
+                    completion: completion
+                )
+
+                guard let stream = stream else {
+                    self?.logger.debug("Failed to get stream")
+                    streamHandler(.failure(ClientManagerError.networkError("Failed to connect")))
+                    return
+                }
+
+                for try await text in stream {
+                    self?.logger.debug("stream: \(text)")
+                    streamHandler(.success(text))
+                }
+            } catch {
+                streamHandler(.failure(error))
             }
         }
     }
@@ -592,37 +607,34 @@ class ClientManager {
     private func performOnboardingTask(
         payload: OnboardingRequestPayload,
         timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>) -> Void
-    ) async -> Result<String, Error> {
+        completion: @escaping (Result<String, Error>) -> Void
+    ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            let error: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
-            streamHandler(error)
-            return error
+            throw ClientManagerError.badRequest("Encoding error")
         }
 
-        var request = URLRequest(url: self.apiOnboarding, timeoutInterval: timeout)
-        request.httpMethod = "POST"
-        request.httpBody = httpBody
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        return AsyncThrowingStream { continuation in
+            Task {
+                var urlRequest = URLRequest(url: self.apiOnboarding, timeoutInterval: timeout)
+                urlRequest.httpMethod = "POST"
+                urlRequest.httpBody = httpBody
+                urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        var output = ""
-        do {
-            let (stream, _) = try await URLSession.shared.bytes(for: request)
-
-            for try await line in stream.lines {
-                let decodedResponse = try JSONDecoder().decode(ChunkPayload.self, from: line.data(using: .utf8)!)
-                if let text = decodedResponse.text {
-                    output += text
-                    streamHandler(.success(text))
+                let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
+                var output = ""
+                for try await line in result.lines {
+                    if let data = line.data(using: .utf8),
+                       let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
+                       let text = response.text {
+                        output += text
+                        continuation.yield(text)
+                    }
                 }
-            }
-        } catch {
-            let err: Result<String, Error> = .failure(error)
-            streamHandler(err)
-            return err
-        }
 
-        return .success(output)
+                completion(.success(output))
+                continuation.finish()
+            }
+        }
     }
 
     private func performStreamOfflineTask(

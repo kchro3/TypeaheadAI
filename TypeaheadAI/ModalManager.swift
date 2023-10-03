@@ -134,7 +134,7 @@ class ModalManager: ObservableObject {
 
     /// Set an error message.
     @MainActor
-    func setError(_ responseError: String) {
+    func setError(_ responseError: String) async {
         isPending = false
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
@@ -277,15 +277,11 @@ class ModalManager: ObservableObject {
 
             switch result {
             case .success(let chunk):
-                Task {
-                    await self.appendText(chunk)
-                }
                 self.logger.info("Received chunk: \(chunk)")
+                await self.appendText(chunk)
             case .failure(let error):
-                Task {
-                    self.setError(error.localizedDescription)
-                }
                 self.logger.error("An error occurred: \(error)")
+                await self.setError(error.localizedDescription)
             }
         }, completion: defaultCompletionHandler)
     }
@@ -482,28 +478,18 @@ class ModalManager: ObservableObject {
     func defaultHandler(result: Result<String, Error>) {
         switch result {
         case .success(let chunk):
-            Task {
-                await self.appendText(chunk)
-            }
             self.logger.info("Received chunk: \(chunk)")
+            await self.appendText(chunk)
         case .failure(let error as ClientManagerError):
             self.logger.error("Error: \(error.localizedDescription)")
             switch error {
             case .badRequest(let message):
-                DispatchQueue.main.async {
-                    self.setError(message)
-                }
+                await self.setError(message)
             default:
-                DispatchQueue.main.async {
-                    self.setError("Something went wrong. Please try again.")
-                }
-                self.logger.error("Something went wrong.")
+                await self.setError("Something went wrong. Please try again.")
             }
         case .failure(let error):
-            self.logger.error("Error: \(error.localizedDescription)")
-            DispatchQueue.main.async {
-                self.setError(error.localizedDescription)
-            }
+            await self.setError(error.localizedDescription)
         }
     }
 }
