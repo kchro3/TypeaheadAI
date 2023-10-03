@@ -50,6 +50,9 @@ struct MessageView: View {
     let message: Message
     var onButtonDown: (() -> Void)?
     @State private var webViewHeight: CGFloat = .zero
+    @State private var isMessageTruncated = true
+
+    private let maxMessageLength = 280
 
     init(
         message: Message,
@@ -90,12 +93,41 @@ struct MessageView: View {
             ChatBubble(direction: .right) {
                 switch message.messageType {
                 case .string:
-                    Text(message.text)
+                    if message.text.count > maxMessageLength {
+                        VStack {
+                            if isMessageTruncated {
+                                Text(message.text.prefix(maxMessageLength))
+                            } else {
+                                Text(message.text)
+                            }
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    isMessageTruncated.toggle()
+                                }, label: {
+                                    if isMessageTruncated {
+                                        Text("See more")
+                                    } else {
+                                        Text("See less")
+                                    }
+                                })
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .frame(minWidth: 400)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 15)
                         .foregroundColor(.white)
                         .background(Color.blue.opacity(0.8))
                         .textSelection(.enabled)
+                    } else {
+                        Text(message.text)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 15)
+                            .foregroundColor(.white)
+                            .background(Color.blue.opacity(0.8))
+                            .textSelection(.enabled)
+                    }
                 case .html(let data):
                     WebView(html: data, dynamicHeight: $webViewHeight)
                         .frame(width: 400, height: webViewHeight)
