@@ -7,6 +7,7 @@
 
 import CoreData
 import SwiftUI
+import SettingsAccess
 
 struct AuxiliaryMenuView: View {
     @ObservedObject var modalManager: ModalManager
@@ -24,20 +25,35 @@ struct AuxiliaryMenuView: View {
     var body: some View {
         VStack {
             VStack(spacing: 0) {
-                buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
-                    settingsTab = Tab.general.id
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                    modalManager.closeModal()
-                }
-                buttonRow(title: "Sign in", isHovering: $isHoveringSignIn) {
-                    settingsTab = Tab.account.id
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                    modalManager.closeModal()
-                }
-                buttonRow(title: "Feedback", isHovering: $isHoveringFeedback) {
-                    settingsTab = Tab.feedback.id
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                    modalManager.closeModal()
+                if #available(macOS 14.0, *) {
+                    settingsButtonRow(title: "Settings", isHovering: $isHoveringSettings) {
+                        settingsTab = Tab.general.id
+                        modalManager.closeModal()
+                    }
+                    settingsButtonRow(title: "Sign in", isHovering: $isHoveringSignIn) {
+                        settingsTab = Tab.account.id
+                        modalManager.closeModal()
+                    }
+                    settingsButtonRow(title: "Feedback", isHovering: $isHoveringFeedback) {
+                        settingsTab = Tab.feedback.id
+                        modalManager.closeModal()
+                    }
+                } else {
+                    buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
+                        settingsTab = Tab.general.id
+                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                        modalManager.closeModal()
+                    }
+                    buttonRow(title: "Sign in", isHovering: $isHoveringSignIn) {
+                        settingsTab = Tab.account.id
+                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                        modalManager.closeModal()
+                    }
+                    buttonRow(title: "Feedback", isHovering: $isHoveringFeedback) {
+                        settingsTab = Tab.feedback.id
+                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                        modalManager.closeModal()
+                    }
                 }
             }
 
@@ -139,6 +155,29 @@ struct AuxiliaryMenuView: View {
             .cornerRadius(4)
             .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovering.wrappedValue = hovering
+        }
+    }
+
+    private func settingsButtonRow(
+        title: String,
+        isHovering: Binding<Bool>,
+        action: @escaping () -> Void
+    ) -> some View {
+        SettingsLink(label: {
+            HStack {
+                Text(title)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .background(isHovering.wrappedValue ? .primary.opacity(0.2) : Color.clear)
+            .cornerRadius(4)
+            .contentShape(Rectangle())
+        }, preAction: action, postAction: { })
         .buttonStyle(.plain)
         .onHover { hovering in
             isHovering.wrappedValue = hovering

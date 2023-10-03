@@ -23,6 +23,7 @@
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
 		2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B473E8B2AA860380042913D /* MenuBarExtraAccess */; };
+		2B4BDB892ACBED2100E55D78 /* SettingsAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2B4BDB882ACBED2100E55D78 /* SettingsAccess */; };
 		2B520D7F2AC6D2AD00310426 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D7E2AC6D2AD00310426 /* TableView.swift */; };
 		2B520D812AC7FD4800310426 /* AuxiliaryMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */; };
 		2B520D852AC82EA100310426 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D842AC82EA100310426 /* AccountView.swift */; };
@@ -141,6 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B4BDB892ACBED2100E55D78 /* SettingsAccess in Frameworks */,
 				2BF558BE2AB8353B002F2008 /* LaunchAtLogin in Frameworks */,
 				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
@@ -362,6 +364,7 @@
 				2BF9297B2AB13EEA00FC105B /* Markdown */,
 				2BF929842AB13FEC00FC105B /* Highlighter */,
 				2BF558BD2AB8353B002F2008 /* LaunchAtLogin */,
+				2B4BDB882ACBED2100E55D78 /* SettingsAccess */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -443,6 +446,7 @@
 				2BF9297A2AB13EEA00FC105B /* XCRemoteSwiftPackageReference "swift-markdown" */,
 				2BF929832AB13FEC00FC105B /* XCRemoteSwiftPackageReference "HighlighterSwift" */,
 				2BF558BC2AB8353B002F2008 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
+				2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -888,6 +892,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/orchetect/SettingsAccess";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
 		2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ggerganov/llama.cpp";
@@ -935,6 +947,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;
 			productName = MenuBarExtraAccess;
+		};
+		2B4BDB882ACBED2100E55D78 /* SettingsAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */;
+			productName = SettingsAccess;
 		};
 		2BA3C2342AADAC5700537F95 /* llama */ = {
 			isa = XCSwiftPackageProductDependency;
