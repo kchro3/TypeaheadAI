@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AuthenticationServices
+import LaunchAtLogin
 
 struct AccountView: View {
     @AppStorage("token") var token: String?
@@ -20,7 +21,7 @@ struct AccountView: View {
 
             Divider()
 
-            Text(token == nil ? "You are not signed in." : "You're signed in through Apple iCloud!")
+            Text(token == nil ? "You are not signed in." : "You're signed in with Apple iCloud.")
 
             if token == nil {
                 SignInWithAppleButton(.signIn) { request in
@@ -45,6 +46,10 @@ struct AccountView: View {
                     token = nil
                 }
             }
+
+            Spacer()
+
+            LaunchAtLogin.Toggle()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)

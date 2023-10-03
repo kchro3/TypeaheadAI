@@ -16,10 +16,8 @@ import MenuBarExtraAccess
 @MainActor
 final class AppState: ObservableObject {
     @Published var isLoading: Bool = false
-    @Published var isBlinking: Bool = false
     @Published var isMenuVisible: Bool = false
 
-    private var blinkTimer: Timer?
     let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "AppState"
@@ -164,22 +162,6 @@ final class AppState: ObservableObject {
         mouseEventMonitor.stopMonitoring()
     }
 
-    private func startBlinking() {
-        // Invalidate the previous timer if it exists
-        blinkTimer?.invalidate()
-
-        // Create and schedule a new timer
-        blinkTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            DispatchQueue.main.async { self.isBlinking.toggle() }
-        }
-    }
-
-    private func stopBlinking() {
-        blinkTimer?.invalidate()
-        blinkTimer = nil
-        DispatchQueue.main.async { self.isBlinking = false }
-    }
-
     private func checkAndRequestNotificationPermissions() -> Void {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
             if granted {
@@ -194,15 +176,11 @@ final class AppState: ObservableObject {
 @main
 struct TypeaheadAIApp {
     static func main() {
-        if #available(macOS 13.0, *) {
-            if UserDefaults.standard.bool(forKey: "hasOnboardedV3") {
-                MacOS13AndLaterApp.main()
-            } else {
-                UserDefaults.standard.setValue(true, forKey: "hasOnboardedV3")
-                MacOS13AndLaterAppWithOnboardingV2.main()
-            }
+        if false {//if UserDefaults.standard.bool(forKey: "hasOnboardedV3") {
+            MacOS13AndLaterApp.main()
         } else {
-            MacOS12AndEarlierApp.main()
+            UserDefaults.standard.setValue(true, forKey: "hasOnboardedV3")
+            MacOS13AndLaterAppWithOnboardingV2.main()
         }
     }
 }
@@ -219,58 +197,6 @@ struct SettingsScene: Scene {
     }
 }
 
-struct MacOS12AndEarlierApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
-    var body: some Scene {
-        SettingsScene(appState: appDelegate.appState)
-    }
-}
-
-class AppDelegate: NSObject, NSApplicationDelegate {
-    var statusBarItem: NSStatusItem?
-    var application: NSApplication = NSApplication.shared
-
-    let persistenceController = PersistenceController.shared
-    @ObservedObject var appState: AppState = {
-        let context = PersistenceController.shared.container.viewContext
-        return AppState(context: context)
-    }()
-
-    override init() {
-        // Further customization if needed.
-        super.init()
-    }
-
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        let menu = NSMenu()
-        let menuItem = NSMenuItem()
-
-        // SwiftUI View
-        let subview = CommonMenuView(
-            promptManager: appState.promptManager,
-            modalManager: appState.modalManager,
-            isMenuVisible: $appState.isMenuVisible
-        )
-
-        let view = NSHostingView(rootView: subview)
-        view.becomeFirstResponder()
-
-        // Very important! If you don't set the frame the menu won't appear to open.
-        view.frame = NSRect(x: 0, y: 0, width: 300, height: 400)
-        menuItem.view = view
-
-        menu.addItem(menuItem)
-
-        NSApp.activate(ignoringOtherApps: true)
-
-        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusBarItem?.button?.image = NSImage(systemSymbolName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard", accessibilityDescription: nil)
-        statusBarItem?.menu = menu
-    }
-}
-
-@available(macOS 13.0, *)
 struct MacOS13AndLaterApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
@@ -291,7 +217,7 @@ struct MacOS13AndLaterApp: App {
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
-            Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
+            Image(systemName: "list.clipboard")
             // TODO: Add symbolEffect when available
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
@@ -299,7 +225,6 @@ struct MacOS13AndLaterApp: App {
     }
 }
 
-@available(macOS 13.0, *)
 struct MacOS13AndLaterAppWithOnboardingV2: App {
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
@@ -314,7 +239,11 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
             OnboardingView(
                 modalManager: appState.modalManager
             )
+            .onAppear {
+                NSApp.activate(ignoringOtherApps: true)
+            }
         }
+        .windowStyle(.hiddenTitleBar)
 
         SettingsScene(appState: appState)
 
@@ -325,7 +254,7 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
-            Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
+            Image(systemName: "list.clipboard")
             // TODO: Add symbolEffect when available
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
