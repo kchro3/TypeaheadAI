@@ -280,7 +280,6 @@ class ModalManager: ObservableObject {
                 Task {
                     await self.appendText(chunk)
                 }
-                self.logger.info("Received chunk: \(chunk)")
             case .failure(let error):
                 Task {
                     self.setError(error.localizedDescription)

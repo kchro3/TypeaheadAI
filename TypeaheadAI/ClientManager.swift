@@ -137,15 +137,15 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -572,14 +572,24 @@ class ClientManager {
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 
-                let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
+                let (data, resp) = try await URLSession.shared.bytes(for: urlRequest)
+
+                guard let httpResponse = resp as? HTTPURLResponse else {
+                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
+                    return
+                }
+
+                guard 200...299 ~= httpResponse.statusCode else {
+                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
+                    return
+                }
 
                 // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
                 // but also making a function call. To support this, if a payload is something other than .text,
                 // it is a special payload and should be cached separately.
                 // In the future, we can think about how to support completions with a full response, but worry about that later.
                 var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
-                for try await line in result.lines {
+                for try await line in data.lines {
                     if let data = line.data(using: .utf8),
                        let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
                        let text = response.text {
@@ -619,14 +629,24 @@ class ClientManager {
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-                let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
+                let (data, resp) = try await URLSession.shared.bytes(for: urlRequest)
+
+                guard let httpResponse = resp as? HTTPURLResponse else {
+                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
+                    return
+                }
+
+                guard 200...299 ~= httpResponse.statusCode else {
+                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
+                    return
+                }
 
                 // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
                 // but also making a function call. To support this, if a payload is something other than .text,
                 // it is a special payload and should be cached separately.
                 // In the future, we can think about how to support completions with a full response, but worry about that later.
                 var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
-                for try await line in result.lines {
+                for try await line in data.lines {
                     if let data = line.data(using: .utf8),
                        let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
                        let text = response.text {

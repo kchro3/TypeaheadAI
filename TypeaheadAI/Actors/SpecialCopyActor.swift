@@ -51,8 +51,6 @@ actor SpecialCopyActor: CanSimulateCopy {
                     messageType = .html(data: htmlString)
                 }
 
-                self.logger.debug("copied '\(copiedText)'")
-
                 // Clear the modal text and reissue request
                 Task {
                     await self.modalManager.clearText(stickyMode: stickyMode)

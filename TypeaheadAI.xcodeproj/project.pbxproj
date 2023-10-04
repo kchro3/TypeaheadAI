@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30072ACCDA1100338B76 /* VisualEffect.swift */; };
+		2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */; };
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
@@ -84,6 +85,7 @@
 
 /* Begin PBXFileReference section */
 		2B0B30072ACCDA1100338B76 /* VisualEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffect.swift; sourceTree = "<group>"; };
+		2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIntentsView.swift; sourceTree = "<group>"; };
 		2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialSaveActor.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
@@ -325,6 +327,7 @@
 				2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */,
 				2B520D7E2AC6D2AD00310426 /* TableView.swift */,
 				2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */,
+				2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */,
 			);
 			path = Modal;
 			sourceTree = "<group>";
@@ -510,6 +513,7 @@
 				2B2EF1502AC40C8F00EF2BD4 /* ChatBubble.swift in Sources */,
 				2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */,
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
+				2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */,
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
@@ -723,7 +727,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.16;
+				MARKETING_VERSION = 1.17;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -764,7 +768,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.16;
+				MARKETING_VERSION = 1.17;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

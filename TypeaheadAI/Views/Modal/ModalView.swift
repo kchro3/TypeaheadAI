@@ -35,7 +35,7 @@ struct ModalView: View {
                     isOnlineTooltipVisible.toggle()
                 }, label: {
                     Image(systemName: "info.circle")
-                        .foregroundStyle(isOnlineTooltipHovering ? Color.blue : Color.secondary)
+                        .foregroundStyle(isOnlineTooltipHovering ? Color.accentColor : Color.secondary)
                         .onHover(perform: { hovering in
                             isOnlineTooltipHovering = hovering
                         })
@@ -96,71 +96,56 @@ struct ModalView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            HStack {
-                ForEach(modalManager.userIntents.indices, id: \.self) { index in
+            VStack(spacing: 5) {
+                if modalManager.userIntents.count > 0 {
+                    UserIntentsView(modalManager: modalManager)
+                }
+
+                HStack {
+                    CustomTextField(
+                        text: $text,
+                        placeholderText: modalManager.messages.isEmpty ? "Ask me anything!" : "Ask a follow-up question...",
+                        autoCompleteSuggestions: self.getPrompts()
+                    ) { text in
+                        if !text.isEmpty {
+                            modalManager.addUserMessage(text)
+                            modalManager.userIntents = []
+                        }
+                    }
+                    .onAppear {
+                        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
+                            if event.keyCode == 125 {  // Down arrow
+                                NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
+                            } else if event.keyCode == 126 {  // Up arrow
+                                NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "up"])
+                            } else if event.keyCode == 36 {  // Enter key
+                                NotificationCenter.default.post(name: NSNotification.Name("EnterKeyPressed"), object: nil)
+                            }
+                            return event
+                        }
+                    }
 
                     Button(action: {
-                        modalManager.addUserMessage(modalManager.userIntents[index], implicit: true)
-                        modalManager.userIntents = []
-                    }) {
-                        Text(modalManager.userIntents[index])
-                            .foregroundColor(.primary)
-                            .textSelection(.enabled)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 15)
-                            .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color.blue.opacity(0.4))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-
-            HStack {
-                CustomTextField(
-                    text: $text,
-                    placeholderText: modalManager.messages.isEmpty ? "Ask me anything!" : "Ask a follow-up question...",
-                    autoCompleteSuggestions: self.getPrompts()
-                ) { text in
-                    if !text.isEmpty {
-                        modalManager.addUserMessage(text)
-                        modalManager.userIntents = []
-                    }
-                }
-                .onAppear {
-                    NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
-                        if event.keyCode == 125 {  // Down arrow
-                            NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
-                        } else if event.keyCode == 126 {  // Up arrow
-                            NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "up"])
-                        } else if event.keyCode == 36 {  // Enter key
-                            NotificationCenter.default.post(name: NSNotification.Name("EnterKeyPressed"), object: nil)
+                        isAuxiliaryMenuVisible.toggle()
+                    }, label: {
+                        if colorScheme == .dark {
+                            Image(systemName: "ellipsis.circle")
+                                .font(.title)
+                                .foregroundColor(modalManager.promptManager?.activePromptID == nil ? .secondary : .accentColor)
+                        } else {
+                            Image(systemName: "ellipsis.circle.fill")
+                                .font(.title)
+                                .foregroundColor(modalManager.promptManager?.activePromptID == nil ? .secondary : .accentColor)
                         }
-                        return event
+                    })
+                    .buttonStyle(.plain)
+                    .popover(
+                        isPresented: $isAuxiliaryMenuVisible,
+                        attachmentAnchor: .rect(.bounds),
+                        arrowEdge: .trailing
+                    ) {
+                        AuxiliaryMenuView(modalManager: modalManager, promptManager: modalManager.promptManager!)
                     }
-                }
-
-                Button(action: {
-                    isAuxiliaryMenuVisible.toggle()
-                }, label: {
-                    if colorScheme == .dark {
-                        Image(systemName: "ellipsis.circle")
-                            .font(.title)
-                            .foregroundColor(.blue)
-                    } else {
-                        Image(systemName: "ellipsis.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.blue)
-                    }
-                })
-                .buttonStyle(.plain)
-                .popover(
-                    isPresented: $isAuxiliaryMenuVisible,
-                    attachmentAnchor: .rect(.bounds),
-                    arrowEdge: .trailing
-                ) {
-                    AuxiliaryMenuView(modalManager: modalManager, promptManager: modalManager.promptManager!)
                 }
             }
             .padding(.horizontal, 10)
@@ -211,6 +196,11 @@ struct ModalView_Previews: PreviewProvider {
             Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true)
         ]
 
+        let modalManagerWithIntents = ModalManager()
+        modalManagerWithIntents.userIntents = [
+            "testing a new idea", "test a test", "testing a test test test testing a test test test testing a test test test testing a test test test"
+        ]
+
         // Create an in-memory Core Data store
         let container = NSPersistentContainer(name: "TypeaheadAI")
         container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
@@ -229,6 +219,7 @@ struct ModalView_Previews: PreviewProvider {
             ModalView(showModal: $showModal, modalManager: modalManagerWithErrors)
             ModalView(showModal: $showModal, modalManager: modalManagerWithCodeblock)
             ModalView(showModal: $showModal, modalManager: modalManagerWithLongMessages)
+            ModalView(showModal: $showModal, modalManager: modalManagerWithIntents)
         }
     }
 

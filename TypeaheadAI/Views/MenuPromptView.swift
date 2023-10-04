@@ -38,7 +38,7 @@ struct MenuPromptView: View {
                 .resizable()
                 .frame(width: 24, height: 24)
                 .symbolRenderingMode(isActive ? .palette : .monochrome)
-                .foregroundStyle(isActive ? .white : .secondary, .blue)
+                .foregroundStyle(isActive ? .white : .secondary, Color.accentColor)
 
             if isEditing {
                 TextField("To delete, clear text and enter.", text: $localPromptContent)
