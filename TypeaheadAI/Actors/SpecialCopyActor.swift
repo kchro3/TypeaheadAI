@@ -132,6 +132,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                                 }
                             } catch {
                                 self.logger.error("\(error.localizedDescription)")
+                                await self.modalManager.setError(error.localizedDescription)
                             }
                         }
                     }
