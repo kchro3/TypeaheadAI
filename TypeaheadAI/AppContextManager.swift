@@ -33,8 +33,8 @@ class AppContextManager {
                               let url = URL(string: urlString),
                               let strippedUrl = self.stripQueryParameters(from: url)?.absoluteString {
 
-                        self.logger.info("Successfully executed script. URL: \(strippedUrl)")
-                        completion(appName, bundleIdentifier, strippedUrl)
+                        self.logger.info("Successfully executed script. URL: \(url.host ?? strippedUrl)")
+                        completion(appName, bundleIdentifier, url.host)
                     }
                 }
             } else {

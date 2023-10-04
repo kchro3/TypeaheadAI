@@ -9,8 +9,16 @@ import Foundation
 import CoreData
 import os.log
 
+struct UserIntent: Codable {
+    let copiedText: String
+    let appName: String?
+    let bundleIdentifier: String?
+    let url: String?
+}
+
 class IntentManager {
     private let managedObjectContext: NSManagedObjectContext
+    private let maxLength: Int = 1000  // Truncate each copiedText
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -133,17 +141,32 @@ class IntentManager {
         }
 
         fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "decayedScore", ascending: false)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
         fetchRequest.fetchLimit = limit
 
         do {
             let entries = try managedObjectContext.fetch(fetchRequest)
             var messages = [Message]()
             for entry in entries {
-                let userMessage = Message(id: UUID(), text: entry.copiedText!, isCurrentUser: true)
-                let assistantMessage = Message(id: UUID(), text: entry.prompt!, isCurrentUser: false)
-                messages.append(contentsOf: [userMessage, assistantMessage])
+                guard let copiedText = entry.copiedText else {
+                    continue
+                }
+
+                let intent = UserIntent(
+                    copiedText: copiedText,
+                    appName: entry.appName,
+                    bundleIdentifier: entry.bundleIdentifier,
+                    url: entry.url
+                )
+
+                if let data = try? JSONEncoder().encode(intent),
+                   let serialized = String(data: data, encoding: .utf8) {
+                    let userMessage = Message(id: UUID(), text: serialized, isCurrentUser: true)
+                    let assistantMessage = Message(id: UUID(), text: entry.prompt!, isCurrentUser: false)
+                    messages.append(contentsOf: [userMessage, assistantMessage])
+                }
             }
+            print(messages)
             return messages
         } catch {
             logger.error("Failed to fetch history entries: \(error.localizedDescription)")

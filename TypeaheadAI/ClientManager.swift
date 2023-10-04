@@ -292,19 +292,19 @@ class ClientManager {
                     var history: [Message]? = nil
                     if let userIntent = userIntent {
                         // NOTE: We cached the copiedText earlier
-                        _ = self.intentManager?.upsertIntentEntry(
+                        _ = self.intentManager?.addIntentEntry(
                             prompt: userIntent,
                             copiedText: payload.copiedText,
-                            activeUrl: url,
-                            activeAppName: appName,
-                            activeAppBundleIdentifier: bundleIdentifier
+                            activeUrl: payload.url,
+                            activeAppName: payload.activeAppName,
+                            activeAppBundleIdentifier: payload.activeAppBundleIdentifier
                         )
 
                         history = self.intentManager?.fetchIntents(
                             limit: 10,
-                            url: url,
-                            appName: appName,
-                            bundleIdentifier: bundleIdentifier
+                            url: payload.url,
+                            appName: payload.activeAppName,
+                            bundleIdentifier: payload.activeAppBundleIdentifier
                         )
                     }
 
@@ -320,8 +320,8 @@ class ClientManager {
                         messages: self.sanitizeMessages(messages),
                         history: history,
                         url: payload.url,
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
+                        activeAppName: payload.activeAppName,
+                        activeAppBundleIdentifier: payload.activeAppBundleIdentifier,
                         incognitoMode: incognitoMode,
                         streamHandler: streamHandler,
                         completion: completion
@@ -700,6 +700,7 @@ class ClientManager {
 
     private func cacheResponse(_ response: String?, for requestPayload: RequestPayload) {
         if let cacheKey = generateCacheKey(from: requestPayload) {
+            self.logger.debug("Overwrite cached request")
             cached = (cacheKey, response)
         }
     }
