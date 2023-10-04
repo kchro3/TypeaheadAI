@@ -155,6 +155,7 @@ struct OnboardingView: View {
             }
             .padding()
         }
+        .background(VisualEffect().ignoresSafeArea())
     }
 
     /// Append text to the onboarding messages. Creates a new message if there is nothing to append to.
@@ -256,10 +257,11 @@ struct OnboardingView: View {
         }
     }
 
-    func completionHandler(result: Result<String, Error>) {
+    func completionHandler(result: Result<ChunkPayload, Error>) {
         switch result {
         case .success(let output):
-            if let suffix = extractAction(from: output) {
+            if let text = output.text,
+               let suffix = extractAction(from: text) {
                 if suffix == "delay" {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         isContinueVisible = true

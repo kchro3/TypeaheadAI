@@ -198,6 +198,8 @@ final class AppState: ObservableObject {
 struct TypeaheadAIApp {
     static func main() {
         if #available(macOS 13.0, *) {
+//            UserDefaults.standard.setValue(false, forKey: "hasOnboardedV3")
+
             if UserDefaults.standard.bool(forKey: "hasOnboardedV3") {
                 MacOS13AndLaterApp.main()
             } else {
@@ -318,6 +320,7 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
                 modalManager: appState.modalManager
             )
         }
+        .windowStyle(.hiddenTitleBar)
 
         SettingsScene(appState: appState)
 

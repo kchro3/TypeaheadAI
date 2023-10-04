@@ -360,7 +360,7 @@ class ClientManager {
         onboardingStep: Int,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<String, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) {
         Task {
             await self.sendOnboardingRequest(
@@ -392,7 +392,7 @@ class ClientManager {
         onboardingStep: Int,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<String, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) async {
         currentOnboardingTask?.cancel()
         currentOnboardingTask = Task.detached { [weak self] in
@@ -405,10 +405,24 @@ class ClientManager {
                 version: "onboarding_v3"
             )
 
-            if let result: Result<String, Error> = await self?.performOnboardingTask(payload: payload, timeout: timeout, streamHandler: streamHandler) {
-                completion(result)
-            } else {
-                completion(.failure(ClientManagerError.appError("Something went wrong...")))
+            do {
+                let stream = try self?.performOnboardingTask(
+                    payload: payload,
+                    timeout: timeout,
+                    completion: completion
+                )
+
+                guard let stream = stream else {
+                    self?.logger.debug("Failed to get stream")
+                    return
+                }
+
+                for try await text in stream {
+                    self?.logger.debug("stream: \(text)")
+                    streamHandler(.success(text))
+                }
+            } catch {
+                streamHandler(.failure(error))
             }
         }
     }
@@ -561,7 +575,7 @@ class ClientManager {
                 let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
 
                 // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
-                // but also making a function call. To support this, if the first payload is something other than .text,
+                // but also making a function call. To support this, if a payload is something other than .text,
                 // it is a special payload and should be cached separately.
                 // In the future, we can think about how to support completions with a full response, but worry about that later.
                 var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
@@ -592,37 +606,48 @@ class ClientManager {
     private func performOnboardingTask(
         payload: OnboardingRequestPayload,
         timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>) -> Void
-    ) async -> Result<String, Error> {
+        completion: @escaping (Result<ChunkPayload, Error>) -> Void
+    ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            let error: Result<String, Error> = .failure(ClientManagerError.badRequest("Encoding error"))
-            streamHandler(error)
-            return error
+            throw ClientManagerError.badRequest("Encoding error")
         }
 
-        var request = URLRequest(url: self.apiOnboarding, timeoutInterval: timeout)
-        request.httpMethod = "POST"
-        request.httpBody = httpBody
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        return AsyncThrowingStream { continuation in
+            Task {
+                var urlRequest = URLRequest(url: self.apiOnboarding, timeoutInterval: timeout)
+                urlRequest.httpMethod = "POST"
+                urlRequest.httpBody = httpBody
+                urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        var output = ""
-        do {
-            let (stream, _) = try await URLSession.shared.bytes(for: request)
+                let (result, _) = try await URLSession.shared.bytes(for: urlRequest)
 
-            for try await line in stream.lines {
-                let decodedResponse = try JSONDecoder().decode(ChunkPayload.self, from: line.data(using: .utf8)!)
-                if let text = decodedResponse.text {
-                    output += text
-                    streamHandler(.success(text))
+                // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
+                // but also making a function call. To support this, if a payload is something other than .text,
+                // it is a special payload and should be cached separately.
+                // In the future, we can think about how to support completions with a full response, but worry about that later.
+                var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
+                for try await line in result.lines {
+                    if let data = line.data(using: .utf8),
+                       let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
+                       let text = response.text {
+
+                        switch response.mode ?? .text {
+                        case .text:
+                            continuation.yield(text)
+                            if bufferedPayload.mode != .image {
+                                bufferedPayload.text = (bufferedPayload.text ?? "") + text
+                                bufferedPayload.mode = .text
+                            }
+                        case .image:
+                            bufferedPayload = response
+                        }
+                    }
                 }
-            }
-        } catch {
-            let err: Result<String, Error> = .failure(error)
-            streamHandler(err)
-            return err
-        }
 
-        return .success(output)
+                completion(.success(bufferedPayload))
+                continuation.finish()
+            }
+        }
     }
 
     private func performStreamOfflineTask(
