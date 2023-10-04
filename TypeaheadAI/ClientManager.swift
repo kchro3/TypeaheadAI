@@ -137,15 +137,15 @@ class ClientManager {
 
     private let session: URLSession
 
-//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 
-    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
