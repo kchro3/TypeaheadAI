@@ -10,10 +10,12 @@ import CoreData
 
 struct HistoryListView: View {
     @Environment(\.managedObjectContext) var managedObjectContext
+    @FetchRequest(entity: IntentEntry.entity(), sortDescriptors: []) var intents: FetchedResults<IntentEntry>
     @FetchRequest(entity: HistoryEntry.entity(), sortDescriptors: []) var history: FetchedResults<HistoryEntry>
     @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
 
-    @State private var showAlert = false
+    @State private var showHistoryAlert = false
+    @State private var showIntentsAlert = false
 
     @AppStorage("numSmartCopies") var numSmartCopies: Int?
     @AppStorage("numSmartPastes") var numSmartPastes: Int?
@@ -61,18 +63,55 @@ struct HistoryListView: View {
 
             Divider()
 
-            Button("Clear History") {
-                showAlert = true
+            Table(intents) {
+                TableColumn("Date") { entry in
+                    Text(entry.updatedAt?.formatted() ?? "unknown")
+                }
+                TableColumn("Copied Text") { entry in
+                    Text(entry.copiedText ?? "none")
+                }
+                TableColumn("Prompt") { entry in
+                    Text(entry.prompt ?? "none")
+                }
+                TableColumn("Active App") { entry in
+                    Text(entry.appName ?? "unknown")
+                }
+                TableColumn("Active Bundle ID") { entry in
+                    Text(entry.bundleIdentifier ?? "none")
+                }
+                TableColumn("Active URL") { entry in
+                    Text(entry.url ?? "none")
+                }
             }
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("Confirm clearing history"),
-                    message: Text("Are you sure you want to the history? This action cannot be undone."),
-                    primaryButton: .destructive(Text("Clear")) {
-                        clearHistory(context: managedObjectContext)
-                    },
-                    secondaryButton: .cancel()
-                )
+
+            HStack {
+                Button("Clear History") {
+                    showHistoryAlert = true
+                }
+                .alert(isPresented: $showHistoryAlert) {
+                    Alert(
+                        title: Text("Confirm clearing history"),
+                        message: Text("Are you sure you want to the history? This action cannot be undone."),
+                        primaryButton: .destructive(Text("Clear")) {
+                            clearHistory(context: managedObjectContext)
+                        },
+                        secondaryButton: .cancel()
+                    )
+                }
+
+                Button("Clear Intents") {
+                    showIntentsAlert = true
+                }
+                .alert(isPresented: $showIntentsAlert) {
+                    Alert(
+                        title: Text("Confirm clearing intents"),
+                        message: Text("Are you sure you want to the intents? This action cannot be undone."),
+                        primaryButton: .destructive(Text("Clear")) {
+                            clearIntents(context: managedObjectContext)
+                        },
+                        secondaryButton: .cancel()
+                    )
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -98,6 +137,23 @@ struct HistoryListView: View {
         numSmartCopies = 0
         numSmartCuts = 0
         numSmartPastes = 0
+    }
+
+    private func clearIntents(context: NSManagedObjectContext) {
+        let fetchRequest: NSFetchRequest<IntentEntry> = IntentEntry.fetchRequest()
+
+        do {
+            let objects = try context.fetch(fetchRequest)
+            // Delete the objects
+            for object in objects {
+                context.delete(object)
+            }
+
+            try context.save()
+        } catch let error as NSError {
+            // Handle the error
+            print("Could not clear intents: \(error), \(error.userInfo)")
+        }
     }
 }
 
