@@ -35,7 +35,7 @@ struct ModalView: View {
                     isOnlineTooltipVisible.toggle()
                 }, label: {
                     Image(systemName: "info.circle")
-                        .foregroundStyle(isOnlineTooltipHovering ? Color.blue : Color.secondary)
+                        .foregroundStyle(isOnlineTooltipHovering ? Color.accentColor : Color.secondary)
                         .onHover(perform: { hovering in
                             isOnlineTooltipHovering = hovering
                         })
@@ -110,7 +110,7 @@ struct ModalView: View {
                             .padding(.horizontal, 15)
                             .background(
                                 RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color.blue.opacity(0.4))
+                                    .fill(Color.accentColor.opacity(0.4))
                             )
                     }
                     .buttonStyle(.plain)
@@ -147,11 +147,11 @@ struct ModalView: View {
                     if colorScheme == .dark {
                         Image(systemName: "ellipsis.circle")
                             .font(.title)
-                            .foregroundColor(.blue)
+                            .foregroundColor(modalManager.promptManager?.activePromptID == nil ? .secondary : .accentColor)
                     } else {
                         Image(systemName: "ellipsis.circle.fill")
                             .font(.title)
-                            .foregroundColor(.blue)
+                            .foregroundColor(modalManager.promptManager?.activePromptID == nil ? .secondary : .accentColor)
                     }
                 })
                 .buttonStyle(.plain)

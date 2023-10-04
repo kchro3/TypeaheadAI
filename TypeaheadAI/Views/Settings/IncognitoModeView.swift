@@ -27,7 +27,7 @@ struct IncognitoModeView: View {
                 Text("This is still a work in progress. Need to use a more advanced sampling method, since it's currently just doing a greedy search. Will integrate with HuggingFace in a future version, but for now, try downloading this to your model directory:")
                 Link(destination: URL(string: "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf")!) {
                     Text("https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf")
-                        .foregroundColor(.blue)
+                        .foregroundColor(.accentColor)
                         .underline()
                 }
             }.textSelection(.enabled)
@@ -93,7 +93,7 @@ struct IncognitoModeView: View {
                         } else {
                             Image(systemName: selectedModelURL == url ? "doc.circle.fill" : "doc.circle")
                                 .font(.system(size: 24))
-                                .foregroundColor(selectedModelURL == url ? .blue : .primary)
+                                .foregroundColor(selectedModelURL == url ? .accentColor : .primary)
                                 .frame(width: 24, height: 24, alignment: .center)
                         }
 

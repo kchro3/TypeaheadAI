@@ -118,24 +118,23 @@ struct MessageView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        .frame(minWidth: 400)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 15)
                         .foregroundColor(.white)
-                        .background(Color.blue.opacity(0.8))
+                        .background(Color.accentColor.opacity(0.8))
                         .textSelection(.enabled)
                     } else {
                         Text(message.text)
                             .padding(.vertical, 10)
                             .padding(.horizontal, 15)
                             .foregroundColor(.white)
-                            .background(Color.blue.opacity(0.8))
+                            .background(Color.accentColor.opacity(0.8))
                             .textSelection(.enabled)
                     }
                 case .html(let data):
                     WebView(html: data, dynamicHeight: $webViewHeight)
                         .frame(width: 400, height: webViewHeight)
-                        .background(Color.blue.opacity(0.8))
+                        .background(Color.accentColor.opacity(0.8))
                 case .image(let data):
                     if let imageData = try? self.decodeBase64Image(data.image) {
                         Image(nsImage: imageData)
@@ -156,7 +155,7 @@ struct MessageView: View {
                 case .html(let data):
                     WebView(html: data, dynamicHeight: $webViewHeight)
                         .frame(width: 400, height: webViewHeight)
-                        .background(Color.blue.opacity(0.8))
+                        .background(Color.accentColor.opacity(0.8))
                 case .image(let data):
                     if let imageData = try? self.decodeBase64Image(data.image) {
                         Image(nsImage: imageData)
