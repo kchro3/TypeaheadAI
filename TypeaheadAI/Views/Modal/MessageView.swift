@@ -110,9 +110,9 @@ struct MessageView: View {
                                     onTruncate?()
                                 }, label: {
                                     if message.isTruncated {
-                                        Text("See more")
+                                        Text("See more").bold()
                                     } else {
-                                        Text("See less")
+                                        Text("See less").bold()
                                     }
                                 })
                                 .buttonStyle(.plain)
