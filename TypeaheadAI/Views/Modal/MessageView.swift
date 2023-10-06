@@ -173,7 +173,7 @@ struct MessageView: View {
                         CodeBlockView(parserResult: parsed)
                             .padding(.bottom, 24)
                     } else if case .table = parsed.parsedType {
-                        TableView(parserResult: parsed)
+                        GenericTableView(parserResult: parsed)
                             .textSelection(.enabled)
                     } else {
                         Text(parsed.attributedString)

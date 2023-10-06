@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30072ACCDA1100338B76 /* VisualEffect.swift */; };
 		2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */; };
+		2B0B300E2ACEB0E000338B76 /* GenericTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300D2ACEB0E000338B76 /* GenericTableView.swift */; };
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
@@ -86,6 +87,7 @@
 /* Begin PBXFileReference section */
 		2B0B30072ACCDA1100338B76 /* VisualEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffect.swift; sourceTree = "<group>"; };
 		2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIntentsView.swift; sourceTree = "<group>"; };
+		2B0B300D2ACEB0E000338B76 /* GenericTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericTableView.swift; sourceTree = "<group>"; };
 		2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialSaveActor.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
@@ -328,6 +330,7 @@
 				2B520D7E2AC6D2AD00310426 /* TableView.swift */,
 				2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */,
 				2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */,
+				2B0B300D2ACEB0E000338B76 /* GenericTableView.swift */,
 			);
 			path = Modal;
 			sourceTree = "<group>";
@@ -528,6 +531,7 @@
 				2BF929802AB13F3600FC105B /* CodeBlockView.swift in Sources */,
 				2BA7F0852A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld in Sources */,
 				2B2EF1522AC40CB500EF2BD4 /* MessagePendingView.swift in Sources */,
+				2B0B300E2ACEB0E000338B76 /* GenericTableView.swift in Sources */,
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
 				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
