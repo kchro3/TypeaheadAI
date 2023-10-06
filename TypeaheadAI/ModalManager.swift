@@ -90,6 +90,10 @@ class ModalManager: ObservableObject {
         }
     }
 
+    func isWindowVisible() -> Bool? {
+        return toastWindow?.isVisible
+    }
+
     @MainActor
     func clearText(stickyMode: Bool) {
         if stickyMode {

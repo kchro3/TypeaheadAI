@@ -40,14 +40,14 @@ actor SpecialCopyActor: CanSimulateCopy {
     func specialCopy(stickyMode: Bool) {
         self.logger.debug("special copy")
 
-        self.appContextManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
+        self.appContextManager.getActiveAppInfo { appContext in
             self.simulateCopy() {
                 var messageType: MessageType = .string
                 guard let copiedText = NSPasteboard.general.string(forType: .string) else {
                     return
                 }
 
-                if let htmlString = self.extractHTML(appName: appName, bundleIdentifier: bundleIdentifier, url: url) {
+                if let htmlString = self.extractHTML(appContext: appContext) {
                     messageType = .html(data: htmlString)
                 }
 
@@ -68,9 +68,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                         let history = self.historyManager.fetchHistoryEntries(
                             limit: 10,
                             quickActionId: quickActionId,
-                            activeUrl: url?.host,
-                            activeAppName: appName,
-                            activeAppBundleIdentifier: bundleIdentifier
+                            activeUrl: appContext?.url?.host,
+                            activeAppName: appContext?.appName,
+                            activeAppBundleIdentifier: appContext?.bundleIdentifier
                         )
 
                         Task {
@@ -87,9 +87,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                                 copiedText: copiedText,
                                 messages: self.modalManager.messages,
                                 history: history,
-                                url: url?.host ?? "",
-                                activeAppName: appName ?? "unknown",
-                                activeAppBundleIdentifier: bundleIdentifier ?? "",
+                                url: appContext?.url?.host ?? "",
+                                activeAppName: appContext?.appName ?? "unknown",
+                                activeAppBundleIdentifier: appContext?.bundleIdentifier ?? "",
                                 incognitoMode: !self.modalManager.online,
                                 streamHandler: self.modalManager.defaultHandler,
                                 completion: { _ in
@@ -102,9 +102,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                     } else {
                         let previousPrompts = self.clientManager.intentManager?.fetchIntents(
                             limit: 10,
-                            url: url?.host,
-                            appName: appName,
-                            bundleIdentifier: bundleIdentifier
+                            url: appContext?.url?.host,
+                            appName: appContext?.appName,
+                            bundleIdentifier: appContext?.bundleIdentifier
                         )
 
                         Task {
@@ -121,9 +121,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                                     copiedText: copiedText,
                                     messages: self.modalManager.messages,
                                     history: previousPrompts,
-                                    url: url?.host ?? "",
-                                    activeAppName: appName ?? "unknown",
-                                    activeAppBundleIdentifier: bundleIdentifier ?? "",
+                                    url: appContext?.url?.host ?? "",
+                                    activeAppName: appContext?.appName ?? "unknown",
+                                    activeAppBundleIdentifier: appContext?.bundleIdentifier ?? "",
                                     incognitoMode: !self.modalManager.online
                                 ) {
                                     await self.modalManager.setUserIntents(intents: intents.intents)

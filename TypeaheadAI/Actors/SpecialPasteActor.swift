@@ -49,7 +49,7 @@ actor SpecialPasteActor: CanSimulatePaste {
     }
 
     func specialPaste() {
-        self.appContextManager.getActiveAppInfo(completion: { (appName, bundleIdentifier, url) in
+        self.appContextManager.getActiveAppInfo(completion: { appContext in
             guard let lastMessage = self.modalManager.messages.last, !lastMessage.isCurrentUser else {
                 return
             }
@@ -92,9 +92,9 @@ actor SpecialPasteActor: CanSimulatePaste {
                     copiedText: firstMessage.text,
                     pastedResponse: lastMessage.text,
                     quickActionId: self.promptManager.activePromptID,
-                    activeUrl: url?.host,
-                    activeAppName: appName,
-                    activeAppBundleIdentifier: bundleIdentifier,
+                    activeUrl: appContext?.url?.host,
+                    activeAppName: appContext?.appName,
+                    activeAppBundleIdentifier: appContext?.bundleIdentifier,
                     numMessages: self.modalManager.messages.count
                 )
             }
@@ -106,13 +106,13 @@ actor SpecialPasteActor: CanSimulatePaste {
             }
 
             if isTable {
-                if let url = url, 
+                if let url = appContext?.url,
                    let _ = self.shiftPasteUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
                     self.simulatePaste(flags: [.maskShift, .maskCommand])
-                } else if let appName = appName,
+                } else if let appName = appContext?.appName,
                           self.optionShiftCommandPasteApps.contains(appName) {
                     self.simulatePaste(flags: [.maskAlternate, .maskShift, .maskCommand])
-                } else if let appName = appName,
+                } else if let appName = appContext?.appName,
                           self.optionCommandPasteApps.contains(appName) {
                     self.simulatePaste(flags: [.maskAlternate, .maskCommand])
                 } else {
