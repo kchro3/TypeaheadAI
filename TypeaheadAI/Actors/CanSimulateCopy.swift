@@ -40,12 +40,12 @@ extension CanSimulateCopy {
     }
 
     // TODO: Only support HTML tables from specific allowlisted apps / urls for now.
-    func extractHTML(appName: String?, bundleIdentifier: String?, url: URL?) -> String? {
+    func extractHTML(appContext: AppContext?) -> String? {
         var isWhitelisted = false
-        if let appName = appName, whitelistedApps.contains(appName) {
+        if let appName = appContext?.appName, whitelistedApps.contains(appName) {
             isWhitelisted = true
         }
-        if let url = url, let _ = whitelistedUrls.first(where: { url.absoluteString.starts(with: $0) }) {
+        if let url = appContext?.url, let _ = whitelistedUrls.first(where: { url.absoluteString.starts(with: $0) }) {
             isWhitelisted = true
         }
 

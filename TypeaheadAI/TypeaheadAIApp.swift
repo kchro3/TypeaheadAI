@@ -40,6 +40,7 @@ final class AppState: ObservableObject {
     private var specialPasteActor: SpecialPasteActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialSaveActor: SpecialSaveActor? = nil
+    private var specialOpenActor: SpecialOpenActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -85,6 +86,11 @@ final class AppState: ObservableObject {
             clientManager: clientManager,
             memoManager: memoManager
         )
+        self.specialOpenActor = SpecialOpenActor(
+            clientManager: clientManager,
+            modalManager: modalManager,
+            appContextManager: appContextManager
+        )
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
@@ -128,18 +134,15 @@ final class AppState: ObservableObject {
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
-            if let window = self.modalManager.toastWindow, !window.isVisible {
-                self.modalManager.showModal()
-                NSApp.activate(ignoringOtherApps: true)
-            } else {
-                self.modalManager.closeModal()
+            Task {
+                await self.specialOpenActor?.specialOpen()
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
-            self.modalManager.forceRefresh()
-            self.modalManager.showModal()
-            NSApp.activate(ignoringOtherApps: true)
+            Task {
+                await self.specialOpenActor?.specialOpen(forceRefresh: true)
+            }
         }
 
         // Configure mouse-click handler

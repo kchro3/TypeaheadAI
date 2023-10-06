@@ -157,6 +157,11 @@ class ClientManager {
     private var currentOnboardingTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
 
+    // NOTE: This can be set by the SpecialOpenActor.
+    // If a user opens a window and sends a message, the current app becomes TypeaheadAI,
+    // so we need to set the app context before the window is opened.
+    var currentAppContext: AppContext? = nil
+
     init(session: URLSession = .shared) {
         self.session = session
     }
@@ -249,7 +254,7 @@ class ClientManager {
             return
         }
 
-        appCtxManager.getActiveAppInfo { (appName, bundleIdentifier, url) in
+        appCtxManager.getActiveAppInfo { appContext in
             Task {
                 await self.sendStreamRequest(
                     id: id,
@@ -262,9 +267,9 @@ class ClientManager {
                     copiedText: copiedText,
                     messages: [],
                     history: history,
-                    url: url?.host ?? "",
-                    activeAppName: appName ?? "unknown",
-                    activeAppBundleIdentifier: bundleIdentifier ?? "",
+                    url: appContext?.url?.host ?? "",
+                    activeAppName: appContext?.appName ?? "unknown",
+                    activeAppBundleIdentifier: appContext?.bundleIdentifier ?? "",
                     incognitoMode: incognitoMode,
                     streamHandler: streamHandler,
                     completion: completion
@@ -286,71 +291,66 @@ class ClientManager {
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
-
-                Task {
-                    var history: [Message]? = nil
-                    if let userIntent = userIntent {
-                        // NOTE: We cached the copiedText earlier
-                        _ = self.intentManager?.addIntentEntry(
-                            prompt: userIntent,
-                            copiedText: payload.copiedText,
-                            activeUrl: payload.url,
-                            activeAppName: payload.activeAppName,
-                            activeAppBundleIdentifier: payload.activeAppBundleIdentifier
-                        )
-
-                        history = self.intentManager?.fetchIntents(
-                            limit: 10,
-                            url: payload.url,
-                            appName: payload.activeAppName,
-                            bundleIdentifier: payload.activeAppBundleIdentifier
-                        )
-                    }
-
-                    await self.sendStreamRequest(
-                        id: UUID(),
-                        token: UserDefaults.standard.string(forKey: "token") ?? "",
-                        username: payload.username,
-                        userFullName: payload.userFullName,
-                        userObjective: payload.userObjective,
-                        userBio: payload.userBio,
-                        userLang: payload.userLang,
+            Task {
+                var history: [Message]? = nil
+                if let userIntent = userIntent {
+                    // NOTE: We cached the copiedText earlier
+                    _ = self.intentManager?.addIntentEntry(
+                        prompt: userIntent,
                         copiedText: payload.copiedText,
-                        messages: self.sanitizeMessages(messages),
-                        history: history,
-                        url: payload.url,
-                        activeAppName: payload.activeAppName,
-                        activeAppBundleIdentifier: payload.activeAppBundleIdentifier,
-                        incognitoMode: incognitoMode,
-                        streamHandler: streamHandler,
-                        completion: completion
+                        activeUrl: self.currentAppContext?.url?.host,
+                        activeAppName: self.currentAppContext?.appName,
+                        activeAppBundleIdentifier: self.currentAppContext?.bundleIdentifier
+                    )
+
+                    history = self.intentManager?.fetchIntents(
+                        limit: 10,
+                        url: self.currentAppContext?.url?.host,
+                        appName: self.currentAppContext?.appName,
+                        bundleIdentifier: self.currentAppContext?.bundleIdentifier
                     )
                 }
+
+                await self.sendStreamRequest(
+                    id: UUID(),
+                    token: UserDefaults.standard.string(forKey: "token") ?? "",
+                    username: payload.username,
+                    userFullName: payload.userFullName,
+                    userObjective: payload.userObjective,
+                    userBio: payload.userBio,
+                    userLang: payload.userLang,
+                    copiedText: payload.copiedText,
+                    messages: self.sanitizeMessages(messages),
+                    history: history,
+                    url: self.currentAppContext?.url?.host ?? "unknown",
+                    activeAppName: self.currentAppContext?.appName ?? "unknown",
+                    activeAppBundleIdentifier: self.currentAppContext?.bundleIdentifier ?? "unknown",
+                    incognitoMode: incognitoMode,
+                    streamHandler: streamHandler,
+                    completion: completion
+                )
             }
         } else {
             logger.error("No cached request to refine")
-            appContextManager!.getActiveAppInfo { (appName, bundleIdentifier, url) in
-                Task {
-                    await self.sendStreamRequest(
-                        id: UUID(),
-                        token: UserDefaults.standard.string(forKey: "token") ?? "",
-                        username: NSUserName(),
-                        userFullName: NSFullUserName(),
-                        userObjective: "",
-                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                        userLang: Locale.preferredLanguages.first ?? "",
-                        copiedText: "",
-                        messages: self.sanitizeMessages(messages),
-                        history: nil,
-                        url: url?.host ?? "unknown",
-                        activeAppName: appName ?? "unknown",
-                        activeAppBundleIdentifier: bundleIdentifier ?? "",
-                        incognitoMode: incognitoMode,
-                        streamHandler: streamHandler,
-                        completion: completion
-                    )
-                }
+            Task {
+                await self.sendStreamRequest(
+                    id: UUID(),
+                    token: UserDefaults.standard.string(forKey: "token") ?? "",
+                    username: NSUserName(),
+                    userFullName: NSFullUserName(),
+                    userObjective: "",
+                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                    userLang: Locale.preferredLanguages.first ?? "",
+                    copiedText: "",
+                    messages: self.sanitizeMessages(messages),
+                    history: nil,
+                    url: self.currentAppContext?.url?.host ?? "unknown",
+                    activeAppName: self.currentAppContext?.appName ?? "unknown",
+                    activeAppBundleIdentifier: self.currentAppContext?.bundleIdentifier ?? "",
+                    incognitoMode: incognitoMode,
+                    streamHandler: streamHandler,
+                    completion: completion
+                )
             }
         }
     }

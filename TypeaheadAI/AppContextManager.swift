@@ -9,6 +9,12 @@ import AppKit
 import Foundation
 import os.log
 
+struct AppContext: Codable {
+    let appName: String?
+    let bundleIdentifier: String?
+    let url: URL?
+}
+
 class AppContextManager {
     private let scriptManager: ScriptManager = ScriptManager()
 
@@ -17,7 +23,7 @@ class AppContextManager {
         category: "AppContextManager"
     )
 
-    func getActiveAppInfo(completion: @escaping (String?, String?, URL?) -> Void) {
+    func getActiveAppInfo(completion: @escaping (AppContext?) -> Void) {
         self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
             let appName = activeApp.localizedName
@@ -28,20 +34,20 @@ class AppContextManager {
                 self.scriptManager.executeScript { (result, error) in
                     if let error = error {
                         self.logger.error("Failed to execute script: \(error.errorDescription ?? "Unknown error")")
-                        completion(appName, bundleIdentifier, nil)
+                        completion(AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil))
                     } else if let urlString = result?.stringValue,
                               let url = URL(string: urlString),
                               let strippedUrl = self.stripQueryParameters(from: url) {
 
                         self.logger.info("Successfully executed script. URL: \(strippedUrl.absoluteString)")
-                        completion(appName, bundleIdentifier, strippedUrl)
+                        completion(AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: strippedUrl))
                     }
                 }
             } else {
-                completion(appName, bundleIdentifier, nil)
+                completion(AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil))
             }
         } else {
-            completion(nil, nil, nil)
+            completion(nil)
         }
     }
 
