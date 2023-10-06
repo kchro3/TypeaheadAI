@@ -68,7 +68,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                         let history = self.historyManager.fetchHistoryEntries(
                             limit: 10,
                             quickActionId: quickActionId,
-                            activeUrl: url,
+                            activeUrl: url?.host,
                             activeAppName: appName,
                             activeAppBundleIdentifier: bundleIdentifier
                         )
@@ -87,7 +87,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                                 copiedText: copiedText,
                                 messages: self.modalManager.messages,
                                 history: history,
-                                url: url ?? "",
+                                url: url?.host ?? "",
                                 activeAppName: appName ?? "unknown",
                                 activeAppBundleIdentifier: bundleIdentifier ?? "",
                                 incognitoMode: !self.modalManager.online,
@@ -102,7 +102,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                     } else {
                         let previousPrompts = self.clientManager.intentManager?.fetchIntents(
                             limit: 10,
-                            url: url,
+                            url: url?.host,
                             appName: appName,
                             bundleIdentifier: bundleIdentifier
                         )
@@ -121,7 +121,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                                     copiedText: copiedText,
                                     messages: self.modalManager.messages,
                                     history: previousPrompts,
-                                    url: url ?? "",
+                                    url: url?.host ?? "",
                                     activeAppName: appName ?? "unknown",
                                     activeAppBundleIdentifier: bundleIdentifier ?? "",
                                     incognitoMode: !self.modalManager.online

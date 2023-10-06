@@ -114,27 +114,23 @@ public struct MarkdownAttributedStringParser: MarkupVisitor {
         return result
     }
 
+    /// Save the table as a TSV in the NSAttributedString
     mutating public func visitTable(_ table: Table) -> NSAttributedString {
         let result = NSMutableAttributedString()
 
         // Headers
         let headers = table.head.cells.map { $0.plainText }
-        let headerString = "|" + headers.joined(separator: " | ") + "|\n"
+        let headerString = headers.joined(separator: "\t") + "\n"
         let headerAttributedString = NSAttributedString(
             string: headerString,
             attributes: [NSAttributedString.Key.font: baseFontSize]
         )
         result.append(headerAttributedString)
 
-        // Divider (at least 3 hyphens for each cell for valid syntax)
-        let divider = "|" + headers.map { _ in "---" }.joined(separator: " | ") + "|\n"
-        let dividerAttributedString = NSAttributedString(string: divider)
-        result.append(dividerAttributedString)
-
         // Rows
         for row in table.body.rows {
             let cells = row.cells.map { $0.plainText }
-            let rowString = "|" + cells.joined(separator: " | ") + "|\n"
+            let rowString = cells.joined(separator: "\t") + "\n"
             let rowAttributedString = NSAttributedString(string: rowString)
             result.append(rowAttributedString)
         }

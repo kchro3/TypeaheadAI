@@ -14,7 +14,7 @@ let whitelistedApps = [
 ]
 
 let whitelistedUrls = [
-    "docs.google.com/spreadsheets"
+    "https://docs.google.com/spreadsheets"
 ]
 
 protocol CanSimulateCopy {
@@ -40,12 +40,12 @@ extension CanSimulateCopy {
     }
 
     // TODO: Only support HTML tables from specific allowlisted apps / urls for now.
-    func extractHTML(appName: String?, bundleIdentifier: String?, url: String?) -> String? {
+    func extractHTML(appName: String?, bundleIdentifier: String?, url: URL?) -> String? {
         var isWhitelisted = false
         if let appName = appName, whitelistedApps.contains(appName) {
             isWhitelisted = true
         }
-        if let url = url, let _ = whitelistedUrls.first(where: { $0.contains(url) }) {
+        if let url = url, let _ = whitelistedUrls.first(where: { url.absoluteString.starts(with: $0) }) {
             isWhitelisted = true
         }
 

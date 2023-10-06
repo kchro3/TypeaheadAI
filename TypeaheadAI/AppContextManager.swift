@@ -17,7 +17,7 @@ class AppContextManager {
         category: "AppContextManager"
     )
 
-    func getActiveAppInfo(completion: @escaping (String?, String?, String?) -> Void) {
+    func getActiveAppInfo(completion: @escaping (String?, String?, URL?) -> Void) {
         self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
             let appName = activeApp.localizedName
@@ -31,10 +31,10 @@ class AppContextManager {
                         completion(appName, bundleIdentifier, nil)
                     } else if let urlString = result?.stringValue,
                               let url = URL(string: urlString),
-                              let strippedUrl = self.stripQueryParameters(from: url)?.absoluteString {
+                              let strippedUrl = self.stripQueryParameters(from: url) {
 
-                        self.logger.info("Successfully executed script. URL: \(url.host ?? strippedUrl)")
-                        completion(appName, bundleIdentifier, url.host)
+                        self.logger.info("Successfully executed script. URL: \(strippedUrl.absoluteString)")
+                        completion(appName, bundleIdentifier, strippedUrl)
                     }
                 }
             } else {
