@@ -32,16 +32,14 @@ class IntentManager {
     func addIntentEntry(
         prompt: String,
         copiedText: String,
-        activeUrl: String?,
-        activeAppName: String?,
-        activeAppBundleIdentifier: String?
+        appContext: AppContext?
     ) -> IntentEntry {
         let newEntry = IntentEntry(context: managedObjectContext)
         newEntry.prompt = prompt
         newEntry.copiedText = copiedText
-        newEntry.url = activeUrl
-        newEntry.appName = activeAppName
-        newEntry.bundleIdentifier = activeAppBundleIdentifier
+        newEntry.url = appContext?.url?.host
+        newEntry.appName = appContext?.appName
+        newEntry.bundleIdentifier = appContext?.bundleIdentifier
         newEntry.decayedScore = 1.0
         newEntry.updatedAt = Date()
 
@@ -63,111 +61,50 @@ class IntentManager {
         return originalScore * exp(-decayConstant * deltaTime)
     }
 
-    func upsertIntentEntry(
-        prompt: String,
-        copiedText: String?,
-        activeUrl: String?,
-        activeAppName: String?,
-        activeAppBundleIdentifier: String?
-    ) {
-        // Create a fetch request to find existing entries
-        let fetchRequest: NSFetchRequest<IntentEntry> = IntentEntry.fetchRequest()
-
-        var predicates = [NSPredicate]()
-        predicates.append(NSPredicate(format: "prompt == %@", prompt))
-
-        if let copiedText = copiedText {
-            predicates.append(NSPredicate(format: "copiedText == %@", copiedText))
-        }
-
-        if let activeUrl = activeUrl {
-            predicates.append(NSPredicate(format: "url == %@", activeUrl))
-        }
-
-        if let activeAppName = activeAppName {
-            predicates.append(NSPredicate(format: "appName == %@", activeAppName))
-        }
-
-        if let activeAppBundleIdentifier = activeAppBundleIdentifier {
-            predicates.append(NSPredicate(format: "bundleIdentifier == %@", activeAppBundleIdentifier))
-        }
-
-        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
-
-        do {
-            // Execute the fetch request
-            let fetchedEntries = try managedObjectContext.fetch(fetchRequest)
-
-            if let existingEntry = fetchedEntries.first {
-                // Entry exists, update decayedScore
-                existingEntry.decayedScore = decayedScore(originalScore: existingEntry.decayedScore, timestamp: existingEntry.updatedAt!)
-                existingEntry.updatedAt = Date() // Update timestamp to current time
-
-                try managedObjectContext.save() // Save the context
-            } else {
-                // Entry does not exist, create new one
-                _ = addIntentEntry(
-                    prompt: prompt,
-                    copiedText: copiedText ?? "",
-                    activeUrl: activeUrl,
-                    activeAppName: activeAppName,
-                    activeAppBundleIdentifier: activeAppBundleIdentifier
-                )
-            }
-        } catch {
-            logger.error("Failed to upsert intent entry: \(error.localizedDescription)")
-        }
-    }
-
     func fetchIntents(
         limit: Int,
-        url: String? = nil,
-        appName: String? = nil,
-        bundleIdentifier: String? = nil
+        appContext: AppContext?
     ) -> [Message] {
+        guard let appContext = appContext else {
+            return []
+        }
+
         let fetchRequest: NSFetchRequest<IntentEntry> = IntentEntry.fetchRequest()
         var predicates = [NSPredicate]()
 
-        if let url = url {
+        if let url = appContext.url?.host {
             predicates.append(NSPredicate(format: "url == %@", url))
         }
 
-        if let appName = appName {
+        if let appName = appContext.appName {
             predicates.append(NSPredicate(format: "appName == %@", appName))
         }
 
-        if let bundleIdentifier = bundleIdentifier {
+        if let bundleIdentifier = appContext.bundleIdentifier {
             predicates.append(NSPredicate(format: "bundleIdentifier == %@", bundleIdentifier))
         }
 
         fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
-        fetchRequest.fetchLimit = limit
+        fetchRequest.fetchLimit = 50
 
         do {
             let entries = try managedObjectContext.fetch(fetchRequest)
-            var messages = [Message]()
+
+            // NOTE: Count the most common recent prompts and construct a user message
+            var promptCounts = [String: Int]()
             for entry in entries {
-                guard let copiedText = entry.copiedText else {
-                    continue
-                }
-
-                let intent = UserIntent(
-                    copiedText: copiedText,
-                    appName: entry.appName,
-                    bundleIdentifier: entry.bundleIdentifier,
-                    url: entry.url
-                )
-
-                if let data = try? JSONEncoder().encode(intent),
-                   let serialized = String(data: data, encoding: .utf8) {
-                    let userMessage = Message(id: UUID(), text: serialized, isCurrentUser: true)
-                    let assistantMessage = Message(id: UUID(), text: entry.prompt!, isCurrentUser: false)
-                    messages.append(contentsOf: [userMessage, assistantMessage])
+                if let prompt = entry.prompt {
+                    promptCounts[prompt] = (promptCounts[prompt] ?? 0) + 1
                 }
             }
-            print(messages)
-            return messages
+
+            var topPromptsString = "Most common answers for this context:\n"
+            for (prompt, count) in promptCounts.sorted(by: { $0.value > $1.value }).prefix(limit) {
+                topPromptsString += "- \(prompt) (used \(count)x)\n"
+            }
+
+            return [Message(id: UUID(), text: topPromptsString, isCurrentUser: true)]
         } catch {
             logger.error("Failed to fetch history entries: \(error.localizedDescription)")
             return []

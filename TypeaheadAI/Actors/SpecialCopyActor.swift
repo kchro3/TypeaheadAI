@@ -87,9 +87,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                                 copiedText: copiedText,
                                 messages: self.modalManager.messages,
                                 history: history,
-                                url: appContext?.url?.host ?? "",
-                                activeAppName: appContext?.appName ?? "unknown",
-                                activeAppBundleIdentifier: appContext?.bundleIdentifier ?? "",
+                                appContext: appContext,
                                 incognitoMode: !self.modalManager.online,
                                 streamHandler: self.modalManager.defaultHandler,
                                 completion: { _ in
@@ -102,9 +100,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                     } else {
                         let previousPrompts = self.clientManager.intentManager?.fetchIntents(
                             limit: 10,
-                            url: appContext?.url?.host,
-                            appName: appContext?.appName,
-                            bundleIdentifier: appContext?.bundleIdentifier
+                            appContext: appContext
                         )
 
                         Task {
@@ -121,9 +117,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                                     copiedText: copiedText,
                                     messages: self.modalManager.messages,
                                     history: previousPrompts,
-                                    url: appContext?.url?.host ?? "",
-                                    activeAppName: appContext?.appName ?? "unknown",
-                                    activeAppBundleIdentifier: appContext?.bundleIdentifier ?? "",
+                                    appContext: appContext,
                                     incognitoMode: !self.modalManager.online
                                 ) {
                                     await self.modalManager.setUserIntents(intents: intents.intents)

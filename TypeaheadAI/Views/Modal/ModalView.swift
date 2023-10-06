@@ -108,8 +108,12 @@ struct ModalView: View {
                         autoCompleteSuggestions: self.getPrompts()
                     ) { text in
                         if !text.isEmpty {
-                            modalManager.addUserMessage(text)
-                            modalManager.userIntents = []
+                            if !modalManager.userIntents.isEmpty {
+                                modalManager.addUserMessage(text, implicit: true)
+                                modalManager.userIntents = []
+                            } else {
+                                modalManager.addUserMessage(text)
+                            }
                         }
                     }
                     .onAppear {

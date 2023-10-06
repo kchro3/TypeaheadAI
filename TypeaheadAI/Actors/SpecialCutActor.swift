@@ -13,6 +13,10 @@ import Cocoa
 import Vision
 import os.log
 
+struct ImageCaptionPayload: Codable {
+    let caption: String
+}
+
 /// This polls the clipboard to see if anything new has been added to the clipboard.
 class ClipboardMonitor {
     private var timer: Timer?
@@ -64,10 +68,14 @@ class ClipboardMonitor {
 
 actor SpecialCutActor {
     private let clipboardMonitor: ClipboardMonitor
+    private let promptManager: PromptManager
     private let clientManager: ClientManager
     private let modalManager: ModalManager
+    private let appContextManager: AppContextManager
 
     @AppStorage("numSmartCuts") var numSmartCuts: Int?
+    @AppStorage("token") var token: String?
+    @AppStorage("bio") var bio: String?
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -80,56 +88,102 @@ actor SpecialCutActor {
     }
 
     init(mouseEventMonitor: MouseEventMonitor,
+         promptManager: PromptManager,
          clientManager: ClientManager,
-         modalManager: ModalManager) {
+         modalManager: ModalManager,
+         appContextManager: AppContextManager
+    ) {
         self.clipboardMonitor = ClipboardMonitor(mouseEventMonitor: mouseEventMonitor)
+        self.promptManager = promptManager
         self.clientManager = clientManager
         self.modalManager = modalManager
+        self.appContextManager = appContextManager
     }
 
     func specialCut(stickyMode: Bool) {
-        do {
-            self.clipboardMonitor.stopMonitoring()
-            try simulateScreengrab() {
-                guard let tiffData = NSPasteboard.general.data(forType: .tiff),
-                      let image = NSImage(data: tiffData),
-                      let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-                    self.logger.error("Failed to retrieve image from clipboard")
-                    return
-                }
+        self.appContextManager.getActiveAppInfo { appContext in
+            do {
+                self.clipboardMonitor.stopMonitoring()
+                try self.simulateScreengrab() {
+                    guard let tiffData = NSPasteboard.general.data(forType: .tiff),
+                          let image = NSImage(data: tiffData),
+                          let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+                        self.logger.error("Failed to retrieve image from clipboard")
+                        return
+                    }
 
-                self.performOCR(image: cgImage) { recognizedText, _ in
-                    self.logger.info("OCRed text: \(recognizedText)")
+                    if self.modalManager.online {
+                        Task {
+                            if let captionPayload = await self.clientManager.captionImage(tiffData: tiffData) {
+                                await self.modalManager.clearText(stickyMode: stickyMode)
+                                await self.modalManager.showModal()
 
-                    Task {
-                        await self.modalManager.clearText(stickyMode: stickyMode)
-                        await self.modalManager.showModal()
+                                await self.modalManager.appendUserImage(tiffData, caption: captionPayload.caption)
 
-                        if let activePrompt = self.clientManager.getActivePrompt() {
-                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
-                        } else {
-                            await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)")
+                                if let nCuts = self.numSmartCuts {
+                                    self.numSmartCuts = nCuts + 1
+                                } else {
+                                    self.numSmartCuts = 1
+                                }
+
+                                do {
+                                    if let intents = try await self.clientManager.suggestIntents(
+                                        id: UUID(),
+                                        token: self.token ?? "",
+                                        username: NSUserName(),
+                                        userFullName: NSFullUserName(),
+                                        userObjective: self.promptManager.getActivePrompt(),
+                                        userBio: self.bio ?? "",
+                                        userLang: Locale.preferredLanguages.first ?? "",
+                                        copiedText: captionPayload.caption,
+                                        messages: self.modalManager.messages,
+                                        history: [],
+                                        appContext: appContext,
+                                        incognitoMode: !self.modalManager.online
+                                    ) {
+                                        await self.modalManager.setUserIntents(intents: intents.intents)
+                                    }
+                                } catch {
+                                    self.logger.error("\(error.localizedDescription)")
+                                    await self.modalManager.setError(error.localizedDescription)
+                                }
+                            }
                         }
+                    } else {
+                        self.performOCR(image: cgImage) { recognizedText, _ in
+                            self.logger.info("OCRed text: \(recognizedText)")
 
-                        if let nCuts = self.numSmartCuts {
-                            self.numSmartCuts = nCuts + 1
-                        } else {
-                            self.numSmartCuts = 1
+                            Task {
+                                await self.modalManager.clearText(stickyMode: stickyMode)
+                                await self.modalManager.showModal()
+
+                                if let activePrompt = self.clientManager.getActivePrompt() {
+                                    await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
+                                } else {
+                                    await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)")
+                                }
+
+                                if let nCuts = self.numSmartCuts {
+                                    self.numSmartCuts = nCuts + 1
+                                } else {
+                                    self.numSmartCuts = 1
+                                }
+
+                                self.clientManager.predict(
+                                    id: UUID(),
+                                    copiedText: recognizedText,
+                                    incognitoMode: !self.modalManager.online,
+                                    stream: true,
+                                    streamHandler: self.modalManager.defaultHandler,
+                                    completion: { _ in }
+                                )
+                            }
                         }
-
-                        self.clientManager.predict(
-                            id: UUID(),
-                            copiedText: recognizedText,
-                            incognitoMode: !self.modalManager.online,
-                            stream: true,
-                            streamHandler: self.modalManager.defaultHandler,
-                            completion: { _ in }
-                        )
                     }
                 }
+            } catch {
+                self.logger.error("Failed to execute special cut: \(error)")
             }
-        } catch {
-            self.logger.error("Failed to execute special cut: \(error)")
         }
     }
 

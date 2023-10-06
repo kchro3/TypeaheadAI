@@ -62,16 +62,13 @@ actor SpecialPasteActor: CanSimulatePaste {
             if let results = lastMessage.attributed?.results {
                 pasteboard.setString(lastMessage.text, forType: .string)
                 for result in results {
-                    switch result.parsedType {
-                    case .table:
+                    if case .table = result.parsedType {
                         pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
                         isTable = true
                         break
-                    case .codeBlock(_):
+                    } else if case .codeBlock(_) = result.parsedType {
                         pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
                         break
-                    default:
-                        continue
                     }
                 }
             } else if case .image(let imageData) = lastMessage.messageType {

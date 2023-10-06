@@ -78,8 +78,10 @@ final class AppState: ObservableObject {
         )
         self.specialCutActor = SpecialCutActor(
             mouseEventMonitor: mouseEventMonitor,
+            promptManager: promptManager,
             clientManager: clientManager,
-            modalManager: modalManager
+            modalManager: modalManager,
+            appContextManager: appContextManager
         )
         self.specialSaveActor = SpecialSaveActor(
             modalManager: modalManager,

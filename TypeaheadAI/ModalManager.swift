@@ -15,6 +15,7 @@ enum MessageType: Codable, Equatable {
     case string
     case html(data: String)
     case image(data: ImageData)
+    case data(data: Data)
 }
 
 struct AttributedOutput: Codable, Equatable {
@@ -234,15 +235,31 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func appendImage(_ image: ImageData, prompt: String) {
+    func appendImage(_ image: ImageData, prompt: String, caption: String?) {
         isPending = false
         userIntents = []
 
+        var placeholder = "<image placeholder>\n"
+        placeholder += " - prompt used: \(prompt)"
+        if let caption = caption {
+            placeholder += " - caption generated: \(caption)"
+        }
+
         messages.append(Message(
             id: UUID(),
-            text: "<image placeholder> prompt used: \(prompt)",
+            text: placeholder,
             isCurrentUser: false,
             messageType: .image(data: image)
+        ))
+    }
+
+    @MainActor
+    func appendUserImage(_ data: Data, caption: String) {
+        messages.append(Message(
+            id: UUID(),
+            text: "<image placeholder> caption generated: \(caption)",
+            isCurrentUser: true,
+            messageType: .data(data: data)
         ))
     }
 
@@ -448,8 +465,14 @@ class ModalManager: ObservableObject {
                     do {
                         if let data = text.data(using: .utf8),
                            let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
-                           let image = try await self.clientManager?.generateImage(payload: imageRequest) {
-                            await self.appendImage(image, prompt: imageRequest.prompt)
+                           let imageData = try await self.clientManager?.generateImage(payload: imageRequest) {
+                            if self.online,
+                               let data = Data(base64Encoded: imageData.image) {
+                                let captionPayload = await self.clientManager?.captionImage(tiffData: data)
+                                await self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption)
+                            } else {
+                                await self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
+                            }
                         }
                     } catch let error as ClientManagerError {
                         DispatchQueue.main.async {

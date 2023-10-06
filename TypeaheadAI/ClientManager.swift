@@ -20,9 +20,7 @@ struct RequestPayload: Codable {
     var copiedText: String
     var messages: [Message]?
     var history: [Message]?
-    var url: String
-    var activeAppName: String
-    var activeAppBundleIdentifier: String
+    var appContext: AppContext?
     var vision: Bool
 }
 
@@ -137,15 +135,17 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
 
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -181,9 +181,7 @@ class ClientManager {
         copiedText: String,
         messages: [Message],
         history: [Message]?,
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
+        appContext: AppContext?,
         incognitoMode: Bool,
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
@@ -197,9 +195,7 @@ class ClientManager {
             copiedText: copiedText,
             messages: self.sanitizeMessages(messages),
             history: history,
-            url: url,
-            activeAppName: activeAppName,
-            activeAppBundleIdentifier: activeAppBundleIdentifier,
+            appContext: appContext,
             vision: true
         )
 
@@ -267,9 +263,7 @@ class ClientManager {
                     copiedText: copiedText,
                     messages: [],
                     history: history,
-                    url: appContext?.url?.host ?? "",
-                    activeAppName: appContext?.appName ?? "unknown",
-                    activeAppBundleIdentifier: appContext?.bundleIdentifier ?? "",
+                    appContext: appContext,
                     incognitoMode: incognitoMode,
                     streamHandler: streamHandler,
                     completion: completion
@@ -298,16 +292,12 @@ class ClientManager {
                     _ = self.intentManager?.addIntentEntry(
                         prompt: userIntent,
                         copiedText: payload.copiedText,
-                        activeUrl: self.currentAppContext?.url?.host,
-                        activeAppName: self.currentAppContext?.appName,
-                        activeAppBundleIdentifier: self.currentAppContext?.bundleIdentifier
+                        appContext: payload.appContext
                     )
 
                     history = self.intentManager?.fetchIntents(
                         limit: 10,
-                        url: self.currentAppContext?.url?.host,
-                        appName: self.currentAppContext?.appName,
-                        bundleIdentifier: self.currentAppContext?.bundleIdentifier
+                        appContext: payload.appContext
                     )
                 }
 
@@ -322,9 +312,7 @@ class ClientManager {
                     copiedText: payload.copiedText,
                     messages: self.sanitizeMessages(messages),
                     history: history,
-                    url: self.currentAppContext?.url?.host ?? "unknown",
-                    activeAppName: self.currentAppContext?.appName ?? "unknown",
-                    activeAppBundleIdentifier: self.currentAppContext?.bundleIdentifier ?? "unknown",
+                    appContext: payload.appContext,
                     incognitoMode: incognitoMode,
                     streamHandler: streamHandler,
                     completion: completion
@@ -344,9 +332,7 @@ class ClientManager {
                     copiedText: "",
                     messages: self.sanitizeMessages(messages),
                     history: nil,
-                    url: self.currentAppContext?.url?.host ?? "unknown",
-                    activeAppName: self.currentAppContext?.appName ?? "unknown",
-                    activeAppBundleIdentifier: self.currentAppContext?.bundleIdentifier ?? "",
+                    appContext: self.currentAppContext,
                     incognitoMode: incognitoMode,
                     streamHandler: streamHandler,
                     completion: completion
@@ -443,9 +429,7 @@ class ClientManager {
         copiedText: String,
         messages: [Message],
         history: [Message]?,
-        url: String,
-        activeAppName: String,
-        activeAppBundleIdentifier: String,
+        appContext: AppContext?,
         incognitoMode: Bool,
         onboardingMode: Bool = false,
         timeout: TimeInterval = 30,
@@ -464,9 +448,7 @@ class ClientManager {
                 copiedText: copiedText,
                 messages: self?.sanitizeMessages(messages),
                 history: history,
-                url: url,
-                activeAppName: activeAppName,
-                activeAppBundleIdentifier: activeAppBundleIdentifier,
+                appContext: appContext,
                 vision: true
             )
 
@@ -554,6 +536,30 @@ class ClientManager {
 
         let response = try JSONDecoder().decode(ImageResponse.self, from: data)
         return response.data[0]
+    }
+
+    func captionImage(
+        tiffData: Data,
+        timeout: TimeInterval = 10.0
+    ) async -> ImageCaptionPayload? {
+        let bitmap = NSBitmapImageRep(data: tiffData)
+        let jpegData = bitmap?.representation(using: .jpeg, properties: [:])
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        var request = URLRequest(url: apiImageCaptions)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jpegData
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let payload = try decoder.decode(ImageCaptionPayload.self, from: data)
+            return payload
+        } catch {
+            self.logger.error("\(error.localizedDescription)")
+            return nil
+        }
     }
 
     private func performStreamOnlineTask(
@@ -690,12 +696,7 @@ class ClientManager {
         let encoder = JSONEncoder()
 
         do {
-            var payloadCopy = payload
-            payloadCopy.url = ""
-            payloadCopy.activeAppName = ""
-            payloadCopy.activeAppBundleIdentifier = ""
-
-            let jsonData = try encoder.encode(payloadCopy)
+            let jsonData = try encoder.encode(payload)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
                 return jsonString
             }

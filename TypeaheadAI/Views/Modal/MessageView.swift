@@ -139,6 +139,10 @@ struct MessageView: View {
                     if let imageData = try? self.decodeBase64Image(data.image) {
                         Image(nsImage: imageData)
                     }
+                case .data(let data):
+                    if let imageData = try? self.decodeImage(data) {
+                        Image(nsImage: imageData)
+                    }
                 }
             }
             .padding(.leading, 100)
@@ -158,6 +162,10 @@ struct MessageView: View {
                         .background(Color.accentColor.opacity(0.8))
                 case .image(let data):
                     if let imageData = try? self.decodeBase64Image(data.image) {
+                        Image(nsImage: imageData)
+                    }
+                case .data(let data):
+                    if let imageData = try? self.decodeImage(data) {
                         Image(nsImage: imageData)
                     }
                 }
@@ -185,6 +193,14 @@ struct MessageView: View {
             .padding(.horizontal, 15)
             .background(Color.secondary.opacity(0.2))
         }
+    }
+
+    private func decodeImage(_ data: Data) throws -> NSImage? {
+        guard let image = NSImage(data: data) else {
+            return nil
+        }
+
+        return image
     }
 
     private func decodeBase64Image(_ b64Data: String) throws -> NSImage? {
