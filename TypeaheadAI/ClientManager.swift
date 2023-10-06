@@ -135,15 +135,17 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
 
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -534,6 +536,30 @@ class ClientManager {
 
         let response = try JSONDecoder().decode(ImageResponse.self, from: data)
         return response.data[0]
+    }
+
+    func captionImage(
+        tiffData: Data,
+        timeout: TimeInterval = 10.0
+    ) async -> ImageCaptionPayload? {
+        let bitmap = NSBitmapImageRep(data: tiffData)
+        let jpegData = bitmap?.representation(using: .jpeg, properties: [:])
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        var request = URLRequest(url: apiImageCaptions)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jpegData
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let payload = try decoder.decode(ImageCaptionPayload.self, from: data)
+            return payload
+        } catch {
+            self.logger.error("\(error.localizedDescription)")
+            return nil
+        }
     }
 
     private func performStreamOnlineTask(
