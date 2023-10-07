@@ -12,8 +12,13 @@ import SwiftUI
 struct ChatBubble<Content>: View where Content: View {
     let direction: ChatBubbleShape.Direction
     let content: () -> Content
-    init(direction: ChatBubbleShape.Direction, @ViewBuilder content: @escaping () -> Content) {
+    let onButtonDown: (() -> Void)?
+
+    init(direction: ChatBubbleShape.Direction,
+         onButtonDown: (() -> Void)? = nil,
+         @ViewBuilder content: @escaping () -> Content) {
         self.content = content
+        self.onButtonDown = onButtonDown
         self.direction = direction
     }
 
@@ -24,6 +29,20 @@ struct ChatBubble<Content>: View where Content: View {
             }
             content().clipShape(ChatBubbleShape(direction: direction))
             if direction == .left {
+                VStack {
+                    Spacer()
+
+                    if let onButtonDown = onButtonDown {
+                        Button(action: {
+                            onButtonDown()
+                        }, label: {
+                            Image(systemName: "arrow.counterclockwise")
+                        })
+                        .buttonStyle(.plain)
+                        .padding(.bottom, 10)
+                        .padding(.trailing, 25)
+                    }
+                }
                 Spacer()
             }
         }

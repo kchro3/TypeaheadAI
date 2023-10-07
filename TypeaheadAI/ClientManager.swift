@@ -33,8 +33,10 @@ struct OnboardingRequestPayload: Codable {
     var version: String
 }
 
+/// https://replicate.com/stability-ai/sdxl
 struct ImageRequestPayload: Codable {
     let prompt: String
+    let style: [String]?
     var version: String?
 }
 
@@ -530,7 +532,7 @@ class ClientManager {
         var payloadCopy = payload
         payloadCopy.version = version
         guard let httpBody = try? JSONEncoder().encode(payloadCopy) else {
-            throw ClientManagerError.badRequest("Something went wrong...")
+            throw ClientManagerError.badRequest("Bad request format")
         }
 
         var urlRequest = URLRequest(url: self.apiImage, timeoutInterval: timeout)
@@ -558,7 +560,7 @@ class ClientManager {
 
     func captionImage(
         tiffData: Data,
-        timeout: TimeInterval = 10.0
+        timeout: TimeInterval = 30.0
     ) async -> ImageCaptionPayload? {
         let bitmap = NSBitmapImageRep(data: tiffData)
         let jpegData = bitmap?.representation(using: .jpeg, properties: [:])
@@ -596,15 +598,24 @@ class ClientManager {
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
                 
-                let (data, resp) = try await URLSession.shared.bytes(for: urlRequest)
+                guard let (data, resp) = try? await URLSession.shared.bytes(for: urlRequest) else {
+                    let error = ClientManagerError.serverError("Could be serious... Please report to Jeff!")
+                    continuation.finish(throwing: error)
+                    completion(.failure(error))
+                    return
+                }
 
                 guard let httpResponse = resp as? HTTPURLResponse else {
-                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
+                    let error = ClientManagerError.serverError("Something went wrong...")
+                    continuation.finish(throwing: error)
+                    completion(.failure(error))
                     return
                 }
 
                 guard 200...299 ~= httpResponse.statusCode else {
-                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
+                    let error = ClientManagerError.serverError("Something went wrong...")
+                    continuation.finish(throwing: error)
+                    completion(.failure(error))
                     return
                 }
 
@@ -614,10 +625,15 @@ class ClientManager {
                 // In the future, we can think about how to support completions with a full response, but worry about that later.
                 var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
                 for try await line in data.lines {
-                    if let data = line.data(using: .utf8),
-                       let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
-                       let text = response.text {
+                    guard let data = line.data(using: .utf8),
+                          let response = try? JSONDecoder().decode(ChunkPayload.self, from: data) else {
+                        let error = ClientManagerError.serverError("Failed to parse response...")
+                        continuation.finish(throwing: error)
+                        completion(.failure(error))
+                        return
+                    }
 
+                    if let text = response.text {
                         switch response.mode ?? .text {
                         case .text:
                             continuation.yield(text)
@@ -748,9 +764,7 @@ class ClientManager {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
             messageCopy.attributed = nil
-            if case .image(_) = messageCopy.messageType {
-                messageCopy.messageType = .string
-            }
+            messageCopy.messageType = .string
             return messageCopy
         }
     }
