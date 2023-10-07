@@ -90,6 +90,12 @@ public struct ImageResponse: Codable {
     public let data: [ImageData]
 }
 
+struct AppVersion: Codable, Equatable {
+    let major: Int
+    let minor: Int
+    let build: Int
+}
+
 struct ResponsePayload: Codable {
     let textToPaste: String
     let assumedIntent: String
@@ -144,16 +150,17 @@ class ClientManager {
     private let version: String = "v3"
 
     #if DEBUG
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
-//    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
+    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
     #else
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
@@ -183,6 +190,16 @@ class ClientManager {
 
     func getActivePrompt() -> String? {
         return self.promptManager?.getActivePrompt()
+    }
+
+    func checkUpdates() async -> AppVersion? {
+        do {
+            let (data, _) = try await URLSession.shared.data(from: apiLatest)
+            return try? JSONDecoder().decode(AppVersion.self, from: data)
+        } catch {
+            self.logger.error("\(error.localizedDescription)")
+            return nil
+        }
     }
 
     func suggestIntents(

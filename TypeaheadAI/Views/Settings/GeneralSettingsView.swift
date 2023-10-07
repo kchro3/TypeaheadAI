@@ -14,6 +14,7 @@ struct GeneralSettingsView: View {
     @ObservedObject var promptManager: PromptManager
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
+    @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -79,15 +80,25 @@ struct GeneralSettingsView: View {
             Divider()
 
             Form {
+                VStack {
+                    HStack {
+                        Spacer()
+                        //                    LaunchAtLogin.Toggle()
+                        //                    Spacer()
+                        Button("Reset User Prompts", action: {
+                            promptManager.clearPrompts()
+                        })
+                        Spacer()
+                        Button("Reset User Settings", action: clearUserDefaults)
+                        Spacer()
+                    }
+                }
+
                 HStack {
                     Spacer()
-//                    LaunchAtLogin.Toggle()
-//                    Spacer()
-                    Button("Reset User Prompts", action: {
-                        promptManager.clearPrompts()
-                    })
-                    Spacer()
-                    Button("Reset User Settings", action: clearUserDefaults)
+                    Toggle(isOn: $notifyOnUpdate) {
+                        Text("Notify on new version")
+                    }
                     Spacer()
                 }
             }
