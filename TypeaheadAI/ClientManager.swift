@@ -21,7 +21,7 @@ struct RequestPayload: Codable {
     var messages: [Message]?
     var history: [Message]?
     var appContext: AppContext?
-    var vision: Bool
+    var version: String?
 }
 
 struct OnboardingRequestPayload: Codable {
@@ -35,6 +35,7 @@ struct OnboardingRequestPayload: Codable {
 
 struct ImageRequestPayload: Codable {
     let prompt: String
+    var version: String?
 }
 
 struct ErrorResponse: Codable {
@@ -65,13 +66,16 @@ public enum ImageData: Codable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        do {
-            let urlAssociate = try container.decode(String.self, forKey: .url)
-            self = .url(urlAssociate)
-        } catch {
-            let b64Associate = try container.decode(String.self, forKey: .b64Json)
-            self = .b64Json(b64Associate)
+        if let url = try? container.decode(String.self, forKey: .url) {
+            if let data = try? Data(contentsOf: URL(string: url)!) {
+                let base64Json = data.base64EncodedString()
+                self = .b64Json(base64Json)
+                return
+            }
         }
+
+        let b64Associate = try container.decode(String.self, forKey: .b64Json)
+        self = .b64Json(b64Associate)
     }
 }
 
@@ -135,17 +139,26 @@ class ClientManager {
 
     private let session: URLSession
 
+    private let version: String = "v3"
+
+    #if DEBUG
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-
 //    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
 //    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
 //    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
 //    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
+    #else
+    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
+    #endif
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -196,7 +209,7 @@ class ClientManager {
             messages: self.sanitizeMessages(messages),
             history: history,
             appContext: appContext,
-            vision: true
+            version: version
         )
 
         // NOTE: Cache the payload so we know what text was copied
@@ -449,7 +462,7 @@ class ClientManager {
                 messages: self?.sanitizeMessages(messages),
                 history: history,
                 appContext: appContext,
-                vision: true
+                version: self?.version
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -510,8 +523,13 @@ class ClientManager {
         }
     }
 
-    func generateImage(payload: ImageRequestPayload, timeout: TimeInterval = 10.0) async throws -> ImageData? {
-        guard let httpBody = try? JSONEncoder().encode(payload) else {
+    func generateImage(
+        payload: ImageRequestPayload,
+        timeout: TimeInterval = 30.0
+    ) async throws -> ImageData? {
+        var payloadCopy = payload
+        payloadCopy.version = version
+        guard let httpBody = try? JSONEncoder().encode(payloadCopy) else {
             throw ClientManagerError.badRequest("Something went wrong...")
         }
 
