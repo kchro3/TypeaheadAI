@@ -195,13 +195,7 @@ class ClientManager {
     func checkUpdates() async -> AppVersion? {
         do {
             let (data, _) = try await URLSession.shared.data(from: apiLatest)
-            
-            if let version = try? JSONDecoder().decode(AppVersion.self, from: data) {
-                print(version)
-                return version
-            } else {
-                return nil
-            }
+            return try? JSONDecoder().decode(AppVersion.self, from: data)
         } catch {
             self.logger.error("\(error.localizedDescription)")
             return nil
