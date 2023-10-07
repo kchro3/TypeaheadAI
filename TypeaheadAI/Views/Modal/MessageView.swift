@@ -138,35 +138,49 @@ struct MessageView: View {
                 case .image(let data):
                     if let imageData = try? self.decodeBase64Image(data.image) {
                         Image(nsImage: imageData)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 512, height: 512)
                     }
                 case .data(let data):
                     if let imageData = try? self.decodeImage(data) {
                         Image(nsImage: imageData)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 512, height: 512)
                     }
                 }
             }
             .padding(.leading, 100)
         } else {
-            ChatBubble(direction: .left) {
-                switch message.messageType {
-                case .string:
-                    Text(message.text)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 15)
-                        .foregroundColor(.primary)
-                        .background(Color.secondary.opacity(0.2))
-                        .textSelection(.enabled)
-                case .html(let data):
-                    WebView(html: data, dynamicHeight: $webViewHeight)
-                        .frame(width: 400, height: webViewHeight)
-                        .background(Color.accentColor.opacity(0.8))
-                case .image(let data):
-                    if let imageData = try? self.decodeBase64Image(data.image) {
-                        Image(nsImage: imageData)
-                    }
-                case .data(let data):
-                    if let imageData = try? self.decodeImage(data) {
-                        Image(nsImage: imageData)
+            HStack {
+                ChatBubble(direction: .left, onButtonDown: onButtonDown) {
+                    switch message.messageType {
+                    case .string:
+                        Text(message.text)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 15)
+                            .foregroundColor(.primary)
+                            .background(Color.secondary.opacity(0.2))
+                            .textSelection(.enabled)
+                    case .html(let data):
+                        WebView(html: data, dynamicHeight: $webViewHeight)
+                            .frame(width: 400, height: webViewHeight)
+                            .background(Color.accentColor.opacity(0.8))
+                    case .image(let data):
+                        if let imageData = try? self.decodeBase64Image(data.image) {
+                            Image(nsImage: imageData)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 512, height: 512)
+                        }
+                    case .data(let data):
+                        if let imageData = try? self.decodeImage(data) {
+                            Image(nsImage: imageData)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 512, height: 512)
+                        }
                     }
                 }
             }
@@ -174,7 +188,7 @@ struct MessageView: View {
     }
 
     func attributedView(results: [ParserResult]) -> some View {
-        ChatBubble(direction: .left) {
+        ChatBubble(direction: .left, onButtonDown: onButtonDown) {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(results) { parsed in
                     if case .codeBlock(_) = parsed.parsedType {

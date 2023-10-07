@@ -316,8 +316,14 @@ class ModalManager: ObservableObject {
         isPending = true
         userIntents = []
 
-        if let lastMessage = self.messages.last, let _ = lastMessage.responseError {
-            _ = self.messages.popLast()
+        if let lastMessage = self.messages.last {
+            if let _ = lastMessage.responseError {
+                _ = self.messages.popLast()
+            } else if case .string = lastMessage.messageType {
+                _ = self.messages.popLast()
+            } else if case .html = lastMessage.messageType {
+                _ = self.messages.popLast()
+            }
         }
 
         self.clientManager?.refine(
@@ -519,11 +525,14 @@ class ModalManager: ObservableObject {
                 DispatchQueue.main.async {
                     self.setError(message)
                 }
+            case .serverError(let message):
+                DispatchQueue.main.async {
+                    self.setError(message)
+                }
             default:
                 DispatchQueue.main.async {
                     self.setError("Something went wrong. Please try again.")
                 }
-                self.logger.error("Something went wrong.")
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
