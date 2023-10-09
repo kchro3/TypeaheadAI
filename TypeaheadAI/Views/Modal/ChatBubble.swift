@@ -12,13 +12,16 @@ import SwiftUI
 struct ChatBubble<Content>: View where Content: View {
     let direction: ChatBubbleShape.Direction
     let content: () -> Content
-    let onButtonDown: (() -> Void)?
+    let onEdit: (() -> Void)?
+    let onRefresh: (() -> Void)?
 
     init(direction: ChatBubbleShape.Direction,
-         onButtonDown: (() -> Void)? = nil,
+         onEdit: (() -> Void)? = nil,
+         onRefresh: (() -> Void)? = nil,
          @ViewBuilder content: @escaping () -> Content) {
         self.content = content
-        self.onButtonDown = onButtonDown
+        self.onEdit = onEdit
+        self.onRefresh = onRefresh
         self.direction = direction
     }
 
@@ -32,15 +35,27 @@ struct ChatBubble<Content>: View where Content: View {
                 VStack {
                     Spacer()
 
-                    if let onButtonDown = onButtonDown {
-                        Button(action: {
-                            onButtonDown()
-                        }, label: {
-                            Image(systemName: "arrow.counterclockwise")
-                        })
-                        .buttonStyle(.plain)
-                        .padding(.bottom, 10)
-                        .padding(.trailing, 25)
+                    HStack {
+                        if let onEdit = onEdit {
+                            Button(action: {
+                                onEdit()
+                            }, label: {
+                                Image(systemName: "square.and.pencil")
+                            })
+                            .buttonStyle(.plain)
+                            .padding(.bottom, 10)
+                        }
+
+                        if let onButtonDown = onRefresh {
+                            Button(action: {
+                                onButtonDown()
+                            }, label: {
+                                Image(systemName: "arrow.counterclockwise")
+                            })
+                            .buttonStyle(.plain)
+                            .padding(.bottom, 10)
+                            .padding(.trailing, 25)
+                        }
                     }
                 }
                 Spacer()

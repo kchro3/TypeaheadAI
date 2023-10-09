@@ -69,7 +69,17 @@ struct ModalView: View {
                         ForEach(modalManager.messages.indices, id: \.self) { index in
                             MessageView(
                                 message: modalManager.messages[index],
-                                onButtonDown: {
+                                onEdit: { newContent in
+                                    if newContent != modalManager.messages[index].text {
+                                        modalManager.updateMessage(index: index, newContent: newContent)
+                                    } else {
+                                        modalManager.messages[index].isEdited.toggle()
+                                    }
+                                },
+                                onEditAppear: {
+                                    modalManager.messages[index].isEdited.toggle()
+                                },
+                                onRefresh: {
                                     modalManager.replyToUserMessage()
                                 },
                                 onTruncate: {
@@ -116,14 +126,17 @@ struct ModalView: View {
                             }
                         }
                     }
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(.secondary.opacity(0.1))
+                    )
                     .onAppear {
                         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
                             if event.keyCode == 125 {  // Down arrow
                                 NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
                             } else if event.keyCode == 126 {  // Up arrow
                                 NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "up"])
-                            } else if event.keyCode == 36 {  // Enter key
-                                NotificationCenter.default.post(name: NSNotification.Name("EnterKeyPressed"), object: nil)
                             }
                             return event
                         }
@@ -160,9 +173,9 @@ struct ModalView: View {
         .foregroundColor(Color.secondary.opacity(0.2))
     }
 
-    private func getPrompts() -> [String] {
+    private func getPrompts() -> [PromptEntry] {
         if let prompts = modalManager.promptManager?.savedPrompts {
-            return prompts.map { $0.prompt! }
+            return prompts
         } else {
             return []
         }
