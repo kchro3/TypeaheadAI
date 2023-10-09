@@ -48,7 +48,7 @@ struct WebView: NSViewRepresentable {
 
 struct MessageView: View {
     var message: Message
-    var onButtonDown: (() -> Void)?
+    var onRefresh: (() -> Void)?
     var onTruncate: (() -> Void)?
 
     @State private var webViewHeight: CGFloat = .zero
@@ -58,11 +58,11 @@ struct MessageView: View {
 
     init(
         message: Message,
-        onButtonDown: (() -> Void)? = nil,
+        onRefresh: (() -> Void)? = nil,
         onTruncate: (() -> Void)? = nil
     ) {
         self.message = message
-        self.onButtonDown = onButtonDown
+        self.onRefresh = onRefresh
         self.onTruncate = onTruncate
     }
 
@@ -80,7 +80,7 @@ struct MessageView: View {
                     )
 
                 Button(action: {
-                    onButtonDown?()
+                    onRefresh?()
                 }, label: {
                     Image(systemName: "arrow.counterclockwise")
                 })
@@ -154,7 +154,7 @@ struct MessageView: View {
             .padding(.leading, 100)
         } else {
             HStack {
-                ChatBubble(direction: .left, onButtonDown: onButtonDown) {
+                ChatBubble(direction: .left, onButtonDown: onRefresh) {
                     switch message.messageType {
                     case .string:
                         Text(message.text)
@@ -188,7 +188,7 @@ struct MessageView: View {
     }
 
     func attributedView(results: [ParserResult]) -> some View {
-        ChatBubble(direction: .left, onButtonDown: onButtonDown) {
+        ChatBubble(direction: .left, onButtonDown: onRefresh) {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(results) { parsed in
                     if case .codeBlock(_) = parsed.parsedType {

@@ -39,6 +39,7 @@ class PromptManager: ObservableObject {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
         newPrompt.prompt = prompt
+        newPrompt.details = prompt
         newPrompt.createdAt = Date()
 
         do {
@@ -52,14 +53,16 @@ class PromptManager: ObservableObject {
 
     func updatePrompt(with id: UUID, newContent: String) {
         if let index = savedPrompts.firstIndex(where: { $0.id == id }) {
-            let promptToUpdate = savedPrompts[index]
-            promptToUpdate.prompt = newContent
-            promptToUpdate.updatedAt = Date()
-            do {
-                try context.save()
-                self.activePromptID = id
-            } catch {
-                print("Failed to update prompt: \(error)")
+            DispatchQueue.main.async {
+                let promptToUpdate = self.savedPrompts[index]
+                promptToUpdate.details = newContent
+                promptToUpdate.updatedAt = Date()
+                do {
+                    try self.context.save()
+                    self.activePromptID = id
+                } catch {
+                    print("Failed to update prompt: \(error)")
+                }
             }
         }
     }

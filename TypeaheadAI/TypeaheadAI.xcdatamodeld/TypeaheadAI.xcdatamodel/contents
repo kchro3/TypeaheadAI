@@ -32,6 +32,7 @@
     <entity name="PromptEntry" representedClassName="PromptEntry" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="decayedScore" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="details" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="implicit" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="prompt" optional="YES" attributeType="String"/>

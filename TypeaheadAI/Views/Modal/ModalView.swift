@@ -69,7 +69,7 @@ struct ModalView: View {
                         ForEach(modalManager.messages.indices, id: \.self) { index in
                             MessageView(
                                 message: modalManager.messages[index],
-                                onButtonDown: {
+                                onRefresh: {
                                     modalManager.replyToUserMessage()
                                 },
                                 onTruncate: {
@@ -160,9 +160,9 @@ struct ModalView: View {
         .foregroundColor(Color.secondary.opacity(0.2))
     }
 
-    private func getPrompts() -> [String] {
+    private func getPrompts() -> [PromptEntry] {
         if let prompts = modalManager.promptManager?.savedPrompts {
-            return prompts.map { $0.prompt! }
+            return prompts
         } else {
             return []
         }

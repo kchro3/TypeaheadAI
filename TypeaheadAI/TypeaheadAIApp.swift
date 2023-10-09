@@ -208,7 +208,7 @@ final class AppState: ObservableObject {
         updateTimer?.invalidate()
 
         // Create and schedule a new timer every hour
-        updateTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
+        updateTimer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { _ in
             Task {
                 if await !self.notifyOnUpdate {
                     return

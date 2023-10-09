@@ -5,6 +5,7 @@
 //  Created by Jeff Hara on 9/25/23.
 //
 
+import CoreData
 import SwiftUI
 
 struct CustomTextView: NSViewRepresentable {
@@ -138,7 +139,7 @@ struct CustomTextView: NSViewRepresentable {
 struct CustomTextField: View {
     @Binding var text: String
     let placeholderText: String
-    let autoCompleteSuggestions: [String]
+    let autoCompleteSuggestions: [PromptEntry]
     var onEnter: (String) -> Void
 
     @State private var showAutoComplete = false
@@ -203,7 +204,7 @@ struct CustomTextField: View {
 
     private func filterSuggestions(input: String) {
         // Check for direct prefix-match
-        filteredSuggestions = autoCompleteSuggestions.filter {
+        filteredSuggestions = autoCompleteSuggestions.map { $0.prompt ?? "" } .filter {
             $0.lowercased().starts(with: input.lowercased()) && $0.lowercased() != input.lowercased()
         }
         numberOfSuggestions = filteredSuggestions.count
@@ -230,7 +231,21 @@ struct CustomTextField: View {
 
 #Preview {
     @State var text = ""
-    let suggestions = ["apple", "banana", "orange", "grape", "watermelon"]
+
+    // Create an in-memory Core Data store
+    let container = NSPersistentContainer(name: "TypeaheadAI")
+    container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+    container.loadPersistentStores { _, error in
+        if let error = error as NSError? {
+            fatalError("Unresolved error \(error), \(error.userInfo)")
+        }
+    }
+
+    let suggestions = ["apple", "banana", "orange", "grape", "watermelon"].map { prompt in
+        let newPrompt = PromptEntry(context: container.viewContext)
+        newPrompt.prompt = prompt
+        return newPrompt
+    }
 
     return CustomTextField(
         text: $text,

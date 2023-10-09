@@ -99,7 +99,7 @@ class IntentManager {
                 }
             }
 
-            var topPromptsString = "Most common answers for this context:\n"
+            var topPromptsString = "Most common user intents for this context:\n"
             for (prompt, count) in promptCounts.sorted(by: { $0.value > $1.value }).prefix(limit) {
                 topPromptsString += "- \(prompt) (used \(count)x)\n"
             }

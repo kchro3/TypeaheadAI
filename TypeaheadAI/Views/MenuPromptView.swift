@@ -29,7 +29,7 @@ struct MenuPromptView: View {
         self._isEditing = isEditing
         self.onDelete = onDelete
         self.onUpdate = onUpdate
-        self._localPromptContent = State(initialValue: prompt.prompt ?? "")
+        self._localPromptContent = State(initialValue: prompt.details ?? "")
     }
 
     var body: some View {
