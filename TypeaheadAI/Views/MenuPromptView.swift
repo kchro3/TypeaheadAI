@@ -41,23 +41,18 @@ struct MenuPromptView: View {
                 .foregroundStyle(isActive ? .white : .secondary, Color.accentColor)
 
             if isEditing {
-                TextField("To delete, clear text and enter.", text: $localPromptContent)
-                    .textFieldStyle(.plain)
-                    .lineLimit(4)
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(.secondary.opacity(0.1))
-                    )
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .onSubmit {
+                CustomTextField(text: $localPromptContent, placeholderText: "", autoCompleteSuggestions: [], onEnter: { newContent in
                         isEditing = false
-                        if !localPromptContent.isEmpty {
+                        if localPromptContent.isEmpty {
                             onUpdate?(localPromptContent)
-                        } else {
-                            onDelete?()
                         }
                     }
+                )
+                .textFieldStyle(.plain)
+                .lineLimit(4)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(Color.clear)
             } else {
                 Text(prompt.prompt ?? "")
                     // On double-click, switch to TextField

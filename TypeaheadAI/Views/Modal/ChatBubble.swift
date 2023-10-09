@@ -17,11 +17,11 @@ struct ChatBubble<Content>: View where Content: View {
 
     init(direction: ChatBubbleShape.Direction,
          onEdit: (() -> Void)? = nil,
-         onButtonDown: (() -> Void)? = nil,
+         onRefresh: (() -> Void)? = nil,
          @ViewBuilder content: @escaping () -> Content) {
         self.content = content
         self.onEdit = onEdit
-        self.onRefresh = onButtonDown
+        self.onRefresh = onRefresh
         self.direction = direction
     }
 
@@ -35,26 +35,27 @@ struct ChatBubble<Content>: View where Content: View {
                 VStack {
                     Spacer()
 
-                    if let onEdit = onEdit {
-                        Button(action: {
-                            onEdit()
-                        }, label: {
-                            Image(systemName: "square.and.pencil")
-                        })
-                        .buttonStyle(.plain)
-                        .padding(.bottom, 10)
-                        .padding(.trailing, 25)
-                    }
+                    HStack {
+                        if let onEdit = onEdit {
+                            Button(action: {
+                                onEdit()
+                            }, label: {
+                                Image(systemName: "square.and.pencil")
+                            })
+                            .buttonStyle(.plain)
+                            .padding(.bottom, 10)
+                        }
 
-                    if let onButtonDown = onRefresh {
-                        Button(action: {
-                            onButtonDown()
-                        }, label: {
-                            Image(systemName: "arrow.counterclockwise")
-                        })
-                        .buttonStyle(.plain)
-                        .padding(.bottom, 10)
-                        .padding(.trailing, 25)
+                        if let onButtonDown = onRefresh {
+                            Button(action: {
+                                onButtonDown()
+                            }, label: {
+                                Image(systemName: "arrow.counterclockwise")
+                            })
+                            .buttonStyle(.plain)
+                            .padding(.bottom, 10)
+                            .padding(.trailing, 25)
+                        }
                     }
                 }
                 Spacer()

@@ -48,20 +48,28 @@ struct WebView: NSViewRepresentable {
 
 struct MessageView: View {
     var message: Message
+    var onEdit: ((String) -> Void)?
+    var onEditAppear: (() -> Void)?
     var onRefresh: (() -> Void)?
     var onTruncate: (() -> Void)?
 
     @State private var webViewHeight: CGFloat = .zero
     @State private var isMessageTruncated = true
+    @State private var isEditing = false
+    @State private var localContent: String = ""
 
     private let maxMessageLength = 280
 
     init(
         message: Message,
+        onEdit: ((String) -> Void)? = nil,
+        onEditAppear: (() -> Void)? = nil,
         onRefresh: (() -> Void)? = nil,
         onTruncate: (() -> Void)? = nil
     ) {
         self.message = message
+        self.onEdit = onEdit
+        self.onEditAppear = onEditAppear
         self.onRefresh = onRefresh
         self.onTruncate = onTruncate
     }
@@ -89,7 +97,8 @@ struct MessageView: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        } else if let attributed = message.attributed {
+        } else if let attributed = message.attributed,
+                  !isPlaintext(parsedResults: attributed.results) {
             attributedView(results: attributed.results)
         } else if message.text.isEmpty && !message.isCurrentUser {
             Divider()
@@ -154,15 +163,41 @@ struct MessageView: View {
             .padding(.leading, 100)
         } else {
             HStack {
-                ChatBubble(direction: .left, onButtonDown: onRefresh) {
+                ChatBubble(direction: .left, onEdit: {
+                    isEditing.toggle()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                        onEditAppear?()
+                    }
+                }, onRefresh: onRefresh) {
                     switch message.messageType {
                     case .string:
-                        Text(message.text)
+                        if isEditing {
+                            CustomTextField(
+                                text: $localContent,
+                                placeholderText: "",
+                                autoCompleteSuggestions: [],
+                                onEnter: { newContent in
+                                    isEditing = false
+                                    if !localContent.isEmpty {
+                                        onEdit?(localContent)
+                                    }
+                                }
+                            )
                             .padding(.vertical, 10)
                             .padding(.horizontal, 15)
                             .foregroundColor(.primary)
-                            .background(Color.secondary.opacity(0.2))
-                            .textSelection(.enabled)
+                            .background(Color.accentColor.opacity(0.2))
+                            .onAppear(perform: {
+                                localContent = message.text
+                            })
+                        } else {
+                            Text(message.text)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 15)
+                                .foregroundColor(.primary)
+                                .background(Color.secondary.opacity(0.2))
+                                .textSelection(.enabled)
+                        }
                     case .html(let data):
                         WebView(html: data, dynamicHeight: $webViewHeight)
                             .frame(width: 400, height: webViewHeight)
@@ -188,18 +223,39 @@ struct MessageView: View {
     }
 
     func attributedView(results: [ParserResult]) -> some View {
-        ChatBubble(direction: .left, onButtonDown: onRefresh) {
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(results) { parsed in
-                    if case .codeBlock(_) = parsed.parsedType {
-                        CodeBlockView(parserResult: parsed)
-                            .padding(.bottom, 24)
-                    } else if case .table = parsed.parsedType {
-                        GenericTableView(parserResult: parsed)
-                            .textSelection(.enabled)
-                    } else {
-                        Text(parsed.attributedString)
-                            .textSelection(.enabled)
+        ChatBubble(direction: .left, onEdit: {
+            isEditing.toggle()
+        }, onRefresh: onRefresh) {
+            Group {
+                if isEditing {
+                    CustomTextField(text: $localContent, placeholderText: "", autoCompleteSuggestions: [], onEnter: { newContent in
+                        isEditing = false
+                        if !localContent.isEmpty {
+                            onEdit?(localContent)
+                        }
+                    })
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.primary)
+                    .background(Color.accentColor.opacity(0.2))
+                    .onAppear(perform: {
+                        localContent = message.text
+                        onEditAppear?()
+                    })
+                } else {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(results) { parsed in
+                            if case .codeBlock(_) = parsed.parsedType {
+                                CodeBlockView(parserResult: parsed)
+                                    .padding(.bottom, 24)
+                            } else if case .table = parsed.parsedType {
+                                GenericTableView(parserResult: parsed)
+                                    .textSelection(.enabled)
+                            } else {
+                                Text(parsed.attributedString)
+                                    .textSelection(.enabled)
+                            }
+                        }
                     }
                 }
             }
@@ -207,6 +263,10 @@ struct MessageView: View {
             .padding(.horizontal, 15)
             .background(Color.secondary.opacity(0.2))
         }
+    }
+
+    private func isPlaintext(parsedResults: [ParserResult]) -> Bool {
+        return parsedResults.count == 1 && parsedResults[0].parsedType == .plaintext
     }
 
     private func decodeImage(_ data: Data) throws -> NSImage? {

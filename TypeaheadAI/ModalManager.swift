@@ -32,6 +32,7 @@ struct Message: Codable, Identifiable, Equatable {
     var responseError: String?
     var messageType: MessageType = .string
     var isTruncated: Bool = true
+    var isEdited: Bool = false
 }
 
 class ModalManager: ObservableObject {
@@ -308,6 +309,18 @@ class ModalManager: ObservableObject {
                 self.logger.error("An error occurred: \(error)")
             }
         }, completion: defaultCompletionHandler)
+    }
+
+    @MainActor
+    func updateMessage(index: Int, newContent: String) {
+        self.messages[index].text = newContent
+
+        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+
+        Task {
+            let output = await parsingTask.parse(text: newContent, isDarkMode: isDarkMode)
+            self.messages[index].attributed = output
+        }
     }
 
     /// Reply to the user
