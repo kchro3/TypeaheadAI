@@ -255,10 +255,10 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func appendUserImage(_ data: Data, caption: String) {
+    func appendUserImage(_ data: Data, caption: String, ocrText: String) {
         messages.append(Message(
             id: UUID(),
-            text: "<image placeholder> caption generated: \(caption)",
+            text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
             isCurrentUser: true,
             messageType: .data(data: data)
         ))
@@ -426,7 +426,6 @@ class ModalManager: ObservableObject {
         }
 
         toastWindow?.titlebarAppearsTransparent = true
-        toastWindow?.isMovableByWindowBackground = true
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.level = .popUpMenu
         toastWindow?.makeKeyAndOrderFront(nil)
@@ -451,8 +450,10 @@ class ModalManager: ObservableObject {
         if let movedWindow = notification.object as? NSWindow {
             let origin = movedWindow.frame.origin
 
-            toastX = origin.x
-            toastY = origin.y
+            DispatchQueue.main.async {
+                self.toastX = origin.x
+                self.toastY = origin.y
+            }
         }
     }
 
@@ -460,8 +461,10 @@ class ModalManager: ObservableObject {
         if let movedWindow = notification.object as? NSWindow {
             let size = movedWindow.frame.size
 
-            toastWidth = size.width
-            toastHeight = size.height
+            DispatchQueue.main.async {
+                self.toastWidth = size.width
+                self.toastHeight = size.height
+            }
         }
     }
 

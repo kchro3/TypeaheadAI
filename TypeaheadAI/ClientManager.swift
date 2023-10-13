@@ -79,6 +79,13 @@ public enum ImageData: Codable, Equatable {
         let b64Associate = try container.decode(String.self, forKey: .b64Json)
         self = .b64Json(b64Associate)
     }
+
+    func toURL() -> URL {
+        let tempURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("image-\(Date()).png")
+        // Write the image data to the temporary file
+        try? Data(base64Encoded: self.image)?.write(to: tempURL)
+        return tempURL
+    }
 }
 
 /// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Structs/Schemas/Images/ImageResponse.swift

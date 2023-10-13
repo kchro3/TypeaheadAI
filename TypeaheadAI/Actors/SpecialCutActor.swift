@@ -113,39 +113,42 @@ actor SpecialCutActor {
                     }
 
                     if self.modalManager.online {
-                        Task {
-                            if let captionPayload = await self.clientManager.captionImage(tiffData: tiffData) {
+                        self.performOCR(image: cgImage) { recognizedText, _ in
+                            self.logger.info("OCRed text: \(recognizedText)")
+                            Task {
                                 await self.modalManager.clearText(stickyMode: stickyMode)
                                 await self.modalManager.showModal()
 
-                                await self.modalManager.appendUserImage(tiffData, caption: captionPayload.caption)
+                                if let captionPayload = await self.clientManager.captionImage(tiffData: tiffData) {
+                                    await self.modalManager.appendUserImage(tiffData, caption: captionPayload.caption, ocrText: recognizedText)
 
-                                if let nCuts = self.numSmartCuts {
-                                    self.numSmartCuts = nCuts + 1
-                                } else {
-                                    self.numSmartCuts = 1
-                                }
-
-                                do {
-                                    if let intents = try await self.clientManager.suggestIntents(
-                                        id: UUID(),
-                                        token: self.token ?? "",
-                                        username: NSUserName(),
-                                        userFullName: NSFullUserName(),
-                                        userObjective: self.promptManager.getActivePrompt(),
-                                        userBio: self.bio ?? "",
-                                        userLang: Locale.preferredLanguages.first ?? "",
-                                        copiedText: captionPayload.caption,
-                                        messages: self.modalManager.messages,
-                                        history: [],
-                                        appContext: appContext,
-                                        incognitoMode: !self.modalManager.online
-                                    ) {
-                                        await self.modalManager.setUserIntents(intents: intents.intents)
+                                    if let nCuts = self.numSmartCuts {
+                                        self.numSmartCuts = nCuts + 1
+                                    } else {
+                                        self.numSmartCuts = 1
                                     }
-                                } catch {
-                                    self.logger.error("\(error.localizedDescription)")
-                                    await self.modalManager.setError(error.localizedDescription)
+
+                                    do {
+                                        if let intents = try await self.clientManager.suggestIntents(
+                                            id: UUID(),
+                                            token: self.token ?? "",
+                                            username: NSUserName(),
+                                            userFullName: NSFullUserName(),
+                                            userObjective: self.promptManager.getActivePrompt(),
+                                            userBio: self.bio ?? "",
+                                            userLang: Locale.preferredLanguages.first ?? "",
+                                            copiedText: captionPayload.caption,
+                                            messages: self.modalManager.messages,
+                                            history: [],
+                                            appContext: appContext,
+                                            incognitoMode: !self.modalManager.online
+                                        ) {
+                                            await self.modalManager.setUserIntents(intents: intents.intents)
+                                        }
+                                    } catch {
+                                        self.logger.error("\(error.localizedDescription)")
+                                        await self.modalManager.setError(error.localizedDescription)
+                                    }
                                 }
                             }
                         }

@@ -8,6 +8,7 @@
 import SwiftUI
 import Markdown
 import WebKit
+import UniformTypeIdentifiers
 
 struct WebView: NSViewRepresentable {
     var html: String
@@ -208,6 +209,9 @@ struct MessageView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 512, height: 512)
+                                .onDrag {
+                                    return NSItemProvider(item: data.toURL() as NSSecureCoding, typeIdentifier: UTType.fileURL.identifier)
+                                }
                         }
                     case .data(let data):
                         if let imageData = try? self.decodeImage(data) {
