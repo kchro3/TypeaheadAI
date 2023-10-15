@@ -527,34 +527,24 @@ class ModalManager: ObservableObject {
         }
     }
 
-    func defaultHandler(result: Result<String, Error>) {
+    func defaultHandler(result: Result<String, Error>) async {
         switch result {
         case .success(let chunk):
-            Task {
-                await self.appendText(chunk)
-            }
+            await self.appendText(chunk)
             self.logger.info("Received chunk: \(chunk)")
         case .failure(let error as ClientManagerError):
             self.logger.error("Error: \(error.localizedDescription)")
             switch error {
             case .badRequest(let message):
-                DispatchQueue.main.async {
-                    self.setError(message)
-                }
+                await self.setError(message)
             case .serverError(let message):
-                DispatchQueue.main.async {
-                    self.setError(message)
-                }
+                await self.setError(message)
             default:
-                DispatchQueue.main.async {
-                    self.setError("Something went wrong. Please try again.")
-                }
+                await self.setError("Something went wrong. Please try again.")
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
-            DispatchQueue.main.async {
-                self.setError(error.localizedDescription)
-            }
+            await self.setError(error.localizedDescription)
         }
     }
 }
