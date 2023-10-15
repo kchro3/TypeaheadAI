@@ -278,7 +278,7 @@ class ClientManager {
         userObjective: String? = nil,
         timeout: TimeInterval = 30,
         stream: Bool = false,
-        streamHandler: @escaping (Result<String, Error>) -> Void,
+        streamHandler: @escaping (Result<String, Error>) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) {
         self.logger.info("incognito: \(incognitoMode)")
@@ -319,7 +319,7 @@ class ClientManager {
         incognitoMode: Bool,
         userIntent: String? = nil,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) -> Void,
+        streamHandler: @escaping (Result<String, Error>) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) {
         self.logger.info("incognito: \(incognitoMode)")
@@ -474,7 +474,7 @@ class ClientManager {
         incognitoMode: Bool,
         onboardingMode: Bool = false,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) -> Void,
+        streamHandler: @escaping (Result<String, Error>) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>) -> Void
     ) async {
         cancelStreamingTask()
@@ -494,7 +494,7 @@ class ClientManager {
             )
 
             if let output = self?.getCachedResponse(for: payload) {
-                streamHandler(.success(output))
+                await streamHandler(.success(output))
                 return
             }
 
@@ -541,11 +541,11 @@ class ClientManager {
 
                     for try await text in stream {
                         self?.logger.debug("stream: \(text)")
-                        streamHandler(.success(text))
+                        await streamHandler(.success(text))
                     }
                 } catch {
                     self?.cacheResponse(nil, for: payload)
-                    streamHandler(.failure(error))
+                    await streamHandler(.failure(error))
                 }
             }
         }
@@ -739,13 +739,13 @@ class ClientManager {
     private func performStreamOfflineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>) async -> Void
     ) async -> Result<ChunkPayload, Error> {
         guard let modelManager = self.llamaModelManager else {
             return .failure(ClientManagerError.appError("Model Manager not found"))
         }
 
-        return modelManager.predict(payload: payload, streamHandler: streamHandler)
+        return await modelManager.predict(payload: payload, streamHandler: streamHandler)
     }
 
     func cancelStreamingTask() {

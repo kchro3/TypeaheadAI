@@ -15,7 +15,9 @@ typealias TokenCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
 func globalHandler(_ token: UnsafePointer<CChar>?) {
     if let token = token {
         print("offline stream: \(token)")
-        LlamaWrapper.handler?(.success(String(cString: token)))
+        Task {
+            await LlamaWrapper.handler?(.success(String(cString: token)))
+        }
     }
 }
 
@@ -33,7 +35,7 @@ class LlamaWrapper {
     private var model: OpaquePointer!
     private var ctx: OpaquePointer?
 
-    static var handler: ((Result<String, Error>) -> Void)?
+    static var handler: ((Result<String, Error>) async -> Void)?
 
     init(_ modelPath: URL) {
         llama_backend_init(true)
@@ -52,8 +54,8 @@ class LlamaWrapper {
 
     func predict(
         _ prompt: String,
-        handler: @escaping (Result<String, Error>) -> Void
-    ) -> Result<ChunkPayload, Error> {
+        handler: @escaping (Result<String, Error>) async -> Void
+    ) async -> Result<ChunkPayload, Error> {
         LlamaWrapper.handler = handler
         ctx = llama_new_context_with_model(model, params)
         guard let cstr = simple_predict(ctx, prompt, 1, globalHandler) else {
