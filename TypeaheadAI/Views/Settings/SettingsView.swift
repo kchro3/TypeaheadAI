@@ -10,6 +10,7 @@ import SwiftUI
 enum Tab: String, CaseIterable, Identifiable {
     case general = "General"
     case profile = "Profile"
+    case quickActions = "Quick Actions"
     case history = "History"
     case incognito = "Incognito Mode"
     case account = "Account Settings"
@@ -30,9 +31,11 @@ struct SettingsView: View {
             }
             .listStyle(SidebarListStyle())
             .frame(minWidth: 200)
+            .background(VisualEffect().ignoresSafeArea())
 
             viewForTab(settingsTab)
         }
+        .background(VisualEffect().ignoresSafeArea())
     }
 
     private func viewForTab(_ tab: String) -> some View {
@@ -45,6 +48,8 @@ struct SettingsView: View {
             return AnyView(ProfileView())
         case .general:
             return AnyView(GeneralSettingsView(promptManager: promptManager))
+        case .quickActions:
+            return AnyView(QuickActionsView(promptManager: promptManager))
         case .history:
             return AnyView(HistoryListView())
         case .incognito:
