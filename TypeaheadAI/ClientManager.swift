@@ -157,18 +157,18 @@ class ClientManager {
     private let version: String = "v3"
 
     #if DEBUG
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
-//    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
+//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
+    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
     #else
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
@@ -616,7 +616,10 @@ class ClientManager {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
         }
-        
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
         return AsyncThrowingStream { continuation in
             Task {
                 var urlRequest = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
@@ -652,7 +655,7 @@ class ClientManager {
                 var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
                 for try await line in data.lines {
                     guard let data = line.data(using: .utf8),
-                          let response = try? JSONDecoder().decode(ChunkPayload.self, from: data) else {
+                          let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
                         completion(.failure(error))
@@ -670,6 +673,12 @@ class ClientManager {
                         case .image:
                             bufferedPayload = response
                         }
+                    } else if let finishReason = response.finishReason,
+                              finishReason != "stop" {
+                        let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
+                        continuation.finish(throwing: error)
+                        completion(.failure(error))
+                        return
                     }
                 }
                 
