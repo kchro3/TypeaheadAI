@@ -25,15 +25,21 @@ struct SettingsView: View {
     @AppStorage("settingsTab") var settingsTab: String = Tab.general.rawValue
 
     var body: some View {
-        NavigationView {
-            List(Tab.allCases, id: \.self) { tab in
-                ItemRow(tab: tab, settingsTab: $settingsTab)
+        HStack {
+            VStack {
+                ForEach(Tab.allCases, id: \.self) { tab in
+                    ItemRow(tab: tab, settingsTab: $settingsTab)
+                        .padding(.horizontal, 15)
+                }
+
+                Spacer()
             }
-            .listStyle(.sidebar)
-            .frame(minWidth: 200)
+            .frame(width: 200, height: 500)
 
             viewForTab(settingsTab)
+                .frame(width: 600, height: 500)
         }
+        .background(VisualEffect().ignoresSafeArea())
     }
 
     private func viewForTab(_ tab: String) -> some View {

@@ -29,6 +29,7 @@ final class AppState: ObservableObject {
     @Published var promptManager: PromptManager
     @Published var llamaModelManager = LlamaModelManager()
     @Published var modalManager: ModalManager
+    @Published var settingsManager: SettingsManager
     @Published var clientManager: ClientManager
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager
@@ -66,6 +67,7 @@ final class AppState: ObservableObject {
         self.intentManager = IntentManager(context: context)
         self.clientManager = ClientManager()
         self.modalManager = ModalManager()
+        self.settingsManager = SettingsManager()
         self.appContextManager = AppContextManager()
 
         // Initialize actors
@@ -108,6 +110,7 @@ final class AppState: ObservableObject {
         self.clientManager.intentManager = intentManager
         self.modalManager.clientManager = clientManager
         self.modalManager.promptManager = promptManager
+        self.settingsManager.promptManager = promptManager
 
         checkAndRequestNotificationPermissions()
 
@@ -299,17 +302,13 @@ final class AppState: ObservableObject {
 @main
 struct TypeaheadAIApp {
     static func main() {
-        if #available(macOS 13.0, *) {
 //            UserDefaults.standard.setValue(false, forKey: "hasOnboardedV3")
 
-            if UserDefaults.standard.bool(forKey: "hasOnboardedV3") {
-                MacOS13AndLaterApp.main()
-            } else {
-                UserDefaults.standard.setValue(true, forKey: "hasOnboardedV3")
-                MacOS13AndLaterAppWithOnboardingV2.main()
-            }
+        if UserDefaults.standard.bool(forKey: "hasOnboardedV3") {
+            MacOS13AndLaterApp.main()
         } else {
-            MacOS12AndEarlierApp.main()
+            UserDefaults.standard.setValue(true, forKey: "hasOnboardedV3")
+            MacOS13AndLaterAppWithOnboardingV2.main()
         }
     }
 }
@@ -323,57 +322,7 @@ struct SettingsScene: Scene {
             SettingsView(promptManager: appState.promptManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
-    }
-}
-
-struct MacOS12AndEarlierApp: App {
-    @NSApplicationDelegateAdaptor(MacOS12AndEarlierAppDelegate.self) var appDelegate
-
-    var body: some Scene {
-        SettingsScene(appState: appDelegate.appState)
-    }
-}
-
-class MacOS12AndEarlierAppDelegate: NSObject, NSApplicationDelegate {
-    var statusBarItem: NSStatusItem?
-    var application: NSApplication = NSApplication.shared
-
-    let persistenceController = PersistenceController.shared
-    @ObservedObject var appState: AppState = {
-        let context = PersistenceController.shared.container.viewContext
-        return AppState(context: context)
-    }()
-
-    override init() {
-        // Further customization if needed.
-        super.init()
-    }
-
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        let menu = NSMenu()
-        let menuItem = NSMenuItem()
-
-        // SwiftUI View
-        let subview = CommonMenuView(
-            promptManager: appState.promptManager,
-            modalManager: appState.modalManager,
-            isMenuVisible: $appState.isMenuVisible
-        )
-
-        let view = NSHostingView(rootView: subview)
-        view.becomeFirstResponder()
-
-        // Very important! If you don't set the frame the menu won't appear to open.
-        view.frame = NSRect(x: 0, y: 0, width: 300, height: 400)
-        menuItem.view = view
-
-        menu.addItem(menuItem)
-
-        NSApp.activate(ignoringOtherApps: true)
-
-        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusBarItem?.button?.image = NSImage(systemSymbolName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard", accessibilityDescription: nil)
-        statusBarItem?.menu = menu
+        .windowStyle(.hiddenTitleBar)
     }
 }
 
@@ -439,6 +388,7 @@ struct MacOS13AndLaterApp: App {
             CommonMenuView(
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
+                settingsManager: appState.settingsManager,
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
@@ -476,6 +426,7 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
             CommonMenuView(
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
+                settingsManager: appState.settingsManager,
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
@@ -492,12 +443,14 @@ struct CommonMenuView: View {
 
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
+    @ObservedObject var settingsManager: SettingsManager
     @Binding var isMenuVisible: Bool
 
     var body: some View {
         MenuView(
             promptManager: promptManager,
             modalManager: modalManager,
+            settingsManager: settingsManager,
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, persistenceController.container.viewContext)
