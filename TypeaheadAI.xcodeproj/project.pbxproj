@@ -11,6 +11,7 @@
 		2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */; };
 		2B0B300E2ACEB0E000338B76 /* GenericTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300D2ACEB0E000338B76 /* GenericTableView.swift */; };
 		2B0B30102ACF8C8000338B76 /* SpecialOpenActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */; };
+		2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */; };
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
@@ -89,6 +90,7 @@
 		2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIntentsView.swift; sourceTree = "<group>"; };
 		2B0B300D2ACEB0E000338B76 /* GenericTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericTableView.swift; sourceTree = "<group>"; };
 		2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialOpenActor.swift; sourceTree = "<group>"; };
+		2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialSaveActor.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
@@ -264,6 +266,7 @@
 				2B473E882AA85BDD0042913D /* LlamaModelManager.swift */,
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
+				2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -525,6 +528,7 @@
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
 				2B520D852AC82EA100310426 /* AccountView.swift in Sources */,
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
+				2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */,
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
