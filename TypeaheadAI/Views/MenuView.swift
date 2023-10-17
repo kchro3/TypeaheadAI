@@ -149,7 +149,7 @@ struct MenuView_Previews: PreviewProvider {
         return MenuView(
             promptManager: promptManager,
             modalManager: modalManager,
-            settingsManager: SettingsManager(),
+            settingsManager: SettingsManager(context: context),
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, context)
