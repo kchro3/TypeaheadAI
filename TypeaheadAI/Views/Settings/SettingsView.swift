@@ -47,7 +47,7 @@ struct SettingsView: View {
         case .general:
             return AnyView(GeneralSettingsView(promptManager: promptManager))
         case .quickActions:
-            return AnyView(QuickActionsView(promptManager: promptManager))
+            return AnyView(QuickActionsView())
         case .history:
             return AnyView(HistoryListView())
         case .incognito:

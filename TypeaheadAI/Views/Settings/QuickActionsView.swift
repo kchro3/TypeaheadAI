@@ -7,6 +7,52 @@
 
 import SwiftUI
 
+struct QuickActionDetails: View {
+    let quickAction: PromptEntry
+    @State private var newLabel: String
+    @State private var newDescription: String
+
+    private var onSubmit: ((String) -> Void)?
+
+    init(
+        quickAction: PromptEntry,
+        onSubmit: ((String) -> Void)? = nil
+    ) {
+        self.quickAction = quickAction
+        self.newLabel = quickAction.prompt ?? ""
+        self.newDescription = quickAction.details ?? quickAction.prompt ?? ""
+        self.onSubmit = onSubmit
+    }
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Editing \"\(quickAction.prompt!)\"")
+                .font(.title2)
+                .padding(.leading, 30)
+
+            HStack {
+                Text("Label:")
+
+                TextField("Label", text: $newLabel)
+                    .onSubmit {
+                        self.onSubmit?(newLabel)
+                    }
+            }
+
+            HStack {
+                Text("Details:")
+
+                TextEditor(text: $newDescription)
+                    .onSubmit {
+                        self.onSubmit?(newDescription)
+                    }
+            }
+
+            Spacer()
+        }
+    }
+}
+
 struct QuickActionRow: View {
     let quickAction: PromptEntry
 
@@ -22,9 +68,10 @@ struct QuickActionRow: View {
 }
 
 struct QuickActionsView: View {
-    @ObservedObject var promptManager: PromptManager
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
+
+    @State private var activeQuickAction: PromptEntry? = nil
 
     @State private var searchText = ""
     var query: Binding<String> {
@@ -39,25 +86,33 @@ struct QuickActionsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                searchBar
-                    .padding(10)
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Quick Actions")
+                .font(.largeTitle)
+                .padding()
 
-                Image(systemName: "plus.circle")
-                    .font(.title)
-                    .padding(10)
-            }
+            searchBar
+                .padding()
 
             HStack {
                 List(quickActions) { quickAction in
-                    QuickActionRow(quickAction: quickAction)
+                    Button(action: {
+                        activeQuickAction = quickAction
+                    }, label: {
+                        QuickActionRow(quickAction: quickAction)
+                    })
+                    .buttonStyle(.plain)
                 }
                 .listStyle(.sidebar)
                 .frame(maxWidth: 200)
 
-                VStack {
-                    Text("hello")
+                if let activeQuickAction = self.activeQuickAction {
+                    QuickActionDetails(
+                        quickAction: activeQuickAction,
+                        onSubmit: { newValue in
+                            print(newValue)
+                        }
+                    )
                 }
 
                 Spacer()
@@ -68,7 +123,7 @@ struct QuickActionsView: View {
 
     private var searchBar: some View {
         TextField(text: query) {
-            Text("Search quick actions")
+            Text("Search quick actions...")
         }
         .textFieldStyle(.plain)
         .padding(.vertical, 5)
@@ -91,18 +146,18 @@ struct QuickActionsView: View {
     }
 
     let context = container.viewContext
-    let promptManager = PromptManager(context: context)
 
     // Create some sample prompts
-    let samplePrompts = ["this is a sample prompt", "this is an active prompt"]
+    let samplePrompts = [
+        "this is a sample prompt",
+        "this is an active prompt"
+    ]
     for prompt in samplePrompts {
         let newPrompt = PromptEntry(context: context)
+        newPrompt.id = UUID()
         newPrompt.prompt = prompt
-        promptManager.addPrompt(prompt)
     }
 
-    return QuickActionsView(
-        promptManager: promptManager
-    )
-    .environment(\.managedObjectContext, context)
+    return QuickActionsView()
+        .environment(\.managedObjectContext, context)
 }
