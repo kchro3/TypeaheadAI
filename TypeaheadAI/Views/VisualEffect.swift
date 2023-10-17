@@ -9,6 +9,12 @@ import Foundation
 import SwiftUI
 
 struct VisualEffect: NSViewRepresentable {
-    func makeNSView(context: Self.Context) -> NSView { return NSVisualEffectView() }
+    func makeNSView(context: Self.Context) -> NSView {
+        let view = NSVisualEffectView()
+        view.material = .hudWindow
+        view.state = .active
+        view.blendingMode = .behindWindow
+        return view
+    }
     func updateNSView(_ nsView: NSView, context: Context) { }
 }

@@ -13,6 +13,7 @@ import SettingsAccess
 struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
+    @ObservedObject var settingsManager: SettingsManager
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
@@ -65,18 +66,11 @@ struct MenuView: View {
                     }
                 }
 
-                if #available(macOS 14.0, *) {
-                    settingsButtonRow(title: "Settings", isHovering: $isHoveringSettings) {
-                        settingsTab = Tab.general.id
-                        isMenuVisible = false
-                    }
-                } else {
-                    buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
-                        NSApp.activate(ignoringOtherApps: true)
-                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                        settingsTab = Tab.general.id
-                        isMenuVisible = false
-                    }
+                buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
+                    NSApp.activate(ignoringOtherApps: true)
+                    settingsTab = Tab.general.id
+                    settingsManager.showModal()
+                    isMenuVisible = false
                 }
 
                 if token != nil {
@@ -85,17 +79,10 @@ struct MenuView: View {
                         isMenuVisible = false
                     }
                 } else {
-                    if #available(macOS 14.0, *) {
-                        settingsButtonRow(title: "Sign in", isHovering: $isHoveringSignOut) {
-                            settingsTab = Tab.account.id
-                            isMenuVisible = false
-                        }
-                    } else {
-                        buttonRow(title: "Sign in", isHovering: $isHoveringSignOut) {
-                            settingsTab = Tab.account.id
-                            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                            isMenuVisible = false
-                        }
+                    buttonRow(title: "Sign in", isHovering: $isHoveringSignOut) {
+                        settingsTab = Tab.account.id
+                        settingsManager.showModal()
+                        isMenuVisible = false
                     }
                 }
 
@@ -105,28 +92,6 @@ struct MenuView: View {
             }
         }
         .padding(4)
-    }
-
-    private func settingsButtonRow(
-        title: String,
-        isHovering: Binding<Bool>,
-        action: @escaping () -> Void
-    ) -> some View {
-        SettingsLink(label: {
-            HStack {
-                Text(title)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(4)
-            .background(isHovering.wrappedValue ? .primary.opacity(0.2) : Color.clear)
-            .cornerRadius(4)
-            .contentShape(Rectangle())
-        }, preAction: action, postAction: { })
-            .buttonStyle(.plain)
-            .onHover { hovering in
-                isHovering.wrappedValue = hovering
-            }
     }
 
     private func buttonRow(
@@ -184,6 +149,7 @@ struct MenuView_Previews: PreviewProvider {
         return MenuView(
             promptManager: promptManager,
             modalManager: modalManager,
+            settingsManager: SettingsManager(),
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, context)
