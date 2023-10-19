@@ -12,7 +12,7 @@ enum Tab: String, CaseIterable, Identifiable {
     case profile = "Profile"
     case quickActions = "Quick Actions"
     case history = "History"
-    case incognito = "Incognito Mode"
+    case incognito = "Offline Mode"
     case account = "Account Settings"
     case feedback = "Feedback"
 
@@ -29,16 +29,24 @@ struct SettingsView: View {
             VStack {
                 ForEach(Tab.allCases, id: \.self) { tab in
                     ItemRow(tab: tab, settingsTab: $settingsTab)
-                        .padding(.horizontal, 15)
                 }
 
                 Spacer()
             }
-            .frame(width: 200, height: 500)
+            .padding(.trailing, 25)
+            .frame(width: 200)
 
             viewForTab(settingsTab)
-                .frame(width: 600, height: 500)
+                .frame(minWidth: 600)
+                .padding(25)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.secondary.opacity(0.2))
+                )
         }
+        .padding(.horizontal, 35)
+        .padding(.top, 20)
+        .padding(.bottom, 35)
         .background(VisualEffect().ignoresSafeArea())
     }
 
@@ -71,12 +79,16 @@ struct ItemRow: View {
     @Binding var settingsTab: String
     @State private var isHovered = false
 
+    @Environment(\.colorScheme) var colorScheme
+
     var body: some View {
         HStack {
             Text(tab.rawValue)
+                .foregroundStyle((settingsTab == tab.id || colorScheme == .dark) ? Color.white : Color.black)
             Spacer()
         }
-        .padding(.all, 15)
+        .padding(.horizontal, 15)
+        .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(

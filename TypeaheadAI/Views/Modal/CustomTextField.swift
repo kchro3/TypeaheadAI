@@ -141,6 +141,7 @@ struct CustomTextField: View {
     let placeholderText: String
     let autoCompleteSuggestions: [PromptEntry]
     var onEnter: (String) -> Void
+    var dynamicHeight: Bool = true
 
     @State private var showAutoComplete = false
     @State private var filteredSuggestions: [String] = []
@@ -178,7 +179,7 @@ struct CustomTextField: View {
             .padding(.horizontal, 5)
             .allowsHitTesting(false)
         }
-        .frame(height: height)
+        .frame(height: dynamicHeight ? height : nil)
         .onChange(of: text, perform: { value in
             filterSuggestions(input: value)
         })

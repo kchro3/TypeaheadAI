@@ -13,6 +13,7 @@ struct QuickActionDetails: View {
     @State private var newDescription: String
 
     private var onSubmit: ((String) -> Void)?
+    private let leadingPadding: CGFloat = 80
 
     init(
         quickAction: PromptEntry,
@@ -26,26 +27,61 @@ struct QuickActionDetails: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Editing \"\(quickAction.prompt!)\"")
+            Text("Editing...")
                 .font(.title2)
-                .padding(.leading, 30)
+                .padding(10)
+                .padding(.leading, leadingPadding)
 
             HStack {
-                Text("Label:")
+                HStack {
+                    Spacer()
+                    Text("Command:")
+                }
+                .frame(width: leadingPadding)
 
-                TextField("Label", text: $newLabel)
-                    .onSubmit {
-                        self.onSubmit?(newLabel)
+                CustomTextField(
+                    text: $newLabel,
+                    placeholderText: "Name of the command",
+                    autoCompleteSuggestions: [],
+                    onEnter: { newValue in
+                        self.onSubmit?(newValue)
                     }
+                )
+                .lineLimit(1)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(.secondary.opacity(0.1))
+                )
             }
 
             HStack {
-                Text("Details:")
+                VStack(alignment: .leading) {
+                    HStack {
+                        Spacer()
 
-                TextEditor(text: $newDescription)
-                    .onSubmit {
-                        self.onSubmit?(newDescription)
+                        Text("Details:")
+                            .padding(.top, 5)
                     }
+
+                    Spacer()
+                }
+                .frame(width: leadingPadding)
+
+                CustomTextField(
+                    text: $newDescription,
+                    placeholderText: "Describe what this action should do",
+                    autoCompleteSuggestions: [],
+                    onEnter: { newValue in
+                        self.onSubmit?(newValue)
+                    },
+                    dynamicHeight: false
+                )
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(.secondary.opacity(0.1))
+                )
             }
 
             Spacer()
@@ -67,11 +103,15 @@ struct QuickActionRow: View {
     }
 }
 
+class QuickActionsViewModel: ObservableObject {
+    @Published var activeQuickAction: PromptEntry? = nil
+}
+
 struct QuickActionsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
 
-    @State private var activeQuickAction: PromptEntry? = nil
+    @StateObject private var vm: QuickActionsViewModel = QuickActionsViewModel()
 
     @State private var searchText = ""
     var query: Binding<String> {
@@ -97,7 +137,7 @@ struct QuickActionsView: View {
             HStack {
                 List(quickActions) { quickAction in
                     Button(action: {
-                        activeQuickAction = quickAction
+                        vm.activeQuickAction = quickAction
                     }, label: {
                         QuickActionRow(quickAction: quickAction)
                     })
@@ -105,20 +145,36 @@ struct QuickActionsView: View {
                 }
                 .listStyle(.sidebar)
                 .frame(maxWidth: 200)
+                .scrollIndicators(.visible)
+                .scrollContentBackground(.hidden)
 
-                if let activeQuickAction = self.activeQuickAction {
+                if let activeQuickAction = vm.activeQuickAction {
                     QuickActionDetails(
                         quickAction: activeQuickAction,
                         onSubmit: { newValue in
                             print(newValue)
                         }
                     )
+                } else {
+                    VStack {
+                        Text(
+                        """
+                        Quickly search for specific quick actions using the search bar or scroll through the list to find the one you want.
+
+                        You can then edit or delete them, or create a brand new one
+                        """
+                        )
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .padding()
+
+                        Spacer()
+                    }
                 }
 
                 Spacer()
             }
         }
-        .background(VisualEffect())
     }
 
     private var searchBar: some View {
@@ -133,6 +189,25 @@ struct QuickActionsView: View {
                 .fill(.primary.opacity(0.1))
         )
     }
+}
+
+#Preview {
+    // Create an in-memory Core Data store
+    let container = NSPersistentContainer(name: "TypeaheadAI")
+    container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+    container.loadPersistentStores { _, error in
+        if let error = error as NSError? {
+            fatalError("Unresolved error \(error), \(error.userInfo)")
+        }
+    }
+
+    let context = container.viewContext
+
+    let newPrompt = PromptEntry(context: context)
+    newPrompt.id = UUID()
+    newPrompt.prompt = "this is a sample prompt"
+
+    return QuickActionDetails(quickAction: newPrompt)
 }
 
 #Preview {
