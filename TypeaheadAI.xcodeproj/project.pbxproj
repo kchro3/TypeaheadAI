@@ -11,6 +11,7 @@
 		2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */; };
 		2B0B300E2ACEB0E000338B76 /* GenericTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300D2ACEB0E000338B76 /* GenericTableView.swift */; };
 		2B0B30102ACF8C8000338B76 /* SpecialOpenActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */; };
+		2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30182ADCBF1600338B76 /* QuickActionsView.swift */; };
 		2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */; };
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
@@ -90,6 +91,7 @@
 		2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIntentsView.swift; sourceTree = "<group>"; };
 		2B0B300D2ACEB0E000338B76 /* GenericTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericTableView.swift; sourceTree = "<group>"; };
 		2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialOpenActor.swift; sourceTree = "<group>"; };
+		2B0B30182ADCBF1600338B76 /* QuickActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsView.swift; sourceTree = "<group>"; };
 		2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialSaveActor.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 				2B33D87C2AAC3330001193A2 /* ProfileView.swift */,
 				2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */,
 				2B520D842AC82EA100310426 /* AccountView.swift */,
+				2B0B30182ADCBF1600338B76 /* QuickActionsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -509,6 +512,7 @@
 				2B0B30102ACF8C8000338B76 /* SpecialOpenActor.swift in Sources */,
 				2BA7F0822A9ABBA8003D38BA /* Persistence.swift in Sources */,
 				2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */,
+				2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,

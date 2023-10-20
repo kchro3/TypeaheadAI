@@ -12,6 +12,11 @@ import Foundation
 class SettingsManager: ObservableObject {
     var toastWindow: ModalWindow?
     var promptManager: PromptManager? = nil
+    private let context: NSManagedObjectContext
+
+    init(context: NSManagedObjectContext) {
+        self.context = context
+    }
 
     @MainActor
     func showModal() {
@@ -24,6 +29,7 @@ class SettingsManager: ObservableObject {
         visualEffect.material = .hudWindow
 
         let contentView = SettingsView(promptManager: promptManager!)
+            .environment(\.managedObjectContext, context)
 
         let hostingView = NSHostingView(rootView: contentView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false

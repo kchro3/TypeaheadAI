@@ -91,32 +91,18 @@ struct ProfileView: View {
 
                 Text("What should TypeaheadAI know about you to provide better responses?").font(.headline)
 
-                if #available(macOS 13.0, *) {
-                    TextEditor(text: $bio)
-                        .scrollContentBackground(.hidden)
-                        .onChange(of: bio) { newValue in
-                            if newValue.count > maxCharacterCount {
-                                bio = String(newValue.prefix(maxCharacterCount))
-                            }
+                TextEditor(text: $bio)
+                    .scrollContentBackground(.hidden)
+                    .onChange(of: bio) { newValue in
+                        if newValue.count > maxCharacterCount {
+                            bio = String(newValue.prefix(maxCharacterCount))
                         }
-                        .padding(10)
-                        .background(.primary.opacity(0.1))
-                        .cornerRadius(5)
-                        .lineSpacing(5)
-                        .frame(minHeight: 50, maxHeight: 200)
-                } else {
-                    TextEditor(text: $bio)
-                        .onChange(of: bio) { newValue in
-                            if newValue.count > maxCharacterCount {
-                                bio = String(newValue.prefix(maxCharacterCount))
-                            }
-                        }
-                        .padding(10)
-                        .background(.primary.opacity(0.1))
-                        .cornerRadius(5)
-                        .lineSpacing(5)
-                        .frame(minHeight: 50, maxHeight: 200)
-                }
+                    }
+                    .padding(10)
+                    .background(.primary.opacity(0.1))
+                    .cornerRadius(5)
+                    .lineSpacing(5)
+                    .frame(minHeight: 50, maxHeight: 200)
 
                 Text("Character count: \(bio.count)/\(maxCharacterCount)")
                     .font(.footnote)

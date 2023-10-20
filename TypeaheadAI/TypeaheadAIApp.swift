@@ -67,7 +67,7 @@ final class AppState: ObservableObject {
         self.intentManager = IntentManager(context: context)
         self.clientManager = ClientManager()
         self.modalManager = ModalManager()
-        self.settingsManager = SettingsManager()
+        self.settingsManager = SettingsManager(context: context)
         self.appContextManager = AppContextManager()
 
         // Initialize actors

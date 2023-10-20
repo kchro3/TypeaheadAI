@@ -51,11 +51,17 @@ class PromptManager: ObservableObject {
         }
     }
 
-    func updatePrompt(with id: UUID, newContent: String) {
+    func updatePrompt(with id: UUID, newLabel: String? = nil, newDetails: String? = nil) {
         if let index = savedPrompts.firstIndex(where: { $0.id == id }) {
             DispatchQueue.main.async {
                 let promptToUpdate = self.savedPrompts[index]
-                promptToUpdate.details = newContent
+                if let newLabel = newLabel {
+                    promptToUpdate.prompt = newLabel
+                }
+
+                if let newDetails = newDetails {
+                    promptToUpdate.details = newDetails
+                }
                 promptToUpdate.updatedAt = Date()
                 do {
                     try self.context.save()
