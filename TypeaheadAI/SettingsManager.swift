@@ -77,7 +77,6 @@ class SettingsManager: ObservableObject {
 
         toastWindow?.titlebarAppearsTransparent = true
         toastWindow?.isReleasedWhenClosed = false
-        toastWindow?.level = .popUpMenu
         toastWindow?.makeKeyAndOrderFront(nil)
 
         toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]

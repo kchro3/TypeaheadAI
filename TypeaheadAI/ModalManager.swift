@@ -386,7 +386,6 @@ class ModalManager: ObservableObject {
             contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
             styleMask: [
                 .closable,
-                .miniaturizable,
                 .fullSizeContentView,
                 .resizable,
                 .titled
@@ -427,7 +426,6 @@ class ModalManager: ObservableObject {
 
         toastWindow?.titlebarAppearsTransparent = true
         toastWindow?.isReleasedWhenClosed = false
-        toastWindow?.level = .popUpMenu
         toastWindow?.makeKeyAndOrderFront(nil)
 
         toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
