@@ -193,6 +193,45 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
+    func suggestIntents(
+        payload: RequestPayload
+    ) async throws -> SuggestIntentsPayload {
+        guard let model = self.model else {
+            throw ClientManagerError.appError("Model not found")
+        }
+
+        var payloadCopy = payload
+        payloadCopy.messages = []
+        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
+            throw ClientManagerError.badRequest("Encoding error")
+        }
+
+        let prompt = """
+        ### Instruction:
+        Below is an instruction that describes a task. Predict three possible user intents based on the copied text and context, and return them as a tab-separated, unquoted string.
+
+        ### Input:
+        \(jsonPayload)
+
+        ## Response:
+
+        """
+
+        print(prompt)
+
+        let result = await model.predict(prompt)
+        switch result {
+        case .success(let data):
+            if let values = data.text?.split(separator: ",") {
+                return SuggestIntentsPayload(intents: values.map { String($0) })
+            } else {
+                return SuggestIntentsPayload(intents: [])
+            }
+        case .failure(let error):
+            throw error
+        }
+    }
+
     func predict(
         payload: RequestPayload,
         streamHandler: @escaping (Result<String, Error>) async -> Void

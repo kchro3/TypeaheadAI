@@ -54,9 +54,14 @@ class LlamaWrapper {
 
     func predict(
         _ prompt: String,
-        handler: @escaping (Result<String, Error>) async -> Void
+        handler: ((Result<String, Error>) async -> Void)? = nil
     ) async -> Result<ChunkPayload, Error> {
-        LlamaWrapper.handler = handler
+        if let handler = handler {
+            LlamaWrapper.handler = handler
+        } else {
+            LlamaWrapper.handler = { _ in }
+        }
+
         ctx = llama_new_context_with_model(model, params)
         guard let cstr = simple_predict(ctx, prompt, 1, globalHandler) else {
             return .failure(LlamaWrapperError.serverError("Failed to run simple_predict"))
