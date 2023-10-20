@@ -98,10 +98,10 @@ struct AuxiliaryMenuView: View {
                                             promptManager.activePromptID = nil
                                         }
                                     },
-                                    onUpdate: { newContent in
+                                    onUpdate: { newDetails in
                                         promptManager.updatePrompt(
                                             with: prompt.id!,
-                                            newContent: newContent
+                                            newDetails: newDetails
                                         )
                                     }
                                 )

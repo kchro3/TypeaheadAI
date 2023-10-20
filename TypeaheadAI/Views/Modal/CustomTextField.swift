@@ -17,6 +17,7 @@ struct CustomTextView: NSViewRepresentable {
 
     var onTab: () -> Void
     var onEnter: (String) -> Void
+    var flushOnEnter: Bool
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -79,7 +80,9 @@ struct CustomTextView: NSViewRepresentable {
                 } else {
                     // Enter pressed
                     parent.onEnter(parent.text)
-                    parent.text = ""
+                    if parent.flushOnEnter {
+                        parent.text = ""
+                    }
                     return true
                 }
             } else if commandSelector == #selector(NSStandardKeyBindingResponding.insertTab(_:)) {
@@ -142,6 +145,7 @@ struct CustomTextField: View {
     let autoCompleteSuggestions: [PromptEntry]
     var onEnter: (String) -> Void
     var dynamicHeight: Bool = true
+    var flushOnEnter: Bool = true
 
     @State private var showAutoComplete = false
     @State private var filteredSuggestions: [String] = []
@@ -163,7 +167,8 @@ struct CustomTextField: View {
                     applySuggestion(index: index)
                 }
             },
-            onEnter: onEnter
+            onEnter: onEnter,
+            flushOnEnter: flushOnEnter
         )
         .overlay(alignment: .topLeading) {
             Group {
