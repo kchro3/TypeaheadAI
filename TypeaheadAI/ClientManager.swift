@@ -243,30 +243,34 @@ class ClientManager {
         // NOTE: Cache the payload so we know what text was copied
         self.cacheResponse(nil, for: payload)
 
-        guard let httpBody = try? JSONEncoder().encode(payload) else {
-            throw ClientManagerError.badRequest("Something went wrong...")
-        }
+        if incognitoMode {
+            return try? await llamaModelManager?.suggestIntents(payload: payload)
+        } else {
+            guard let httpBody = try? JSONEncoder().encode(payload) else {
+                throw ClientManagerError.badRequest("Something went wrong...")
+            }
 
-        var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
-        urlRequest.httpMethod = "POST"
-        urlRequest.httpBody = httpBody
-        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
+            urlRequest.httpMethod = "POST"
+            urlRequest.httpBody = httpBody
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let (data, resp) = try await self.session.data(for: urlRequest)
+            let (data, resp) = try await self.session.data(for: urlRequest)
 
-        guard let httpResponse = resp as? HTTPURLResponse else {
-            throw ClientManagerError.serverError("Something went wrong...")
-        }
-
-        guard 200...299 ~= httpResponse.statusCode else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw ClientManagerError.serverError(errorResponse.detail)
-            } else {
+            guard let httpResponse = resp as? HTTPURLResponse else {
                 throw ClientManagerError.serverError("Something went wrong...")
             }
-        }
 
-        return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
+            guard 200...299 ~= httpResponse.statusCode else {
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    throw ClientManagerError.serverError(errorResponse.detail)
+                } else {
+                    throw ClientManagerError.serverError("Something went wrong...")
+                }
+            }
+
+            return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
+        }
     }
 
     /// Easier to use this wrapper function.
