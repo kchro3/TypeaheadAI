@@ -37,79 +37,77 @@ struct QuickActionDetails: View {
     var body: some View {
         VStack(alignment: .leading) {
             ScrollView {
-                VStack(alignment: .leading) {
-                    if isEditing {
-                        Text("Editing...")
-                            .font(.title2)
-                            .padding(10)
-                            .padding(.leading, leadingPadding)
+                if isEditing {
+                    Text("Editing...")
+                        .font(.title2)
+                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                        .padding(10)
+                        .padding(.leading, leadingPadding)
 
+                    HStack {
                         HStack {
+                            Spacer()
+                            Text("Command:")
+                        }
+                        .frame(width: leadingPadding)
+
+                        CustomTextField(
+                            text: $mutableLabel,
+                            placeholderText: "Name of the command",
+                            autoCompleteSuggestions: [],
+                            onEnter: { _ in },
+                            flushOnEnter: false
+                        )
+                        .lineLimit(1)
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(.secondary.opacity(0.1))
+                        )
+                    }
+
+                    HStack {
+                        VStack(alignment: .leading) {
                             HStack {
                                 Spacer()
-                                Text("Command:")
-                            }
-                            .frame(width: leadingPadding)
 
-                            CustomTextField(
-                                text: $mutableLabel,
-                                placeholderText: "Name of the command",
-                                autoCompleteSuggestions: [],
-                                onEnter: { _ in },
-                                flushOnEnter: false
-                            )
-                            .lineLimit(1)
+                                Text("Details:")
+                                    .padding(.top, 5)
+                            }
+
+                            Spacer()
+                        }
+                        .frame(width: leadingPadding)
+
+                        TextEditor(text: $mutableDetails)
+                            .font(.system(.body))
+                            .scrollContentBackground(.hidden)
+                            .lineLimit(nil)
                             .padding(.vertical, 5)
                             .padding(.horizontal, 10)
                             .background(RoundedRectangle(cornerRadius: 15)
                                 .fill(.secondary.opacity(0.1))
                             )
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading) {
-                                HStack {
-                                    Spacer()
-
-                                    Text("Details:")
-                                        .padding(.top, 5)
-                                }
-
-                                Spacer()
-                            }
-                            .frame(width: leadingPadding)
-
-                            TextEditor(text: $mutableDetails)
-                                .font(.system(.body))
-                                .scrollContentBackground(.hidden)
-                                .lineLimit(nil)
-                                .padding(.vertical, 5)
-                                .padding(.horizontal, 10)
-                                .background(RoundedRectangle(cornerRadius: 15)
-                                    .fill(.secondary.opacity(0.1))
-                                )
-                        }
-                    } else {
-                        HStack {
-                            VStack {
-                                Text(quickAction.prompt ?? "<none>")
-                                    .font(.title2)
-                                    .padding(10)
-
-                                VStack(alignment: .leading) {
-                                    Text("Details:")
-                                        .font(.headline)
-
-                                    Text(quickAction.details ?? "<none>")
-                                }
-                                .padding(10)
-                            }
-
-                            Spacer()
-                        }
                     }
+                } else {
+                    Text(quickAction.prompt ?? "<none>")
+                        .font(.title2)
+                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                        .padding(10)
+                        .border(Color.black)
+
+                    VStack(alignment: .leading) {
+                        Text("Details:")
+                            .foregroundStyle(Color.accentColor)
+                            .font(.headline)
+                            .border(.primary)
+
+                        Text(quickAction.details ?? "<none>")
+                            .border(.primary)
+                    }
+                    .padding(10)
+                    .border(.primary)
                 }
-                .frame(maxWidth: .infinity)
             }
 
             if !isEditing {
@@ -313,6 +311,7 @@ struct QuickActionsView: View {
     let newPrompt = PromptEntry(context: context)
     newPrompt.id = UUID()
     newPrompt.prompt = "this is a sample prompt"
+    newPrompt.details = "This is a longer detailed section\nWith multiple lines of content."
 
     return QuickActionDetails(
         quickAction: newPrompt,
@@ -320,6 +319,7 @@ struct QuickActionsView: View {
         mutableLabel: $mutableLabel,
         mutableDetails: $mutableDetails
     )
+    .environment(\.managedObjectContext, context)
 }
 
 #Preview {
