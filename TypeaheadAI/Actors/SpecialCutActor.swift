@@ -112,7 +112,7 @@ actor SpecialCutActor {
                         return
                     }
 
-                    if self.modalManager.online {
+                    if false {
                         self.performOCR(image: cgImage) { recognizedText, _ in
                             self.logger.info("OCRed text: \(recognizedText)")
                             Task {
