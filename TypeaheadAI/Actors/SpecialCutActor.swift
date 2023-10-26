@@ -74,7 +74,6 @@ actor SpecialCutActor {
     private let appContextManager: AppContextManager
 
     @AppStorage("numSmartCuts") var numSmartCuts: Int?
-    @AppStorage("token") var token: String?
     @AppStorage("bio") var bio: String?
 
     private let logger = Logger(
@@ -131,7 +130,6 @@ actor SpecialCutActor {
                                     do {
                                         if let intents = try await self.clientManager.suggestIntents(
                                             id: UUID(),
-                                            token: self.token ?? "",
                                             username: NSUserName(),
                                             userFullName: NSFullUserName(),
                                             userObjective: self.promptManager.getActivePrompt(),

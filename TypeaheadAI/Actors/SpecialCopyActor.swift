@@ -78,7 +78,6 @@ actor SpecialCopyActor: CanSimulateCopy {
 
                             await self.clientManager.sendStreamRequest(
                                 id: UUID(),
-                                token: UserDefaults.standard.string(forKey: "token") ?? "",
                                 username: NSUserName(),
                                 userFullName: NSFullUserName(),
                                 userObjective: self.promptManager.getActivePrompt(),
@@ -108,7 +107,6 @@ actor SpecialCopyActor: CanSimulateCopy {
                             do {
                                 if let intents = try await self.clientManager.suggestIntents(
                                     id: UUID(),
-                                    token: UserDefaults.standard.string(forKey: "token") ?? "",
                                     username: NSUserName(),
                                     userFullName: NSFullUserName(),
                                     userObjective: self.promptManager.getActivePrompt(),

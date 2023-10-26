@@ -9,9 +9,9 @@ import AppKit
 import CoreData
 import Foundation
 import os.log
+import SwiftUI
 
 struct RequestPayload: Codable {
-    var token: String?
     var username: String
     var userFullName: String
     var userObjective: String?
@@ -155,6 +155,7 @@ class ClientManager {
     private let session: URLSession
 
     private let version: String = "v3"
+    @AppStorage("token") var token: String?
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
@@ -213,7 +214,6 @@ class ClientManager {
 
     func suggestIntents(
         id: UUID,
-        token: String,
         username: String,
         userFullName: String,
         userObjective: String?,
@@ -227,7 +227,6 @@ class ClientManager {
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
         let payload = RequestPayload(
-            token: token,
             username: username,
             userFullName: userFullName,
             userObjective: userObjective,
@@ -254,6 +253,9 @@ class ClientManager {
             urlRequest.httpMethod = "POST"
             urlRequest.httpBody = httpBody
             urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            if let token = token {
+                urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            }
 
             let (data, resp) = try await self.session.data(for: urlRequest)
 
@@ -299,7 +301,6 @@ class ClientManager {
             Task {
                 await self.sendStreamRequest(
                     id: id,
-                    token: UserDefaults.standard.string(forKey: "token") ?? "",
                     username: NSUserName(),
                     userFullName: NSFullUserName(),
                     userObjective: objective,
@@ -348,7 +349,6 @@ class ClientManager {
 
                 await self.sendStreamRequest(
                     id: UUID(),
-                    token: UserDefaults.standard.string(forKey: "token") ?? "",
                     username: payload.username,
                     userFullName: payload.userFullName,
                     userObjective: payload.userObjective,
@@ -368,7 +368,6 @@ class ClientManager {
             Task {
                 await self.sendStreamRequest(
                     id: UUID(),
-                    token: UserDefaults.standard.string(forKey: "token") ?? "",
                     username: NSUserName(),
                     userFullName: NSFullUserName(),
                     userObjective: "",
@@ -465,7 +464,6 @@ class ClientManager {
     ///   - streamHandler: A closure to be executed for each chunk of data received.
     func sendStreamRequest(
         id: UUID,
-        token: String?,
         username: String,
         userFullName: String,
         userObjective: String?,
@@ -484,7 +482,6 @@ class ClientManager {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
             let payload = RequestPayload(
-                token: token,
                 username: username,
                 userFullName: userFullName,
                 userObjective: userObjective,
@@ -569,6 +566,9 @@ class ClientManager {
         urlRequest.httpMethod = "POST"
         urlRequest.httpBody = httpBody
         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = token {
+            urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
 
         let (data, resp) = try await self.session.data(for: urlRequest)
 
@@ -598,12 +598,16 @@ class ClientManager {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
-        var request = URLRequest(url: apiImageCaptions)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jpegData
+        var urlRequest = URLRequest(url: apiImageCaptions)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = token {
+            urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        urlRequest.httpBody = jpegData
         do {
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, _) = try await URLSession.shared.data(for: urlRequest)
             let payload = try decoder.decode(ImageCaptionPayload.self, from: data)
             return payload
         } catch {
@@ -630,7 +634,10 @@ class ClientManager {
                 urlRequest.httpMethod = "POST"
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                
+                if let token = token {
+                    urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                }
+
                 guard let (data, resp) = try? await URLSession.shared.bytes(for: urlRequest) else {
                     let error = ClientManagerError.serverError("Could be serious... Please report to Jeff!")
                     continuation.finish(throwing: error)
@@ -707,6 +714,9 @@ class ClientManager {
                 urlRequest.httpMethod = "POST"
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                if let token = token {
+                    urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                }
 
                 let (data, resp) = try await URLSession.shared.bytes(for: urlRequest)
 
