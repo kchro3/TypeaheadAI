@@ -280,11 +280,11 @@ struct MessageView: View {
         } else if attributed.results[0].parsedType != .plaintext {
             return true
         } else {
-            if attributed.string.contains("##") || attributed.string.contains("**") ||
-                attributed.string.contains("[// ]
+            // Check for artifacts of markdown
+            return attributed.string.contains("##") || attributed.string.contains("**") ||
+                attributed.string.contains("[//]: #") ||
+                attributed.string.contains("`")
         }
-
-        return attributed.parsedResults.count == 1 && attributed.parsedResults[0].parsedType == .plaintext
     }
 
     private func decodeImage(_ data: Data) throws -> NSImage? {

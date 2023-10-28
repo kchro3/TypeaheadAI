@@ -13,7 +13,7 @@ import SwiftUI
 import Supabase
 
 struct RequestPayload: Codable {
-    let uuid: UUID?
+    let uuid: UUID
     var username: String
     var userFullName: String
     var userObjective: String?
@@ -24,6 +24,7 @@ struct RequestPayload: Codable {
     var history: [Message]?
     var appContext: AppContext?
     var version: String?
+    let freebies: Int?
 }
 
 struct OnboardingRequestPayload: Codable {
@@ -157,6 +158,7 @@ class ClientManager {
     private let session: URLSession
 
     private let version: String = "v3"
+    @AppStorage("freebies") var freebies: Int = 10
 
     let supabase = SupabaseClient(
         supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
@@ -232,8 +234,9 @@ class ClientManager {
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
         let uuid: UUID? = try? await supabase.auth.session.user.id
+        freebies -= 1
         let payload = RequestPayload(
-            uuid: uuid,
+            uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
             username: username,
             userFullName: userFullName,
             userObjective: userObjective,
@@ -243,7 +246,8 @@ class ClientManager {
             messages: self.sanitizeMessages(messages),
             history: history,
             appContext: appContext,
-            version: version
+            version: version,
+            freebies: freebies
         )
 
         // NOTE: Cache the payload so we know what text was copied
@@ -485,8 +489,10 @@ class ClientManager {
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
+            self?.freebies -= 1
+            let uuid = try? await self?.supabase.auth.session.user.id
             let payload = RequestPayload(
-                uuid: try? await self?.supabase.auth.session.user.id,
+                uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
                 username: username,
                 userFullName: userFullName,
                 userObjective: userObjective,
@@ -496,7 +502,8 @@ class ClientManager {
                 messages: self?.sanitizeMessages(messages),
                 history: history,
                 appContext: appContext,
-                version: self?.version
+                version: self?.version,
+                freebies: self?.freebies
             )
 
             if let output = self?.getCachedResponse(for: payload) {
