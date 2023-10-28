@@ -52,7 +52,7 @@ struct UserIntentsView: View {
         }
     }
 
-    var modalManager = ModalManager()
+    let modalManager = ModalManager()
     modalManager.userIntents = [
         "Test",
         "This is a longer sentence",
