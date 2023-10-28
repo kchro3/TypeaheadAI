@@ -302,6 +302,11 @@ class ModalManager: ObservableObject {
                 Task {
                     await self.appendText(chunk)
                 }
+            case .failure(let error as ClientManagerError):
+                Task {
+                    self.setError(error.localizedDescription)
+                }
+                self.logger.error("An error occurred: \(error)")
             case .failure(let error):
                 Task {
                     self.setError(error.localizedDescription)
@@ -537,6 +542,8 @@ class ModalManager: ObservableObject {
             case .badRequest(let message):
                 await self.setError(message)
             case .serverError(let message):
+                await self.setError(message)
+            case .clientError(let message):
                 await self.setError(message)
             default:
                 await self.setError("Something went wrong. Please try again.")

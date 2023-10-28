@@ -6,13 +6,19 @@
 //
 
 import SwiftUI
+import Supabase
 import AuthenticationServices
 
 struct AccountView: View {
-    @AppStorage("token") var token: String?
+    // Use this as a flag for checking if the user is signed in.
+    @AppStorage("token2") var token: String?
 
     @State private var isSignInVisible: Bool = false
     @State private var isHoveringSignOut: Bool = false
+
+    let supabase = SupabaseClient(
+        supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -26,16 +32,29 @@ struct AccountView: View {
                 SignInWithAppleButton(.signIn) { request in
                     request.requestedScopes = [.fullName, .email]
                 } onCompletion: { result in
-                    switch result {
-                    case .success(let authResults):
-                        if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
-                           let authorizationToken = appleIDCredential.authorizationCode,
-                           let tokenString = String(data: authorizationToken, encoding: .utf8) {
-                            token = tokenString
+                    Task {
+                        do {
+                            guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
+                            else {
+                                return
+                            }
+
+                            guard let idToken = credential.identityToken
+                                .flatMap({ String(data: $0, encoding: .utf8) })
+                            else {
+                                return
+                            }
+
+                            token = idToken
+                            try await supabase.auth.signInWithIdToken(
+                                credentials: .init(
+                                    provider: .apple,
+                                    idToken: idToken
+                                )
+                            )
+                        } catch {
+                            dump(error)
                         }
-                    case .failure(let error):
-                        // TODO: Show some error message
-                        print("Authorization failed: \(error.localizedDescription)")
                     }
                 }
                 .signInWithAppleButtonStyle(.white)
@@ -43,6 +62,9 @@ struct AccountView: View {
             } else {
                 buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
                     token = nil
+                    Task {
+                        try await supabase.auth.signOut()
+                    }
                 }
             }
         }
