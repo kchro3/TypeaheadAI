@@ -13,6 +13,7 @@
 		2B0B30102ACF8C8000338B76 /* SpecialOpenActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */; };
 		2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30182ADCBF1600338B76 /* QuickActionsView.swift */; };
 		2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */; };
+		2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B7D2AEC5F8500F1BB60 /* Supabase */; };
 		2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
@@ -158,6 +159,7 @@
 				2BF558BE2AB8353B002F2008 /* LaunchAtLogin in Frameworks */,
 				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
+				2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */,
 				2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 				2BF9297C2AB13EEA00FC105B /* Markdown in Frameworks */,
@@ -383,6 +385,7 @@
 				2BF929842AB13FEC00FC105B /* Highlighter */,
 				2BF558BD2AB8353B002F2008 /* LaunchAtLogin */,
 				2B4BDB882ACBED2100E55D78 /* SettingsAccess */,
+				2B1F3B7D2AEC5F8500F1BB60 /* Supabase */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -465,6 +468,7 @@
 				2BF929832AB13FEC00FC105B /* XCRemoteSwiftPackageReference "HighlighterSwift" */,
 				2BF558BC2AB8353B002F2008 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */,
+				2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -739,7 +743,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.21;
+				MARKETING_VERSION = 1.22;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -780,7 +784,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.21;
+				MARKETING_VERSION = 1.22;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -908,6 +912,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase-community/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.0;
+			};
+		};
 		2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
@@ -967,6 +979,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2B1F3B7D2AEC5F8500F1BB60 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;

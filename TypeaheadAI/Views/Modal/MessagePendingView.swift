@@ -9,6 +9,8 @@ import SwiftUI
 
 struct MessagePendingView: View {
     @State private var activeDotIndex = 0
+    @Environment(\.colorScheme) private var colorScheme
+
     let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -23,7 +25,7 @@ struct MessagePendingView: View {
             .padding(.vertical, 10)
             .padding(.trailing, 10)
             .padding(.leading, 15)
-            .background(Color.secondary.opacity(0.2))
+            .background(colorScheme == .dark ? Color.black.opacity(0.2) : Color.secondary.opacity(0.15))
             .onReceive(timer) { _ in
                 activeDotIndex = (activeDotIndex + 1) % 3
             }

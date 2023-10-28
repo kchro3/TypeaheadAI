@@ -10,8 +10,10 @@ import CoreData
 import Foundation
 import os.log
 import SwiftUI
+import Supabase
 
 struct RequestPayload: Codable {
+    let uuid: UUID
     var username: String
     var userFullName: String
     var userObjective: String?
@@ -22,6 +24,7 @@ struct RequestPayload: Codable {
     var history: [Message]?
     var appContext: AppContext?
     var version: String?
+    let freebies: Int?
 }
 
 struct OnboardingRequestPayload: Codable {
@@ -155,7 +158,11 @@ class ClientManager {
     private let session: URLSession
 
     private let version: String = "v3"
-    @AppStorage("token") var token: String?
+    @AppStorage("freebies") var freebies: Int = 10
+
+    let supabase = SupabaseClient(
+        supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
@@ -226,7 +233,10 @@ class ClientManager {
         incognitoMode: Bool,
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
+        let uuid: UUID? = try? await supabase.auth.session.user.id
+        freebies -= 1
         let payload = RequestPayload(
+            uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
             username: username,
             userFullName: userFullName,
             userObjective: userObjective,
@@ -236,7 +246,8 @@ class ClientManager {
             messages: self.sanitizeMessages(messages),
             history: history,
             appContext: appContext,
-            version: version
+            version: version,
+            freebies: freebies
         )
 
         // NOTE: Cache the payload so we know what text was copied
@@ -246,16 +257,13 @@ class ClientManager {
             return try? await llamaModelManager?.suggestIntents(payload: payload)
         } else {
             guard let httpBody = try? JSONEncoder().encode(payload) else {
-                throw ClientManagerError.badRequest("Something went wrong...")
+                throw ClientManagerError.badRequest("Request was malformed...")
             }
 
             var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
             urlRequest.httpMethod = "POST"
             urlRequest.httpBody = httpBody
             urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            if let token = token {
-                urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
 
             let (data, resp) = try await self.session.data(for: urlRequest)
 
@@ -481,7 +489,10 @@ class ClientManager {
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
+            self?.freebies -= 1
+            let uuid = try? await self?.supabase.auth.session.user.id
             let payload = RequestPayload(
+                uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
                 username: username,
                 userFullName: userFullName,
                 userObjective: userObjective,
@@ -491,7 +502,8 @@ class ClientManager {
                 messages: self?.sanitizeMessages(messages),
                 history: history,
                 appContext: appContext,
-                version: self?.version
+                version: self?.version,
+                freebies: self?.freebies
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -566,9 +578,6 @@ class ClientManager {
         urlRequest.httpMethod = "POST"
         urlRequest.httpBody = httpBody
         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = token {
-            urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
 
         let (data, resp) = try await self.session.data(for: urlRequest)
 
@@ -601,9 +610,6 @@ class ClientManager {
         var urlRequest = URLRequest(url: apiImageCaptions)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = token {
-            urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
 
         urlRequest.httpBody = jpegData
         do {
@@ -634,28 +640,30 @@ class ClientManager {
                 urlRequest.httpMethod = "POST"
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                if let token = token {
-                    urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                }
 
-                guard let (data, resp) = try? await URLSession.shared.bytes(for: urlRequest) else {
+                guard let (data, resp) = try? await self.session.bytes(for: urlRequest) else {
                     let error = ClientManagerError.serverError("Could be serious... Please report to Jeff!")
                     continuation.finish(throwing: error)
-                    completion(.failure(error))
                     return
                 }
 
                 guard let httpResponse = resp as? HTTPURLResponse else {
                     let error = ClientManagerError.serverError("Something went wrong...")
                     continuation.finish(throwing: error)
-                    completion(.failure(error))
                     return
                 }
 
                 guard 200...299 ~= httpResponse.statusCode else {
-                    let error = ClientManagerError.serverError("Something went wrong...")
+                    var buffer = Data()
+                    var error = ClientManagerError.serverError("Something went wrong...")
+                    for try await byte in data {
+                        buffer.append(byte)
+                    }
+                    if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: buffer) {
+                        error = ClientManagerError.serverError(errorResponse.detail)
+                    }
+
                     continuation.finish(throwing: error)
-                    completion(.failure(error))
                     return
                 }
 
@@ -714,9 +722,6 @@ class ClientManager {
                 urlRequest.httpMethod = "POST"
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-                if let token = token {
-                    urlRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-                }
 
                 let (data, resp) = try await URLSession.shared.bytes(for: urlRequest)
 

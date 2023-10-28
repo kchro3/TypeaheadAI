@@ -120,7 +120,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                                 ) {
                                     await self.modalManager.setUserIntents(intents: intents.intents)
                                 }
-                            } catch {
+                            } catch let error as ClientManagerError {
                                 self.logger.error("\(error.localizedDescription)")
                                 await self.modalManager.setError(error.localizedDescription)
                             }

@@ -53,6 +53,7 @@ struct MessageView: View {
     var onEditAppear: (() -> Void)?
     var onRefresh: (() -> Void)?
     var onTruncate: (() -> Void)?
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var webViewHeight: CGFloat = .zero
     @State private var isMessageTruncated = true
@@ -99,7 +100,7 @@ struct MessageView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         } else if let attributed = message.attributed,
-                  !isPlaintext(parsedResults: attributed.results) {
+                  isMarkdown(attributed: attributed) {
             attributedView(results: attributed.results)
         } else if message.text.isEmpty && !message.isCurrentUser {
             Divider()
@@ -196,7 +197,7 @@ struct MessageView: View {
                                 .padding(.vertical, 10)
                                 .padding(.horizontal, 15)
                                 .foregroundColor(.primary)
-                                .background(Color.secondary.opacity(0.2))
+                                .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                                 .textSelection(.enabled)
                         }
                     case .html(let data):
@@ -241,7 +242,7 @@ struct MessageView: View {
                     .padding(.vertical, 10)
                     .padding(.horizontal, 15)
                     .foregroundColor(.primary)
-                    .background(Color.accentColor.opacity(0.2))
+                    .background(Color.accentColor.opacity(0.4))
                     .onAppear(perform: {
                         localContent = message.text
                         onEditAppear?()
@@ -258,6 +259,7 @@ struct MessageView: View {
                             } else {
                                 Text(parsed.attributedString)
                                     .textSelection(.enabled)
+                                    .foregroundStyle(.primary)
                             }
                         }
                     }
@@ -265,12 +267,24 @@ struct MessageView: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 15)
-            .background(Color.secondary.opacity(0.2))
+            .background(colorScheme == .dark ? Color.black.opacity(0.2) : Color.secondary.opacity(0.15))
         }
     }
 
-    private func isPlaintext(parsedResults: [ParserResult]) -> Bool {
-        return parsedResults.count == 1 && parsedResults[0].parsedType == .plaintext
+    private func isMarkdown(attributed: AttributedOutput) -> Bool {
+        if attributed.results.count == 0 {
+            // If no text, then not Markdown
+            return false
+        } else if attributed.results.count > 1 {
+            return true
+        } else if attributed.results[0].parsedType != .plaintext {
+            return true
+        } else {
+            // Check for artifacts of markdown
+            return attributed.string.contains("##") || attributed.string.contains("**") ||
+                attributed.string.contains("[//]: #") ||
+                attributed.string.contains("`")
+        }
     }
 
     private func decodeImage(_ data: Data) throws -> NSImage? {

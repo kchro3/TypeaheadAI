@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Supabase
 import AuthenticationServices
 
 struct OnboardingView: View {
@@ -19,6 +20,10 @@ struct OnboardingView: View {
     @State private var onboardingStep: Int = 0
     @State private var text: String = ""
 
+    let supabase = SupabaseClient(
+        supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
+
     // When streaming a result, we want to batch process tokens.
     // Since we stream tokens one at a time, we need a global variable to
     // track the token counts per batch.
@@ -28,7 +33,7 @@ struct OnboardingView: View {
     @State private var currentOutput: AttributedOutput? = nil
     private let parsingTask = ResponseParsingTask()
 
-    @AppStorage("token") var token: String?
+    @AppStorage("token2") var token: String?
 
     var body: some View {
         VStack {
@@ -74,16 +79,29 @@ struct OnboardingView: View {
                     SignInWithAppleButton(.signIn) { request in
                         request.requestedScopes = [.fullName, .email]
                     } onCompletion: { result in
-                        switch result {
-                        case .success(let authResults):
-                            if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
-                               let authorizationToken = appleIDCredential.authorizationCode,
-                               let tokenString = String(data: authorizationToken, encoding: .utf8) {
-                                token = tokenString
+                        Task {
+                            do {
+                                guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
+                                else {
+                                    return
+                                }
+
+                                guard let idToken = credential.identityToken
+                                    .flatMap({ String(data: $0, encoding: .utf8) })
+                                else {
+                                    return
+                                }
+
+                                token = idToken
+                                try await supabase.auth.signInWithIdToken(
+                                    credentials: .init(
+                                        provider: .apple,
+                                        idToken: idToken
+                                    )
+                                )
+                            } catch {
+                                dump(error)
                             }
-                        case .failure(let error):
-                            // TODO: Show some error message
-                            print("Authorization failed: \(error.localizedDescription)")
                         }
                     }
                     .signInWithAppleButtonStyle(.white)
