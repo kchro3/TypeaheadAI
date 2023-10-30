@@ -262,7 +262,6 @@
 				2BA7F07E2A9ABBA8003D38BA /* Preview Content */,
 				2BA7F0A82A9ABBE2003D38BA /* ClientManager.swift */,
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
-				2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */,
 				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
 				2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */,
@@ -354,6 +353,7 @@
 		2BF929772AB04D0800FC105B /* CrudManagers */ = {
 			isa = PBXGroup;
 			children = (
+				2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */,
 				2BCF84342A9DD90F00359841 /* HistoryManager.swift */,
 				2BF929782AB04D2600FC105B /* MemoManager.swift */,
 				2B4BDB8A2ACC281E00E55D78 /* IntentManager.swift */,

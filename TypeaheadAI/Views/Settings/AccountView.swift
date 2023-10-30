@@ -12,6 +12,7 @@ import AuthenticationServices
 struct AccountView: View {
     // Use this as a flag for checking if the user is signed in.
     @AppStorage("token2") var token: String?
+    @AppStorage("uuid") var uuid: String?
 
     @State private var isSignInVisible: Bool = false
     @State private var isHoveringSignOut: Bool = false
@@ -26,50 +27,71 @@ struct AccountView: View {
 
             Divider()
 
-            Text(token == nil ? "You are not signed in." : "You're signed in through Apple iCloud!")
-
             if token == nil {
-                SignInWithAppleButton(.signIn) { request in
-                    request.requestedScopes = [.fullName, .email]
-                } onCompletion: { result in
-                    Task {
-                        do {
-                            guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
-                            else {
-                                return
-                            }
-
-                            guard let idToken = credential.identityToken
-                                .flatMap({ String(data: $0, encoding: .utf8) })
-                            else {
-                                return
-                            }
-
-                            token = idToken
-                            try await supabase.auth.signInWithIdToken(
-                                credentials: .init(
-                                    provider: .apple,
-                                    idToken: idToken
-                                )
-                            )
-                        } catch {
-                            dump(error)
-                        }
-                    }
-                }
-                .signInWithAppleButtonStyle(.white)
-                .cornerRadius(25)
+                // Logged-out view
+                loggedOutView
             } else {
-                buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
-                    token = nil
-                    Task {
-                        try await supabase.auth.signOut()
-                    }
-                }
+                // Logged-in view
+                loggedInView
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
+    }
+
+    @ViewBuilder
+    var loggedOutView: some View {
+        VStack {
+            Text("Please sign-in to use online mode.")
+
+            SignInWithAppleButton(.signIn) { request in
+                request.requestedScopes = [.fullName, .email]
+            } onCompletion: { result in
+                Task {
+                    do {
+                        guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
+                        else {
+                            return
+                        }
+
+                        guard let idToken = credential.identityToken
+                            .flatMap({ String(data: $0, encoding: .utf8) })
+                        else {
+                            return
+                        }
+
+                        token = idToken
+                        try await supabase.auth.signInWithIdToken(
+                            credentials: .init(
+                                provider: .apple,
+                                idToken: idToken
+                            )
+                        )
+
+                        uuid = try? await supabase.auth.session.user.id.uuidString
+                    } catch {
+                        dump(error)
+                    }
+                }
+            }
+            .signInWithAppleButtonStyle(.white)
+            .cornerRadius(25)
+        }
+    }
+
+    @ViewBuilder
+    var loggedInView: some View {
+        VStack {
+            Text("You're signed in through Apple iCloud!")
+            Text("User ID: \(uuid ?? "<not found>")")
+
+            buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
+                token = nil
+                Task {
+                    try await supabase.auth.signOut()
+                }
+            }
+        }
     }
 
     private func buttonRow(
