@@ -35,11 +35,17 @@ class PromptManager: ObservableObject {
         }
     }
 
-    func addPrompt(_ prompt: String) {
+    func addPrompt(_ prompt: String, details: String? = nil) {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
         newPrompt.prompt = prompt
-        newPrompt.details = prompt
+
+        if let details = details {
+            newPrompt.details = details
+        } else {
+            newPrompt.details = prompt
+        }
+
         newPrompt.createdAt = Date()
 
         do {

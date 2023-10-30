@@ -170,14 +170,26 @@ actor SpecialCutActor {
                                     self.numSmartCuts = 1
                                 }
 
-                                self.clientManager.predict(
-                                    id: UUID(),
-                                    copiedText: recognizedText,
-                                    incognitoMode: !self.modalManager.online,
-                                    stream: true,
-                                    streamHandler: self.modalManager.defaultHandler,
-                                    completion: { _ in }
-                                )
+                                do {
+                                    if let intents = try await self.clientManager.suggestIntents(
+                                        id: UUID(),
+                                        username: NSUserName(),
+                                        userFullName: NSFullUserName(),
+                                        userObjective: self.promptManager.getActivePrompt(),
+                                        userBio: self.bio ?? "",
+                                        userLang: Locale.preferredLanguages.first ?? "",
+                                        copiedText: recognizedText,
+                                        messages: self.modalManager.messages,
+                                        history: [],
+                                        appContext: appContext,
+                                        incognitoMode: !self.modalManager.online
+                                    ) {
+                                        await self.modalManager.setUserIntents(intents: intents.intents)
+                                    }
+                                } catch {
+                                    self.logger.error("\(error.localizedDescription)")
+                                    await self.modalManager.setError(error.localizedDescription)
+                                }
                             }
                         }
                     }

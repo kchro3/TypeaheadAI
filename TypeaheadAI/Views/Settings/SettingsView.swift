@@ -22,6 +22,7 @@ enum Tab: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     var promptManager: PromptManager
 
+    @Environment(\.colorScheme) var colorScheme
     @AppStorage("settingsTab") var settingsTab: String = Tab.general.rawValue
 
     var body: some View {
@@ -41,7 +42,7 @@ struct SettingsView: View {
                 .padding(25)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(.secondary.opacity(0.2))
+                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                 )
         }
         .padding(.horizontal, 35)
