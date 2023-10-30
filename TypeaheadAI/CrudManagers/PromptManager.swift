@@ -57,6 +57,14 @@ class PromptManager: ObservableObject {
         }
     }
 
+    func getByLabel(_ label: String) -> PromptEntry? {
+        if let index = savedPrompts.firstIndex(where: { $0.prompt == label }) {
+            return self.savedPrompts[index]
+        } else {
+            return nil
+        }
+    }
+
     func updatePrompt(with id: UUID, newLabel: String? = nil, newDetails: String? = nil) {
         if let index = savedPrompts.firstIndex(where: { $0.id == id }) {
             DispatchQueue.main.async {

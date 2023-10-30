@@ -341,7 +341,11 @@ class ClientManager {
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
             Task {
                 var history: [Message]? = nil
+                var quickAction: PromptEntry? = nil
                 if let userIntent = userIntent {
+                    // NOTE: Check if the user intent is also a Quick Action
+                    quickAction = self.promptManager?.getByLabel(userIntent)
+
                     // NOTE: We cached the copiedText earlier
                     _ = self.intentManager?.addIntentEntry(
                         prompt: userIntent,
@@ -359,7 +363,7 @@ class ClientManager {
                     id: UUID(),
                     username: payload.username,
                     userFullName: payload.userFullName,
-                    userObjective: payload.userObjective,
+                    userObjective: quickAction?.details ?? payload.userObjective,
                     userBio: payload.userBio,
                     userLang: payload.userLang,
                     copiedText: payload.copiedText,

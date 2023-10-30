@@ -211,27 +211,47 @@ class ModalManager: ObservableObject {
                 )
 
                 try Task.checkCancellation()
-                messages[idx].attributed = AttributedOutput(string: streamText, results: results)
+                if idx < messages.count {
+                    messages[idx].attributed = AttributedOutput(string: streamText, results: results)
+                } else {
+                    // NOTE: Not sure if I need to throw here.
+                    return
+                }
             } else {
                 try Task.checkCancellation()
-                messages[idx].attributed = AttributedOutput(string: streamText, results: [
-                    ParserResult(
-                        id: UUID(),
-                        attributedString: AttributedString(stringLiteral: streamText),
-                        parsedType: .plaintext
-                    )
-                ])
+                if idx < messages.count {
+                    messages[idx].attributed = AttributedOutput(string: streamText, results: [
+                        ParserResult(
+                            id: UUID(),
+                            attributedString: AttributedString(stringLiteral: streamText),
+                            parsedType: .plaintext
+                        )
+                    ])
+                } else {
+                    // NOTE: Not sure if I need to throw here.
+                    return
+                }
             }
         } catch {
             try? Task.checkCancellation()
-            messages[idx].responseError = error.localizedDescription
+            if idx < messages.count {
+                messages[idx].responseError = error.localizedDescription
+            } else {
+                // NOTE: Not sure if I need to throw here.
+                return
+            }
         }
 
         // Check if the parsed string is different than the full string.
         if let currentString = currentOutput?.string, currentString != streamText {
             let output = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
             try? Task.checkCancellation()
-            messages[idx].attributed = output
+            if idx < messages.count {
+                messages[idx].attributed = output
+            } else {
+                // NOTE: Not sure if I need to throw here.
+                return
+            }
         }
     }
 
