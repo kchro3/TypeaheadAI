@@ -125,7 +125,7 @@ class ScriptManager {
         DispatchQueue.main.async {
             let alert = NSAlert()
             alert.messageText = "Permission Required"
-            alert.informativeText = "TypeaheadAI wants permission to control Google Chrome to tailor the results. Click 'Open Preferences' to go to the Security & Privacy pane where you can grant permission."
+            alert.informativeText = "TypeaheadAI wants permission to get the active URL. Click 'Open Preferences' to go to the Security & Privacy pane where you can grant permission."
             alert.alertStyle = .warning
             alert.addButton(withTitle: "Open Preferences")
             alert.addButton(withTitle: "Cancel")
