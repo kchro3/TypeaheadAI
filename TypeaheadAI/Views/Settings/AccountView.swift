@@ -9,92 +9,6 @@ import SwiftUI
 import Supabase
 import AuthenticationServices
 
-struct NewAccountView: View {
-    let failedToRegister: Binding<String?>
-    let onSubmit: (String, String) -> Void
-    let onCancel: () -> Void
-
-    @Environment(\.colorScheme) var colorScheme
-
-    @State private var newEmail: String = ""
-    @State private var newPassword: String = ""
-
-    private let descWidth: CGFloat = 80
-    private let height: CGFloat = 200
-    private let width: CGFloat = 300
-
-    var body: some View {
-        VStack(spacing: 15) {
-            Text("New Account")
-                .font(.title2)
-                .fontWeight(.bold)
-
-            HStack {
-                Text("Email")
-                    .frame(width: descWidth, alignment: .trailing)
-
-                TextField("Email", text: $newEmail)
-                    .textFieldStyle(.plain)
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 15)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                    )
-            }
-
-            HStack {
-                Text("Password")
-                    .frame(width: descWidth, alignment: .trailing)
-
-                SecureField(text: $newPassword, label: {
-                    Text("Password")
-                })
-                .textFieldStyle(.plain)
-                .padding(.vertical, 5)
-                .padding(.horizontal, 15)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                )
-            }
-
-            if let reason = failedToRegister.wrappedValue {
-                Text(reason)
-                    .foregroundStyle(.red)
-            }
-
-            HStack {
-                Spacer()
-
-                Button(action: {
-                    onCancel()
-                }, label: {
-                    Text("Cancel")
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .background(RoundedRectangle(cornerRadius: 15)
-                            .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                        )
-                })
-                .buttonStyle(.plain)
-
-                Button(action: {
-                    onSubmit(newEmail, newPassword)
-                }, label: {
-                    Text("Create")
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .background(RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.accentColor)
-                        )
-                })
-                .buttonStyle(.plain)
-            }
-        }
-        .frame(width: width, height: height)
-        .padding(15)
-    }
-}
-
 struct AccountView: View {
     // Use this as a flag for checking if the user is signed in.
     @AppStorage("token3") var token: String?
@@ -102,9 +16,7 @@ struct AccountView: View {
 
     @Environment(\.colorScheme) var colorScheme
 
-    @State private var isSignInVisible: Bool = false
     @State private var isHoveringSignOut: Bool = false
-    @State private var isSheetPresented: Bool = false
     @State private var failedToRegisterReason: String? = nil
     @State private var email: String = ""
     @State private var password: String = ""
@@ -173,60 +85,69 @@ struct AccountView: View {
                 )
             }
 
-            Button {
-                Task {
-                    do {
-                        let authResponse = try await supabase.auth.signIn(email: email, password: password)
-                        let user = authResponse.user
-                        uuid = user.id.uuidString
-                        token = "placeholder"
-                        let _ = try await supabase.auth.session
-                        email = ""
-                        password = ""
-                    } catch {
-                        failedToRegisterReason = error.localizedDescription
-                        failedToSignIn = true
-                    }
-                }
-            } label: {
-                Text("Sign in")
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.accentColor)
-                    )
-            }
-            .buttonStyle(.plain)
-            .alert(isPresented: $failedToSignIn, content: {
-                Alert(title: Text("Failed to sign-in"), message: failedToRegisterReason.map { Text("\($0)") })
-            })
-
-            Button {
-                isSheetPresented.toggle()
-            } label: {
-                Text("Sign up with email")
-            }
-            .sheet(isPresented: $isSheetPresented) {
-                NewAccountView(failedToRegister: $failedToRegisterReason, onSubmit: { email, password in
+            HStack(spacing: 40) {
+                Button(action: {
                     Task {
                         do {
                             try await supabase.auth.signUp(email: email, password: password)
                             let session = try await supabase.auth.session
-                            isSheetPresented = false
 
                             let user = session.user
                             uuid = user.id.uuidString
                             token = "placeholder"
+                            email = ""
+                            password = ""
                         } catch {
                             failedToRegisterReason = error.localizedDescription
+                            failedToSignIn = true
                         }
                     }
-                }, onCancel: {
-                    isSheetPresented = false
-                    failedToRegisterReason = nil
+                }, label: {
+                    Text("Register with email")
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                        )
+                })
+                .buttonStyle(.plain)
+                .alert(isPresented: $failedToSignIn, content: {
+                    Alert(title: Text("Failed to register"), message: failedToRegisterReason.map { Text("\($0)") })
+                })
+
+                Button {
+                    Task {
+                        do {
+                            let authResponse = try await supabase.auth.signIn(email: email, password: password)
+                            let user = authResponse.user
+                            uuid = user.id.uuidString
+                            token = "placeholder"
+                            let _ = try await supabase.auth.session
+                            email = ""
+                            password = ""
+                        } catch {
+                            failedToRegisterReason = error.localizedDescription
+                            failedToSignIn = true
+                        }
+                    }
+                } label: {
+                    Text("Sign in")
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.accentColor)
+                        )
+                }
+                .buttonStyle(.plain)
+                .alert(isPresented: $failedToSignIn, content: {
+                    Alert(title: Text("Failed to sign-in"), message: failedToRegisterReason.map { Text("\($0)") })
                 })
             }
+            .padding(.top, 30)
+
+            Spacer()
         }
+        .padding()
     }
 
     @ViewBuilder
@@ -266,10 +187,6 @@ struct AccountView: View {
             isHovering.wrappedValue = hovering
         }
     }
-}
-
-#Preview {
-    NewAccountView(failedToRegister: .constant(nil), onSubmit: { _, _ in }, onCancel: {})
 }
 
 #Preview {
