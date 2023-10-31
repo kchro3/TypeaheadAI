@@ -15,7 +15,6 @@ struct ModalView: View {
     @ObservedObject var modalManager: ModalManager
     @State private var fontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
     @State private var text: String = ""
-    @FocusState private var isTextFieldFocused: Bool
     @State private var isReplyLocked: Bool = false
     @State private var isOnlineTooltipVisible: Bool = false
     @State private var isOnlineTooltipHovering: Bool = false

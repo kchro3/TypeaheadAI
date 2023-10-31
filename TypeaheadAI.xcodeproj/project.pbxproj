@@ -62,6 +62,8 @@
 		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
 		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
+		2BF4A7E32AF1A52600AA2512 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF4A7E22AF1A52600AA2512 /* GoogleSignIn */; };
+		2BF4A7E52AF1A52600AA2512 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */; };
 		2BF929792AB04D2600FC105B /* MemoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF929782AB04D2600FC105B /* MemoManager.swift */; };
 		2BF9297C2AB13EEA00FC105B /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF9297B2AB13EEA00FC105B /* Markdown */; };
 		2BF929802AB13F3600FC105B /* CodeBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF9297F2AB13F3600FC105B /* CodeBlockView.swift */; };
@@ -160,9 +162,11 @@
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
 				2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */,
 				2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */,
+				2BF4A7E52AF1A52600AA2512 /* GoogleSignInSwift in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 				2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */,
 				2BF9297C2AB13EEA00FC105B /* Markdown in Frameworks */,
+				2BF4A7E32AF1A52600AA2512 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -386,6 +390,8 @@
 				2B4BDB882ACBED2100E55D78 /* SettingsAccess */,
 				2B1F3B7D2AEC5F8500F1BB60 /* Supabase */,
 				2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */,
+				2BF4A7E22AF1A52600AA2512 /* GoogleSignIn */,
+				2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -469,6 +475,7 @@
 				2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */,
 				2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				2B1F3B7F2AEDBDFF00F1BB60 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
+				2BC52A202AF1A27C00721033 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -722,6 +729,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = TypeaheadAI/TypeaheadAI.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -762,6 +770,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = TypeaheadAI/TypeaheadAI.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -958,6 +967,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		2BC52A202AF1A27C00721033 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
 		2BF9297A2AB13EEA00FC105B /* XCRemoteSwiftPackageReference "swift-markdown" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-markdown";
@@ -1006,6 +1023,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
+		};
+		2BF4A7E22AF1A52600AA2512 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2BC52A202AF1A27C00721033 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2BC52A202AF1A27C00721033 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 		2BF9297B2AB13EEA00FC105B /* Markdown */ = {
 			isa = XCSwiftPackageProductDependency;

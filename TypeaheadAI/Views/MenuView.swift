@@ -18,7 +18,7 @@ struct MenuView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
 
-    @AppStorage("token2") var token: String?
+    @AppStorage("token3") var token: String?
     @AppStorage("settingsTab") var settingsTab: String?
 
     @State private var currentPreset: String = ""

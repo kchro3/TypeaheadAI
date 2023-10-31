@@ -9,13 +9,109 @@ import SwiftUI
 import Supabase
 import AuthenticationServices
 
+struct NewAccountView: View {
+    let failedToRegister: Binding<String?>
+    let onSubmit: (String, String) -> Void
+    let onCancel: () -> Void
+
+    @Environment(\.colorScheme) var colorScheme
+
+    @State private var newEmail: String = ""
+    @State private var newPassword: String = ""
+
+    private let descWidth: CGFloat = 80
+    private let height: CGFloat = 200
+    private let width: CGFloat = 300
+
+    var body: some View {
+        VStack(spacing: 15) {
+            Text("New Account")
+                .font(.title2)
+                .fontWeight(.bold)
+
+            HStack {
+                Text("Email")
+                    .frame(width: descWidth, alignment: .trailing)
+
+                TextField("Email", text: $newEmail)
+                    .textFieldStyle(.plain)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 15)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                    )
+            }
+
+            HStack {
+                Text("Password")
+                    .frame(width: descWidth, alignment: .trailing)
+
+                SecureField(text: $newPassword, label: {
+                    Text("Password")
+                })
+                .textFieldStyle(.plain)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 15)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                )
+            }
+
+            if let reason = failedToRegister.wrappedValue {
+                Text(reason)
+                    .foregroundStyle(.red)
+            }
+
+            HStack {
+                Spacer()
+
+                Button(action: {
+                    onCancel()
+                }, label: {
+                    Text("Cancel")
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                        )
+                })
+                .buttonStyle(.plain)
+
+                Button(action: {
+                    onSubmit(newEmail, newPassword)
+                }, label: {
+                    Text("Create")
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.accentColor)
+                        )
+                })
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(width: width, height: height)
+        .padding(15)
+    }
+}
+
 struct AccountView: View {
     // Use this as a flag for checking if the user is signed in.
-    @AppStorage("token2") var token: String?
+    @AppStorage("token3") var token: String?
     @AppStorage("uuid") var uuid: String?
+
+    @Environment(\.colorScheme) var colorScheme
 
     @State private var isSignInVisible: Bool = false
     @State private var isHoveringSignOut: Bool = false
+    @State private var isSheetPresented: Bool = false
+    @State private var failedToRegisterReason: String? = nil
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var failedToSignIn: Bool = false
+    @FocusState private var isTextFieldFocused: Bool
+
+    private let descWidth: CGFloat = 80
 
     let supabase = SupabaseClient(
         supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
@@ -42,56 +138,115 @@ struct AccountView: View {
     @ViewBuilder
     var loggedOutView: some View {
         VStack {
-            Text("Please sign-in to use online mode.")
+            Text("Please sign-in to use online mode. Apple Sign-in is temporarily disabled.")
+                .padding()
 
-            SignInWithAppleButton(.signIn) { request in
-                request.requestedScopes = [.fullName, .email]
-            } onCompletion: { result in
+            HStack {
+                Text("Email")
+                    .frame(width: descWidth, alignment: .trailing)
+
+                TextField("Email", text: $email)
+                    .textFieldStyle(.plain)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 15)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                    )
+                    .focused($isTextFieldFocused)
+                    .onAppear {
+                        isTextFieldFocused = true
+                    }
+            }
+
+            HStack {
+                Text("Password")
+                    .frame(width: descWidth, alignment: .trailing)
+
+                SecureField(text: $password, label: {
+                    Text("Password")
+                })
+                .textFieldStyle(.plain)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 15)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                )
+            }
+
+            Button {
                 Task {
                     do {
-                        guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
-                        else {
-                            return
-                        }
-
-                        guard let idToken = credential.identityToken
-                            .flatMap({ String(data: $0, encoding: .utf8) })
-                        else {
-                            return
-                        }
-
-                        token = idToken
-                        try await supabase.auth.signInWithIdToken(
-                            credentials: .init(
-                                provider: .apple,
-                                idToken: idToken
-                            )
-                        )
-
-                        uuid = try? await supabase.auth.session.user.id.uuidString
+                        let authResponse = try await supabase.auth.signIn(email: email, password: password)
+                        let user = authResponse.user
+                        uuid = user.id.uuidString
+                        token = "placeholder"
+                        let _ = try await supabase.auth.session
+                        email = ""
+                        password = ""
                     } catch {
-                        dump(error)
+                        failedToRegisterReason = error.localizedDescription
+                        failedToSignIn = true
                     }
                 }
+            } label: {
+                Text("Sign in")
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.accentColor)
+                    )
             }
-            .signInWithAppleButtonStyle(.white)
-            .cornerRadius(25)
+            .buttonStyle(.plain)
+            .alert(isPresented: $failedToSignIn, content: {
+                Alert(title: Text("Failed to sign-in"), message: failedToRegisterReason.map { Text("\($0)") })
+            })
+
+            Button {
+                isSheetPresented.toggle()
+            } label: {
+                Text("Sign up with email")
+            }
+            .sheet(isPresented: $isSheetPresented) {
+                NewAccountView(failedToRegister: $failedToRegisterReason, onSubmit: { email, password in
+                    Task {
+                        do {
+                            try await supabase.auth.signUp(email: email, password: password)
+                            let session = try await supabase.auth.session
+                            isSheetPresented = false
+
+                            let user = session.user
+                            uuid = user.id.uuidString
+                            token = "placeholder"
+                        } catch {
+                            failedToRegisterReason = error.localizedDescription
+                        }
+                    }
+                }, onCancel: {
+                    isSheetPresented = false
+                    failedToRegisterReason = nil
+                })
+            }
         }
     }
 
     @ViewBuilder
     var loggedInView: some View {
-        VStack {
-            Text("You're signed in through Apple iCloud!")
+        VStack(alignment: .leading) {
+            Text("You're signed in!")
+                .padding()
+
             Text("User ID: \(uuid ?? "<not found>")")
+                .padding()
 
             buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
                 token = nil
+                uuid = nil
                 Task {
                     try await supabase.auth.signOut()
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func buttonRow(
@@ -111,6 +266,10 @@ struct AccountView: View {
             isHovering.wrappedValue = hovering
         }
     }
+}
+
+#Preview {
+    NewAccountView(failedToRegister: .constant(nil), onSubmit: { _, _ in }, onCancel: {})
 }
 
 #Preview {
