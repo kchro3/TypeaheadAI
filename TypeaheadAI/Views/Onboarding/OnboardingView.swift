@@ -33,7 +33,7 @@ struct OnboardingView: View {
     @State private var currentOutput: AttributedOutput? = nil
     private let parsingTask = ResponseParsingTask()
 
-    @AppStorage("token2") var token: String?
+    @AppStorage("token3") var token: String?
 
     var body: some View {
         VStack {
