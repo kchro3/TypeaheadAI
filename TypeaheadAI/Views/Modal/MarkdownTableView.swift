@@ -13,32 +13,10 @@ struct TableCell: Identifiable, Hashable {
 }
 
 struct GenericTableView: View {
-    var header: [TableCell]
-    var data: [[TableCell]]
+    let header: [TableCell]
+    let data: [[TableCell]]
 
     @Environment(\.colorScheme) private var colorScheme
-
-    init(parserResult: ParserResult) {
-        let rows = NSAttributedString(parserResult.attributedString).string.components(separatedBy: "\n")
-
-        header = []
-        data = []
-        for index in rows.indices {
-            guard !rows[index].isEmpty else {
-                continue
-            }
-
-            let cols = rows[index].components(separatedBy: "\t").map {
-                TableCell(id: $0.trimmingCharacters(in: .whitespaces))
-            }
-
-            if index == 0 {
-                header = cols
-            } else {
-                data.append(cols)
-            }
-        }
-    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -74,6 +52,39 @@ struct GenericTableView: View {
     }
 }
 
+struct MarkdownTableView: View {
+    var header: [TableCell]
+    var data: [[TableCell]]
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    init(parserResult: ParserResult) {
+        let rows = NSAttributedString(parserResult.attributedString).string.components(separatedBy: "\n")
+
+        header = []
+        data = []
+        for index in rows.indices {
+            guard !rows[index].isEmpty else {
+                continue
+            }
+
+            let cols = rows[index].components(separatedBy: "\t").map {
+                TableCell(id: $0.trimmingCharacters(in: .whitespaces))
+            }
+
+            if index == 0 {
+                header = cols
+            } else {
+                data.append(cols)
+            }
+        }
+    }
+
+    var body: some View {
+        GenericTableView(header: header, data: data)
+    }
+}
+
 #Preview {
     let markdownString = "| Unbalanced Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |"
     let parserResult: ParserResult = {
@@ -82,7 +93,7 @@ struct GenericTableView: View {
         return parser.parserResults(from: document)[0]
     }()
 
-    return GenericTableView(parserResult: parserResult)
+    return MarkdownTableView(parserResult: parserResult)
 }
 
 
@@ -94,5 +105,5 @@ struct GenericTableView: View {
         return parser.parserResults(from: document)[0]
     }()
 
-    return GenericTableView(parserResult: parserResult)
+    return MarkdownTableView(parserResult: parserResult)
 }

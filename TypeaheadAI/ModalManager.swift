@@ -382,6 +382,8 @@ class ModalManager: ObservableObject {
     func closeModal() {
         toastWindow?.close()
         isVisible = false
+        self.promptManager?.activePromptID = nil
+        self.clientManager?.cancelStreamingTask()
     }
 
     @MainActor

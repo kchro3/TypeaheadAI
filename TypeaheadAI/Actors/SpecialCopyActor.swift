@@ -62,12 +62,12 @@ actor SpecialCopyActor: CanSimulateCopy {
                         self.numSmartCopies = 1
                     }
 
-                    if let quickActionId = self.promptManager.activePromptID {
+                    if let quickActionID = self.promptManager.activePromptID {
 
                         // NOTE: If the user has specified a quick action, execute the quick action. Use the few-shot mode to reference previously successful copy-pastes.
-                        let history = self.historyManager.fetchHistoryEntries(
+                        let history = self.historyManager.fetchHistoryEntriesAsMessages(
                             limit: 10,
-                            quickActionId: quickActionId,
+                            quickActionId: quickActionID,
                             activeUrl: appContext?.url?.host,
                             activeAppName: appContext?.appName,
                             activeAppBundleIdentifier: appContext?.bundleIdentifier
