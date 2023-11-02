@@ -61,7 +61,7 @@ class IntentManager {
         return originalScore * exp(-decayConstant * deltaTime)
     }
 
-    func fetchIntents(
+    func fetchIntentsAsMessages(
         limit: Int,
         appContext: AppContext?
     ) -> [Message] {
@@ -109,5 +109,60 @@ class IntentManager {
             logger.error("Failed to fetch history entries: \(error.localizedDescription)")
             return []
         }
+    }
+
+    func fetchContextualIntents(
+        limit: Int,
+        appContext: AppContext?
+    ) -> [String] {
+        guard let appContext = appContext else {
+            return []
+        }
+
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "IntentEntry")
+        fetchRequest.resultType = .dictionaryResultType
+
+        var predicates = [NSPredicate]()
+
+        if let url = appContext.url?.host {
+            predicates.append(NSPredicate(format: "url == %@", url))
+        }
+
+        if let appName = appContext.appName {
+            predicates.append(NSPredicate(format: "appName == %@", appName))
+        }
+
+        if let bundleIdentifier = appContext.bundleIdentifier {
+            predicates.append(NSPredicate(format: "bundleIdentifier == %@", bundleIdentifier))
+        }
+
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+
+        let countExpression = NSExpression(forFunction: "count:", arguments: [NSExpression(forKeyPath: "prompt")])
+        let countExpressionDescription = NSExpressionDescription()
+        countExpressionDescription.name = "count"
+        countExpressionDescription.expression = countExpression
+        countExpressionDescription.expressionResultType = .integer32AttributeType
+
+        fetchRequest.propertiesToFetch = ["prompt", countExpressionDescription]
+        fetchRequest.propertiesToGroupBy = ["prompt"]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "count", ascending: false)]
+        fetchRequest.fetchLimit = limit
+
+        do {
+            let results = try managedObjectContext.fetch(fetchRequest) as? [NSDictionary]
+            let intents = results?.compactMap { dict -> String? in
+                if let prompt = dict["prompt"] as? String,
+                   let _ = dict["count"] as? Int {
+                    return prompt
+                }
+                return nil
+            }
+            return intents ?? []
+        } catch {
+            logger.error("Failed to fetch top intents: \(error.localizedDescription)")
+        }
+
+        return []
     }
 }

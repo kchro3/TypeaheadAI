@@ -54,32 +54,34 @@ class HistoryManager {
 
     func fetchHistoryEntriesAsMessages(
         limit: Int,
-        quickActionId: UUID? = nil,
-        activeUrl: String? = nil,
-        activeAppName: String? = nil,
-        activeAppBundleIdentifier: String? = nil
+        appContext: AppContext?,
+        quickActionID: UUID? = nil
     ) -> [Message] {
+        guard let appContext = appContext else {
+            return []
+        }
+
         let fetchRequest: NSFetchRequest<HistoryEntry> = HistoryEntry.fetchRequest()
         var predicates = [NSPredicate]()
 
-        if let quickActionId = quickActionId {
-            predicates.append(NSPredicate(format: "quickActionId == %@", quickActionId as CVarArg))
+        if let quickActionID = quickActionID {
+            predicates.append(NSPredicate(format: "quickActionId == %@", quickActionID as CVarArg))
         }
 
-        if let activeUrl = activeUrl {
-            predicates.append(NSPredicate(format: "activeUrl == %@", activeUrl))
+        if let url = appContext.url?.host {
+            predicates.append(NSPredicate(format: "activeUrl == %@", url))
         }
 
-        if let activeAppName = activeAppName {
-            predicates.append(NSPredicate(format: "activeAppName == %@", activeAppName))
+        if let appName = appContext.appName {
+            predicates.append(NSPredicate(format: "activeAppName == %@", appName))
         }
 
-        if let activeAppBundleIdentifier = activeAppBundleIdentifier {
-            predicates.append(NSPredicate(format: "activeAppBundleIdentifier == %@", activeAppBundleIdentifier))
+        if let bundleIdentifier = appContext.bundleIdentifier {
+            predicates.append(NSPredicate(format: "activeAppBundleIdentifier == %@", bundleIdentifier))
         }
 
         fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "numMessages", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         fetchRequest.fetchLimit = limit
 
         do {

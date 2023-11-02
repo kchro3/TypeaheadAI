@@ -37,7 +37,7 @@ struct Message: Codable, Identifiable, Equatable {
 
 class ModalManager: ObservableObject {
     @Published var messages: [Message]
-    @Published var userIntents: [String]
+    @Published var userIntents: [String]?
 
     @Published var triggerFocus: Bool
     @Published var onboardingMode: Bool
@@ -63,12 +63,9 @@ class ModalManager: ObservableObject {
     private var currentOutput: AttributedOutput?
     private let parsingTask = ResponseParsingTask()
 
-    private var signinTimer: Timer?
-    private var copyTimer: Timer?
-
     init() {
         self.messages = []
-        self.userIntents = []
+        self.userIntents = nil
         self.triggerFocus = false
         self.onboardingMode = false
         self.isVisible = false
@@ -110,7 +107,7 @@ class ModalManager: ObservableObject {
         currentTextCount = 0
         currentOutput = nil
         isPending = false
-        userIntents = []
+        userIntents = nil
     }
 
     @MainActor
@@ -124,7 +121,7 @@ class ModalManager: ObservableObject {
         currentTextCount = 0
         currentOutput = nil
         isPending = false
-        userIntents = []
+        userIntents = nil
 
         if (toastWindow?.isVisible ?? false) {
             NSApp.activate(ignoringOtherApps: true)
@@ -163,7 +160,7 @@ class ModalManager: ObservableObject {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
             // If the AI response doesn't exist yet, create one.
             messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
-            userIntents = []
+            userIntents = nil
 
             currentTextCount = 0
             currentOutput = nil
@@ -260,7 +257,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func appendImage(_ image: ImageData, prompt: String, caption: String?) {
         isPending = false
-        userIntents = []
+        userIntents = nil
 
         var placeholder = "<image placeholder>\n"
         placeholder += " - prompt used: \(prompt)"
@@ -290,7 +287,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string) {
         isPending = true
-        userIntents = []
+        userIntents = nil
 
         messages.append(
             Message(
@@ -310,7 +307,7 @@ class ModalManager: ObservableObject {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
-        userIntents = []
+        userIntents = nil
 
         isPending = true
         self.clientManager?.refine(
@@ -354,7 +351,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func replyToUserMessage() {
         isPending = true
-        userIntents = []
+        userIntents = nil
 
         if let lastMessage = self.messages.last {
             if let _ = lastMessage.responseError {

@@ -106,20 +106,34 @@ struct ModalView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             VStack(spacing: 5) {
-                if modalManager.userIntents.count > 0 {
-                    UserIntentsView(modalManager: modalManager)
+                if let userIntents = modalManager.userIntents,
+                   userIntents.count > 0 {
+                    UserIntentsView(userIntents: userIntents) { userIntent in
+                        // On button click, set the new message & reset the user intents
+                        modalManager.addUserMessage(userIntent, implicit: true)
+                        modalManager.userIntents = nil
+                    }
                 }
 
                 HStack {
                     CustomTextField(
                         text: $text,
-                        placeholderText: modalManager.messages.isEmpty ? "Ask me anything!" : "Ask a follow-up question...",
+                        placeholderText: (
+                            modalManager.messages.isEmpty ?
+                            "Ask me anything!" : 
+                                (
+                                    modalManager.userIntents == nil ?
+                                    "Ask a follow-up question..." :
+                                    "What do you want to do with this?"
+                                )
+                        ),
                         autoCompleteSuggestions: self.getPrompts()
                     ) { text in
                         if !text.isEmpty {
-                            if !modalManager.userIntents.isEmpty {
+                            if let _ = modalManager.userIntents {
+                                // If userIntents is non-nil, reset it.
                                 modalManager.addUserMessage(text, implicit: true)
-                                modalManager.userIntents = []
+                                modalManager.userIntents = nil
                             } else {
                                 modalManager.addUserMessage(text)
                             }

@@ -117,6 +117,7 @@ actor SpecialCutActor {
                             Task {
                                 await self.modalManager.clearText(stickyMode: stickyMode)
                                 await self.modalManager.showModal()
+                                await NSApp.activate(ignoringOtherApps: true)
 
                                 if let captionPayload = await self.clientManager.captionImage(tiffData: tiffData) {
                                     await self.modalManager.appendUserImage(tiffData, caption: captionPayload.caption, ocrText: recognizedText)
@@ -157,6 +158,7 @@ actor SpecialCutActor {
                             Task {
                                 await self.modalManager.clearText(stickyMode: stickyMode)
                                 await self.modalManager.showModal()
+                                await NSApp.activate(ignoringOtherApps: true)
 
                                 if let activePrompt = self.clientManager.getActivePrompt() {
                                     await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
