@@ -97,13 +97,9 @@ actor SpecialCopyActor: CanSimulateCopy {
                             )
                         }
                     } else {
-                        let previousPrompts = self.clientManager.intentManager?.fetchIntents(
-                            limit: 10,
-                            appContext: appContext
-                        )
-
                         Task {
                             await self.modalManager.setUserMessage(copiedText, messageType: messageType)
+
                             do {
                                 if let intents = try await self.clientManager.suggestIntents(
                                     id: UUID(),
@@ -114,11 +110,33 @@ actor SpecialCopyActor: CanSimulateCopy {
                                     userLang: Locale.preferredLanguages.first ?? "",
                                     copiedText: copiedText,
                                     messages: self.modalManager.messages,
-                                    history: previousPrompts,
+                                    history: [],
                                     appContext: appContext,
                                     incognitoMode: !self.modalManager.online
-                                ) {
+                                ), !intents.intents.isEmpty {
                                     await self.modalManager.setUserIntents(intents: intents.intents)
+                                } else {
+                                    // NOTE: This should be more helpful.
+                                    await self.clientManager.sendStreamRequest(
+                                        id: UUID(),
+                                        username: NSUserName(),
+                                        userFullName: NSFullUserName(),
+                                        userObjective: nil,
+                                        userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                                        userLang: Locale.preferredLanguages.first ?? "",
+                                        copiedText: copiedText,
+                                        messages: self.modalManager.messages,
+                                        history: nil,
+                                        appContext: appContext,
+                                        incognitoMode: !self.modalManager.online,
+                                        timeout: 10,
+                                        streamHandler: self.modalManager.defaultHandler,
+                                        completion: { _ in
+                                            DispatchQueue.main.async {
+                                                self.modalManager.isPending = false
+                                            }
+                                        }
+                                    )
                                 }
                             } catch let error as ClientManagerError {
                                 self.logger.error("\(error.localizedDescription)")

@@ -165,18 +165,18 @@ class ClientManager {
         supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
 
     #if DEBUG
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
-//    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
+//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
+    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
     #else
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
@@ -219,6 +219,8 @@ class ClientManager {
         }
     }
 
+    /// This used to call the suggest intents API, but it's too slow.
+    /// This is using CoreData instead of remotely fetching the user intents.
     func suggestIntents(
         id: UUID,
         username: String,
@@ -253,33 +255,10 @@ class ClientManager {
         // NOTE: Cache the payload so we know what text was copied
         self.cacheResponse(nil, for: payload)
 
-        if incognitoMode {
-            return try? await llamaModelManager?.suggestIntents(payload: payload)
+        if let intents = self.intentManager?.fetchContextualIntents(limit: 10, appContext: appContext) {
+            return SuggestIntentsPayload(intents: intents)
         } else {
-            guard let httpBody = try? JSONEncoder().encode(payload) else {
-                throw ClientManagerError.badRequest("Request was malformed...")
-            }
-
-            var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
-            urlRequest.httpMethod = "POST"
-            urlRequest.httpBody = httpBody
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            let (data, resp) = try await self.session.data(for: urlRequest)
-
-            guard let httpResponse = resp as? HTTPURLResponse else {
-                throw ClientManagerError.serverError("Something went wrong...")
-            }
-
-            guard 200...299 ~= httpResponse.statusCode else {
-                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                    throw ClientManagerError.serverError(errorResponse.detail)
-                } else {
-                    throw ClientManagerError.serverError("Something went wrong...")
-                }
-            }
-
-            return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
+            return nil
         }
     }
 
@@ -356,7 +335,7 @@ class ClientManager {
                         appContext: payload.appContext
                     )
 
-                    history = self.intentManager?.fetchIntents(
+                    history = self.intentManager?.fetchIntentsAsMessages(
                         limit: 10,
                         appContext: payload.appContext
                     )
