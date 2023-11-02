@@ -117,6 +117,8 @@ class ModalManager: ObservableObject {
     func forceRefresh() {
         self.clientManager?.cancelStreamingTask()
         self.clientManager?.flushCache()
+        self.promptManager?.activePromptID = nil
+
         onboardingMode = false
         messages = []
         currentTextCount = 0

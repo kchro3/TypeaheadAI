@@ -52,7 +52,7 @@ class HistoryManager {
         return newEntry
     }
 
-    func fetchHistoryEntries(
+    func fetchHistoryEntriesAsMessages(
         limit: Int,
         quickActionId: UUID? = nil,
         activeUrl: String? = nil,

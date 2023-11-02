@@ -345,6 +345,9 @@ class ClientManager {
                 if let userIntent = userIntent {
                     // NOTE: Check if the user intent is also a Quick Action
                     quickAction = self.promptManager?.getByLabel(userIntent)
+                    if let quickActionId = quickAction?.id {
+                        await self.promptManager?.setActivePrompt(id: quickActionId)
+                    }
 
                     // NOTE: We cached the copiedText earlier
                     _ = self.intentManager?.addIntentEntry(

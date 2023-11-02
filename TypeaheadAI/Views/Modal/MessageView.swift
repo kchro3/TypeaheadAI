@@ -254,7 +254,7 @@ struct MessageView: View {
                                 CodeBlockView(parserResult: parsed)
                                     .padding(.bottom, 24)
                             } else if case .table = parsed.parsedType {
-                                GenericTableView(parserResult: parsed)
+                                MarkdownTableView(parserResult: parsed)
                                     .textSelection(.enabled)
                             } else {
                                 Text(parsed.attributedString)
