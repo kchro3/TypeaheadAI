@@ -16,6 +16,9 @@ struct QuickActionDetails: View {
     let onSubmit: ((String, String) -> Void)?
 
     @FetchRequest(entity: HistoryEntry.entity(), sortDescriptors: []) var history: FetchedResults<HistoryEntry>
+    @State private var selectedRow: HistoryEntry.ID?
+    @State private var isSheetPresented: Bool = false
+    @State private var confirmDelete: Bool = false
 
     @Binding var isEditing: Bool
     @Binding var mutableLabel: String
@@ -53,104 +56,151 @@ struct QuickActionDetails: View {
 
     @ViewBuilder
     var readWriteView: some View {
-        VStack {
-            // Read-Write Header
-            HStack {
-                Button(action: {
-                    isEditing = false
-                    onDelete?()
-                }, label: {
-                    Image(systemName: "trash.fill")
-                    Text("Delete")
-                        .foregroundStyle(.white)
-                })
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(.red.opacity(0.4)))
-                .buttonStyle(.plain)
-
-                Spacer()
-
-                Button(action: {
-                    isEditing = false
-                }, label: {
-                    Text("Cancel")
-                })
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                )
-                .buttonStyle(.plain)
-
-                Button(action: {
-                    isEditing = false
-                    onSubmit?(
-                        mutableLabel,
-                        mutableDetails
-                    )
-                }, label: {
-                    Text("Save")
-                        .foregroundStyle(.white)
-                })
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.accentColor))
-                .buttonStyle(.plain)
-            }
-            .frame(maxWidth: .infinity)
-
-            // Body
-            VStack(alignment: .leading) {
-
-                // Title
+        ScrollView {
+            VStack {
+                // Read-Write Header
                 HStack {
-                    Text("Name")
-                        .frame(width: descWidth, alignment: .trailing)
+                    Button(action: {
+                        isEditing = false
+                        onDelete?()
+                    }, label: {
+                        Image(systemName: "trash.fill")
+                        Text("Delete")
+                            .foregroundStyle(.white)
+                    })
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(.red.opacity(0.4)))
+                    .buttonStyle(.plain)
 
-                    CustomTextField(
-                        text: $mutableLabel,
-                        placeholderText: quickAction.prompt ?? "Name of command",
-                        autoCompleteSuggestions: [],
-                        onEnter: { _ in },
-                        flushOnEnter: false
-                    )
-                    .lineLimit(1)
+                    Spacer()
+
+                    Button(action: {
+                        isEditing = false
+                    }, label: {
+                        Text("Cancel")
+                    })
                     .padding(.vertical, 5)
                     .padding(.horizontal, 10)
                     .background(RoundedRectangle(cornerRadius: 15)
                         .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                     )
+                    .buttonStyle(.plain)
+
+                    Button(action: {
+                        isEditing = false
+                        onSubmit?(
+                            mutableLabel,
+                            mutableDetails
+                        )
+                    }, label: {
+                        Text("Save")
+                            .foregroundStyle(.white)
+                    })
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.accentColor))
+                    .buttonStyle(.plain)
                 }
+                .frame(maxWidth: .infinity)
 
-                // Details
-                HStack {
-                    Text("Prompt")
-                        .frame(width: descWidth, alignment: .trailing)
+                // Body
+                VStack(alignment: .leading) {
 
-                    TextEditor(text: $mutableDetails)
-                        .font(.system(.body))
-                        .scrollContentBackground(.hidden)
-                        .lineLimit(nil)
+                    // Title
+                    HStack {
+                        Text("Name")
+                            .frame(width: descWidth, alignment: .trailing)
+
+                        CustomTextField(
+                            text: $mutableLabel,
+                            placeholderText: quickAction.prompt ?? "Name of command",
+                            autoCompleteSuggestions: [],
+                            onEnter: { _ in },
+                            flushOnEnter: false
+                        )
+                        .lineLimit(1)
                         .padding(.vertical, 5)
                         .padding(.horizontal, 10)
                         .background(RoundedRectangle(cornerRadius: 15)
                             .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                         )
-                }
+                    }
 
-                Spacer()
+                    // Details
+                    HStack {
+                        Text("Prompt")
+                            .frame(width: descWidth, alignment: .trailing)
+
+                        TextEditor(text: $mutableDetails)
+                            .font(.system(.body))
+                            .scrollContentBackground(.hidden)
+                            .lineLimit(nil)
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .background(RoundedRectangle(cornerRadius: 15)
+                                .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                            )
+                            .frame(minHeight: 50)
+                    }
+
+                    // Examples
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Examples")
+                            .foregroundStyle(Color.accentColor)
+
+                        Table(history, selection: $selectedRow) {
+                            TableColumn("Date") { entry in
+                                Text(entry.timestamp?.formatted() ?? "unknown")
+                            }
+                            TableColumn("Copied Text") { entry in
+                                Text(entry.copiedText ?? "none")
+                            }
+                            TableColumn("Pasted Text") { entry in
+                                Text(entry.pastedResponse ?? "none")
+                            }
+                            TableColumn("Active App") { entry in
+                                Text(entry.activeAppName ?? "unknown")
+                            }
+                            TableColumn("Active URL") { entry in
+                                Text(entry.activeUrl ?? "none")
+                            }
+                        }
+                        .onDeleteCommand(perform: {
+                            confirmDelete = true
+                        })
+                        .alert(isPresented: $confirmDelete) {
+                            Alert(
+                                title: Text("Are you sure you want to delete this example?"),
+                                message: Text("If you delete this, TypeaheadAI will forget about this example, and this action cannot be undone."),
+                                primaryButton: .destructive(Text("Delete")) {
+                                    deleteSelectedRow()
+                                },
+                                secondaryButton: .cancel()
+                            )
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                    )
+                    Spacer()
+
+                    Spacer()
+                }
+                .padding(10)
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity,
+                    alignment: .leading
+                )
             }
-            .padding(10)
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .leading
-            )
+            .padding(15)
         }
-        .padding(15)
     }
 
     @ViewBuilder
@@ -202,7 +252,7 @@ struct QuickActionDetails: View {
                         Text("Examples")
                             .foregroundStyle(Color.accentColor)
 
-                        Table(history) {
+                        Table(history, selection: $selectedRow) {
                             TableColumn("Date") { entry in
                                 Text(entry.timestamp?.formatted() ?? "unknown")
                             }
@@ -236,6 +286,31 @@ struct QuickActionDetails: View {
                 )
             }
             .padding(15)
+        }
+    }
+
+    private func deleteSelectedRow() {
+        if let selectedRow = selectedRow,
+           let historyId = selectedRow {
+            let fetchRequest: NSFetchRequest<HistoryEntry> = HistoryEntry.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", historyId as CVarArg)
+
+            do {
+                let fetchedObjects = try managedObjectContext.fetch(fetchRequest)
+                if let object = fetchedObjects.first {
+                    managedObjectContext.delete(object)
+
+                    do {
+                        try managedObjectContext.save()
+                    } catch {
+                        // Handle the error appropriately
+                        print("Error deleting entry: \(error.localizedDescription)")
+                    }
+                }
+            } catch {
+                // Handle the error appropriately
+                print("Error fetching entry: \(error.localizedDescription)")
+            }
         }
     }
 }
