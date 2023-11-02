@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct UserIntentsView: View {
-    @ObservedObject var modalManager: ModalManager
+    let userIntents: [String]
+    let onButtonClick: ((String) -> Void)?
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                ForEach(modalManager.userIntents.indices, id: \.self) { index in
+                ForEach(userIntents.indices, id: \.self) { index in
                     intent(for: index)
                         .padding([.horizontal, .vertical], 5)
                 }
@@ -23,10 +24,9 @@ struct UserIntentsView: View {
 
     private func intent(for index: Int) -> some View {
         Button(action: {
-            modalManager.addUserMessage(modalManager.userIntents[index], implicit: true)
-            modalManager.userIntents = []
+            onButtonClick?(userIntents[index])
         }) {
-            Text(modalManager.userIntents[index])
+            Text(userIntents[index])
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .foregroundColor(.primary)
@@ -43,22 +43,6 @@ struct UserIntentsView: View {
 }
 
 #Preview {
-    // Create an in-memory Core Data store
-    let container = NSPersistentContainer(name: "TypeaheadAI")
-    container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
-    container.loadPersistentStores { _, error in
-        if let error = error as NSError? {
-            fatalError("Unresolved error \(error), \(error.userInfo)")
-        }
-    }
-
-    let modalManager = ModalManager()
-    modalManager.userIntents = [
-        "Test",
-        "This is a longer sentence",
-        "How about a third sentence"
-    ]
-
-    return UserIntentsView(modalManager: modalManager)
+    UserIntentsView(userIntents: ["Test", "This is a longer sentence", "How about a third sentence"], onButtonClick: nil)
         .frame(width: 400, height: 200)
 }

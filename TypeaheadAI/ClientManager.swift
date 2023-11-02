@@ -154,6 +154,7 @@ class ClientManager {
     var promptManager: PromptManager? = nil
     var appContextManager: AppContextManager? = nil
     var intentManager: IntentManager? = nil
+    var historyManager: HistoryManager? = nil
 
     private let session: URLSession
 
@@ -324,19 +325,23 @@ class ClientManager {
                 if let userIntent = userIntent {
                     // NOTE: Check if the user intent is also a Quick Action
                     quickAction = self.promptManager?.getByLabel(userIntent)
-                    if let quickActionId = quickAction?.id {
-                        await self.promptManager?.setActivePrompt(id: quickActionId)
+                    if let quickActionID = quickAction?.id {
+                        // NOTE: This is probably a stupid way of managing the state
+                        await self.promptManager?.setActivePrompt(id: quickActionID)
+
+                        // Create a few-shot prompt from smart-copy-paste history
+                        history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickActionID)
+                    } else {
+                        history = self.intentManager?.fetchIntentsAsMessages(
+                            limit: 10,
+                            appContext: payload.appContext
+                        )
                     }
 
                     // NOTE: We cached the copiedText earlier
                     _ = self.intentManager?.addIntentEntry(
                         prompt: userIntent,
                         copiedText: payload.copiedText,
-                        appContext: payload.appContext
-                    )
-
-                    history = self.intentManager?.fetchIntentsAsMessages(
-                        limit: 10,
                         appContext: payload.appContext
                     )
                 }

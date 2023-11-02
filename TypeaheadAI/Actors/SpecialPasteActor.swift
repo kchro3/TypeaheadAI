@@ -118,6 +118,10 @@ actor SpecialPasteActor: CanSimulatePaste {
             } else {
                 self.simulatePaste()
             }
+
+            Task {
+                await self.modalManager.closeModal()
+            }
         })
     }
 }
