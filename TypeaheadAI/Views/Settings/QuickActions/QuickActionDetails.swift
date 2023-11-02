@@ -140,33 +140,67 @@ struct QuickActionDetails: View {
                             .lineLimit(nil)
                             .padding(.vertical, 5)
                             .padding(.horizontal, 10)
-                            .background(RoundedRectangle(cornerRadius: 15)
+                            .background(RoundedRectangle(cornerRadius: 10)
                                 .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                             )
                             .frame(minHeight: 50)
                     }
 
-                    // Examples
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("Examples")
-                            .foregroundStyle(Color.accentColor)
+                    Divider()
 
+                    Text("Examples")
+                        .font(.title3)
+                        .foregroundStyle(Color.accentColor)
+
+                    // Examples
+                    VStack {
                         Table(history, selection: $selectedRow) {
-                            TableColumn("Date") { entry in
-                                Text(entry.timestamp?.formatted() ?? "unknown")
-                            }
                             TableColumn("Copied Text") { entry in
                                 Text(entry.copiedText ?? "none")
                             }
                             TableColumn("Pasted Text") { entry in
                                 Text(entry.pastedResponse ?? "none")
                             }
-                            TableColumn("Active App") { entry in
-                                Text(entry.activeAppName ?? "unknown")
+                        }
+                        .contextMenu(menuItems: {
+                            Button {
+                                selectedRow = nil
+                                isSheetPresented = true
+                            } label: {
+                                Text("Add New Example")
                             }
-                            TableColumn("Active URL") { entry in
-                                Text(entry.activeUrl ?? "none")
+
+                            if let selectedRow = selectedRow, let _ = selectedRow {
+                                Button {
+                                    isSheetPresented = true
+                                } label: {
+                                    Text("Edit")
+                                }
+
+                                Button {
+                                    confirmDelete = true
+                                } label: {
+                                    Text("Delete")
+                                }
                             }
+                        })
+                        .sheet(isPresented: $isSheetPresented, onDismiss: {
+                            isSheetPresented = false
+                        }) {
+                            QuickActionExampleForm(
+                                selectedRow: selectedRow,
+                                onFetch: self.fetchHistoryEntry,
+                                onSubmit: { (copiedText, pastedText) in
+                                    self.upsertExample(
+                                        copiedText: copiedText,
+                                        pastedText: pastedText
+                                    )
+                                    isSheetPresented = false
+                                },
+                                onCancel: {
+                                    isSheetPresented = false
+                                }
+                            )
                         }
                         .onDeleteCommand(perform: {
                             confirmDelete = true
@@ -181,16 +215,9 @@ struct QuickActionDetails: View {
                                 secondaryButton: .cancel()
                             )
                         }
-                        .frame(maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
+                        .cornerRadius(10)
                     }
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                    )
-                    Spacer()
-
-                    Spacer()
+                    .frame(maxWidth: .infinity, minHeight: 150, maxHeight: .infinity, alignment: .leading)
                 }
                 .padding(10)
                 .frame(
@@ -253,30 +280,20 @@ struct QuickActionDetails: View {
                             .foregroundStyle(Color.accentColor)
 
                         Table(history, selection: $selectedRow) {
-                            TableColumn("Date") { entry in
-                                Text(entry.timestamp?.formatted() ?? "unknown")
-                            }
                             TableColumn("Copied Text") { entry in
                                 Text(entry.copiedText ?? "none")
                             }
                             TableColumn("Pasted Text") { entry in
                                 Text(entry.pastedResponse ?? "none")
                             }
-                            TableColumn("Active App") { entry in
-                                Text(entry.activeAppName ?? "unknown")
-                            }
-                            TableColumn("Active URL") { entry in
-                                Text(entry.activeUrl ?? "none")
-                            }
                         }
-                        .frame(maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
+                        .frame(maxWidth: .infinity,  minHeight: 150, maxHeight: .infinity, alignment: .leading)
+                        .cornerRadius(10)
                     }
                     .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 15)
                         .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                     )
-                    Spacer()
                 }
                 .padding(10)
                 .frame(
@@ -286,6 +303,66 @@ struct QuickActionDetails: View {
                 )
             }
             .padding(15)
+        }
+    }
+
+    private func fetchHistoryEntry(uuid: UUID) -> HistoryEntry? {
+        let fetchRequest: NSFetchRequest<HistoryEntry> = HistoryEntry.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", uuid as CVarArg)
+
+        do {
+            let fetchedObjects = try managedObjectContext.fetch(fetchRequest)
+            if let object = fetchedObjects.first {
+                return object
+            }
+        } catch {
+            // Handle the error appropriately
+            print("Error fetching entry: \(error.localizedDescription)")
+        }
+
+        return nil
+    }
+
+    private func upsertExample(copiedText: String, pastedText: String) {
+        if let selectedRow = selectedRow,
+           let historyId = selectedRow {
+            // Update flow
+            let fetchRequest: NSFetchRequest<HistoryEntry> = HistoryEntry.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", historyId as CVarArg)
+
+            do {
+                let fetchedObjects = try managedObjectContext.fetch(fetchRequest)
+                if let object = fetchedObjects.first {
+                    object.copiedText = copiedText
+                    object.pastedResponse = pastedText
+
+                    do {
+                        try managedObjectContext.save()
+                    } catch {
+                        // Handle the error appropriately
+                        print("Error fetching entry: \(error.localizedDescription)")
+                    }
+                }
+            } catch {
+                // Handle the error appropriately
+                print("Error fetching entry: \(error.localizedDescription)")
+            }
+        } else {
+            // Create new example flow
+            let newEntry = HistoryEntry(context: managedObjectContext)
+            newEntry.id = UUID()
+            newEntry.timestamp = Date()
+            newEntry.quickActionId = quickAction.id
+            newEntry.copiedText = copiedText
+            newEntry.pastedResponse = pastedText
+            newEntry.numMessages = Int16(0)
+
+            do {
+                try managedObjectContext.save()
+            } catch {
+                // Handle the error appropriately
+                print("Error writing entry: \(error.localizedDescription)")
+            }
         }
     }
 

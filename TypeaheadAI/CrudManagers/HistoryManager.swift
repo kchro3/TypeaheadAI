@@ -69,15 +69,15 @@ class HistoryManager {
         }
 
         if let url = appContext.url?.host {
-            predicates.append(NSPredicate(format: "activeUrl == %@", url))
+            predicates.append(NSPredicate(format: "activeUrl == %@ || activeUrl == nil", url))
         }
 
         if let appName = appContext.appName {
-            predicates.append(NSPredicate(format: "activeAppName == %@", appName))
+            predicates.append(NSPredicate(format: "activeAppName == %@ || activeAppName == nil", appName))
         }
 
         if let bundleIdentifier = appContext.bundleIdentifier {
-            predicates.append(NSPredicate(format: "activeAppBundleIdentifier == %@", bundleIdentifier))
+            predicates.append(NSPredicate(format: "activeAppBundleIdentifier == %@ || activeAppBundleIdentifier == nil", bundleIdentifier))
         }
 
         fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
