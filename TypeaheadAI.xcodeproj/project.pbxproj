@@ -37,6 +37,7 @@
 		2B520D852AC82EA100310426 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D842AC82EA100310426 /* AccountView.swift */; };
 		2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */; };
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
+		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
@@ -120,6 +121,7 @@
 		2B520D842AC82EA100310426 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDetails.swift; sourceTree = "<group>"; };
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
+		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 				2B0B30182ADCBF1600338B76 /* QuickActionsView.swift */,
 				2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */,
 				2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */,
+				2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */,
 			);
 			path = QuickActions;
 			sourceTree = "<group>";
@@ -582,6 +585,7 @@
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
 				2BF929822AB13F7900FC105B /* MarkdownAttributedStringParser.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
+				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,
 				2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

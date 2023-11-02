@@ -166,18 +166,18 @@ class ClientManager {
         supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
 
     #if DEBUG
-//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
-    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
+    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
+    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+//    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
+//    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
     #else
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!

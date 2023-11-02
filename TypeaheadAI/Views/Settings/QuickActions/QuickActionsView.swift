@@ -87,12 +87,12 @@ struct QuickActionsView: View {
             }
             .padding()
 
-            searchBar
-                .padding()
-
             // Two-panel view
             HStack {
                 VStack {
+                    searchBar
+                        .padding(10)
+
                     List(quickActions) { quickAction in
                         Button(action: {
                             activeQuickAction = quickAction
@@ -105,10 +105,10 @@ struct QuickActionsView: View {
                         .buttonStyle(.plain)
                     }
                     .listStyle(.sidebar)
-                    .frame(maxWidth: 200)
                     .scrollIndicators(.visible)
                     .scrollContentBackground(.hidden)
                 }
+                .frame(maxWidth: 200)
 
                 if let activeQuickAction = activeQuickAction {
                     QuickActionDetails(
