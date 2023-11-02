@@ -8,16 +8,18 @@
 import SwiftUI
 
 struct QuickActionDetails: View {
+    @Environment(\.managedObjectContext) var managedObjectContext
+    @Environment(\.colorScheme) var colorScheme
+
     let quickAction: PromptEntry
     let onDelete: (() -> Void)?
     let onSubmit: ((String, String) -> Void)?
+
     @FetchRequest(entity: HistoryEntry.entity(), sortDescriptors: []) var history: FetchedResults<HistoryEntry>
 
     @Binding var isEditing: Bool
     @Binding var mutableLabel: String
     @Binding var mutableDetails: String
-
-    @Environment(\.colorScheme) var colorScheme
 
     private let descWidth: CGFloat = 50
 
@@ -33,6 +35,10 @@ struct QuickActionDetails: View {
         self._isEditing = isEditing
         self._mutableLabel = mutableLabel
         self._mutableDetails = mutableDetails
+        self._history = FetchRequest<HistoryEntry>(
+            sortDescriptors: [],
+            predicate: NSPredicate(format: "quickActionId == %@", quickAction.id! as CVarArg)
+        )
         self.onDelete = onDelete
         self.onSubmit = onSubmit
     }
@@ -153,6 +159,12 @@ struct QuickActionDetails: View {
             VStack {
                 // Read-only Header
                 HStack {
+                    // Title
+                    Text(quickAction.prompt ?? "<none>")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .padding(10)
+
                     Spacer()
 
                     Button(action: {
@@ -174,12 +186,6 @@ struct QuickActionDetails: View {
 
                 // Body
                 VStack(alignment: .leading) {
-                    // Title
-                    Text(quickAction.prompt ?? "<none>")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(10)
-
                     // Details
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Prompt")
@@ -213,6 +219,7 @@ struct QuickActionDetails: View {
                                 Text(entry.activeUrl ?? "none")
                             }
                         }
+                        .frame(maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
                     }
                     .padding(10)
                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -15,95 +15,16 @@ struct QuickActionRow: View {
 
     var body: some View {
         Text(quickAction.prompt ?? "none")
-            .padding(.vertical, 5)
+            .padding(.vertical, 8)
             .padding(.horizontal, 10)
             .background(
-                RoundedRectangle(cornerRadius: 15)
+                RoundedRectangle(cornerRadius: 10)
                     .fill(
                         isActive ?
                         Color.accentColor :
                         (colorScheme == .dark ? Color.black.opacity(0.2) : Color.secondary.opacity(0.15))
                     )
             )
-    }
-}
-
-struct NewQuickActionForm: View {
-    @State private var newLabel: String = ""
-    @State private var newDetails: String = ""
-    let onSubmit: (String, String) -> Void
-    let onCancel: () -> Void
-
-    @Environment(\.colorScheme) var colorScheme
-    private let descWidth: CGFloat = 50
-    private let height: CGFloat = 300
-    private let width: CGFloat = 400
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("New Quick Action")
-                .font(.title2)
-                .fontWeight(.bold)
-
-            HStack {
-                Text("Label")
-                    .frame(width: descWidth, alignment: .trailing)
-
-                TextField("Label", text: $newLabel)
-                    .textFieldStyle(.plain)
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 15)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                    )
-            }
-
-            // Details
-            HStack {
-                Text("Prompt")
-                    .frame(width: descWidth, alignment: .trailing)
-
-                TextEditor(text: $newDetails)
-                    .font(.system(.body))
-                    .scrollContentBackground(.hidden)
-                    .lineLimit(nil)
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                    )
-            }
-
-            HStack {
-                Spacer()
-
-                Button(action: {
-                    onCancel()
-                }, label: {
-                    Text("Cancel")
-                })
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                )
-                .buttonStyle(.plain)
-
-                Button(action: {
-                    onSubmit(newLabel, newDetails)
-                }, label: {
-                    Text("Create")
-                })
-                .padding(.vertical, 5)
-                .padding(.horizontal, 10)
-                .background(RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.accentColor)
-                )
-                .buttonStyle(.plain)
-            }
-        }
-        .frame(width: width, height: height)
-        .padding(15)
     }
 }
 
@@ -133,6 +54,7 @@ struct QuickActionsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // Quick Actions header
             HStack {
                 Text("Quick Actions")
                     .font(.largeTitle)
@@ -168,6 +90,7 @@ struct QuickActionsView: View {
             searchBar
                 .padding()
 
+            // Two-panel view
             HStack {
                 VStack {
                     List(quickActions) { quickAction in
@@ -242,10 +165,6 @@ struct QuickActionsView: View {
 }
 
 #Preview {
-    NewQuickActionForm(onSubmit: { _, _ in }, onCancel: { })
-}
-
-#Preview {
     // Create an in-memory Core Data store
     let container = NSPersistentContainer(name: "TypeaheadAI")
     container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
@@ -261,13 +180,13 @@ struct QuickActionsView: View {
     // Create some sample prompts
     let samplePrompts = [
         "this is a sample prompt",
-        "this is an active prompt"
+        "this is an active prompt",
+        "this is a slightly longer prompt",
     ]
     for prompt in samplePrompts {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
         newPrompt.prompt = prompt
-        promptManager.addPrompt(prompt)
     }
 
     return QuickActionsView(promptManager: promptManager)
