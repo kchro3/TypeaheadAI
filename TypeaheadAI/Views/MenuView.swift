@@ -67,7 +67,6 @@ struct MenuView: View {
                 }
 
                 buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
-                    NSApp.activate(ignoringOtherApps: true)
                     settingsTab = Tab.general.id
                     settingsManager.showModal()
                     isMenuVisible = false

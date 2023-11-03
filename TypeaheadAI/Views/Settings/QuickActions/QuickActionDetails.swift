@@ -65,13 +65,14 @@ struct QuickActionDetails: View {
                         onDelete?()
                     }, label: {
                         Image(systemName: "trash.fill")
+                            .foregroundStyle(.white)
                         Text("Delete")
                             .foregroundStyle(.white)
                     })
                     .padding(.vertical, 5)
                     .padding(.horizontal, 10)
                     .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(.red.opacity(0.4)))
+                        .fill(.red))
                     .buttonStyle(.plain)
 
                     Spacer()
