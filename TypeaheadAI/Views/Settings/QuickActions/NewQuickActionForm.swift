@@ -91,6 +91,7 @@ struct NewQuickActionForm: View {
                     Text("Create")
                         .padding(.vertical, 5)
                         .padding(.horizontal, 10)
+                        .foregroundStyle(.white)
                         .background(RoundedRectangle(cornerRadius: 15)
                             .fill(Color.accentColor)
                         )

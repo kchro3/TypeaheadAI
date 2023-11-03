@@ -66,7 +66,7 @@ class SettingsManager: ObservableObject {
 
         // Add constraints to make the hosting view fill the base view
         NSLayoutConstraint.activate([
-            hostingView.topAnchor.constraint(equalTo: baseView.topAnchor),
+            hostingView.topAnchor.constraint(equalTo: baseView.topAnchor, constant: -28), // Offset by the size of the menu bar
             hostingView.bottomAnchor.constraint(equalTo: baseView.bottomAnchor),
             hostingView.leadingAnchor.constraint(equalTo: baseView.leadingAnchor),
             hostingView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor)
@@ -78,7 +78,6 @@ class SettingsManager: ObservableObject {
         toastWindow?.titlebarAppearsTransparent = true
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.makeKeyAndOrderFront(nil)
-
-        toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        NSApp.activate(ignoringOtherApps: true)
     }
 }

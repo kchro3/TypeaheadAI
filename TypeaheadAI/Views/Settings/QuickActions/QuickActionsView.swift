@@ -10,21 +10,28 @@ import SwiftUI
 struct QuickActionRow: View {
     let quickAction: PromptEntry
     let isActive: Bool
+    @State private var isHovered = false
 
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         Text(quickAction.prompt ?? "none")
+            .lineLimit(1)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 8)
             .padding(.horizontal, 10)
+            .foregroundStyle(isActive ? .white : .primary)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 5)
                     .fill(
                         isActive ?
                         Color.accentColor :
-                        (colorScheme == .dark ? Color.black.opacity(0.2) : Color.secondary.opacity(0.15))
+                        (isHovered ? Color.primary.opacity(0.2) : Color.clear)
                     )
             )
+            .onHover { hovering in
+                isHovered = hovering
+            }
     }
 }
 
@@ -56,8 +63,7 @@ struct QuickActionsView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Quick Actions header
             HStack {
-                Text("Quick Actions")
-                    .font(.largeTitle)
+                Text("Quick Actions").font(.title)
 
                 Spacer()
 
@@ -71,6 +77,7 @@ struct QuickActionsView: View {
                 }
                 .padding(.vertical, 5)
                 .padding(.horizontal, 10)
+                .foregroundColor(.white)
                 .background(
                     RoundedRectangle(cornerRadius: 15)
                         .fill(Color.accentColor)
@@ -103,8 +110,9 @@ struct QuickActionsView: View {
                             QuickActionRow(quickAction: quickAction, isActive: quickAction.id == activeQuickAction?.id)
                         })
                         .buttonStyle(.plain)
+                        .listRowSeparator(.hidden)
                     }
-                    .listStyle(.sidebar)
+                    .listStyle(.plain)
                     .scrollIndicators(.visible)
                     .scrollContentBackground(.hidden)
                 }

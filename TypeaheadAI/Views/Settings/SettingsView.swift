@@ -34,20 +34,15 @@ struct SettingsView: View {
 
                 Spacer()
             }
-            .padding(.trailing, 25)
-            .frame(width: 200)
+            .frame(width: 150)
+            .padding(10)
+            .padding(.top, 25)
 
             viewForTab(settingsTab)
-                .frame(minWidth: 600)
-                .padding(25)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                )
+                .frame(minWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
+                .padding(10)
+                .background(Color(NSColor.windowBackgroundColor))
         }
-        .padding(.horizontal, 35)
-        .padding(.top, 20)
-        .padding(.bottom, 35)
         .background(VisualEffect().ignoresSafeArea())
     }
 
@@ -88,12 +83,11 @@ struct ItemRow: View {
                 .foregroundStyle((settingsTab == tab.id || colorScheme == .dark) ? Color.white : Color.black)
             Spacer()
         }
-        .padding(.horizontal, 15)
-        .padding(.vertical, 10)
+        .padding(10)
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 5)
                 .fill(
-                    settingsTab == tab.id ? .accentColor : (isHovered ? Color.gray.opacity(0.2) : Color.clear)
+                    settingsTab == tab.id ? .accentColor : (isHovered ? Color.primary.opacity(0.2) : Color.clear)
                 )
         )
         .contentShape(RoundedRectangle(cornerRadius: 10))
