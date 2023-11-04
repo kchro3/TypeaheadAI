@@ -58,7 +58,6 @@
 		2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */; };
 		2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */; };
 		2BAC14762AF61DD000B33E13 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAC14752AF61DD000B33E13 /* WebView.swift */; };
-		2BAC14782AF61E0A00B33E13 /* MessageFailedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAC14772AF61E0A00B33E13 /* MessageFailedView.swift */; };
 		2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB652AF58E0B009C8370 /* ConversationView.swift */; };
 		2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */; };
 		2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */; };
@@ -147,7 +146,6 @@
 		2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptManager.swift; sourceTree = "<group>"; };
 		2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2BAC14752AF61DD000B33E13 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
-		2BAC14772AF61E0A00B33E13 /* MessageFailedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageFailedView.swift; sourceTree = "<group>"; };
 		2BAFDB652AF58E0B009C8370 /* ConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationView.swift; sourceTree = "<group>"; };
 		2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButtonView.swift; sourceTree = "<group>"; };
 		2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
@@ -348,7 +346,6 @@
 				2BDA45C22ABEE840006128BC /* MessageView.swift */,
 				2B2EF14F2AC40C8F00EF2BD4 /* ChatBubble.swift */,
 				2BAC14752AF61DD000B33E13 /* WebView.swift */,
-				2BAC14772AF61E0A00B33E13 /* MessageFailedView.swift */,
 			);
 			path = Message;
 			sourceTree = "<group>";
@@ -576,7 +573,6 @@
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
 				2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */,
 				2B2EF1502AC40C8F00EF2BD4 /* ChatBubble.swift in Sources */,
-				2BAC14782AF61E0A00B33E13 /* MessageFailedView.swift in Sources */,
 				2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */,
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
 				2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */,

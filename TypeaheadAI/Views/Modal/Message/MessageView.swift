@@ -40,7 +40,7 @@ struct MessageView: View {
 
     var body: some View {
         if let error = message.responseError {
-            MessageFailedView(error: error, onRefresh: onRefresh)
+            messageFailed(error: error)
         } else if let attributed = message.attributed,
                   isMarkdown(attributed: attributed) {
             aiMarkdown(results: attributed.results)
@@ -208,29 +208,21 @@ struct MessageView: View {
         }
     }
 
+    /// Errors can only happen on the AI side.
     private func messageFailed(error: String) -> some View {
         HStack {
-            // Message itself (wrap in a chat?)
-            Text(error)
-                .foregroundColor(.primary)
-                .textSelection(.enabled)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 15)
-                .background(
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.red.opacity(0.4))
-                )
-
-            Button(action: {
-                onRefresh?()
-            }, label: {
-                Image(systemName: "arrow.counterclockwise")
-            })
-            .buttonStyle(.plain)
-
-            Spacer()
+            ChatBubble(
+                direction: .left,
+                onRefresh: onRefresh
+            ) {
+                Text(error)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.primary)
+                    .background(Color.red.opacity(0.4))
+                    .textSelection(.enabled)
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 
     private func aiMarkdown(results: [ParserResult]) -> some View {
@@ -314,6 +306,10 @@ struct MessageView: View {
 
         return image
     }
+}
+
+#Preview {
+    MessageView(message: Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Something has gone horribly wrong."))
 }
 
 #Preview {
