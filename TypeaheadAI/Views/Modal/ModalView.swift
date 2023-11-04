@@ -28,82 +28,10 @@ struct ModalView: View {
 
     var body: some View {
         VStack {
-            HStack(spacing: 0) {
-                Spacer()
-                Button(action: {
-                    isOnlineTooltipVisible.toggle()
-                }, label: {
-                    Image(systemName: "info.circle")
-                        .foregroundStyle(isOnlineTooltipHovering ? Color.accentColor : Color.secondary)
-                        .onHover(perform: { hovering in
-                            isOnlineTooltipHovering = hovering
-                        })
-                })
-                .buttonStyle(.plain)
-                .popover(isPresented: $isOnlineTooltipVisible, arrowEdge: .bottom) {
-                    Text("You can run TypeaheadAI in offline mode by running an LLM on your laptop locally, and you can toggle between online and offline modes here. Please see the Settings for detailed instructions on how to use offline mode.")
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: 300, maxHeight: 100)
-                }
+            // Header
+            modalHeaderView
 
-                Toggle("Online", isOn: $modalManager.online)
-                    .scaleEffect(0.8)
-                    .onChange(of: modalManager.online) { online in
-                        if let manager = modalManager.clientManager?.llamaModelManager,
-                           !online,
-                           let _ = selectedModelURL {
-                            manager.load()
-                        }
-                    }
-                    .foregroundColor(Color.secondary)
-                    .toggleStyle(.switch)
-                    .accentColor(.blue)
-                    .padding(0)
-            }
-
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 2) {
-                        ForEach(modalManager.messages.indices, id: \.self) { index in
-                            MessageView(
-                                message: modalManager.messages[index],
-                                onEdit: { newContent in
-                                    if newContent != modalManager.messages[index].text {
-                                        modalManager.updateMessage(index: index, newContent: newContent)
-                                    } else {
-                                        modalManager.messages[index].isEdited.toggle()
-                                    }
-                                },
-                                onEditAppear: {
-                                    modalManager.messages[index].isEdited.toggle()
-                                },
-                                onRefresh: {
-                                    modalManager.replyToUserMessage()
-                                },
-                                onTruncate: {
-                                    modalManager.messages[index].isTruncated.toggle()
-                                }
-                            )
-                            .padding(5)
-                        }
-
-                        if modalManager.isPending {
-                            MessagePendingView()
-                                .padding(5)
-                                .id(bottomID)
-                        }
-                    }
-                    .onChange(of: modalManager.messages) { _ in
-                        if modalManager.isPending {
-                            proxy.scrollTo(bottomID, anchor: .bottom)
-                        } else {
-                            proxy.scrollTo(modalManager.messages.count - 1, anchor: .bottom)
-                        }
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            MessageHistoryView(modalManager: modalManager)
 
             VStack(spacing: 5) {
                 if let userIntents = modalManager.userIntents,
@@ -154,28 +82,6 @@ struct ModalView: View {
                             return event
                         }
                     }
-
-                    Button(action: {
-                        isAuxiliaryMenuVisible.toggle()
-                    }, label: {
-                        if colorScheme == .dark {
-                            Image(systemName: "ellipsis.circle")
-                                .font(.title)
-                                .foregroundColor(modalManager.promptManager?.activePromptID == nil ? .secondary : .accentColor)
-                        } else {
-                            Image(systemName: "ellipsis.circle.fill")
-                                .font(.title)
-                                .foregroundColor(modalManager.promptManager?.activePromptID == nil ? .secondary : .accentColor)
-                        }
-                    })
-                    .buttonStyle(.plain)
-                    .popover(
-                        isPresented: $isAuxiliaryMenuVisible,
-                        attachmentAnchor: .rect(.bounds),
-                        arrowEdge: .trailing
-                    ) {
-                        AuxiliaryMenuView(modalManager: modalManager, promptManager: modalManager.promptManager!)
-                    }
                 }
             }
             .padding(.horizontal, 10)
@@ -184,6 +90,32 @@ struct ModalView: View {
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)
         .foregroundColor(Color.secondary.opacity(0.2))
+    }
+
+    @ViewBuilder
+    var modalHeaderView: some View {
+        HStack {
+            Spacer()
+
+            Button(action: {
+                isAuxiliaryMenuVisible.toggle()
+            }, label: {
+                Image(systemName: "ellipsis")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .contentShape(Rectangle())
+            })
+            .buttonStyle(.plain)
+            .popover(
+                isPresented: $isAuxiliaryMenuVisible,
+                attachmentAnchor: .rect(.bounds),
+                arrowEdge: .bottom
+            ) {
+                AuxiliaryMenuView(modalManager: modalManager, promptManager: modalManager.promptManager!)
+            }
+        }
     }
 
     private func getPrompts() -> [PromptEntry] {

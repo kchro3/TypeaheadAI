@@ -24,14 +24,12 @@ struct AuxiliaryMenuView: View {
 
     var body: some View {
         VStack {
+            ModalHeaderView(modalManager: modalManager)
+
             VStack(spacing: 0) {
                 if #available(macOS 14.0, *) {
                     settingsButtonRow(title: "Settings", isHovering: $isHoveringSettings) {
                         settingsTab = Tab.general.id
-                        modalManager.closeModal()
-                    }
-                    settingsButtonRow(title: "Sign in", isHovering: $isHoveringSignIn) {
-                        settingsTab = Tab.account.id
                         modalManager.closeModal()
                     }
                     settingsButtonRow(title: "Feedback", isHovering: $isHoveringFeedback) {
@@ -44,11 +42,6 @@ struct AuxiliaryMenuView: View {
                         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                         modalManager.closeModal()
                     }
-                    buttonRow(title: "Sign in", isHovering: $isHoveringSignIn) {
-                        settingsTab = Tab.account.id
-                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                        modalManager.closeModal()
-                    }
                     buttonRow(title: "Feedback", isHovering: $isHoveringFeedback) {
                         settingsTab = Tab.feedback.id
                         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
@@ -56,78 +49,8 @@ struct AuxiliaryMenuView: View {
                     }
                 }
             }
-
-            Divider()
-                .padding(.vertical, 0)
-                .padding(.horizontal, 10)
-            Spacer()
-
-            VStack {
-                HStack {
-                    Text("Quick Actions")
-                        .padding(.horizontal, 10)
-
-                    Spacer()
-                }
-
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(promptManager.savedPrompts, id: \.id) { prompt in
-                            Button(action: {
-                                if let activePromptId = promptManager.activePromptID,
-                                   activePromptId == prompt.id {
-                                    promptManager.activePromptID = nil
-                                } else {
-                                    promptManager.activePromptID = prompt.id
-                                }
-                            }, label: {
-                                MenuPromptView(
-                                    prompt: prompt,
-                                    isActive: prompt.id == promptManager.activePromptID,
-                                    isEditing: .init(
-                                        get: { self.isEditingID == prompt.id },
-                                        set: { _ in
-                                            self.isEditingID = (self.isEditingID == prompt.id ? nil : prompt.id)
-                                            promptManager.activePromptID = prompt.id
-                                        }
-                                    ),
-                                    onDelete: {
-                                        promptManager.removePrompt(with: prompt.id!)
-                                        if let activePromptId = promptManager.activePromptID,
-                                           activePromptId == prompt.id {
-                                            promptManager.activePromptID = nil
-                                        }
-                                    },
-                                    onUpdate: { newDetails in
-                                        promptManager.updatePrompt(
-                                            with: prompt.id!,
-                                            newDetails: newDetails
-                                        )
-                                    }
-                                )
-                            })
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-
-                TextField("Tell me what to do when you smart-copy.", text: $currentPreset)
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .textFieldStyle(.plain)
-                    .focused($isTextFieldFocused)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(.secondary.opacity(0.1)))
-                    .onSubmit {
-                        if !currentPreset.isEmpty {
-                            promptManager.addPrompt(currentPreset)
-                            currentPreset = ""
-                        }
-                    }
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(10)
-            }
         }
+        .padding(10)
         .frame(
             minWidth: 200,
             idealWidth: 300,

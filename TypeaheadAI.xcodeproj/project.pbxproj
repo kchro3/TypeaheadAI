@@ -58,6 +58,8 @@
 		2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */; };
 		2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */; };
 		2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */; };
+		2BAFDB662AF58E0B009C8370 /* MessageHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB652AF58E0B009C8370 /* MessageHistoryView.swift */; };
+		2BAFDB692AF5E455009C8370 /* ModalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB682AF5E455009C8370 /* ModalHeaderView.swift */; };
 		2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */; };
 		2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */; };
 		2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84342A9DD90F00359841 /* HistoryManager.swift */; };
@@ -144,6 +146,8 @@
 		2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptManager.swift; sourceTree = "<group>"; };
 		2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2BAFDB652AF58E0B009C8370 /* MessageHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageHistoryView.swift; sourceTree = "<group>"; };
+		2BAFDB682AF5E455009C8370 /* ModalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalHeaderView.swift; sourceTree = "<group>"; };
 		2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
 		2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestStatus.swift; sourceTree = "<group>"; };
 		2BCF84342A9DD90F00359841 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
@@ -329,8 +333,23 @@
 				2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */,
 				2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */,
 				2B0B30072ACCDA1100338B76 /* VisualEffect.swift */,
+				2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		2BAFDB672AF5E375009C8370 /* Message */ = {
+			isa = PBXGroup;
+			children = (
+				2BAFDB652AF58E0B009C8370 /* MessageHistoryView.swift */,
+				2B0B300D2ACEB0E000338B76 /* MarkdownTableView.swift */,
+				2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */,
+				2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */,
+				2BF9297F2AB13F3600FC105B /* CodeBlockView.swift */,
+				2BDA45C22ABEE840006128BC /* MessageView.swift */,
+				2B2EF14F2AC40C8F00EF2BD4 /* ChatBubble.swift */,
+			);
+			path = Message;
 			sourceTree = "<group>";
 		};
 		2BCF84362A9DE68200359841 /* Settings */ = {
@@ -350,15 +369,10 @@
 		2BE0EC202AA0955C00E47C52 /* Modal */ = {
 			isa = PBXGroup;
 			children = (
+				2BAFDB672AF5E375009C8370 /* Message */,
 				2BE0EC212AA0956C00E47C52 /* ModalView.swift */,
-				2BF9297F2AB13F3600FC105B /* CodeBlockView.swift */,
-				2BDA45C22ABEE840006128BC /* MessageView.swift */,
-				2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */,
-				2B2EF14F2AC40C8F00EF2BD4 /* ChatBubble.swift */,
-				2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */,
 				2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */,
-				2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */,
-				2B0B300D2ACEB0E000338B76 /* MarkdownTableView.swift */,
+				2BAFDB682AF5E455009C8370 /* ModalHeaderView.swift */,
 			);
 			path = Modal;
 			sourceTree = "<group>";
@@ -549,6 +563,7 @@
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
+				2BAFDB662AF58E0B009C8370 /* MessageHistoryView.swift in Sources */,
 				2B2EF1502AC40C8F00EF2BD4 /* ChatBubble.swift in Sources */,
 				2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */,
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
@@ -562,6 +577,7 @@
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
 				2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */,
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
+				2BAFDB692AF5E455009C8370 /* ModalHeaderView.swift in Sources */,
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
