@@ -343,9 +343,28 @@ class ModalManager: ObservableObject {
 
         let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
 
-        Task {
-            let output = await parsingTask.parse(text: newContent, isDarkMode: isDarkMode)
-            self.messages[index].attributed = output
+        if self.messages[index].isCurrentUser {
+            // Reissue the message
+            let excess = self.messages.count - index - 1
+            if excess > 0 {
+                self.messages.removeLast(excess)
+            }
+
+            isPending = true
+            userIntents = nil
+
+            self.clientManager?.refine(
+                messages: self.messages,
+                incognitoMode: !online,
+                streamHandler: defaultHandler,
+                completion: defaultCompletionHandler
+            )
+        } else {
+            // Reparse the AI message
+            Task {
+                let output = await parsingTask.parse(text: newContent, isDarkMode: isDarkMode)
+                self.messages[index].attributed = output
+            }
         }
     }
 

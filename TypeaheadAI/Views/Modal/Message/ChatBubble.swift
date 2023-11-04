@@ -26,39 +26,64 @@ struct ChatBubble<Content>: View where Content: View {
     }
 
     var body: some View {
+        if direction == .right {
+            userMessage
+        } else {
+            aiMessage
+        }
+    }
+
+    @ViewBuilder
+    var userMessage: some View {
         HStack {
-            if direction == .right {
-                Spacer()
-            }
-            content().clipShape(ChatBubbleShape(direction: direction))
-            if direction == .left {
-                VStack {
-                    Spacer()
+            Spacer()
 
-                    HStack {
-                        if let onEdit = onEdit {
-                            Button(action: {
-                                onEdit()
-                            }, label: {
-                                Image(systemName: "square.and.pencil")
-                            })
-                            .buttonStyle(.plain)
-                            .padding(.bottom, 10)
-                        }
+            buttons
 
-                        if let onButtonDown = onRefresh {
-                            Button(action: {
-                                onButtonDown()
-                            }, label: {
-                                Image(systemName: "arrow.counterclockwise")
-                            })
-                            .buttonStyle(.plain)
-                            .padding(.bottom, 10)
-                            .padding(.trailing, 25)
-                        }
-                    }
+            content()
+                .clipShape(ChatBubbleShape(direction: direction))
+        }
+    }
+
+    @ViewBuilder
+    var aiMessage: some View {
+        HStack {
+            content()
+                .clipShape(ChatBubbleShape(direction: direction))
+
+            buttons
+
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    var buttons: some View {
+        VStack {
+            // Make sure that the buttons are at the bottom of a multiline message.
+            Spacer()
+
+            HStack {
+                if let onEdit = onEdit {
+                    Button(action: {
+                        onEdit()
+                    }, label: {
+                        Image(systemName: "square.and.pencil")
+                    })
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 10)
                 }
-                Spacer()
+
+                if let onButtonDown = onRefresh {
+                    Button(action: {
+                        onButtonDown()
+                    }, label: {
+                        Image(systemName: "arrow.counterclockwise")
+                    })
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 10)
+                    .padding(.trailing, 25)
+                }
             }
         }
     }

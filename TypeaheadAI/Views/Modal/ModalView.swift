@@ -22,7 +22,7 @@ struct ModalView: View {
             // Header
             modalHeaderView
 
-            MessageHistoryView(modalManager: modalManager)
+            ConversationView(modalManager: modalManager)
 
             VStack(spacing: 5) {
                 if let userIntents = modalManager.userIntents,
