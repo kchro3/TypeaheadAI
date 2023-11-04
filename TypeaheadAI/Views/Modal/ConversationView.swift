@@ -1,5 +1,5 @@
 //
-//  MessageHistoryView.swift
+//  ConversationView.swift
 //  TypeaheadAI
 //
 //  Created by Jeff Hara on 11/3/23.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct MessageHistoryView: View {
+struct ConversationView: View {
     @StateObject var modalManager: ModalManager
 
     @Namespace var bottomID
@@ -62,7 +62,7 @@ struct MessageHistoryView: View {
         Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true)
     ]
 
-    return MessageHistoryView(modalManager: modalManagerWithLongMessages)
+    return ConversationView(modalManager: modalManagerWithLongMessages)
 }
 
 #Preview {
@@ -73,7 +73,7 @@ struct MessageHistoryView: View {
     ]
     modalManagerPending.isPending = true
 
-    return MessageHistoryView(modalManager: modalManagerPending)
+    return ConversationView(modalManager: modalManagerPending)
 }
 
 #Preview {
@@ -86,5 +86,5 @@ struct MessageHistoryView: View {
         Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: false),
     ]
 
-    return MessageHistoryView(modalManager: modalManagerScrolling)
+    return ConversationView(modalManager: modalManagerScrolling)
 }

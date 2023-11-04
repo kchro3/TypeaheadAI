@@ -7,45 +7,7 @@
 
 import SwiftUI
 import Markdown
-import WebKit
 import UniformTypeIdentifiers
-
-struct WebView: NSViewRepresentable {
-    var html: String
-    @Binding var dynamicHeight: CGFloat
-
-    func makeNSView(context: Context) -> WKWebView  {
-        let webView = WKWebView()
-        webView.navigationDelegate = context.coordinator
-        return webView
-    }
-
-    func updateNSView(_ nsView: WKWebView, context: Context) {
-        nsView.loadHTMLString(html, baseURL: nil)
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    class Coordinator: NSObject, WKNavigationDelegate {
-        var parent: WebView
-
-        init(_ parent: WebView) {
-            self.parent = parent
-        }
-
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            webView.evaluateJavaScript("document.documentElement.scrollHeight") { (height, error) in
-                if let height = height as? CGFloat {
-                    DispatchQueue.main.async {
-                        self.parent.dynamicHeight = height
-                    }
-                }
-            }
-        }
-    }
-}
 
 struct MessageView: View {
     var message: Message
@@ -77,69 +39,147 @@ struct MessageView: View {
     }
 
     var body: some View {
-        if let error = message.responseError, !message.isCurrentUser {
-            HStack {
-                Text(error)
-                    .foregroundColor(.primary)
-                    .textSelection(.enabled)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 15)
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(Color.red.opacity(0.4))
-                    )
-
-                Button(action: {
-                    onRefresh?()
-                }, label: {
-                    Image(systemName: "arrow.counterclockwise")
-                })
-                .buttonStyle(.plain)
-
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        if let error = message.responseError {
+            messageFailed(error: error)
         } else if let attributed = message.attributed,
                   isMarkdown(attributed: attributed) {
-            attributedView(results: attributed.results)
+            aiMarkdown(results: attributed.results)
         } else if message.text.isEmpty && !message.isCurrentUser {
+            // NOTE: This is broken...
             Divider()
         } else if message.isCurrentUser {
-            ChatBubble(direction: .right) {
-                switch message.messageType {
-                case .string:
-                    if message.text.count > maxMessageLength {
-                        VStack {
-                            if message.isTruncated {
-                                Text(message.text.prefix(maxMessageLength))
-                            } else {
-                                Text(message.text)
-                            }
-                            HStack {
-                                Spacer()
-                                Button(action: {
-                                    onTruncate?()
-                                }, label: {
-                                    if message.isTruncated {
-                                        Text("See more").bold()
-                                    } else {
-                                        Text("See less").bold()
-                                    }
-                                })
-                                .buttonStyle(.plain)
+            userMessage
+        } else {
+            aiMessage
+        }
+    }
+
+    @ViewBuilder
+    var userMessage: some View {
+        ChatBubble(
+            direction: .right,
+            onEdit: {
+                isEditing.toggle()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                    onEditAppear?()
+                }
+            }
+        ) {
+            switch message.messageType {
+            case .string:
+                if isEditing {
+                    CustomTextField(
+                        text: $localContent,
+                        placeholderText: "",
+                        autoCompleteSuggestions: [],
+                        onEnter: { newContent in
+                            isEditing = false
+                            if !localContent.isEmpty {
+                                onEdit?(localContent)
                             }
                         }
+                    )
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.primary)
+                    .background(Color.accentColor.opacity(0.2))
+                    .onAppear(perform: {
+                        localContent = message.text
+                    })
+                } else if message.text.count > maxMessageLength {
+                    // Truncatable string
+                    VStack {
+                        if message.isTruncated {
+                            Text(message.text.prefix(maxMessageLength))
+                        } else {
+                            Text(message.text)
+                        }
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                onTruncate?()
+                            }, label: {
+                                if message.isTruncated {
+                                    Text("See more").bold()
+                                } else {
+                                    Text("See less").bold()
+                                }
+                            })
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.white)
+                    .background(Color.accentColor.opacity(0.8))
+                    .textSelection(.enabled)
+                } else {
+                    Text(message.text)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 15)
                         .foregroundColor(.white)
                         .background(Color.accentColor.opacity(0.8))
                         .textSelection(.enabled)
+                }
+            case .html(let data):
+                WebView(html: data, dynamicHeight: $webViewHeight)
+                    .frame(width: 400, height: webViewHeight)
+                    .background(Color.accentColor.opacity(0.8))
+            case .image(let data):
+                if let imageData = try? self.decodeBase64Image(data.image) {
+                    Image(nsImage: imageData)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 512, height: 512)
+                }
+            case .data(let data):
+                if let imageData = try? self.decodeImage(data) {
+                    Image(nsImage: imageData)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 512, height: 512)
+                }
+            }
+        }
+        .padding(.leading, 100)
+    }
+
+    @ViewBuilder
+    var aiMessage: some View {
+        HStack {
+            ChatBubble(direction: .left, onEdit: {
+                isEditing.toggle()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                    onEditAppear?()
+                }
+            }, onRefresh: onRefresh) {
+                switch message.messageType {
+                case .string:
+                    if isEditing {
+                        CustomTextField(
+                            text: $localContent,
+                            placeholderText: "",
+                            autoCompleteSuggestions: [],
+                            onEnter: { newContent in
+                                isEditing = false
+                                if !localContent.isEmpty {
+                                    onEdit?(localContent)
+                                }
+                            }
+                        )
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 15)
+                        .foregroundColor(.primary)
+                        .background(Color.accentColor.opacity(0.2))
+                        .onAppear(perform: {
+                            localContent = message.text
+                        })
                     } else {
                         Text(message.text)
                             .padding(.vertical, 10)
                             .padding(.horizontal, 15)
-                            .foregroundColor(.white)
-                            .background(Color.accentColor.opacity(0.8))
+                            .foregroundColor(.primary)
+                            .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                             .textSelection(.enabled)
                     }
                 case .html(let data):
@@ -152,6 +192,9 @@ struct MessageView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 512, height: 512)
+                            .onDrag {
+                                return NSItemProvider(item: data.toURL() as NSSecureCoding, typeIdentifier: UTType.fileURL.identifier)
+                            }
                     }
                 case .data(let data):
                     if let imageData = try? self.decodeImage(data) {
@@ -162,72 +205,27 @@ struct MessageView: View {
                     }
                 }
             }
-            .padding(.leading, 100)
-        } else {
-            HStack {
-                ChatBubble(direction: .left, onEdit: {
-                    isEditing.toggle()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                        onEditAppear?()
-                    }
-                }, onRefresh: onRefresh) {
-                    switch message.messageType {
-                    case .string:
-                        if isEditing {
-                            CustomTextField(
-                                text: $localContent,
-                                placeholderText: "",
-                                autoCompleteSuggestions: [],
-                                onEnter: { newContent in
-                                    isEditing = false
-                                    if !localContent.isEmpty {
-                                        onEdit?(localContent)
-                                    }
-                                }
-                            )
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 15)
-                            .foregroundColor(.primary)
-                            .background(Color.accentColor.opacity(0.2))
-                            .onAppear(perform: {
-                                localContent = message.text
-                            })
-                        } else {
-                            Text(message.text)
-                                .padding(.vertical, 10)
-                                .padding(.horizontal, 15)
-                                .foregroundColor(.primary)
-                                .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                                .textSelection(.enabled)
-                        }
-                    case .html(let data):
-                        WebView(html: data, dynamicHeight: $webViewHeight)
-                            .frame(width: 400, height: webViewHeight)
-                            .background(Color.accentColor.opacity(0.8))
-                    case .image(let data):
-                        if let imageData = try? self.decodeBase64Image(data.image) {
-                            Image(nsImage: imageData)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 512, height: 512)
-                                .onDrag {
-                                    return NSItemProvider(item: data.toURL() as NSSecureCoding, typeIdentifier: UTType.fileURL.identifier)
-                                }
-                        }
-                    case .data(let data):
-                        if let imageData = try? self.decodeImage(data) {
-                            Image(nsImage: imageData)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 512, height: 512)
-                        }
-                    }
-                }
+        }
+    }
+
+    /// Errors can only happen on the AI side.
+    private func messageFailed(error: String) -> some View {
+        HStack {
+            ChatBubble(
+                direction: .left,
+                onRefresh: onRefresh
+            ) {
+                Text(error)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.primary)
+                    .background(Color.red.opacity(0.4))
+                    .textSelection(.enabled)
             }
         }
     }
 
-    func attributedView(results: [ParserResult]) -> some View {
+    private func aiMarkdown(results: [ParserResult]) -> some View {
         ChatBubble(direction: .left, onEdit: {
             isEditing.toggle()
         }, onRefresh: onRefresh) {
@@ -271,6 +269,7 @@ struct MessageView: View {
         }
     }
 
+    /// This is simply a heuristic.
     private func isMarkdown(attributed: AttributedOutput) -> Bool {
         if attributed.results.count == 0 {
             // If no text, then not Markdown
@@ -283,7 +282,8 @@ struct MessageView: View {
             // Check for artifacts of markdown
             return attributed.string.contains("##") || attributed.string.contains("**") ||
                 attributed.string.contains("[//]: #") ||
-                attributed.string.contains("`")
+                attributed.string.contains("`") ||
+                attributed.string.contains("](")
         }
     }
 
@@ -306,6 +306,10 @@ struct MessageView: View {
 
         return image
     }
+}
+
+#Preview {
+    MessageView(message: Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Something has gone horribly wrong."))
 }
 
 #Preview {
