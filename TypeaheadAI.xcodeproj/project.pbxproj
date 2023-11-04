@@ -338,7 +338,6 @@
 		2BAFDB672AF5E375009C8370 /* Message */ = {
 			isa = PBXGroup;
 			children = (
-				2BAFDB652AF58E0B009C8370 /* MessageHistoryView.swift */,
 				2B0B300D2ACEB0E000338B76 /* MarkdownTableView.swift */,
 				2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */,
 				2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */,
@@ -377,6 +376,7 @@
 			children = (
 				2BAFDB672AF5E375009C8370 /* Message */,
 				2BE0EC212AA0956C00E47C52 /* ModalView.swift */,
+				2BAFDB652AF58E0B009C8370 /* MessageHistoryView.swift */,
 				2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */,
 			);
 			path = Modal;
