@@ -37,19 +37,19 @@ actor SpecialOpenActor {
         }
 
         self.appContextManager.getActiveAppInfo { appContext in
-            DispatchQueue.main.async {
+            Task {
                 self.clientManager.currentAppContext = appContext
-                if let isVisible = self.modalManager.isWindowVisible(), !forceRefresh {
+                if let isVisible = await self.modalManager.isWindowVisible(), !forceRefresh {
                     if !isVisible {
-                        self.modalManager.showModal()
-                        NSApp.activate(ignoringOtherApps: true)
+                        await self.modalManager.showModal()
+                        await NSApp.activate(ignoringOtherApps: true)
                     } else {
-                        self.modalManager.closeModal()
+                        await self.modalManager.closeModal()
                     }
                 } else {
-                    self.modalManager.forceRefresh()
-                    self.modalManager.showModal()
-                    NSApp.activate(ignoringOtherApps: true)
+                    await self.modalManager.forceRefresh()
+                    await self.modalManager.showModal()
+                    await NSApp.activate(ignoringOtherApps: true)
                 }
             }
         }

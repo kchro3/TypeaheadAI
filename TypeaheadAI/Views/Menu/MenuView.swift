@@ -20,13 +20,9 @@ struct MenuView: View {
 
     @AppStorage("token3") var token: String?
     @AppStorage("settingsTab") var settingsTab: String?
+    @AppStorage("selectedModel") private var selectedModelURL: URL?
 
     @State private var currentPreset: String = ""
-    @State private var isHoveringChat = false
-    @State private var isHoveringClearChat = false
-    @State private var isHoveringSettings = false
-    @State private var isHoveringSignOut = false
-    @State private var isHoveringQuit = false
     @State private var isEditingID: UUID?
     @FocusState private var isTextFieldFocused: Bool
 
@@ -35,19 +31,42 @@ struct MenuView: View {
 
     var body: some View {
         VStack(spacing: verticalPadding) {
+            // Menu Header
             HStack {
                 Text("TypeaheadAI").font(.headline)
 
                 Spacer()
+
+                Toggle("Online", isOn: $modalManager.online)
+                    .scaleEffect(0.8)
+                    .onChange(of: modalManager.online) { online in
+                        if let manager = modalManager.clientManager?.llamaModelManager,
+                           !online,
+                           let _ = selectedModelURL {
+                            manager.load()
+                        }
+                    }
+                    .foregroundColor(Color.secondary)
+                    .toggleStyle(.switch)
+                    .accentColor(.blue)
+                    .padding(0)
             }
             .padding(.vertical, verticalPadding)
-            .padding(.horizontal, horizontalPadding)
+            .padding(.leading, horizontalPadding)
+            .padding(.trailing, -8)
 
             VStack(spacing: 0) {
+                MenuButtonView(
+                    title: "Quick Actions"
+                ) {
+                    settingsTab = Tab.quickActions.id
+                    settingsManager.showModal()
+                    isMenuVisible = false
+                }
+
                 if modalManager.isVisible {
-                    buttonRow(
+                    MenuButtonView(
                         title: "New chat",
-                        isHovering: $isHoveringClearChat,
                         shortcut: KeyboardShortcuts.Name.chatNew
                     ) {
                         modalManager.forceRefresh()
@@ -55,9 +74,8 @@ struct MenuView: View {
                         isMenuVisible = false
                     }
                 } else {
-                    buttonRow(
+                    MenuButtonView(
                         title: "Open chat",
-                        isHovering: $isHoveringChat,
                         shortcut: KeyboardShortcuts.Name.chatOpen
                     ) {
                         modalManager.showModal()
@@ -66,55 +84,35 @@ struct MenuView: View {
                     }
                 }
 
-                buttonRow(title: "Settings", isHovering: $isHoveringSettings) {
+                Divider()
+                    .padding(.vertical, verticalPadding)
+                    .padding(.horizontal, horizontalPadding)
+
+                MenuButtonView(title: "Settings") {
                     settingsTab = Tab.general.id
                     settingsManager.showModal()
                     isMenuVisible = false
                 }
 
                 if token != nil {
-                    buttonRow(title: "Sign out", isHovering: $isHoveringSignOut) {
+                    MenuButtonView(title: "Sign out") {
                         token = nil
                         isMenuVisible = false
                     }
                 } else {
-                    buttonRow(title: "Sign in", isHovering: $isHoveringSignOut) {
+                    MenuButtonView(title: "Sign in") {
                         settingsTab = Tab.account.id
                         settingsManager.showModal()
                         isMenuVisible = false
                     }
                 }
 
-                buttonRow(title: "Quit", isHovering: $isHoveringQuit) {
+                MenuButtonView(title: "Quit") {
                     NSApplication.shared.terminate(self)
                 }
             }
         }
         .padding(4)
-    }
-
-    private func buttonRow(
-        title: String,
-        isHovering: Binding<Bool>,
-        shortcut: KeyboardShortcuts.Name? = nil,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            HStack {
-                Text(title)
-                Spacer()
-                Text(shortcut?.shortcut?.description ?? "")
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(4)
-            .background(isHovering.wrappedValue ? .primary.opacity(0.2) : Color.clear)
-            .cornerRadius(4)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(PlainButtonStyle())
-        .onHover { hovering in
-            isHovering.wrappedValue = hovering
-        }
     }
 }
 
