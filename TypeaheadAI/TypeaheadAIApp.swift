@@ -112,7 +112,8 @@ final class AppState: ObservableObject {
 
         self.modalManager.clientManager = clientManager
         self.modalManager.promptManager = promptManager
-        
+        self.modalManager.settingsManager = settingsManager
+
         self.settingsManager.promptManager = promptManager
 
         checkAndRequestNotificationPermissions()

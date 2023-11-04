@@ -77,6 +77,7 @@ class ModalManager: ObservableObject {
     var clientManager: ClientManager? = nil
     var promptManager: PromptManager? = nil
     var intentManager: IntentManager? = nil
+    var settingsManager: SettingsManager? = nil
 
     var toastWindow: CustomModalWindow?
 
@@ -89,6 +90,7 @@ class ModalManager: ObservableObject {
         }
     }
 
+    @MainActor
     func isWindowVisible() -> Bool? {
         return toastWindow?.isVisible
     }

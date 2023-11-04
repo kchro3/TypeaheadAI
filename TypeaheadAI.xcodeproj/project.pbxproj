@@ -54,12 +54,11 @@
 		2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0A82A9ABBE2003D38BA /* ClientManager.swift */; };
 		2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0AA2A9ABC20003D38BA /* Constants.swift */; };
 		2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA7F0AD2A9ABC47003D38BA /* KeyboardShortcuts */; };
-		2BA7F0B12A9ABCA5003D38BA /* MenuPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */; };
 		2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */; };
 		2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */; };
 		2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */; };
 		2BAFDB662AF58E0B009C8370 /* MessageHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB652AF58E0B009C8370 /* MessageHistoryView.swift */; };
-		2BAFDB692AF5E455009C8370 /* ModalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB682AF5E455009C8370 /* ModalHeaderView.swift */; };
+		2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */; };
 		2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */; };
 		2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */; };
 		2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84342A9DD90F00359841 /* HistoryManager.swift */; };
@@ -142,12 +141,11 @@
 		2BA7F09B2A9ABBA8003D38BA /* TypeaheadAIUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		2BA7F0A82A9ABBE2003D38BA /* ClientManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientManager.swift; sourceTree = "<group>"; };
 		2BA7F0AA2A9ABC20003D38BA /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPromptView.swift; sourceTree = "<group>"; };
 		2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		2BA7F0B42A9ABCD7003D38BA /* PromptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptManager.swift; sourceTree = "<group>"; };
 		2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2BAFDB652AF58E0B009C8370 /* MessageHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageHistoryView.swift; sourceTree = "<group>"; };
-		2BAFDB682AF5E455009C8370 /* ModalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalHeaderView.swift; sourceTree = "<group>"; };
+		2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButtonView.swift; sourceTree = "<group>"; };
 		2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
 		2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestStatus.swift; sourceTree = "<group>"; };
 		2BCF84342A9DD90F00359841 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
@@ -327,11 +325,10 @@
 		2BA7F0AF2A9ABC62003D38BA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2BAFDB6C2AF61475009C8370 /* Menu */,
 				2B44FA962ABA783200C6B542 /* Onboarding */,
 				2BE0EC202AA0955C00E47C52 /* Modal */,
 				2BCF84362A9DE68200359841 /* Settings */,
-				2BA7F0B02A9ABCA5003D38BA /* MenuPromptView.swift */,
-				2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */,
 				2B0B30072ACCDA1100338B76 /* VisualEffect.swift */,
 				2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */,
 			);
@@ -350,6 +347,15 @@
 				2B2EF14F2AC40C8F00EF2BD4 /* ChatBubble.swift */,
 			);
 			path = Message;
+			sourceTree = "<group>";
+		};
+		2BAFDB6C2AF61475009C8370 /* Menu */ = {
+			isa = PBXGroup;
+			children = (
+				2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */,
+				2BA7F0B22A9ABCBF003D38BA /* MenuView.swift */,
+			);
+			path = Menu;
 			sourceTree = "<group>";
 		};
 		2BCF84362A9DE68200359841 /* Settings */ = {
@@ -372,7 +378,6 @@
 				2BAFDB672AF5E375009C8370 /* Message */,
 				2BE0EC212AA0956C00E47C52 /* ModalView.swift */,
 				2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */,
-				2BAFDB682AF5E455009C8370 /* ModalHeaderView.swift */,
 			);
 			path = Modal;
 			sourceTree = "<group>";
@@ -577,7 +582,7 @@
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
 				2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */,
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
-				2BAFDB692AF5E455009C8370 /* ModalHeaderView.swift in Sources */,
+				2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */,
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
@@ -592,7 +597,6 @@
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
-				2BA7F0B12A9ABCA5003D38BA /* MenuPromptView.swift in Sources */,
 				2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */,
 				2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */,
 				2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */,

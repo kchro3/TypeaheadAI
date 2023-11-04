@@ -15,16 +15,7 @@ struct ModalView: View {
     @ObservedObject var modalManager: ModalManager
     @State private var fontSize: CGFloat = NSFont.preferredFont(forTextStyle: .body).pointSize
     @State private var text: String = ""
-    @State private var isReplyLocked: Bool = false
-    @State private var isOnlineTooltipVisible: Bool = false
-    @State private var isOnlineTooltipHovering: Bool = false
     @State private var isAuxiliaryMenuVisible: Bool = false
-
-    @AppStorage("selectedModel") private var selectedModelURL: URL?
-    @AppStorage("modelDirectory") private var directoryURL: URL?
-    @Environment(\.colorScheme) var colorScheme
-
-    @Namespace var bottomID
 
     var body: some View {
         VStack {
@@ -113,7 +104,10 @@ struct ModalView: View {
                 attachmentAnchor: .rect(.bounds),
                 arrowEdge: .bottom
             ) {
-                AuxiliaryMenuView(modalManager: modalManager, promptManager: modalManager.promptManager!)
+                AuxiliaryMenuView(
+                    modalManager: modalManager,
+                    settingsManager: modalManager.settingsManager!
+                )
             }
         }
     }
