@@ -155,29 +155,26 @@ class ClientManager {
     var appContextManager: AppContextManager? = nil
     var intentManager: IntentManager? = nil
     var historyManager: HistoryManager? = nil
+    var supabaseManager: SupabaseManager? = nil
 
     private let session: URLSession
 
     private let version: String = "v3"
     @AppStorage("freebies") var freebies: Int = 10
 
-    let supabase = SupabaseClient(
-        supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
-        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
-
     #if DEBUG
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
-//    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
+//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
+//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
+//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
+//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
+    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
+    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
+    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
+    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
     #else
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
@@ -236,7 +233,7 @@ class ClientManager {
         incognitoMode: Bool,
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
-        let uuid: UUID? = try? await supabase.auth.session.user.id
+        let uuid: UUID? = try? await supabaseManager?.client.auth.session.user.id
         freebies -= 1
         let payload = RequestPayload(
             uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
@@ -431,7 +428,7 @@ class ClientManager {
                 userBio: userBio,
                 userLang: userLang,
                 onboardingStep: onboardingStep,
-                version: "onboarding_v3"
+                version: "onboarding_v4"
             )
 
             do {
@@ -481,7 +478,7 @@ class ClientManager {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
             self?.freebies -= 1
-            let uuid = try? await self?.supabase.auth.session.user.id
+            let uuid = try? await self?.supabaseManager?.client.auth.session.user.id
             let payload = RequestPayload(
                 uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
                 username: username,

@@ -11,6 +11,9 @@ import AuthenticationServices
 
 struct OnboardingView: View {
     @ObservedObject var modalManager: ModalManager
+    var settingsManager: SettingsManager
+    var supabaseManager: SupabaseManager
+
     @State private var messages: [Message] = []
     @State private var isVisible: Bool = false
     @State private var isContinueVisible: Bool = false
@@ -19,10 +22,6 @@ struct OnboardingView: View {
     @State private var isCloseVisible: Bool = false
     @State private var onboardingStep: Int = 0
     @State private var text: String = ""
-
-    let supabase = SupabaseClient(
-        supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
-        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
 
     // When streaming a result, we want to batch process tokens.
     // Since we stream tokens one at a time, we need a global variable to
@@ -34,32 +33,33 @@ struct OnboardingView: View {
     private let parsingTask = ResponseParsingTask()
 
     @AppStorage("token3") var token: String?
+    @AppStorage("settingsTab") var settingsTab: String?
 
     var body: some View {
         VStack {
-            HStack {
-                Image("SplashIcon")
-                Text("TypeaheadAI").font(.title)
-            }
-            .padding()
-            .opacity(isVisible ? 1 : 0)
-            .animation(.easeIn, value: isVisible)
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) {
-                    isVisible = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        modalManager.clientManager?.onboarding(
-                            onboardingStep: onboardingStep,
-                            streamHandler: self.streamHandler,
-                            completion: self.completionHandler
-                        )
-                    }
-                }
-            }
-
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 10) {
+                        HStack {
+                            Image("SplashIcon")
+                            Text("TypeaheadAI").font(.title)
+                        }
+                        .padding()
+                        .opacity(isVisible ? 1 : 0)
+                        .animation(.easeIn, value: isVisible)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) {
+                                isVisible = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    modalManager.clientManager?.onboarding(
+                                        onboardingStep: onboardingStep,
+                                        streamHandler: self.streamHandler,
+                                        completion: self.completionHandler
+                                    )
+                                }
+                            }
+                        }
+
                         ForEach(messages.indices, id: \.self) { index in
                             MessageView(message: messages[index])
                                 .padding(5)
@@ -76,36 +76,11 @@ struct OnboardingView: View {
 
             HStack {
                 if isSignInVisible {
-                    SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        Task {
-                            do {
-                                guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
-                                else {
-                                    return
-                                }
-
-                                guard let idToken = credential.identityToken
-                                    .flatMap({ String(data: $0, encoding: .utf8) })
-                                else {
-                                    return
-                                }
-
-                                token = idToken
-                                try await supabase.auth.signInWithIdToken(
-                                    credentials: .init(
-                                        provider: .apple,
-                                        idToken: idToken
-                                    )
-                                )
-                            } catch {
-                                dump(error)
-                            }
-                        }
+                    AccountOptionButton(label: "Create an account", isAccent: true) {
+                        NSApplication.shared.keyWindow?.close()
+                        settingsTab = Tab.account.id
+                        settingsManager.showModal()
                     }
-                    .signInWithAppleButtonStyle(.white)
-                    .cornerRadius(25)
                 }
 
                 if isTextEditorVisible {
@@ -289,11 +264,9 @@ struct OnboardingView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         isContinueVisible = true
                     }
-                } else if suffix == "apple_sign_in" {
+                } else if suffix == "sign_in" {
                     isSignInVisible = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        isContinueVisible = true
-                    }
+                    isCloseVisible = true
                 } else if suffix == "done" {
                     isCloseVisible = true
                 } else {
@@ -332,12 +305,20 @@ struct OnboardingView: View {
     }
 }
 
-struct OnboardingView_Previews: PreviewProvider {
-    static var previews: some View {
-        let modalManager = ModalManager()
-
-        return OnboardingView(
-            modalManager: modalManager
-        )
+#Preview {
+    // Create an in-memory Core Data store
+    let container = NSPersistentContainer(name: "TypeaheadAI")
+    container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+    container.loadPersistentStores { _, error in
+        if let error = error as NSError? {
+            fatalError("Unresolved error \(error), \(error.userInfo)")
+        }
     }
+
+    let context = container.viewContext
+    return OnboardingView(
+        modalManager: ModalManager(),
+        settingsManager: SettingsManager(context: context),
+        supabaseManager: SupabaseManager()
+    )
 }
