@@ -2,24 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleTypeRole</key>
-	<string>Editor</string>
-	<key>CFBundleURLSchemes</key>
-	<array>
-		<string>app.typeahead://login-callback</string>
-	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.740152617489-ctcjqh4jae9flccc7g7t5tj3962u3ilt</string>
-			</array>
-		</dict>
-	</array>
 	<key>GIDClientID</key>
 	<string>740152617489-ctcjqh4jae9flccc7g7t5tj3962u3ilt.apps.googleusercontent.com</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>CFBundleTypeRole</key>
+	<string>Editor</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Custom Scheme for TypeaheadAI</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app.typeahead</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

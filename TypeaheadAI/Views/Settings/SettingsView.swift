@@ -21,6 +21,8 @@ enum Tab: String, CaseIterable, Identifiable {
 
 struct SettingsView: View {
     var promptManager: PromptManager
+    var llamaModelManager: LlamaModelManager
+    var supabaseManager: SupabaseManager
 
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("settingsTab") var settingsTab: String = Tab.general.rawValue
@@ -61,9 +63,9 @@ struct SettingsView: View {
         case .history:
             return AnyView(HistoryListView())
         case .incognito:
-            return AnyView(IncognitoModeView())
+            return AnyView(IncognitoModeView(llamaModelManager: llamaModelManager))
         case .account:
-            return AnyView(AccountView())
+            return AnyView(AccountView(supabaseManager: supabaseManager))
         case .feedback:
             return AnyView(Text("Work in progress!"))
         }
@@ -122,10 +124,13 @@ struct SettingsView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt)
         }
 
+        let llamaModelManager = LlamaModelManager()
+        let supabaseManager = SupabaseManager()
+
         return Group {
-            SettingsView(promptManager: promptManager)
+            SettingsView(promptManager: promptManager, llamaModelManager: llamaModelManager, supabaseManager: supabaseManager)
                 .environment(\.managedObjectContext, context)
-            SettingsView(promptManager: promptManager)
+            SettingsView(promptManager: promptManager, llamaModelManager: llamaModelManager, supabaseManager: supabaseManager)
                 .environment(\.managedObjectContext, context)
         }
     }

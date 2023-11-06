@@ -14,6 +14,9 @@ struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var settingsManager: SettingsManager
+
+    private let supabaseManager = SupabaseManager()
+
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
@@ -43,7 +46,13 @@ struct MenuView: View {
                         if let manager = modalManager.clientManager?.llamaModelManager,
                            !online,
                            let _ = selectedModelURL {
-                            manager.load()
+                            Task {
+                                do {
+                                    try await manager.load()
+                                } catch let error {
+                                    print(error.localizedDescription)
+                                }
+                            }
                         }
                     }
                     .foregroundColor(Color.secondary)

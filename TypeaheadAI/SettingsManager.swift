@@ -12,6 +12,9 @@ import Foundation
 class SettingsManager: ObservableObject {
     var toastWindow: ModalWindow?
     var promptManager: PromptManager? = nil
+    var llamaModelManager: LlamaModelManager? = nil
+    var supabaseManager: SupabaseManager? = nil
+
     private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
@@ -28,8 +31,12 @@ class SettingsManager: ObservableObject {
         visualEffect.state = .active
         visualEffect.material = .hudWindow
 
-        let contentView = SettingsView(promptManager: promptManager!)
-            .environment(\.managedObjectContext, context)
+        let contentView = SettingsView(
+            promptManager: promptManager!, 
+            llamaModelManager: llamaModelManager!,
+            supabaseManager: supabaseManager!
+        )
+        .environment(\.managedObjectContext, context)
 
         let hostingView = NSHostingView(rootView: contentView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
