@@ -7,14 +7,17 @@
 import SwiftUI
 
 struct IncognitoModeView: View {
-    @ObservedObject var modelManager = LlamaModelManager()
+    @ObservedObject var llamaModelManager: LlamaModelManager
 
     @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL?
     @State private var isPickerPresented = false
+    @State private var isLoading = false
+    @State private var showAlert = false
+    @State private var currentlyLoadingModel: URL? = nil
 
-    init() {
-        self.modelManager.load()
+    init(llamaModelManager: LlamaModelManager) {
+        self.llamaModelManager = llamaModelManager
     }
 
     var body: some View {
@@ -58,8 +61,16 @@ struct IncognitoModeView: View {
                 ) { result in
                     switch result {
                     case .success(let urls):
-                        directoryURL = urls.first
-                        self.modelManager.load()
+                        if let url = urls.first {
+                            self.llamaModelManager.setModelDirectory(url)
+                            Task {
+                                do {
+                                    try await self.llamaModelManager.load()
+                                } catch let error {
+                                    print(error.localizedDescription)
+                                }
+                            }
+                        }
                     case .failure(let error):
                         print("Error selecting directory: \(error.localizedDescription)")
                     }
@@ -74,18 +85,31 @@ struct IncognitoModeView: View {
                 .disabled(directoryURL == nil)
             }
 
-            List(modelManager.modelFiles ?? [], id: \.self) { url in
+            List(llamaModelManager.modelFiles ?? [], id: \.self) { url in
                 Button(action: {
                     if selectedModelURL == url {
-                        modelManager.unloadModel()
+                        llamaModelManager.unloadModel()
                     } else {
-                        modelManager.isLoading = true
-                        modelManager.currentlyLoadingModel = url
-                        modelManager.loadModel(from: url)
+                        Task {
+                            do {
+                                isLoading = true
+                                currentlyLoadingModel = url
+
+                                try await llamaModelManager.loadModel(from: url)
+
+                                selectedModelURL = url
+                            } catch {
+                                showAlert = true
+                                print(error.localizedDescription)
+                            }
+
+                            isLoading = false
+                            currentlyLoadingModel = nil
+                        }
                     }
                 }) {
                     HStack {
-                        if modelManager.isLoading && modelManager.currentlyLoadingModel == url {
+                        if isLoading && currentlyLoadingModel == url {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
                                 .scaleEffect(0.5, anchor: .center)
@@ -107,21 +131,32 @@ struct IncognitoModeView: View {
                     .cornerRadius(8)
                 }
                 .buttonStyle(.plain)
+                .listRowSeparator(.hidden)
             }
-            .disabled(modelManager.isLoading)
+            .disabled(isLoading)
         }
-        .alert(isPresented: $modelManager.showAlert) {
+        .alert(isPresented: $showAlert) {
             Alert(title: Text("Something went wrong..."),
                   message: Text("The model failed to load."),
                   dismissButton: .default(Text("OK")))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
+        .onAppear {
+            Task {
+                do {
+                    try await self.llamaModelManager.load()
+                } catch let error {
+                    showAlert = true
+                    print(error.localizedDescription)
+                }
+            }
+        }
     }
 }
 
 struct IncognitoModeView_Previews: PreviewProvider {
     static var previews: some View {
-        return IncognitoModeView()
+        return IncognitoModeView(llamaModelManager: LlamaModelManager())
     }
 }

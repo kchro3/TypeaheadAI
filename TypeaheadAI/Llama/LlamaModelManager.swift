@@ -10,6 +10,14 @@ import SwiftUI
 import Foundation
 import os.log
 
+enum LlamaManagerError: Error {
+    case modelNotFound(_ message: String)
+    case modelNotLoaded(_ message: String)
+    case modelDirectoryNotAuthorized(_ message: String)
+}
+
+/// NOTE: I had set up some security bookmark initially for some reason, but I did it incorrectly, so I'm
+/// reverting the changes.
 class LlamaModelManager: ObservableObject {
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -33,29 +41,34 @@ class LlamaModelManager: ObservableObject {
     @AppStorage("modelDirectory") private var directoryURL: URL? {
         didSet {
             if let url = directoryURL {
-                let success = url.startAccessingSecurityScopedResource()
-                if !success {
+                guard url.startAccessingSecurityScopedResource() else {
                     logger.debug("Failed to start accessing security-scoped resource.")
+                    return
                 }
+
+                saveDirectoryBookmark(from: url)
             }
         }
     }
 
-    @Published var isLoading: Bool = false
-    @Published var currentlyLoadingModel: URL?
-    @Published var showAlert: Bool = false
-
     private var model: LlamaWrapper?
 
-    func load() {
+    @MainActor
+    func setModelDirectory(_ url: URL) {
+        directoryURL = url
+        selectedModelURL = nil  // Unset the current model
+    }
+
+    @MainActor
+    func load() async throws {
         loadModelDirectoryBookmark()
 
         // Load saved selected model from UserDefaults
-        if let urlString = selectedModelURL {
-            self.loadModel(from: urlString)
-        }
-
         self.modelFiles = loadModelFiles()
+
+        if let urlString = selectedModelURL {
+            try await self.loadModel(from: urlString)
+        }
     }
 
     deinit {
@@ -158,31 +171,14 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
-    func loadModel(from url: URL) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.model = LlamaWrapper(url)
+    func loadModel(from url: URL) async throws {
+        let model = LlamaWrapper(url)
 
-            guard let model = self.model else {
-                return
-            }
-
-            if (model.isLoaded()) {
-                DispatchQueue.main.async {
-                    self.logger.info("model loaded successfully: \(url.lastPathComponent)")
-                    self.isLoading = false
-                    self.selectedModelURL = url
-                    self.currentlyLoadingModel = nil
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.logger.info("model failed to load: \(url.lastPathComponent)")
-                    self.isLoading = false
-                    self.selectedModelURL = nil
-                    self.currentlyLoadingModel = nil
-                    self.showAlert = true
-                }
-            }
+        guard model.isLoaded() else {
+            throw LlamaManagerError.modelNotLoaded("Model could not be loaded")
         }
+
+        self.logger.info("model loaded successfully: \(url.lastPathComponent)")
     }
 
     func unloadModel() {

@@ -43,7 +43,13 @@ struct MenuView: View {
                         if let manager = modalManager.clientManager?.llamaModelManager,
                            !online,
                            let _ = selectedModelURL {
-                            manager.load()
+                            Task {
+                                do {
+                                    try await manager.load()
+                                } catch let error {
+                                    print(error.localizedDescription)
+                                }
+                            }
                         }
                     }
                     .foregroundColor(Color.secondary)
@@ -101,8 +107,13 @@ struct MenuView: View {
                     }
                 } else {
                     MenuButtonView(title: "Sign in") {
-                        settingsTab = Tab.account.id
-                        settingsManager.showModal()
+                        guard let url = URL(string: "http://localhost:8080/signin.html") else {
+                            return
+                        }
+
+                        NSWorkspace.shared.open(url)
+//                        settingsTab = Tab.account.id
+//                        settingsManager.showModal()
                         isMenuVisible = false
                     }
                 }
