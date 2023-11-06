@@ -49,6 +49,21 @@ struct LoggedOutAccountView: View {
                     Alert(title: Text("Failed to sign-in with Apple"), message: failedToRegisterReason.map { Text("\($0)") })
                 })
 
+
+                AccountOptionButton(label: "Sign-in with Google") {
+                    Task {
+                        do {
+                            try await supabaseManager.signinWithGoogle()
+                        } catch {
+                            failedToRegisterReason = error.localizedDescription
+                            failedToSignIn = true
+                        }
+                    }
+                }
+                .alert(isPresented: $failedToSignIn, content: {
+                    Alert(title: Text("Failed to sign-in with Google"), message: failedToRegisterReason.map { Text("\($0)") })
+                })
+
                 AccountOptionButton(label: "Register with email", isAccent: true) {
                     // Open up the modal window for registration
                     isSheetPresenting = true

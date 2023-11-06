@@ -43,6 +43,11 @@ class SupabaseManager {
         NSWorkspace.shared.open(url)
     }
 
+    func signinWithGoogle() async throws {
+        let url = try client.auth.getOAuthSignInURL(provider: Provider.google, redirectTo: callbackURL)
+        NSWorkspace.shared.open(url)
+    }
+
     func signout() async throws {
         uuid = nil
         token = nil
