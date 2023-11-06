@@ -33,6 +33,7 @@ final class AppState: ObservableObject {
     private let appContextManager: AppContextManager
     private let memoManager: MemoManager
     private let intentManager: IntentManager
+    @Published var supabaseManager = SupabaseManager()
 
     // Actors
     private var specialCutActor: SpecialCutActor? = nil
@@ -114,6 +115,7 @@ final class AppState: ObservableObject {
 
         self.settingsManager.llamaModelManager = llamaModelManager
         self.settingsManager.promptManager = promptManager
+        self.settingsManager.supabaseManager = supabaseManager
 
         checkAndRequestNotificationPermissions()
 

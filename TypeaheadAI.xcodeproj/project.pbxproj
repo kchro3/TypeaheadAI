@@ -10,6 +10,11 @@
 		2B0116EB2AF86E88000C78E1 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116EA2AF86E88000C78E1 /* AppState.swift */; };
 		2B0116ED2AF878D1000C78E1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116EC2AF878D1000C78E1 /* AppDelegate.swift */; };
 		2B0116F02AF88051000C78E1 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116EF2AF88051000C78E1 /* SupabaseManager.swift */; };
+		2B0116F32AF98D68000C78E1 /* LoggedOutAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116F22AF98D68000C78E1 /* LoggedOutAccountView.swift */; };
+		2B0116F52AF98EBD000C78E1 /* AccountOptionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116F42AF98EBD000C78E1 /* AccountOptionButton.swift */; };
+		2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116F62AF98F2C000C78E1 /* NewAccountRegistrationForm.swift */; };
+		2B0116F92AF990E2000C78E1 /* EmailAndPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116F82AF990E2000C78E1 /* EmailAndPasswordView.swift */; };
+		2B0116FB2AF99347000C78E1 /* RoundedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0116FA2AF99347000C78E1 /* RoundedButton.swift */; };
 		2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30072ACCDA1100338B76 /* VisualEffect.swift */; };
 		2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */; };
 		2B0B300E2ACEB0E000338B76 /* MarkdownTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300D2ACEB0E000338B76 /* MarkdownTableView.swift */; };
@@ -101,6 +106,11 @@
 		2B0116EA2AF86E88000C78E1 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		2B0116EC2AF878D1000C78E1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2B0116EF2AF88051000C78E1 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
+		2B0116F22AF98D68000C78E1 /* LoggedOutAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutAccountView.swift; sourceTree = "<group>"; };
+		2B0116F42AF98EBD000C78E1 /* AccountOptionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountOptionButton.swift; sourceTree = "<group>"; };
+		2B0116F62AF98F2C000C78E1 /* NewAccountRegistrationForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewAccountRegistrationForm.swift; sourceTree = "<group>"; };
+		2B0116F82AF990E2000C78E1 /* EmailAndPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailAndPasswordView.swift; sourceTree = "<group>"; };
+		2B0116FA2AF99347000C78E1 /* RoundedButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedButton.swift; sourceTree = "<group>"; };
 		2B0B30072ACCDA1100338B76 /* VisualEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffect.swift; sourceTree = "<group>"; };
 		2B0B30092ACD6E6B00338B76 /* UserIntentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIntentsView.swift; sourceTree = "<group>"; };
 		2B0B300D2ACEB0E000338B76 /* MarkdownTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTableView.swift; sourceTree = "<group>"; };
@@ -209,6 +219,18 @@
 				2B0116EF2AF88051000C78E1 /* SupabaseManager.swift */,
 			);
 			path = Supabase;
+			sourceTree = "<group>";
+		};
+		2B0116F12AF9800C000C78E1 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				2B520D842AC82EA100310426 /* AccountView.swift */,
+				2B0116F22AF98D68000C78E1 /* LoggedOutAccountView.swift */,
+				2B0116F42AF98EBD000C78E1 /* AccountOptionButton.swift */,
+				2B0116F62AF98F2C000C78E1 /* NewAccountRegistrationForm.swift */,
+				2B0116F82AF990E2000C78E1 /* EmailAndPasswordView.swift */,
+			);
+			path = Account;
 			sourceTree = "<group>";
 		};
 		2B33D8812AAC4E0F001193A2 /* Actors */ = {
@@ -350,6 +372,7 @@
 				2BCF84362A9DE68200359841 /* Settings */,
 				2B0B30072ACCDA1100338B76 /* VisualEffect.swift */,
 				2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */,
+				2B0116FA2AF99347000C78E1 /* RoundedButton.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -379,13 +402,13 @@
 		2BCF84362A9DE68200359841 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				2B0116F12AF9800C000C78E1 /* Account */,
 				2B7BBABE2AF2B47900E4CE1F /* QuickActions */,
 				2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */,
 				2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */,
 				2B473E862AA85B9A0042913D /* IncognitoModeView.swift */,
 				2B33D87C2AAC3330001193A2 /* ProfileView.swift */,
 				2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */,
-				2B520D842AC82EA100310426 /* AccountView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -584,6 +607,7 @@
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
+				2B0116F32AF98D68000C78E1 /* LoggedOutAccountView.swift in Sources */,
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
@@ -622,10 +646,14 @@
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
 				2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */,
 				2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */,
+				2B0116F52AF98EBD000C78E1 /* AccountOptionButton.swift in Sources */,
 				2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */,
+				2B0116F92AF990E2000C78E1 /* EmailAndPasswordView.swift in Sources */,
 				2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */,
+				2B0116FB2AF99347000C78E1 /* RoundedButton.swift in Sources */,
 				2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
+				2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */,
 				2BF929822AB13F7900FC105B /* MarkdownAttributedStringParser.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
 				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,

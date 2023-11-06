@@ -30,9 +30,10 @@ struct SettingsScene: Scene {
         Settings {
             SettingsView(
                 promptManager: appState.promptManager,
-                llamaModelManager: appState.llamaModelManager
+                llamaModelManager: appState.llamaModelManager,
+                supabaseManager: appState.supabaseManager
             )
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
         .windowStyle(.hiddenTitleBar)
     }

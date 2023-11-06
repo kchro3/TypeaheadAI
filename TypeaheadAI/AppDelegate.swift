@@ -14,11 +14,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
             // Handle the URL
-            print("App opened with URL: \(url)")
-            // You might check the path, query string, or other parts of the URL
-            // to determine exactly what the app should do
-//            Task {
-//            }
+            if url.host == "login-callback" {
+                let urlDict: [String: URL] = ["url": url]
+                NotificationCenter.default.post(name: Notification.Name("OAuthCallBack"), object: nil, userInfo: urlDict)
+            }
         }
     }
 

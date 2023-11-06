@@ -167,9 +167,9 @@ class LlamaModelManager: ObservableObject {
     }
 
     func loadModel(from url: URL) async throws {
-        let model = LlamaWrapper(url)
+        self.model = LlamaWrapper(url)
 
-        guard model.isLoaded() else {
+        guard let _ = self.model?.isLoaded() else {
             throw LlamaManagerError.modelNotLoaded("Model could not be loaded")
         }
 
@@ -188,7 +188,7 @@ class LlamaModelManager: ObservableObject {
         payload: RequestPayload
     ) async throws -> SuggestIntentsPayload {
         guard let model = self.model else {
-            throw ClientManagerError.appError("Model not found")
+            throw LlamaManagerError.modelNotFound("Model not found")
         }
 
         var payloadCopy = payload
@@ -237,7 +237,7 @@ class LlamaModelManager: ObservableObject {
         }
 
         guard let model = self.model else {
-            let error = ClientManagerError.serverError("Model not found")
+            let error = LlamaManagerError.modelNotFound("Model not found")
             await streamHandler(.failure(error))
             return .failure(error)
         }

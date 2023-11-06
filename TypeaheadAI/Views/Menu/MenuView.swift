@@ -14,6 +14,9 @@ struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var settingsManager: SettingsManager
+
+    private let supabaseManager = SupabaseManager()
+
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
@@ -107,13 +110,8 @@ struct MenuView: View {
                     }
                 } else {
                     MenuButtonView(title: "Sign in") {
-                        guard let url = URL(string: "http://localhost:8080/signin.html") else {
-                            return
-                        }
-
-                        NSWorkspace.shared.open(url)
-//                        settingsTab = Tab.account.id
-//                        settingsManager.showModal()
+                        settingsTab = Tab.account.id
+                        settingsManager.showModal()
                         isMenuVisible = false
                     }
                 }

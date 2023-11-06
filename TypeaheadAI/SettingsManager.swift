@@ -13,6 +13,7 @@ class SettingsManager: ObservableObject {
     var toastWindow: ModalWindow?
     var promptManager: PromptManager? = nil
     var llamaModelManager: LlamaModelManager? = nil
+    var supabaseManager: SupabaseManager? = nil
 
     private let context: NSManagedObjectContext
 
@@ -32,7 +33,8 @@ class SettingsManager: ObservableObject {
 
         let contentView = SettingsView(
             promptManager: promptManager!, 
-            llamaModelManager: llamaModelManager!
+            llamaModelManager: llamaModelManager!,
+            supabaseManager: supabaseManager!
         )
         .environment(\.managedObjectContext, context)
 
