@@ -318,6 +318,8 @@
 				2BE0EC242AA17DB600E47C52 /* Info.plist */,
 				2BA7F0AF2A9ABC62003D38BA /* Views */,
 				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
+				2B0116EA2AF86E88000C78E1 /* AppState.swift */,
+				2B0116EC2AF878D1000C78E1 /* AppDelegate.swift */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
 				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
@@ -332,8 +334,6 @@
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
 				2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */,
-				2B0116EA2AF86E88000C78E1 /* AppState.swift */,
-				2B0116EC2AF878D1000C78E1 /* AppDelegate.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";

@@ -29,11 +29,13 @@ final class AppState: ObservableObject {
     @Published var modalManager: ModalManager
     @Published var settingsManager: SettingsManager
     @Published var clientManager: ClientManager
+
+    var supabaseManager = SupabaseManager()
+
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager
     private let memoManager: MemoManager
     private let intentManager: IntentManager
-    @Published var supabaseManager = SupabaseManager()
 
     // Actors
     private var specialCutActor: SpecialCutActor? = nil
@@ -108,6 +110,7 @@ final class AppState: ObservableObject {
         self.clientManager.appContextManager = appContextManager
         self.clientManager.intentManager = intentManager
         self.clientManager.historyManager = historyManager
+        self.clientManager.supabaseManager = supabaseManager
 
         self.modalManager.clientManager = clientManager
         self.modalManager.promptManager = promptManager
