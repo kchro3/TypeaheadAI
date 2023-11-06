@@ -16,16 +16,11 @@ enum LlamaManagerError: Error {
     case modelDirectoryNotAuthorized(_ message: String)
 }
 
-/// NOTE: I had set up some security bookmark initially for some reason, but I did it incorrectly, so I'm
-/// reverting the changes.
 class LlamaModelManager: ObservableObject {
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "LlamaModelManager"
     )
-
-    private let bookmarkKey = "modelDirectoryBookmark"
-    private let selectedModelKey = "selectedModelKey"
 
     @Published var modelFiles: [URL]? {
         didSet {
@@ -37,6 +32,7 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
+    @AppStorage("modelDirectoryBookmark") private var modelDirectoryBookmark: Data?
     @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL? {
         didSet {
@@ -93,7 +89,7 @@ class LlamaModelManager: ObservableObject {
     }
 
     private func loadModelDirectoryBookmark() {
-        if let bookmarkData = UserDefaults.standard.data(forKey: bookmarkKey) {
+        if let bookmarkData = modelDirectoryBookmark {
             var isBookmarkStale = false
             do {
                 let resolvedURL = try URL(resolvingBookmarkData: bookmarkData, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isBookmarkStale)
@@ -164,8 +160,7 @@ class LlamaModelManager: ObservableObject {
 
     private func saveDirectoryBookmark(from directoryURL: URL) {
         do {
-            let bookmarkData = try directoryURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-            UserDefaults.standard.set(bookmarkData, forKey: bookmarkKey)
+            modelDirectoryBookmark = try directoryURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
         } catch {
             logger.error("Failed to create security-scoped bookmark: \(error)")
         }
