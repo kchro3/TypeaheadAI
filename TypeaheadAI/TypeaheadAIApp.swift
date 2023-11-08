@@ -13,7 +13,7 @@ struct TypeaheadAIApp {
     static let onboardingKey = "hasOnboardedV3"
 
     static func main() {
-//        UserDefaults.standard.setValue(false, forKey: onboardingKey)
+        // UserDefaults.standard.setValue(false, forKey: onboardingKey)
 
         if UserDefaults.standard.bool(forKey: onboardingKey) {
             MacOS13AndLaterApp.main()
@@ -65,8 +65,7 @@ struct MacOS13AndLaterApp: App {
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
-            Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
-            // TODO: Add symbolEffect when available
+            Image("SplashIcon")
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
         .menuBarExtraStyle(.window)
@@ -105,8 +104,7 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
-            Image(systemName: appState.isBlinking ? "list.clipboard.fill" : "list.clipboard")
-            // TODO: Add symbolEffect when available
+            Image("SplashIcon")
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
         .menuBarExtraStyle(.window)

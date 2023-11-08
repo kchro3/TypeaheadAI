@@ -41,7 +41,6 @@ struct OnboardingView: View {
                 ScrollView {
                     LazyVStack(spacing: 10) {
                         HStack {
-                            Image("SplashIcon")
                             Text("TypeaheadAI").font(.title)
                         }
                         .padding()
