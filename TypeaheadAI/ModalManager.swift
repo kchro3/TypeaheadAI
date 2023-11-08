@@ -369,12 +369,13 @@ class ModalManager: ObservableObject {
     }
 
     /// Reply to the user
+    /// If refresh, then pop the previous message before responding.
     @MainActor
-    func replyToUserMessage() {
+    func replyToUserMessage(refresh: Bool) {
         isPending = true
         userIntents = nil
 
-        if let lastMessage = self.messages.last {
+        if refresh, let lastMessage = self.messages.last {
             if let _ = lastMessage.responseError {
                 _ = self.messages.popLast()
             } else if case .string = lastMessage.messageType {

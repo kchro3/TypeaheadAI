@@ -46,7 +46,7 @@ struct ModalView: View {
                                     "What do you want to do with this?"
                                 )
                         ),
-                        autoCompleteSuggestions: self.getPrompts()
+                        autoCompleteSuggestions: self.modalManager.promptManager?.getPrompts() ?? []
                     ) { text in
                         if !text.isEmpty {
                             if let _ = modalManager.userIntents {
@@ -109,14 +109,6 @@ struct ModalView: View {
                     settingsManager: modalManager.settingsManager!
                 )
             }
-        }
-    }
-
-    private func getPrompts() -> [PromptEntry] {
-        if let prompts = modalManager.promptManager?.savedPrompts {
-            return prompts
-        } else {
-            return []
         }
     }
 }

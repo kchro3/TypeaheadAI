@@ -337,16 +337,11 @@ struct QuickActionDetails: View {
                     object.copiedText = copiedText
                     object.pastedResponse = pastedText
 
-                    do {
-                        try managedObjectContext.save()
-                    } catch {
-                        // Handle the error appropriately
-                        print("Error fetching entry: \(error.localizedDescription)")
-                    }
+                    try managedObjectContext.save()
                 }
             } catch {
                 // Handle the error appropriately
-                print("Error fetching entry: \(error.localizedDescription)")
+                print("Error updating entry: \(error.localizedDescription)")
             }
         } else {
             // Create new example flow
