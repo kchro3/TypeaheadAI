@@ -30,7 +30,7 @@ struct ConversationView: View {
                                 modalManager.messages[index].isEdited.toggle()
                             },
                             onRefresh: {
-                                modalManager.replyToUserMessage()
+                                modalManager.replyToUserMessage(refresh: true)
                             },
                             onTruncate: {
                                 modalManager.messages[index].isTruncated.toggle()

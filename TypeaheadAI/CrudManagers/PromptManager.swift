@@ -7,23 +7,31 @@
 
 import CoreData
 import Foundation
+import os.log
 
 class PromptManager: ObservableObject {
-    @Published var savedPrompts: [PromptEntry]
-    @Published var activePromptID: UUID?
+    var activePromptID: UUID?
     private let context: NSManagedObjectContext
 
+    private let logger = Logger(
+        subsystem: "ai.typeahead.TypeaheadAI",
+        category: "PromptManager"
+    )
+
     init(context: NSManagedObjectContext) {
-        // Fetch saved prompts from Core Data
-        let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
-        do {
-            self.savedPrompts = try context.fetch(fetchRequest)
-        } catch {
-            print("Failed to fetch prompts: \(error)")
-            self.savedPrompts = []
-        }
         self.activePromptID = nil
         self.context = context
+    }
+
+    /// Fetch prompts from Core Data
+    func getPrompts() -> [PromptEntry] {
+        let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
+        do {
+            return try context.fetch(fetchRequest)
+        } catch {
+            logger.error("Failed to fetch prompts: \(error)")
+            return []
+        }
     }
 
     @MainActor
@@ -34,15 +42,25 @@ class PromptManager: ObservableObject {
     }
 
     func getActivePrompt() -> String? {
-        if let activeID = activePromptID,
-           let activePrompt = savedPrompts.first(where: { $0.id == activeID }) {
-            return activePrompt.prompt
-        } else {
-            return nil
+        if let activeID = activePromptID {
+            let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@",
+                                                 activeID as CVarArg)
+            do {
+                let fetchedObjects = try context.fetch(fetchRequest)
+                if let promptEntry = fetchedObjects.first {
+                    return promptEntry.prompt
+                }
+            } catch {
+                // Handle the error appropriately
+                logger.error("Error fetching entry: \(error.localizedDescription)")
+            }
         }
+
+        return nil
     }
 
-    func addPrompt(_ prompt: String, details: String? = nil) {
+    func addPrompt(_ prompt: String, details: String? = nil) -> PromptEntry? {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
         newPrompt.prompt = prompt
@@ -57,70 +75,89 @@ class PromptManager: ObservableObject {
 
         do {
             try context.save()
-            self.savedPrompts.append(newPrompt)
             self.activePromptID = newPrompt.id
+            return newPrompt
         } catch {
-            print("Failed to save prompt: \(error)")
-        }
-    }
-
-    func getByLabel(_ label: String) -> PromptEntry? {
-        if let index = savedPrompts.firstIndex(where: { $0.prompt == label }) {
-            return self.savedPrompts[index]
-        } else {
+            logger.error("Failed to save prompt: \(error)")
             return nil
         }
     }
 
+    func getByLabel(_ label: String) -> PromptEntry? {
+        let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "prompt ==[c] %@",
+                                             label as CVarArg)
+        do {
+            let fetchedObjects = try context.fetch(fetchRequest)
+            if let promptEntry = fetchedObjects.first {
+                return promptEntry
+            }
+        } catch {
+            // Handle the error appropriately
+            logger.error("Error fetching entry: \(error.localizedDescription)")
+        }
+
+        return nil
+    }
+
     func updatePrompt(with id: UUID, newLabel: String? = nil, newDetails: String? = nil) {
-        if let index = savedPrompts.firstIndex(where: { $0.id == id }) {
-            DispatchQueue.main.async {
-                let promptToUpdate = self.savedPrompts[index]
-                if let newLabel = newLabel {
-                    promptToUpdate.prompt = newLabel
+        let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@",
+                                             id as CVarArg)
+        do {
+            let fetchedObjects = try context.fetch(fetchRequest)
+            if let promptEntry = fetchedObjects.first {
+                if let label = newLabel {
+                    promptEntry.prompt = label
+                }
+                if let details = newDetails {
+                    promptEntry.details = details
                 }
 
-                if let newDetails = newDetails {
-                    promptToUpdate.details = newDetails
-                }
-                promptToUpdate.updatedAt = Date()
-                do {
-                    try self.context.save()
-                    self.activePromptID = id
-                } catch {
-                    print("Failed to update prompt: \(error)")
-                }
+                promptEntry.updatedAt = Date()
+
+                try context.save()
+                self.activePromptID = id
             }
+        } catch {
+            // Handle the error appropriately
+            logger.error("Error updating entry: \(error.localizedDescription)")
         }
     }
 
     func removePrompt(with id: UUID) {
-        if let index = savedPrompts.firstIndex(where: { $0.id == id }) {
-            let promptToRemove = savedPrompts[index]
-            context.delete(promptToRemove)
-            do {
+        if activePromptID == id {
+            activePromptID = nil
+        }
+
+        let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@",
+                                             id as CVarArg)
+        do {
+            let fetchedObjects = try context.fetch(fetchRequest)
+            if let object = fetchedObjects.first {
+                context.delete(object)
                 try context.save()
-                if activePromptID == id {
-                    activePromptID = nil
-                }
-                self.savedPrompts.remove(at: index)
-            } catch {
-                print("Failed to remove prompt: \(error)")
             }
+        } catch {
+            logger.error("Error deleting entry: \(error.localizedDescription)")
         }
     }
 
     func clearPrompts() {
-        for entry in savedPrompts {
-            context.delete(entry)
-        }
+        let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
 
         do {
+            let objects = try context.fetch(fetchRequest)
+            // Delete the objects
+            for object in objects {
+                context.delete(object)
+            }
+
             try context.save()
-            self.savedPrompts.removeAll()
-            self.activePromptID = nil
-        } catch let error as NSError {
-            print("Could not fetch or delete. \(error), \(error.userInfo)")
+        } catch {
+            // Handle the error
+            logger.error("Could not clear intents: \(error.localizedDescription)")
         }
     }
 }

@@ -125,8 +125,8 @@ struct QuickActionsView: View {
                         mutableLabel: $mutableLabel,
                         mutableDetails: $mutableDetails,
                         onDelete: {
-                            promptManager.removePrompt(with: activeQuickAction.id!)
                             self.activeQuickAction = nil
+                            promptManager.removePrompt(with: activeQuickAction.id!)
                         },
                         onSubmit: { newLabel, newDetails in
                             promptManager.updatePrompt(

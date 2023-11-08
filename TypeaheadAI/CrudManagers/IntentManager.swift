@@ -45,9 +45,9 @@ class IntentManager {
 
         do {
             try managedObjectContext.save()
-            logger.debug("Added entry")
+            logger.debug("Created a new intent")
         } catch {
-            logger.error("Failed to save new history entry: \(error.localizedDescription)")
+            logger.error("Failed to create new intent: \(error.localizedDescription)")
         }
 
         return newEntry
