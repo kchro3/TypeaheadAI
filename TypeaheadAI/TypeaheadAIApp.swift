@@ -65,7 +65,7 @@ struct MacOS13AndLaterApp: App {
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
-            Image("SplashIcon")
+            Image(nsImage: NSImage(named: "MenuIcon")!.withTemplate())
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
         .menuBarExtraStyle(.window)
@@ -104,7 +104,7 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
-            Image("SplashIcon")
+            Image(nsImage: NSImage(named: "MenuIcon")!.withTemplate())
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
         .menuBarExtraStyle(.window)
@@ -127,5 +127,12 @@ struct CommonMenuView: View {
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, persistenceController.container.viewContext)
+    }
+}
+
+extension NSImage {
+    func withTemplate() -> NSImage {
+        self.isTemplate = true
+        return self
     }
 }
