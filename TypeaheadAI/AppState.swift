@@ -43,6 +43,7 @@ final class AppState: ObservableObject {
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialSaveActor: SpecialSaveActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
+    private var specialRecordActor: SpecialRecordActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -102,6 +103,7 @@ final class AppState: ObservableObject {
             modalManager: modalManager,
             appContextManager: appContextManager
         )
+        self.specialRecordActor = SpecialRecordActor(appContextManager: appContextManager)
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
@@ -149,6 +151,12 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialSave) { [self] in
             Task {
                 await self.specialSaveActor?.specialSave()
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .specialRecord) { [self] in
+            Task {
+                await self.specialRecordActor?.specialRecord()
             }
         }
 

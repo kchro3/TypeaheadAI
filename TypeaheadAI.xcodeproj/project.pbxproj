@@ -45,6 +45,10 @@
 		2B520D852AC82EA100310426 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D842AC82EA100310426 /* AccountView.swift */; };
 		2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */; };
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
+		2B7D35722AFCC68100E85AEF /* SpecialRecordActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35712AFCC68100E85AEF /* SpecialRecordActor.swift */; };
+		2B7D35742AFCC98600E85AEF /* CanSimulateScreengrab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35732AFCC98600E85AEF /* CanSimulateScreengrab.swift */; };
+		2B7D35762AFCCE8B00E85AEF /* CanPerformOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35752AFCCE8B00E85AEF /* CanPerformOCR.swift */; };
+		2B7D35782AFCD06A00E85AEF /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35772AFCD06A00E85AEF /* ClipboardMonitor.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
@@ -139,6 +143,10 @@
 		2B520D842AC82EA100310426 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDetails.swift; sourceTree = "<group>"; };
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
+		2B7D35712AFCC68100E85AEF /* SpecialRecordActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialRecordActor.swift; sourceTree = "<group>"; };
+		2B7D35732AFCC98600E85AEF /* CanSimulateScreengrab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateScreengrab.swift; sourceTree = "<group>"; };
+		2B7D35752AFCCE8B00E85AEF /* CanPerformOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanPerformOCR.swift; sourceTree = "<group>"; };
+		2B7D35772AFCD06A00E85AEF /* ClipboardMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitor.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
@@ -244,6 +252,9 @@
 				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
 				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
+				2B7D35712AFCC68100E85AEF /* SpecialRecordActor.swift */,
+				2B7D35732AFCC98600E85AEF /* CanSimulateScreengrab.swift */,
+				2B7D35752AFCCE8B00E85AEF /* CanPerformOCR.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -429,6 +440,7 @@
 			isa = PBXGroup;
 			children = (
 				2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */,
+				2B7D35772AFCD06A00E85AEF /* ClipboardMonitor.swift */,
 			);
 			path = Monitors;
 			sourceTree = "<group>";
@@ -610,6 +622,7 @@
 				2B0116F32AF98D68000C78E1 /* LoggedOutAccountView.swift in Sources */,
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
+				2B7D35722AFCC68100E85AEF /* SpecialRecordActor.swift in Sources */,
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
@@ -644,6 +657,7 @@
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
+				2B7D35782AFCD06A00E85AEF /* ClipboardMonitor.swift in Sources */,
 				2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */,
 				2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */,
 				2B0116F52AF98EBD000C78E1 /* AccountOptionButton.swift in Sources */,
@@ -657,8 +671,10 @@
 				2BF929822AB13F7900FC105B /* MarkdownAttributedStringParser.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
 				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,
+				2B7D35742AFCC98600E85AEF /* CanSimulateScreengrab.swift in Sources */,
 				2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */,
 				2B0116F02AF88051000C78E1 /* SupabaseManager.swift in Sources */,
+				2B7D35762AFCCE8B00E85AEF /* CanPerformOCR.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

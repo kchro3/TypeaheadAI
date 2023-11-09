@@ -24,7 +24,6 @@ class AppContextManager {
     )
 
     func getActiveAppInfo(completion: @escaping (AppContext?) -> Void) {
-        self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {
             let appName = activeApp.localizedName
             self.logger.debug("Detected active app: \(appName ?? "none")")
