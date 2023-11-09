@@ -60,6 +60,7 @@ class PromptManager: ObservableObject {
         return nil
     }
 
+    @discardableResult
     func addPrompt(_ prompt: String, details: String? = nil) -> PromptEntry? {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
