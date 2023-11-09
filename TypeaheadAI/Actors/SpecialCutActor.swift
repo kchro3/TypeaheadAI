@@ -141,8 +141,10 @@ actor SpecialCutActor {
                                             history: [],
                                             appContext: appContext,
                                             incognitoMode: !self.modalManager.online
-                                        ) {
+                                        ), !intents.intents.isEmpty {
                                             await self.modalManager.setUserIntents(intents: intents.intents)
+                                        } else {
+                                            await self.modalManager.replyToUserMessage(refresh: false)
                                         }
                                     } catch {
                                         self.logger.error("\(error.localizedDescription)")
@@ -185,8 +187,10 @@ actor SpecialCutActor {
                                         history: [],
                                         appContext: appContext,
                                         incognitoMode: !self.modalManager.online
-                                    ) {
+                                    ), !intents.intents.isEmpty {
                                         await self.modalManager.setUserIntents(intents: intents.intents)
+                                    } else {
+                                        await self.modalManager.replyToUserMessage(refresh: false)
                                     }
                                 } catch {
                                     self.logger.error("\(error.localizedDescription)")

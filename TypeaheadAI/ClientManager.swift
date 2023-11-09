@@ -257,31 +257,30 @@ class ClientManager {
             // If there are intents to show without making a network call
             return SuggestIntentsPayload(intents: intents)
         } else {
-            return nil
-//            guard let httpBody = try? JSONEncoder().encode(payload) else {
-//                throw ClientManagerError.badRequest("Request was malformed...")
-//            }
-//
-//            var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
-//            urlRequest.httpMethod = "POST"
-//            urlRequest.httpBody = httpBody
-//            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//            let (data, resp) = try await self.session.data(for: urlRequest)
-//
-//            guard let httpResponse = resp as? HTTPURLResponse else {
-//                throw ClientManagerError.serverError("Something went wrong...")
-//            }
-//
-//            guard 200...299 ~= httpResponse.statusCode else {
-//                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-//                    throw ClientManagerError.serverError(errorResponse.detail)
-//                } else {
-//                    throw ClientManagerError.serverError("Something went wrong...")
-//                }
-//            }
-//
-//            return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
+            guard let httpBody = try? JSONEncoder().encode(payload) else {
+                throw ClientManagerError.badRequest("Request was malformed...")
+            }
+
+            var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
+            urlRequest.httpMethod = "POST"
+            urlRequest.httpBody = httpBody
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let (data, resp) = try await self.session.data(for: urlRequest)
+
+            guard let httpResponse = resp as? HTTPURLResponse else {
+                throw ClientManagerError.serverError("Something went wrong...")
+            }
+
+            guard 200...299 ~= httpResponse.statusCode else {
+                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                    throw ClientManagerError.serverError(errorResponse.detail)
+                } else {
+                    throw ClientManagerError.serverError("Something went wrong...")
+                }
+            }
+
+            return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
         }
     }
 
