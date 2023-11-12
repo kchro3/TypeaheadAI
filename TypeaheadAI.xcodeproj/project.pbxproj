@@ -47,6 +47,7 @@
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
 		2B7D357A2B00B3A900E85AEF /* OnboardingViewV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35792B00B3A900E85AEF /* OnboardingViewV4.swift */; };
 		2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */; };
+		2B7D357E2B00C1D100E85AEF /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357D2B00C1D100E85AEF /* SafariView.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
@@ -143,6 +144,7 @@
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
 		2B7D35792B00B3A900E85AEF /* OnboardingViewV4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewV4.swift; sourceTree = "<group>"; };
 		2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutOnboardingView.swift; sourceTree = "<group>"; };
+		2B7D357D2B00C1D100E85AEF /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
@@ -228,11 +230,10 @@
 		2B0116F12AF9800C000C78E1 /* Account */ = {
 			isa = PBXGroup;
 			children = (
-				2B520D842AC82EA100310426 /* AccountView.swift */,
-				2B0116F22AF98D68000C78E1 /* LoggedOutAccountView.swift */,
 				2B0116F42AF98EBD000C78E1 /* AccountOptionButton.swift */,
 				2B0116F62AF98F2C000C78E1 /* NewAccountRegistrationForm.swift */,
 				2B0116F82AF990E2000C78E1 /* EmailAndPasswordView.swift */,
+				2B7D357D2B00C1D100E85AEF /* SafariView.swift */,
 			);
 			path = Account;
 			sourceTree = "<group>";
@@ -372,6 +373,7 @@
 		2BA7F0AF2A9ABC62003D38BA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2B0116F12AF9800C000C78E1 /* Account */,
 				2BAFDB6C2AF61475009C8370 /* Menu */,
 				2B44FA962ABA783200C6B542 /* Onboarding */,
 				2BE0EC202AA0955C00E47C52 /* Modal */,
@@ -408,8 +410,9 @@
 		2BCF84362A9DE68200359841 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				2B0116F12AF9800C000C78E1 /* Account */,
 				2B7BBABE2AF2B47900E4CE1F /* QuickActions */,
+				2B520D842AC82EA100310426 /* AccountView.swift */,
+				2B0116F22AF98D68000C78E1 /* LoggedOutAccountView.swift */,
 				2BA7F0B62A9ABD61003D38BA /* SettingsView.swift */,
 				2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */,
 				2B473E862AA85B9A0042913D /* IncognitoModeView.swift */,
@@ -632,6 +635,7 @@
 				2B520D852AC82EA100310426 /* AccountView.swift in Sources */,
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
 				2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */,
+				2B7D357E2B00C1D100E85AEF /* SafariView.swift in Sources */,
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
 				2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */,
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,

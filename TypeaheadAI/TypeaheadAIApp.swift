@@ -8,12 +8,11 @@
 import SwiftUI
 import MenuBarExtraAccess
 
-@main
 struct TypeaheadAIApp {
     static let onboardingKey = "hasOnboardedV3"
 
     static func main() {
-//        UserDefaults.standard.setValue(false, forKey: onboardingKey)
+        UserDefaults.standard.setValue(false, forKey: onboardingKey)
 
         if UserDefaults.standard.bool(forKey: onboardingKey) {
             MacOS13AndLaterApp.main()
@@ -72,7 +71,7 @@ struct MacOS13AndLaterApp: App {
     }
 }
 
-@available(macOS 13.0, *)
+@main
 struct MacOS13AndLaterAppWithOnboardingV2: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
@@ -87,11 +86,12 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
     var body: some Scene {
         WindowGroup {
             OnboardingView(
-                modalManager: appState.modalManager,
-                settingsManager: appState.settingsManager,
-                supabaseManager: appState.supabaseManager
+//                modalManager: appState.modalManager,
+//                settingsManager: appState.settingsManager,
             )
+            .environmentObject(appState.supabaseManager)
         }
+        .windowResizability(.contentSize)
         .windowStyle(.hiddenTitleBar)
 
         SettingsScene(appState: appState)

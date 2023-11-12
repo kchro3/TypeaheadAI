@@ -29,8 +29,7 @@ final class AppState: ObservableObject {
     @Published var modalManager: ModalManager
     @Published var settingsManager: SettingsManager
     @Published var clientManager: ClientManager
-
-    var supabaseManager = SupabaseManager()
+    @Published var supabaseManager = SupabaseManager()
 
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager

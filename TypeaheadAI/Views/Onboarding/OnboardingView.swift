@@ -9,11 +9,28 @@ import SwiftUI
 import Supabase
 import AuthenticationServices
 
-struct OnboardingView: View {
-    var supabaseManager: SupabaseManager
+struct LoggedInOnboardingView: View {
+    init() {
+        print("init")
+    }
 
     var body: some View {
-        LoggedOutOnboardingView()
+        Text("Signed in")
+    }
+}
+
+struct OnboardingView: View {
+    @EnvironmentObject var supabaseManager: SupabaseManager
+
+    var body: some View {
+        VStack {
+            if let uuid = supabaseManager.uuid {
+                LoggedInOnboardingView()
+            } else {
+                LoggedOutOnboardingView()
+                    .frame(width: 400, height: 450)
+            }
+        }
     }
 }
 
@@ -28,7 +45,6 @@ struct OnboardingView: View {
     }
 
     let context = container.viewContext
-    return OnboardingView(
-        supabaseManager: SupabaseManager()
-    )
+    return OnboardingView()
+        .environmentObject(SupabaseManager())
 }
