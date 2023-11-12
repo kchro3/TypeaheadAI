@@ -56,7 +56,7 @@ class ScriptManager {
         scriptDirectoryURL?.stopAccessingSecurityScopedResource()
     }
 
-    func executeScriptAsync() async throws -> NSAppleEventDescriptor? {
+    func executeScript() async throws -> NSAppleEventDescriptor? {
         guard let directoryURL = scriptDirectoryURL else {
             logger.debug("Script directory is not set.")
             throw ScriptManagerError.directoryNotSet
@@ -74,6 +74,7 @@ class ScriptManager {
         }
     }
 
+    /// DEPRECATED: Prefer the async throws API
     func executeScript(completion: @escaping (NSAppleEventDescriptor?, ScriptManagerError?) -> Void) {
         guard let directoryURL = scriptDirectoryURL else {
             logger.debug("Script directory is not set.")

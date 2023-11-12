@@ -41,7 +41,6 @@ struct SettingsScene: Scene {
     }
 }
 
-@available(macOS 13.0, *)
 struct MacOS13AndLaterApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
@@ -72,7 +71,6 @@ struct MacOS13AndLaterApp: App {
     }
 }
 
-@available(macOS 13.0, *)
 struct MacOS13AndLaterAppWithOnboardingV2: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 

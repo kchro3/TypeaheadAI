@@ -162,27 +162,12 @@ class ClientManager {
     private let version: String = "v3"
     @AppStorage("freebies") var freebies: Int = 10
 
-    #if DEBUG
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
-//    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
-//    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-//    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
-//    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
-    #else
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
-    #endif
+    private let apiUrlStreaming: URL
+    private let apiOnboarding: URL
+    private let apiImage: URL
+    private let apiIntents: URL
+    private let apiImageCaptions: URL
+    private let apiLatest: URL
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -199,8 +184,20 @@ class ClientManager {
     // so we need to set the app context before the window is opened.
     var currentAppContext: AppContext? = nil
 
-    init(session: URLSession = .shared) {
+    init(session: URLSession = .shared, isLocal: Bool = true) {
         self.session = session
+
+#if DEBUG
+        let host = isLocal ? "http://localhost:8080" : "https://typeahead-ai.fly.dev"
+#else
+        let host = "https://typeahead-ai.fly.dev"
+#endif
+        self.apiUrlStreaming = URL(string: "\(host)/v2/get_stream")!
+        self.apiOnboarding = URL(string: "\(host)/onboarding")!
+        self.apiImage = URL(string: "\(host)/v2/get_image")!
+        self.apiIntents = URL(string: "\(host)/v2/suggest_intents")!
+        self.apiImageCaptions = URL(string: "\(host)/v2/get_image_caption")!
+        self.apiLatest = URL(string: "\(host)/v2/latest")!
     }
 
     func getActivePrompt() -> String? {
