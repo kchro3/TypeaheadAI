@@ -103,7 +103,10 @@ final class AppState: ObservableObject {
             modalManager: modalManager,
             appContextManager: appContextManager
         )
-        self.specialRecordActor = SpecialRecordActor(appContextManager: appContextManager)
+        self.specialRecordActor = SpecialRecordActor(
+            appContextManager: appContextManager,
+            modalManager: modalManager
+        )
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
@@ -157,6 +160,12 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialRecord) { [self] in
             Task {
                 await self.specialRecordActor?.specialRecord()
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .specialPlayback) { [self] in
+            Task {
+                await self.specialRecordActor?.playback()
             }
         }
 

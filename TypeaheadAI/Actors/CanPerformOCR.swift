@@ -14,20 +14,24 @@ struct OCRConstants {
     static let thresholdY: CGFloat = 0.02
 }
 
+struct OCRResponse {
+    let results: [(box: CGRect, text: String)]
+
+    func recognizedText() -> String {
+        return results.map { $0.text }.joined(separator: "\n")
+    }
+}
+
 protocol CanPerformOCR {
-    func performOCR(image: CGImage, completion: @escaping (String, NSImage?) -> Void)
+    func performOCR(image: CGImage, completion: @escaping (OCRResponse) -> Void)
 }
 
 extension CanPerformOCR {
-    func performOCR(image: CGImage, completion: @escaping (String, NSImage?) -> Void) {
+    func performOCR(image: CGImage, completion: @escaping (OCRResponse) -> Void) {
         let request = VNRecognizeTextRequest { (request, error) in
             guard let observations = request.results as? [VNRecognizedTextObservation] else { return }
 
-            let groupedBoxesAndTexts = self.groupBoundingBoxes(observations)
-            let allRecognizedText = groupedBoxesAndTexts.map { $0.text }.joined(separator: "\n")
-            let imageWithBoxes = self.drawBoundingBoxes(around: observations, in: image)
-
-            completion(allRecognizedText, imageWithBoxes)
+            completion(self.groupBoundingBoxes(observations))
         }
 
         request.recognitionLevel = .accurate
@@ -42,7 +46,7 @@ extension CanPerformOCR {
     }
 
     // Function to group recognized text bounding boxes based on overlaps
-    func groupBoundingBoxes(_ observations: [VNRecognizedTextObservation]) -> [(box: CGRect, text: String)] {
+    func groupBoundingBoxes(_ observations: [VNRecognizedTextObservation]) -> OCRResponse {
         let boxesAndTexts = observations.map {
             (box: $0.boundingBox.insetBy(dx: -OCRConstants.thresholdX, dy: -OCRConstants.thresholdY),
              text: $0.topCandidates(1).first?.string ?? "")
@@ -61,7 +65,7 @@ extension CanPerformOCR {
         }
 
         if overlappingSets.count == 0 {
-            return []
+            return OCRResponse(results: [])
         }
 
         // Merge overlapping sets without replacement
@@ -112,13 +116,13 @@ extension CanPerformOCR {
         }
 
         // Convert the grouped boxes and texts into the required format
-        let result = groupedBoxesAndTexts.map { (group: (box: CGRect, texts: [(box: CGRect, text: String)])) -> (box: CGRect, text: String) in
+        let results = groupedBoxesAndTexts.map { (group: (box: CGRect, texts: [(box: CGRect, text: String)])) -> (box: CGRect, text: String) in
             // Merge all the texts within each group
             let text = group.texts.map({ $0.text }).joined(separator: " ")
             return (box: group.box, text: text)
         }
 
-        return result
+        return OCRResponse(results: results)
     }
 
     // Function to draw bounding boxes around the given observations in the given image
@@ -128,10 +132,11 @@ extension CanPerformOCR {
         guard let context = CGContext(data: nil,
                                       width: image.width,
                                       height: image.height,
-                                      bitsPerComponent: 8, // image.bitsPerComponent,
-                                      bytesPerRow: 0, // image.bytesPerRow,
+                                      bitsPerComponent: image.bitsPerComponent,
+                                      bytesPerRow: image.bytesPerRow,
                                       space: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!,
-                                      bitmapInfo: image.bitmapInfo.rawValue) else {
+                                      // NOTE: Don't know why this works: https://stackoverflow.com/questions/13527692/cgbitmapcontextcreate-unsupported-parameter-combination
+                                      bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else {
             print("Could not create context")
             return nil
         }

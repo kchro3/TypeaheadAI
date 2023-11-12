@@ -23,6 +23,29 @@ class AppContextManager {
         category: "AppContextManager"
     )
 
+    func getActiveAppInfoAsync() async throws -> AppContext? {
+        if let activeApp = NSWorkspace.shared.frontmostApplication {
+            let appName = activeApp.localizedName
+            self.logger.debug("Detected active app: \(appName ?? "none")")
+            let bundleIdentifier = activeApp.bundleIdentifier
+
+            if bundleIdentifier == "com.google.Chrome" {
+                let result = try await self.scriptManager.executeScriptAsync()
+                if let urlString = result?.stringValue,
+                   let url = URL(string: urlString),
+                   let strippedUrl = self.stripQueryParameters(from: url) {
+
+                    self.logger.info("Successfully executed script. URL: \(strippedUrl.absoluteString)")
+                    return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: strippedUrl)
+                }
+            } else {
+                return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
+            }
+        }
+
+        return nil
+    }
+
     func getActiveAppInfo(completion: @escaping (AppContext?) -> Void) {
         if let activeApp = NSWorkspace.shared.frontmostApplication {
             let appName = activeApp.localizedName

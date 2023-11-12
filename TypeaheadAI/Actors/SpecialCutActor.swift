@@ -59,7 +59,9 @@ actor SpecialCutActor: CanPerformOCR {
                     }
 
                     if false {
-                        self.performOCR(image: cgImage) { recognizedText, _ in
+                        self.performOCR(image: cgImage) { ocrResponse in
+                            let recognizedText = ocrResponse.recognizedText()
+
                             self.logger.info("OCRed text: \(recognizedText)")
                             Task {
                                 await self.modalManager.clearText(stickyMode: stickyMode)
@@ -101,7 +103,9 @@ actor SpecialCutActor: CanPerformOCR {
                             }
                         }
                     } else {
-                        self.performOCR(image: cgImage) { recognizedText, _ in
+                        self.performOCR(image: cgImage) { ocrResponse in
+                            let recognizedText = ocrResponse.recognizedText()
+
                             self.logger.info("OCRed text: \(recognizedText)")
 
                             Task {
