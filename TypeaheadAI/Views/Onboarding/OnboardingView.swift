@@ -20,14 +20,19 @@ struct LoggedInOnboardingView: View {
 }
 
 struct OnboardingView: View {
-    @EnvironmentObject var supabaseManager: SupabaseManager
+    var supabaseManager: SupabaseManager
+
+    init(supabaseManager: SupabaseManager) {
+        print("init onboarding")
+        self.supabaseManager = supabaseManager
+    }
 
     var body: some View {
         VStack {
-            if let uuid = supabaseManager.uuid {
+            if let _ = supabaseManager.uuid {
                 LoggedInOnboardingView()
             } else {
-                LoggedOutOnboardingView()
+                LoggedOutOnboardingView(supabaseManager: supabaseManager)
                     .frame(width: 400, height: 450)
             }
         }
@@ -45,6 +50,5 @@ struct OnboardingView: View {
     }
 
     let context = container.viewContext
-    return OnboardingView()
-        .environmentObject(SupabaseManager())
+    return OnboardingView(supabaseManager: SupabaseManager())
 }

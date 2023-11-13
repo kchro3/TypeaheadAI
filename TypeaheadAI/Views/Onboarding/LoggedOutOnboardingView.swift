@@ -13,7 +13,7 @@ struct LoggedOutOnboardingView: View {
     @State private var failedToSignIn: Bool = false
     @State private var failedToRegisterReason: String? = nil
 
-    @EnvironmentObject var supabaseManager: SupabaseManager
+    var supabaseManager: SupabaseManager
 
     var body: some View {
         VStack(alignment: .center) {
@@ -74,7 +74,6 @@ struct LoggedOutOnboardingView: View {
 }
 
 #Preview {
-    LoggedOutOnboardingView()
-        .environmentObject(SupabaseManager())
+    LoggedOutOnboardingView(supabaseManager: SupabaseManager())
         .frame(width: 400, height: 450)
 }

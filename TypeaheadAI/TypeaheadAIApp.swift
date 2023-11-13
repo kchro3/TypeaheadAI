@@ -8,21 +8,6 @@
 import SwiftUI
 import MenuBarExtraAccess
 
-struct TypeaheadAIApp {
-    static let onboardingKey = "hasOnboardedV3"
-
-    static func main() {
-        UserDefaults.standard.setValue(false, forKey: onboardingKey)
-
-        if UserDefaults.standard.bool(forKey: onboardingKey) {
-            MacOS13AndLaterApp.main()
-        } else {
-            UserDefaults.standard.setValue(true, forKey: onboardingKey)
-            MacOS13AndLaterAppWithOnboardingV2.main()
-        }
-    }
-}
-
 struct SettingsScene: Scene {
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
@@ -37,37 +22,6 @@ struct SettingsScene: Scene {
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
         .windowStyle(.hiddenTitleBar)
-    }
-}
-
-@available(macOS 13.0, *)
-struct MacOS13AndLaterApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
-    let persistenceController = PersistenceController.shared
-    @StateObject var appState: AppState
-    @State var text: String = ""
-
-    init() {
-        let context = persistenceController.container.viewContext
-        _appState = StateObject(wrappedValue: AppState(context: context))
-    }
-
-    var body: some Scene {
-        SettingsScene(appState: appState)
-
-        MenuBarExtra {
-            CommonMenuView(
-                promptManager: appState.promptManager,
-                modalManager: appState.modalManager,
-                settingsManager: appState.settingsManager,
-                isMenuVisible: $appState.isMenuVisible
-            )
-        } label: {
-            Image(nsImage: NSImage(named: "MenuIcon")!.withTemplate())
-        }
-        .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
-        .menuBarExtraStyle(.window)
     }
 }
 
@@ -88,13 +42,20 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
             OnboardingView(
 //                modalManager: appState.modalManager,
 //                settingsManager: appState.settingsManager,
+                supabaseManager: appState.supabaseManager
             )
-            .environmentObject(appState.supabaseManager)
         }
         .windowResizability(.contentSize)
         .windowStyle(.hiddenTitleBar)
 
-        SettingsScene(appState: appState)
+        Settings {
+            SettingsView(
+                promptManager: appState.promptManager,
+                llamaModelManager: appState.llamaModelManager,
+                supabaseManager: appState.supabaseManager
+            )
+        }
+        .windowStyle(.hiddenTitleBar)
 
         MenuBarExtra {
             CommonMenuView(
