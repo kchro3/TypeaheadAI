@@ -47,6 +47,9 @@
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
 		2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */; };
 		2B7D357E2B00C1D100E85AEF /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357D2B00C1D100E85AEF /* SafariView.swift */; };
+		2B7D35842B01B14100E85AEF /* IntroOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */; };
+		2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */; };
+		2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
@@ -143,6 +146,9 @@
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
 		2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutOnboardingView.swift; sourceTree = "<group>"; };
 		2B7D357D2B00C1D100E85AEF /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
+		2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroOnboardingView.swift; sourceTree = "<group>"; };
+		2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutroOnboardingView.swift; sourceTree = "<group>"; };
+		2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCopyOnboardingView.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
@@ -275,6 +281,9 @@
 			children = (
 				2B44FA972ABA783F00C6B542 /* OnboardingView.swift */,
 				2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */,
+				2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */,
+				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
+				2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -618,6 +627,7 @@
 				2BA7F0B52A9ABCD7003D38BA /* PromptManager.swift in Sources */,
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
+				2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */,
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
 				2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */,
 				2B2EF1502AC40C8F00EF2BD4 /* ChatBubble.swift in Sources */,
@@ -634,6 +644,8 @@
 				2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */,
 				2B7D357E2B00C1D100E85AEF /* SafariView.swift in Sources */,
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
+				2B7D35842B01B14100E85AEF /* IntroOnboardingView.swift in Sources */,
+				2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */,
 				2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */,
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
