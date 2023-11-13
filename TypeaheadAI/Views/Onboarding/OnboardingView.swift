@@ -33,8 +33,10 @@ struct OnboardingView: View {
                 }
                 .padding(20)
             } else {
-                LoggedOutOnboardingView(supabaseManager: supabaseManager)
-                    .frame(width: 400, height: 450)
+                LoggedOutOnboardingView(
+                    supabaseManager: supabaseManager
+                )
+                .frame(width: 400, height: 450)
             }
         }
     }
@@ -44,9 +46,14 @@ struct OnboardingView: View {
         if step == 0 {
             AnyView(IntroOnboardingView())
         } else if step == 1 {
-            AnyView(SmartCopyOnboardingView())
+            AnyView(SmartCopyOnboardingView()
+                .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
+                    // Perform your UI update here
+                    step += 1
+                }
+            )
         } else if step == 2 {
-            AnyView(SmartCopyOnboardingView())
+            AnyView(SmartPasteOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
         }

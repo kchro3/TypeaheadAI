@@ -26,8 +26,8 @@ struct SmartCopyOnboardingView: View {
 
             HStack {
                 HStack {
-                    Text("Command")
-                    Image(systemName: "command")
+                    Text("Control")
+                    Image(systemName: "control")
                 }
                 .padding(5)
                 .cornerRadius(5)
@@ -37,8 +37,8 @@ struct SmartCopyOnboardingView: View {
                 )
 
                 HStack {
-                    Text("Control")
-                    Image(systemName: "control")
+                    Text("Command")
+                    Image(systemName: "command")
                 }
                 .padding(5)
                 .cornerRadius(5)

@@ -50,6 +50,7 @@
 		2B7D35842B01B14100E85AEF /* IntroOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */; };
 		2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */; };
 		2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */; };
+		2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
@@ -149,6 +150,7 @@
 		2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroOnboardingView.swift; sourceTree = "<group>"; };
 		2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutroOnboardingView.swift; sourceTree = "<group>"; };
 		2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCopyOnboardingView.swift; sourceTree = "<group>"; };
+		2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartPasteOnboardingView.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
@@ -284,6 +286,7 @@
 				2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */,
 				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
 				2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */,
+				2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -663,6 +666,7 @@
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
+				2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */,
 				2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */,
 				2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */,
 				2B0116F52AF98EBD000C78E1 /* AccountOptionButton.swift in Sources */,

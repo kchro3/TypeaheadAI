@@ -49,13 +49,14 @@ actor SpecialCopyActor: CanSimulateCopy {
                     messageType = .html(data: htmlString)
                 }
 
+                NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
+
                 // Clear the modal text and reissue request
                 Task {
                     await self.modalManager.clearText(stickyMode: stickyMode)
                     await self.modalManager.showModal()
                     await NSApp.activate(ignoringOtherApps: true)
 
-                    NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
                     if let nCopies = self.numSmartCopies {
                         self.numSmartCopies = nCopies + 1
                     } else {

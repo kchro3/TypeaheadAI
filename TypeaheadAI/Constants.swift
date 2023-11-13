@@ -16,7 +16,7 @@ extension KeyboardShortcuts.Name {
     static let specialSave = KeyboardShortcuts.Name("specialSave", default: Shortcut(.s, modifiers: [.command, .control]))
 
     static let chatNew = KeyboardShortcuts.Name("chatNew", default: Shortcut(.n, modifiers: [.command, .control]))
-    static let chatOpen = KeyboardShortcuts.Name("chatOpen", default: Shortcut(.o, modifiers: [.command, .control]))
+    static let chatOpen = KeyboardShortcuts.Name("chatOpen", default: Shortcut(.t, modifiers: [.command, .control]))
 }
 
 extension KeyboardShortcuts.Name: CaseIterable {
