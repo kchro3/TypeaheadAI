@@ -29,6 +29,7 @@ class IntentManager {
         self.managedObjectContext = context
     }
 
+    @discardableResult
     func addIntentEntry(
         prompt: String,
         copiedText: String,

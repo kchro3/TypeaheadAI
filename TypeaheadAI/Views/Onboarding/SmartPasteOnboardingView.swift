@@ -23,9 +23,9 @@ struct SmartPasteOnboardingView: View {
             """
             In the chat window, you can tell Typeahead what to do with the copied data, and Typeahead will also try to suggest relevant actions.
 
-            In this case, you can tell it to "reply to the email"
+            In this case, you can press the "reply to this email" suggestion.
 
-            Typeahead will try to generate an email, which you can paste with:
+            Then, Typeahead will try to generate an email, which you can paste with:
             """
             )
             .padding(.horizontal, 30)
@@ -74,24 +74,25 @@ struct SmartPasteOnboardingView: View {
                 .lineLimit(nil)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 10)
-//                .background(RoundedRectangle(cornerRadius: 15)
-//                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-//                )
-//                .overlay(
-//                    Group {
-//                        if pastedContent.isEmpty {
-//                            Text(
-//                                    """
-//                                    Click here and press "smart-copy"
-//                                    """)
-//                            .foregroundColor(.secondary.opacity(0.4))
-//                            .padding(.top, 8)
-//                            .padding(.horizontal, 15)
-//                            .transition(.opacity)
-//                        }
-//                    },
-//                    alignment: .topLeading
-//                )
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                )
+                .overlay(
+                    Group {
+                        if pastedContent.isEmpty {
+                            Text(
+                                """
+                                Click here and press "smart-paste"
+                                """
+                            )
+                            .foregroundColor(.secondary.opacity(0.4))
+                            .padding(.top, 8)
+                            .padding(.horizontal, 15)
+                            .transition(.opacity)
+                        }
+                    }.allowsHitTesting(false),
+                    alignment: .topLeading
+                )
 
             Spacer()
         }

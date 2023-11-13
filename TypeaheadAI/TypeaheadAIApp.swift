@@ -88,7 +88,8 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
         Window("TypeaheadAI", id: "main") {
             OnboardingView(
                 supabaseManager: appState.supabaseManager,
-                modalManager: appState.modalManager
+                modalManager: appState.modalManager,
+                intentManager: appState.intentManager
             )
         }
         .windowStyle(.hiddenTitleBar)

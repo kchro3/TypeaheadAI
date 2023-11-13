@@ -18,10 +18,24 @@ let whitelistedUrls = [
 ]
 
 protocol CanSimulateCopy {
+    func simulateCopy() async throws
     func simulateCopy(completion: @escaping () -> Void)
 }
 
 extension CanSimulateCopy {
+    func simulateCopy() async throws {
+        // Post a Command-C keystroke
+        let source = CGEventSource(stateID: .hidSystemState)!
+        let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)! // c key
+        cmdCDown.flags = [.maskCommand]
+        let cmdCUp = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: false)! // c key
+        cmdCUp.flags = [.maskCommand]
+
+        cmdCDown.post(tap: .cghidEventTap)
+        cmdCUp.post(tap: .cghidEventTap)
+        try await Task.sleep(for: .milliseconds(200))
+    }
+
     func simulateCopy(completion: @escaping () -> Void) {
         // Post a Command-C keystroke
         let source = CGEventSource(stateID: .hidSystemState)!

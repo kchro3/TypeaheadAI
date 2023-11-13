@@ -29,13 +29,13 @@ final class AppState: ObservableObject {
     @Published var modalManager: ModalManager
     @Published var settingsManager: SettingsManager
     @Published var clientManager: ClientManager
+    @Published var intentManager: IntentManager
 
     var supabaseManager = SupabaseManager()
 
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager
     private let memoManager: MemoManager
-    private let intentManager: IntentManager
 
     // Actors
     private var specialCutActor: SpecialCutActor? = nil
@@ -123,18 +123,20 @@ final class AppState: ObservableObject {
         checkAndRequestNotificationPermissions()
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
+            NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
             Task {
-                await self.specialCopyActor?.specialCopy(stickyMode: false)
+                try await self.specialCopyActor?.specialCopy(stickyMode: false)
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .stickyCopy) { [self] in
             Task {
-                await self.specialCopyActor?.specialCopy(stickyMode: true)
+                try await self.specialCopyActor?.specialCopy(stickyMode: true)
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
+            NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
             Task {
                 try await specialPasteActor?.specialPaste()
             }

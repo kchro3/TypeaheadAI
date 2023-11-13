@@ -120,3 +120,8 @@ actor SpecialPasteActor: CanSimulatePaste {
         await self.modalManager.closeModal()
     }
 }
+
+// Define the notification name extension somewhere in your codebase
+extension Notification.Name {
+    static let smartPastePerformed = Notification.Name("smartPastePerformed")
+}

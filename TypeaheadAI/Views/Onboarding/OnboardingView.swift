@@ -10,15 +10,23 @@ import Supabase
 import AuthenticationServices
 
 struct OnboardingView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+
     var supabaseManager: SupabaseManager
     var modalManager: ModalManager
+    var intentManager: IntentManager
 
     @State private var step: Int = 0
-    private let totalSteps: Int = 5
+    private let totalSteps: Int = 4
 
-    init(supabaseManager: SupabaseManager, modalManager: ModalManager) {
+    init(
+        supabaseManager: SupabaseManager,
+        modalManager: ModalManager,
+        intentManager: IntentManager
+    ) {
         self.supabaseManager = supabaseManager
         self.modalManager = modalManager
+        self.intentManager = intentManager
     }
 
     var body: some View {
@@ -36,7 +44,7 @@ struct OnboardingView: View {
                 LoggedOutOnboardingView(
                     supabaseManager: supabaseManager
                 )
-                .frame(width: 400, height: 450)
+                .frame(width: 600, height: 650)
             }
         }
     }
@@ -47,13 +55,38 @@ struct OnboardingView: View {
             AnyView(IntroOnboardingView())
         } else if step == 1 {
             AnyView(SmartCopyOnboardingView()
+                .onAppear(perform: {
+                    /// NOTE: Seed the user intents
+                    let appContext = AppContext(
+                        appName: "TypeaheadAI",
+                        bundleIdentifier: "ai.typeahead.TypeaheadAI",
+                        url: nil
+                    )
+                    if self.intentManager.fetchContextualIntents(
+                        limit: 1, appContext: appContext
+                    ).isEmpty {
+                        self.intentManager.addIntentEntry(
+                            prompt: "reply to this email",
+                            copiedText: "placeholder",
+                            appContext: AppContext(
+                                appName: "TypeaheadAI",
+                                bundleIdentifier: "ai.typeahead.TypeaheadAI",
+                                url: nil
+                            )
+                        )
+                    }
+                })
                 .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
-                    // Perform your UI update here
-                    step += 1
+                    // Add a delay so that there is time to copy the text
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        step += 1
+                    }
                 }
             )
         } else if step == 2 {
             AnyView(SmartPasteOnboardingView())
+        } else if step == 3 {
+            AnyView(QuickActionExplanationOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
         }
@@ -88,14 +121,15 @@ struct OnboardingView: View {
                     }
                 }
 
-                RoundedButton("Continue", isAccent: true) {
-                    Task {
-                        await modalManager.closeModal()
-                        step += 1
+                if step + 1 < totalSteps {
+                    RoundedButton("Continue", isAccent: true) {
+                        Task {
+                            await modalManager.closeModal()
+                            step += 1
+                        }
                     }
                 }
             }
-
         }
     }
 }
@@ -113,6 +147,7 @@ struct OnboardingView: View {
     let context = container.viewContext
     return OnboardingView(
         supabaseManager: SupabaseManager(),
-        modalManager: ModalManager()
+        modalManager: ModalManager(),
+        intentManager: IntentManager(context: context)
     )
 }
