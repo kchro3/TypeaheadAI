@@ -6,7 +6,6 @@
 //
 
 import AppKit
-import SafariServices
 import Supabase
 import SwiftUI
 import Foundation
@@ -18,18 +17,16 @@ class SupabaseManager {
     private let callbackURL: URL = URL(string: "app.typeahead://login-callback")!
 
     // Use this as a flag for checking if the user is signed in.
-    @Published var uuid: String?
-    private var authenticatedURL: URL?
+    @AppStorage("token3") var token: String?
+    @AppStorage("uuid") var uuid: String?
 
     init() {
         // Register OAuth notifications
-        print("init supabase")
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(self.oAuthCallback(_:)),
-            name: NSNotification.Name(rawValue: "OAuthCallBack2"),
-            object: nil
-        )
+            name: NSNotification.Name(rawValue: "OAuthCallBack"),
+            object: nil)
     }
 
     func registerWithEmail(email: String, password: String) async throws {
@@ -38,6 +35,7 @@ class SupabaseManager {
 
         let user = session.user
         uuid = user.id.uuidString
+        token = "placeholder"
     }
 
     func signinWithApple() async throws {
@@ -52,19 +50,21 @@ class SupabaseManager {
 
     func signout() async throws {
         uuid = nil
+        token = nil
         try await client.auth.signOut()
     }
 
-    @MainActor
-    func setUUID(url: URL) async throws {
-        let session = try await client.auth.session(from: url)
-        let user = session.user
-        self.uuid = user.id.uuidString
-    }
-
-    @objc func oAuthCallback(_ notification: NSNotification) {
-        print("trigger callback")
-        guard let url = notification.userInfo?["url"] as? URL else { return }
-        authenticatedURL = url
+    @objc func oAuthCallback(_ notification: NSNotification){
+        guard let url = notification.userInfo?["url"] as? URL  else { return }
+        Task {
+            do {
+                let session = try await client.auth.session(from: url)
+                let user = session.user
+                uuid = user.id.uuidString
+                token = "placeholder"
+            } catch {
+                print("### oAuthCallback error: \(error)")
+            }
+        }
     }
 }

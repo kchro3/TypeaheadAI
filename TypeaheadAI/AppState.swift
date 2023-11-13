@@ -29,6 +29,7 @@ final class AppState: ObservableObject {
     @Published var modalManager: ModalManager
     @Published var settingsManager: SettingsManager
     @Published var clientManager: ClientManager
+
     var supabaseManager = SupabaseManager()
 
     private let historyManager: HistoryManager
@@ -164,24 +165,24 @@ final class AppState: ObservableObject {
         }
 
         // Configure mouse-click handler
-//        mouseEventMonitor.onLeftMouseDown = { [weak self] in
-//            self?.mouseEventMonitor.mouseClicked = true
-//
-//            // If the toast window is open and the user clicks out,
-//            // we can close the window.
-//            // NOTE: If the user has chatted, then keep it open.
-//            if let window = self?.modalManager.toastWindow,
-//               (self?.modalManager.messages.count ?? 0) < 2 {
-//                let mouseLocation = NSEvent.mouseLocation
-//                let windowRect = window.frame
-//
-//                if !windowRect.contains(mouseLocation) {
-//                    self?.modalManager.closeModal()
-//                }
-//            }
-//        }
+        mouseEventMonitor.onLeftMouseDown = { [weak self] in
+            self?.mouseEventMonitor.mouseClicked = true
 
-//        mouseEventMonitor.startMonitoring()
+            // If the toast window is open and the user clicks out,
+            // we can close the window.
+            // NOTE: If the user has chatted, then keep it open.
+            if let window = self?.modalManager.toastWindow,
+               (self?.modalManager.messages.count ?? 0) < 2 {
+                let mouseLocation = NSEvent.mouseLocation
+                let windowRect = window.frame
+
+                if !windowRect.contains(mouseLocation) {
+                    self?.modalManager.closeModal()
+                }
+            }
+        }
+
+        mouseEventMonitor.startMonitoring()
 
         appVersion = getAppVersion()
         startCheckingForUpdates()

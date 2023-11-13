@@ -31,16 +31,6 @@ struct MenuView: View {
 
     private let verticalPadding: CGFloat = 5
     private let horizontalPadding: CGFloat = 5
-//
-//    init(
-//        promptManager: PromptManager,
-//        modalManager: ModalManager,
-//        settingsManager: SettingsManager,
-//        isMenuVisible: Bool
-//    ) {
-//        print("create menu")
-//
-//    }
 
     var body: some View {
         VStack(spacing: verticalPadding) {
