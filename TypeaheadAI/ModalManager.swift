@@ -576,7 +576,6 @@ class ModalManager: ObservableObject {
         switch result {
         case .success(let chunk):
             await self.appendText(chunk)
-            self.logger.info("Received chunk: \(chunk)")
         case .failure(let error as ClientManagerError):
             self.logger.error("Error: \(error.localizedDescription)")
             switch error {

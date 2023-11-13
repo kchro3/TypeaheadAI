@@ -15,7 +15,12 @@ struct SmartCopyOnboardingView: View {
 
             Spacer()
 
-            Text("You can select text and smart-copy it with:")
+            Text("""
+            The primary interface for Typeahead is smart-copy and smart-paste.
+
+            For example, let's say you want to reply to this email. You can select the email below and smart-copy it with:
+            """)
+            .padding(.horizontal, 30)
 
             Spacer()
 
@@ -55,17 +60,28 @@ struct SmartCopyOnboardingView: View {
 
             Spacer()
 
-            Text("Try selecting and smart-copying the following text:")
+            Text(
+            """
+            Hi,
 
-            Text("""
-            
-            """)
+            Thanks for trying out Typeahead! We are working on new features and fixing bugs every day, so we appreciate your support. Please let us know if you run into any issues.
+
+            Best,
+            The Typeahead Team
+            """
+            )
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerSize: CGSize(width: CGFloat(10), height: CGFloat(10)))
+                    .fill(Color.accentColor.opacity(0.1))
+            )
+            .padding(.horizontal, 30)
+            .textSelection(.enabled)
 
             Spacer()
 
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-
     }
 }
 

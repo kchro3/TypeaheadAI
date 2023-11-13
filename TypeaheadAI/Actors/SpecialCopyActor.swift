@@ -38,8 +38,6 @@ actor SpecialCopyActor: CanSimulateCopy {
     }
     
     func specialCopy(stickyMode: Bool) {
-        self.logger.debug("special copy")
-
         self.appContextManager.getActiveAppInfo { appContext in
             self.simulateCopy() {
                 var messageType: MessageType = .string
@@ -57,6 +55,7 @@ actor SpecialCopyActor: CanSimulateCopy {
                     await self.modalManager.showModal()
                     await NSApp.activate(ignoringOtherApps: true)
 
+                    NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
                     if let nCopies = self.numSmartCopies {
                         self.numSmartCopies = nCopies + 1
                     } else {
@@ -95,4 +94,9 @@ actor SpecialCopyActor: CanSimulateCopy {
             }
         }
     }
+}
+
+// Define the notification name extension somewhere in your codebase
+extension Notification.Name {
+    static let smartCopyPerformed = Notification.Name("smartCopyPerformed")
 }

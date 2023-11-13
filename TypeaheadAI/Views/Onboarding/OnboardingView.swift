@@ -31,7 +31,7 @@ struct OnboardingView: View {
 
                     navbar
                 }
-                .padding(30)
+                .padding(20)
             } else {
                 LoggedOutOnboardingView(supabaseManager: supabaseManager)
                     .frame(width: 400, height: 450)
@@ -44,6 +44,8 @@ struct OnboardingView: View {
         if step == 0 {
             AnyView(IntroOnboardingView())
         } else if step == 1 {
+            AnyView(SmartCopyOnboardingView())
+        } else if step == 2 {
             AnyView(SmartCopyOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
