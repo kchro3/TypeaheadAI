@@ -136,7 +136,7 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
             Task {
-                await specialPasteActor?.specialPaste()
+                try await specialPasteActor?.specialPaste()
             }
         }
 

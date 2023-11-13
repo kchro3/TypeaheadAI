@@ -23,6 +23,33 @@ class AppContextManager {
         category: "AppContextManager"
     )
 
+    func getActiveAppInfo() async throws -> AppContext? {
+        if let activeApp = NSWorkspace.shared.frontmostApplication {
+            let appName = activeApp.localizedName
+            let bundleIdentifier = activeApp.bundleIdentifier
+
+            if bundleIdentifier == "com.google.Chrome" {
+                do {
+                    let result = try await self.scriptManager.executeScript()
+                    if let urlString = result.stringValue,
+                       let url = URL(string: urlString),
+                       let strippedUrl = self.stripQueryParameters(from: url) {
+                        return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: strippedUrl)
+                    }
+                } catch let error {
+                    self.logger.error("Failed to execute script: \(error.localizedDescription)")
+                }
+
+                return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
+            } else {
+                return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
+            }
+        } else {
+            return nil
+        }
+    }
+
+    /// DEPRECATED: Prefer the async throws version
     func getActiveAppInfo(completion: @escaping (AppContext?) -> Void) {
         self.logger.debug("get active app")
         if let activeApp = NSWorkspace.shared.frontmostApplication {

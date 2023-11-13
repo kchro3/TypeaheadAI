@@ -56,6 +56,32 @@ class ScriptManager {
         scriptDirectoryURL?.stopAccessingSecurityScopedResource()
     }
 
+    func executeScript() async throws -> NSAppleEventDescriptor {
+        guard let directoryURL = scriptDirectoryURL else {
+            logger.debug("Script directory is not set.")
+            throw ScriptManagerError.directoryNotSet
+        }
+
+        let scriptURL = directoryURL.appendingPathComponent("GetActiveTabURL.scpt")
+
+        do {
+            let appleScriptTask = try NSUserAppleScriptTask(url: scriptURL)
+            return try await appleScriptTask.execute(withAppleEvent: nil)
+        } catch {
+            self.logger.error("\(error.localizedDescription)")
+            if error.localizedDescription.contains("-1743") {
+                // Check if the user has opted to not see the warning again
+                if !UserDefaults.standard.bool(forKey: "DontShowAppleEventWarning") {
+                    self.showAppleEventPermissionDialog()
+                }
+
+                throw ScriptManagerError.scriptExecutionFailed
+            } else {
+                throw ScriptManagerError.scriptExecutionFailed
+            }
+        }
+    }
+
     func executeScript(completion: @escaping (NSAppleEventDescriptor?, ScriptManagerError?) -> Void) {
         guard let directoryURL = scriptDirectoryURL else {
             logger.debug("Script directory is not set.")
