@@ -71,6 +71,17 @@ class ModalManager: ObservableObject {
         self.isVisible = false
         self.online = true
         self.isPending = false
+
+        // Register for window moved notifications to save the new position
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidMove(_:)),
+            name: NSWindow.didMoveNotification, object: toastWindow)
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidResize(_:)),
+            name: NSWindow.didResizeNotification, object: toastWindow)
     }
 
     // TODO: Inject?
@@ -476,17 +487,6 @@ class ModalManager: ObservableObject {
         toastWindow?.makeKeyAndOrderFront(nil)
 
         toastWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-
-        // Register for window moved notifications to save the new position
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(windowDidMove(_:)),
-            name: NSWindow.didMoveNotification, object: toastWindow)
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(windowDidResize(_:)),
-            name: NSWindow.didResizeNotification, object: toastWindow)
 
         self.isVisible = true
     }
