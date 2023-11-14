@@ -8,22 +8,6 @@
 import SwiftUI
 import MenuBarExtraAccess
 
-@main
-struct TypeaheadAIApp {
-    static let onboardingKey = "hasOnboardedV4"
-
-    static func main() {
-//        UserDefaults.standard.setValue(false, forKey: onboardingKey)
-
-        if UserDefaults.standard.bool(forKey: onboardingKey) {
-            MacOS13AndLaterApp.main()
-        } else {
-            UserDefaults.standard.setValue(true, forKey: onboardingKey)
-            MacOS13AndLaterAppWithOnboardingV2.main()
-        }
-    }
-}
-
 struct SettingsScene: Scene {
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
@@ -41,8 +25,8 @@ struct SettingsScene: Scene {
     }
 }
 
-@available(macOS 13.0, *)
-struct MacOS13AndLaterApp: App {
+@main
+struct TypeaheadAIApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     let persistenceController = PersistenceController.shared
@@ -50,6 +34,11 @@ struct MacOS13AndLaterApp: App {
     @State var text: String = ""
 
     init() {
+        #if DEBUG
+//        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+//        UserDefaults.standard.synchronize()
+        #endif
+
         let context = persistenceController.container.viewContext
         _appState = StateObject(wrappedValue: AppState(context: context))
     }
@@ -62,45 +51,7 @@ struct MacOS13AndLaterApp: App {
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
                 settingsManager: appState.settingsManager,
-                isMenuVisible: $appState.isMenuVisible
-            )
-        } label: {
-            Image(nsImage: NSImage(named: "MenuIcon")!.withTemplate())
-        }
-        .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
-        .menuBarExtraStyle(.window)
-    }
-}
-
-@available(macOS 13.0, *)
-struct MacOS13AndLaterAppWithOnboardingV2: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
-    let persistenceController = PersistenceController.shared
-    @StateObject var appState: AppState
-
-    init() {
-        let context = persistenceController.container.viewContext
-        _appState = StateObject(wrappedValue: AppState(context: context))
-    }
-
-    var body: some Scene {
-        Window("TypeaheadAI", id: "main") {
-            OnboardingView(
                 supabaseManager: appState.supabaseManager,
-                modalManager: appState.modalManager,
-                intentManager: appState.intentManager
-            )
-        }
-        .windowStyle(.hiddenTitleBar)
-
-        SettingsScene(appState: appState)
-
-        MenuBarExtra {
-            CommonMenuView(
-                promptManager: appState.promptManager,
-                modalManager: appState.modalManager,
-                settingsManager: appState.settingsManager,
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
@@ -117,6 +68,7 @@ struct CommonMenuView: View {
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var settingsManager: SettingsManager
+    @ObservedObject var supabaseManager: SupabaseManager
     @Binding var isMenuVisible: Bool
 
     var body: some View {
@@ -124,6 +76,7 @@ struct CommonMenuView: View {
             promptManager: promptManager,
             modalManager: modalManager,
             settingsManager: settingsManager,
+            supabaseManager: supabaseManager,
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, persistenceController.container.viewContext)

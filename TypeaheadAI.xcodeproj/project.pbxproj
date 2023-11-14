@@ -74,6 +74,8 @@
 		2BAA97892B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA97882B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift */; };
 		2BAA978B2B02E81600EC6A63 /* IntentsOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA978A2B02E81600EC6A63 /* IntentsOnboardingView.swift */; };
 		2BAA978D2B02EBE500EC6A63 /* RefineOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */; };
+		2BAA97912B0366C400EC6A63 /* OnboardingWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA97902B0366C400EC6A63 /* OnboardingWindowManager.swift */; };
+		2BAA97932B03693A00EC6A63 /* Notification+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */; };
 		2BAC14762AF61DD000B33E13 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAC14752AF61DD000B33E13 /* WebView.swift */; };
 		2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB652AF58E0B009C8370 /* ConversationView.swift */; };
 		2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */; };
@@ -179,6 +181,8 @@
 		2BAA97882B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExplanationOnboardingView.swift; sourceTree = "<group>"; };
 		2BAA978A2B02E81600EC6A63 /* IntentsOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentsOnboardingView.swift; sourceTree = "<group>"; };
 		2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefineOnboardingView.swift; sourceTree = "<group>"; };
+		2BAA97902B0366C400EC6A63 /* OnboardingWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowManager.swift; sourceTree = "<group>"; };
+		2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification+Extension.swift"; sourceTree = "<group>"; };
 		2BAC14752AF61DD000B33E13 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		2BAFDB652AF58E0B009C8370 /* ConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationView.swift; sourceTree = "<group>"; };
 		2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButtonView.swift; sourceTree = "<group>"; };
@@ -335,6 +339,7 @@
 		2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */ = {
 			isa = PBXGroup;
 			children = (
+				2BAA978F2B03668E00EC6A63 /* WindowManagers */,
 				2B0116EE2AF88042000C78E1 /* Supabase */,
 				2BF929772AB04D0800FC105B /* CrudManagers */,
 				2B33D8812AAC4E0F001193A2 /* Actors */,
@@ -354,11 +359,9 @@
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
 				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
-				2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */,
-				2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */,
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
-				2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */,
+				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -401,6 +404,17 @@
 				2B0116FA2AF99347000C78E1 /* RoundedButton.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		2BAA978F2B03668E00EC6A63 /* WindowManagers */ = {
+			isa = PBXGroup;
+			children = (
+				2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */,
+				2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */,
+				2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */,
+				2BAA97902B0366C400EC6A63 /* OnboardingWindowManager.swift */,
+			);
+			path = WindowManagers;
 			sourceTree = "<group>";
 		};
 		2BAFDB672AF5E375009C8370 /* Message */ = {
@@ -641,6 +655,7 @@
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */,
+				2BAA97912B0366C400EC6A63 /* OnboardingWindowManager.swift in Sources */,
 				2BF929872AB16C4C00FC105B /* ResponseParsingTask.swift in Sources */,
 				2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */,
 				2BAA97892B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift in Sources */,
@@ -686,6 +701,7 @@
 				2BAA978D2B02EBE500EC6A63 /* RefineOnboardingView.swift in Sources */,
 				2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */,
 				2B0116FB2AF99347000C78E1 /* RoundedButton.swift in Sources */,
+				2BAA97932B03693A00EC6A63 /* Notification+Extension.swift in Sources */,
 				2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
 				2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */,

@@ -51,8 +51,8 @@ class ModalManager: ObservableObject {
 
     @AppStorage("toastX") var toastX: Double?
     @AppStorage("toastY") var toastY: Double?
-    @AppStorage("toastWidth") var toastWidth: Double = 300.0
-    @AppStorage("toastHeight") var toastHeight: Double = 500.0
+    @AppStorage("toastWidth") var toastWidth: Double = 400.0
+    @AppStorage("toastHeight") var toastHeight: Double = 400.0
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",

@@ -14,8 +14,7 @@ struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var settingsManager: SettingsManager
-
-    private let supabaseManager = SupabaseManager()
+    @ObservedObject var supabaseManager: SupabaseManager
 
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
@@ -68,8 +67,7 @@ struct MenuView: View {
                 MenuButtonView(
                     title: "Quick Actions"
                 ) {
-                    settingsTab = Tab.quickActions.id
-                    settingsManager.showModal()
+                    settingsManager.showModal(tab: .quickActions)
                     isMenuVisible = false
                 }
 
@@ -98,20 +96,21 @@ struct MenuView: View {
                     .padding(.horizontal, horizontalPadding)
 
                 MenuButtonView(title: "Settings") {
-                    settingsTab = Tab.general.id
                     settingsManager.showModal()
                     isMenuVisible = false
                 }
 
-                if token != nil {
+                if supabaseManager.uuid != nil {
                     MenuButtonView(title: "Sign out") {
-                        token = nil
-                        isMenuVisible = false
+                        Task {
+                            token = nil
+                            isMenuVisible = false
+                            try await supabaseManager.signout()
+                        }
                     }
                 } else {
                     MenuButtonView(title: "Sign in") {
-                        settingsTab = Tab.account.id
-                        settingsManager.showModal()
+                        settingsManager.showModal(tab: .account)
                         isMenuVisible = false
                     }
                 }
@@ -156,6 +155,7 @@ struct MenuView_Previews: PreviewProvider {
             promptManager: promptManager,
             modalManager: modalManager,
             settingsManager: SettingsManager(context: context),
+            supabaseManager: SupabaseManager(),
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, context)

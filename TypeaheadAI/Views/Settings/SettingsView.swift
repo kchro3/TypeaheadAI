@@ -22,7 +22,7 @@ enum Tab: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     var promptManager: PromptManager
     var llamaModelManager: LlamaModelManager
-    var supabaseManager: SupabaseManager
+    @ObservedObject var supabaseManager: SupabaseManager
 
     @Environment(\.colorScheme) var colorScheme
 

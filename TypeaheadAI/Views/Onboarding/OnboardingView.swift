@@ -12,12 +12,14 @@ import AuthenticationServices
 struct OnboardingView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    var supabaseManager: SupabaseManager
+    @ObservedObject var supabaseManager: SupabaseManager
     var modalManager: ModalManager
     var intentManager: IntentManager
 
     @State private var step: Int = 1
     private let totalSteps: Int = 7
+
+    @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
 
     init(
         supabaseManager: SupabaseManager,
@@ -40,6 +42,10 @@ struct OnboardingView: View {
                     navbar
                 }
                 .padding(15)
+                .onDisappear {
+                    print("Mark as onboarded...")
+                    hasOnboarded = true
+                }
             } else {
                 LoggedOutOnboardingView(
                     supabaseManager: supabaseManager

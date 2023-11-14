@@ -28,6 +28,7 @@ final class AppState: ObservableObject {
     @Published var llamaModelManager = LlamaModelManager()
     @Published var modalManager: ModalManager
     @Published var settingsManager: SettingsManager
+    @Published var onboardingWindowManager: OnboardingWindowManager
     @Published var clientManager: ClientManager
     @Published var intentManager: IntentManager
 
@@ -69,6 +70,7 @@ final class AppState: ObservableObject {
         self.clientManager = ClientManager()
         self.modalManager = ModalManager()
         self.settingsManager = SettingsManager(context: context)
+        self.onboardingWindowManager = OnboardingWindowManager(context: context)
         self.appContextManager = AppContextManager()
 
         // Initialize actors
@@ -119,6 +121,10 @@ final class AppState: ObservableObject {
         self.settingsManager.llamaModelManager = llamaModelManager
         self.settingsManager.promptManager = promptManager
         self.settingsManager.supabaseManager = supabaseManager
+
+        self.onboardingWindowManager.supabaseManager = supabaseManager
+        self.onboardingWindowManager.modalManager = modalManager
+        self.onboardingWindowManager.intentManager = intentManager
 
         checkAndRequestNotificationPermissions()
 

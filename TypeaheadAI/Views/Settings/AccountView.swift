@@ -12,10 +12,9 @@ import AuthenticationServices
 struct AccountView: View {
     // Use this as a flag for checking if the user is signed in.
     @AppStorage("token3") var token: String?
-    @AppStorage("uuid") var uuid: String?
 
     @Environment(\.colorScheme) var colorScheme
-    var supabaseManager: SupabaseManager
+    @ObservedObject var supabaseManager: SupabaseManager
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -49,14 +48,18 @@ struct AccountView: View {
             HStack {
                 AccountOptionButton(label: "Sign out") {
                     Task {
-                        try? await supabaseManager.signout()
+                        do {
+                            try await supabaseManager.signout()
+                        } catch {
+                            print(error.localizedDescription)
+                        }
                     }
                 }
             }
             .frame(maxWidth: .infinity)
 
             HStack {
-                Text("User ID: \(uuid ?? "<none>")")
+                Text("User ID: \(supabaseManager.uuid ?? "<none>")")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .padding(10)
