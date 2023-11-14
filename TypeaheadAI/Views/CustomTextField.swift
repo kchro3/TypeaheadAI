@@ -142,7 +142,7 @@ struct CustomTextView: NSViewRepresentable {
 struct CustomTextField: View {
     @Binding var text: String
     let placeholderText: String
-    let autoCompleteSuggestions: [PromptEntry]
+    let autoCompleteSuggestions: [String]
     var onEnter: (String) -> Void
     var dynamicHeight: Bool = true
     var flushOnEnter: Bool = true
@@ -210,7 +210,7 @@ struct CustomTextField: View {
 
     private func filterSuggestions(input: String) {
         // Check for direct prefix-match
-        filteredSuggestions = autoCompleteSuggestions.map { $0.prompt ?? "" } .filter {
+        filteredSuggestions = autoCompleteSuggestions.filter {
             $0.lowercased().starts(with: input.lowercased()) && $0.lowercased() != input.lowercased()
         }
         numberOfSuggestions = filteredSuggestions.count
@@ -247,16 +247,10 @@ struct CustomTextField: View {
         }
     }
 
-    let suggestions = ["apple", "banana", "orange", "grape", "watermelon"].map { prompt in
-        let newPrompt = PromptEntry(context: container.viewContext)
-        newPrompt.prompt = prompt
-        return newPrompt
-    }
-
     return CustomTextField(
         text: $text,
         placeholderText: "Placeholder",
-        autoCompleteSuggestions: suggestions,
+        autoCompleteSuggestions: ["apple", "banana", "orange", "grape", "watermelon"],
         onEnter: { res in print(res) }
     )
 }

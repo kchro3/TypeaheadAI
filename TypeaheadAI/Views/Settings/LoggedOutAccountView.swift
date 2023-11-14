@@ -49,7 +49,6 @@ struct LoggedOutAccountView: View {
                     Alert(title: Text("Failed to sign-in with Apple"), message: failedToRegisterReason.map { Text("\($0)") })
                 })
 
-
                 AccountOptionButton(label: "Sign-in with Google") {
                     Task {
                         do {

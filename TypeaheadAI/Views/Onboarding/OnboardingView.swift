@@ -10,297 +10,146 @@ import Supabase
 import AuthenticationServices
 
 struct OnboardingView: View {
-    @ObservedObject var modalManager: ModalManager
-    var settingsManager: SettingsManager
+    @Environment(\.managedObjectContext) private var viewContext
+
     var supabaseManager: SupabaseManager
+    var modalManager: ModalManager
+    var intentManager: IntentManager
 
-    @State private var messages: [Message] = []
-    @State private var isVisible: Bool = false
-    @State private var isContinueVisible: Bool = false
-    @State private var isTextEditorVisible: Bool = false
-    @State private var isSignInVisible: Bool = false
-    @State private var isCloseVisible: Bool = false
-    @State private var onboardingStep: Int = 0
-    @State private var text: String = ""
+    @State private var step: Int = 1
+    private let totalSteps: Int = 7
 
-    // When streaming a result, we want to batch process tokens.
-    // Since we stream tokens one at a time, we need a global variable to
-    // track the token counts per batch.
-    @State private var currentTextCount = 0
-    private let parserThresholdTextCount = 5
-    private let maxMessages = 20
-    @State private var currentOutput: AttributedOutput? = nil
-    private let parsingTask = ResponseParsingTask()
-
-    @AppStorage("token3") var token: String?
-    @AppStorage("settingsTab") var settingsTab: String?
+    init(
+        supabaseManager: SupabaseManager,
+        modalManager: ModalManager,
+        intentManager: IntentManager
+    ) {
+        self.supabaseManager = supabaseManager
+        self.modalManager = modalManager
+        self.intentManager = intentManager
+    }
 
     var body: some View {
         VStack {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 10) {
-                        HStack {
-                            Text("TypeaheadAI").font(.title)
-                        }
-                        .padding()
-                        .opacity(isVisible ? 1 : 0)
-                        .animation(.easeIn, value: isVisible)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) {
-                                isVisible = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    modalManager.clientManager?.onboarding(
-                                        onboardingStep: onboardingStep,
-                                        streamHandler: self.streamHandler,
-                                        completion: self.completionHandler
-                                    )
-                                }
-                            }
-                        }
+            if let _ = supabaseManager.uuid {
+                VStack {
+                    panel
 
-                        ForEach(messages.indices, id: \.self) { index in
-                            MessageView(message: messages[index])
-                                .padding(5)
-                        }
+                    Spacer()
+
+                    navbar
+                }
+                .padding(15)
+            } else {
+                LoggedOutOnboardingView(
+                    supabaseManager: supabaseManager
+                )
+            }
+        }
+        .frame(width: 500, height: 550)
+    }
+
+    @ViewBuilder
+    var panel: some View {
+        if step == 1 {
+            AnyView(IntroOnboardingView())
+        } else if step == 2 {
+            AnyView(SmartCopyOnboardingView()
+                .onAppear(perform: {
+                    /// NOTE: Seed the user intents
+                    let appContext = AppContext(
+                        appName: "TypeaheadAI",
+                        bundleIdentifier: "ai.typeahead.TypeaheadAI",
+                        url: nil
+                    )
+                    if self.intentManager.fetchContextualIntents(
+                        limit: 1, appContext: appContext
+                    ).isEmpty {
+                        self.intentManager.addIntentEntry(
+                            prompt: "reply to this email",
+                            copiedText: "placeholder",
+                            appContext: AppContext(
+                                appName: "TypeaheadAI",
+                                bundleIdentifier: "ai.typeahead.TypeaheadAI",
+                                url: nil
+                            )
+                        )
                     }
-                    .onChange(of: messages.last) { _ in
-                        proxy.scrollTo(messages.count - 1, anchor: .bottom)
+                })
+                .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
+                    // Add a delay so that there is time to copy the text
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        step += 1
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            )
+        } else if step == 3 {
+            AnyView(
+                IntentsOnboardingView()
+                    .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            step += 1
+                        }
+                    }
+            )
+        } else if step == 4 {
+            AnyView(RefineOnboardingView())
+        } else if step == 5 {
+            AnyView(SmartPasteOnboardingView())
+        } else if step == 6 {
+            AnyView(QuickActionExplanationOnboardingView())
+        } else {
+            AnyView(OutroOnboardingView())
+        }
+    }
+
+    @ViewBuilder
+    var navbar: some View {
+        VStack {
+            HStack {
+                Spacer()
+
+                Text("Step \(step) of \(totalSteps)")
+
+                Spacer()
             }
 
-            Spacer()
-
             HStack {
-                if isSignInVisible {
-                    AccountOptionButton(label: "Create an account", isAccent: true) {
-                        NSApplication.shared.keyWindow?.close()
-                        settingsTab = Tab.account.id
-                        settingsManager.showModal()
+                RoundedButton("Skip") {
+                    if let window = NSApplication.shared.keyWindow {
+                        window.performClose(nil)
                     }
-                }
-
-                if isTextEditorVisible {
-                    VStack {
-                        if #available(macOS 13.0, *) {
-                            Text("Smart-paste the response here!")
-                            TextEditor(text: $text)
-                                .scrollContentBackground(.hidden)
-                                .padding(10)
-                                .background(.primary.opacity(0.1))
-                                .cornerRadius(5)
-                                .lineSpacing(5)
-                                .frame(maxHeight: isTextEditorVisible ? 200 : 0)
-                        } else {
-                            Text("Smart-paste the response here!")
-                            TextEditor(text: $text)
-                                .padding(10)
-                                .background(.primary)
-                                .cornerRadius(5)
-                                .lineSpacing(5)
-                                .frame(maxHeight: isTextEditorVisible ? 200 : 0)
-                        }
-                    }
-                    .opacity(isTextEditorVisible ? 1 : 0)
-                    .animation(.easeIn, value: isTextEditorVisible)
                 }
 
                 Spacer()
 
-                if isCloseVisible {
-                    Button {
-                        NSApplication.shared.keyWindow?.close()
-                    } label: {
-                        Text("Done")
+                if step > 1 {
+                    RoundedButton("Back") {
+                        Task {
+                            await modalManager.closeModal()
+                            step -= 1
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.primary.opacity(0.2))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .opacity(isCloseVisible ? 1 : 0)
-                    .animation(.easeIn, value: isCloseVisible)
-                } else {
-                    Button {
-                        onboardingStep += 1
-                        isContinueVisible = false
-                        isTextEditorVisible = false
-                        isSignInVisible = false
-                        modalManager.clientManager?.onboarding(
-                            onboardingStep: onboardingStep,
-                            streamHandler: self.streamHandler,
-                            completion: self.completionHandler
-                        )
-                    } label: {
-                        Text("Continue")
+                }
+
+                if step < totalSteps {
+                    RoundedButton("Continue", isAccent: true) {
+                        Task {
+                            if step != 4 {
+                                await modalManager.closeModal()
+                            }
+                            step += 1
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Color.primary.opacity(0.2))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .opacity(isContinueVisible ? 1 : 0)
-                    .animation(.easeIn, value: isContinueVisible)
-                }
-            }
-            .padding()
-        }
-        .background(VisualEffect().ignoresSafeArea())
-    }
-
-    /// Append text to the onboarding messages. Creates a new message if there is nothing to append to.
-    func appendText(_ text: String) async {
-        guard let idx = messages.indices.last, idx == onboardingStep else {
-            // If the AI response doesn't exist yet, create one.
-            DispatchQueue.main.async {
-                messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
-            }
-            currentTextCount = 0
-            currentOutput = nil
-            return
-        }
-
-        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
-
-        DispatchQueue.main.async {
-            messages[idx].text += text
-        }
-        let streamText = messages[idx].text
-
-        do {
-            currentTextCount += text.count
-
-            if currentTextCount >= parserThresholdTextCount {
-                currentOutput = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
-                try Task.checkCancellation()
-                currentTextCount = 0
-            }
-
-            // Check if the parser detected anything
-            if let currentOutput = currentOutput, !currentOutput.results.isEmpty {
-                let suffixText = streamText.trimmingPrefix(currentOutput.string)
-                var results = currentOutput.results
-                let lastResult = results[results.count - 1]
-                var lastAttrString = lastResult.attributedString
-                if case .codeBlock(_) = lastResult.parsedType,
-                   let font = NSFont.preferredFont(forTextStyle: .body).apply(newTraits: .monoSpace) {
-                    lastAttrString.append(
-                        AttributedString(
-                            String(suffixText),
-                            attributes: .init([
-                                .font: font,
-                                .foregroundColor: NSColor.white
-                            ])
-                        )
-                    )
-                } else {
-                    lastAttrString.append(AttributedString(String(suffixText)))
-                }
-
-                results[results.count - 1] = ParserResult(
-                    id: UUID(),
-                    attributedString: lastAttrString,
-                    parsedType: lastResult.parsedType
-                )
-
-                messages[idx].attributed = AttributedOutput(string: streamText, results: results)
-            } else {
-                messages[idx].attributed = AttributedOutput(string: streamText, results: [
-                    ParserResult(
-                        id: UUID(),
-                        attributedString: AttributedString(stringLiteral: streamText),
-                        parsedType: .plaintext
-                    )
-                ])
-            }
-        } catch {
-            messages[idx].responseError = error.localizedDescription
-        }
-
-        // Check if the parsed string is different than the full string.
-        if let currentString = currentOutput?.string, currentString != streamText {
-            let output = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
-            try? Task.checkCancellation()
-            messages[idx].attributed = output
-        }
-    }
-
-    func streamHandler(result: Result<String, Error>) {
-        switch result {
-        case .success(let chunk):
-            Task {
-                await self.appendText(chunk)
-            }
-        case .failure(let error as ClientManagerError):
-            switch error {
-            case .badRequest(let message):
-                DispatchQueue.main.async {
-                    self.setError(message)
-                }
-            default:
-                DispatchQueue.main.async {
-                    self.setError("Something went wrong. Please try again.")
-                }
-            }
-        default:
-            print("Unknown error")
-        }
-    }
-
-    func completionHandler(result: Result<ChunkPayload, Error>) {
-        switch result {
-        case .success(let output):
-            if let text = output.text,
-               let suffix = extractAction(from: text) {
-                if suffix == "delay" {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        isContinueVisible = true
+                } else if step == totalSteps {
+                    RoundedButton("Finish", isAccent: true) {
+                        if let window = NSApplication.shared.keyWindow {
+                            window.performClose(nil)
+                        }
                     }
-                } else if suffix == "show_text_field" {
-                    isTextEditorVisible = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        isContinueVisible = true
-                    }
-                } else if suffix == "sign_in" {
-                    isSignInVisible = true
-                    isCloseVisible = true
-                } else if suffix == "done" {
-                    isCloseVisible = true
-                } else {
-                    isContinueVisible = true
                 }
-            } else {
-                isContinueVisible = true
-            }
-        case .failure(let error):
-            print(error.localizedDescription)
-            self.setError(error.localizedDescription)
-        }
-    }
-
-    /// Set an error message.
-    func setError(_ responseError: String) {
-        messages.append(Message(
-            id: UUID(),
-            text: "",
-            isCurrentUser: false,
-            responseError: responseError)
-        )
-    }
-
-    func extractAction(from text: String) -> String? {
-        let pattern = "\\[\\/\\/\\]: # \"(.*)\""
-        let regex = try? NSRegularExpression(pattern: pattern)
-        let range = NSRange(location: 0, length: text.utf16.count)
-        if let match = regex?.firstMatch(in: text, options: [], range: range) {
-            let actionRange = match.range(at: 1)
-            if let swiftRange = Range(actionRange, in: text) {
-                return String(text[swiftRange])
             }
         }
-        return nil
     }
 }
 
@@ -316,8 +165,8 @@ struct OnboardingView: View {
 
     let context = container.viewContext
     return OnboardingView(
+        supabaseManager: SupabaseManager(),
         modalManager: ModalManager(),
-        settingsManager: SettingsManager(context: context),
-        supabaseManager: SupabaseManager()
+        intentManager: IntentManager(context: context)
     )
 }

@@ -25,6 +25,7 @@ struct SettingsView: View {
     var supabaseManager: SupabaseManager
 
     @Environment(\.colorScheme) var colorScheme
+
     @AppStorage("settingsTab") var settingsTab: String = Tab.general.rawValue
 
     var body: some View {
@@ -128,10 +129,18 @@ struct SettingsView_Previews: PreviewProvider {
         let supabaseManager = SupabaseManager()
 
         return Group {
-            SettingsView(promptManager: promptManager, llamaModelManager: llamaModelManager, supabaseManager: supabaseManager)
-                .environment(\.managedObjectContext, context)
-            SettingsView(promptManager: promptManager, llamaModelManager: llamaModelManager, supabaseManager: supabaseManager)
-                .environment(\.managedObjectContext, context)
+            SettingsView(
+                promptManager: promptManager,
+                llamaModelManager: llamaModelManager,
+                supabaseManager: supabaseManager
+            )
+            .environment(\.managedObjectContext, context)
+            SettingsView(
+                promptManager: promptManager,
+                llamaModelManager: llamaModelManager,
+                supabaseManager: supabaseManager
+            )
+            .environment(\.managedObjectContext, context)
         }
     }
 }

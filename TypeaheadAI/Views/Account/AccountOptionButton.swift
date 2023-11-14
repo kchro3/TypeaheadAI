@@ -11,17 +11,22 @@ struct AccountOptionButton: View {
     let label: String
     let isAccent: Bool
     let action: (() -> Void)?
+    let width: CGFloat
 
+    @Environment(\.colorScheme) var colorScheme
     @State private var isHovering: Bool = false
 
-    init(label: String, isAccent: Bool = false, action: (() -> Void)? = nil) {
+    init(
+        label: String,
+        isAccent: Bool = false,
+        width: CGFloat = 300,
+        action: (() -> Void)? = nil
+    ) {
         self.label = label
         self.isAccent = isAccent
         self.action = action
+        self.width = width
     }
-
-    @Environment(\.colorScheme) var colorScheme
-    private let width: CGFloat = 300
 
     var body: some View {
         Button {

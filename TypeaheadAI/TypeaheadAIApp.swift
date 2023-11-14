@@ -10,7 +10,7 @@ import MenuBarExtraAccess
 
 @main
 struct TypeaheadAIApp {
-    static let onboardingKey = "hasOnboardedV3"
+    static let onboardingKey = "hasOnboardedV4"
 
     static func main() {
 //        UserDefaults.standard.setValue(false, forKey: onboardingKey)
@@ -85,11 +85,11 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
     }
 
     var body: some Scene {
-        WindowGroup {
+        Window("TypeaheadAI", id: "main") {
             OnboardingView(
+                supabaseManager: appState.supabaseManager,
                 modalManager: appState.modalManager,
-                settingsManager: appState.settingsManager,
-                supabaseManager: appState.supabaseManager
+                intentManager: appState.intentManager
             )
         }
         .windowStyle(.hiddenTitleBar)

@@ -15,8 +15,7 @@ struct AccountView: View {
     @AppStorage("uuid") var uuid: String?
 
     @Environment(\.colorScheme) var colorScheme
-
-    let supabaseManager: SupabaseManager
+    var supabaseManager: SupabaseManager
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -24,7 +23,7 @@ struct AccountView: View {
 
             Divider()
 
-            if token == nil {
+            if self.supabaseManager.uuid == nil {
                 // Logged-out view
                 LoggedOutAccountView(supabaseManager: supabaseManager)
             } else {

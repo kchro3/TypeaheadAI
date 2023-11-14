@@ -48,80 +48,80 @@ actor SpecialPasteActor: CanSimulatePaste {
         self.appContextManager = appContextManager
     }
 
-    func specialPaste() {
-        self.appContextManager.getActiveAppInfo(completion: { appContext in
-            guard let lastMessage = self.modalManager.messages.last, !lastMessage.isCurrentUser else {
-                return
-            }
+    func specialPaste() async throws {
+        let appContext = try await self.appContextManager.getActiveAppInfo()
+        guard let lastMessage = self.modalManager.messages.last, !lastMessage.isCurrentUser else {
+            return
+        }
 
-            let pasteboard = NSPasteboard.general
-            pasteboard.prepareForNewContents()
+        let pasteboard = NSPasteboard.general
+        pasteboard.prepareForNewContents()
 
-            // just a proof of concept
-            var isTable = false
-            if let results = lastMessage.attributed?.results {
-                pasteboard.setString(lastMessage.text, forType: .string)
-                for result in results {
-                    if case .table = result.parsedType {
-                        pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
-                        isTable = true
-                        break
-                    } else if case .codeBlock(_) = result.parsedType {
-                        pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
-                        break
-                    }
+        // just a proof of concept
+        var isTable = false
+        if let results = lastMessage.attributed?.results {
+            pasteboard.setString(lastMessage.text, forType: .string)
+            for result in results {
+                if case .table = result.parsedType {
+                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+                    isTable = true
+                    break
+                } else if case .codeBlock(_) = result.parsedType {
+                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+                    break
                 }
-            } else if case .image(let imageData) = lastMessage.messageType {
-                if let data = Data(base64Encoded: imageData.image) {
-                    pasteboard.setData(data, forType: .tiff)
-                }
-            } else {
-                pasteboard.setString(lastMessage.text, forType: .string)
             }
-
-            Task {
-                guard let firstMessage = self.modalManager.messages.first else {
-                    self.logger.error("Illegal state")
-                    return
-                }
-
-                _ = self.historyManager.addHistoryEntry(
-                    copiedText: firstMessage.text,
-                    pastedResponse: lastMessage.text,
-                    quickActionId: self.promptManager.activePromptID,
-                    activeUrl: appContext?.url?.host,
-                    activeAppName: appContext?.appName,
-                    activeAppBundleIdentifier: appContext?.bundleIdentifier,
-                    numMessages: self.modalManager.messages.count
-                )
+        } else if case .image(let imageData) = lastMessage.messageType {
+            if let data = Data(base64Encoded: imageData.image) {
+                pasteboard.setData(data, forType: .tiff)
             }
+        } else {
+            pasteboard.setString(lastMessage.text, forType: .string)
+        }
 
-            if let nPastes = self.numSmartPastes {
-                self.numSmartPastes = nPastes + 1
-            } else {
-                self.numSmartPastes = 1
-            }
+        guard let firstMessage = self.modalManager.messages.first else {
+            self.logger.error("Illegal state")
+            return
+        }
 
-            if isTable {
-                if let url = appContext?.url,
-                   let _ = self.shiftPasteUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
-                    self.simulatePaste(flags: [.maskShift, .maskCommand])
-                } else if let appName = appContext?.appName,
-                          self.optionShiftCommandPasteApps.contains(appName) {
-                    self.simulatePaste(flags: [.maskAlternate, .maskShift, .maskCommand])
-                } else if let appName = appContext?.appName,
-                          self.optionCommandPasteApps.contains(appName) {
-                    self.simulatePaste(flags: [.maskAlternate, .maskCommand])
-                } else {
-                    self.simulatePaste()
-                }
+        _ = self.historyManager.addHistoryEntry(
+            copiedText: firstMessage.text,
+            pastedResponse: lastMessage.text,
+            quickActionId: self.promptManager.activePromptID,
+            activeUrl: appContext?.url?.host,
+            activeAppName: appContext?.appName,
+            activeAppBundleIdentifier: appContext?.bundleIdentifier,
+            numMessages: self.modalManager.messages.count
+        )
+
+        if let nPastes = self.numSmartPastes {
+            self.numSmartPastes = nPastes + 1
+        } else {
+            self.numSmartPastes = 1
+        }
+
+        if isTable {
+            if let url = appContext?.url,
+               let _ = self.shiftPasteUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
+                self.simulatePaste(flags: [.maskShift, .maskCommand])
+            } else if let appName = appContext?.appName,
+                      self.optionShiftCommandPasteApps.contains(appName) {
+                self.simulatePaste(flags: [.maskAlternate, .maskShift, .maskCommand])
+            } else if let appName = appContext?.appName,
+                      self.optionCommandPasteApps.contains(appName) {
+                self.simulatePaste(flags: [.maskAlternate, .maskCommand])
             } else {
                 self.simulatePaste()
             }
+        } else {
+            self.simulatePaste()
+        }
 
-            Task {
-                await self.modalManager.closeModal()
-            }
-        })
+        await self.modalManager.closeModal()
     }
+}
+
+// Define the notification name extension somewhere in your codebase
+extension Notification.Name {
+    static let smartPastePerformed = Notification.Name("smartPastePerformed")
 }

@@ -19,15 +19,17 @@ class PromptManager: ObservableObject {
     )
 
     init(context: NSManagedObjectContext) {
+        self.context = PersistenceController.shared.newBackgroundContext()
         self.activePromptID = nil
-        self.context = context
     }
 
     /// Fetch prompts from Core Data
-    func getPrompts() -> [PromptEntry] {
+    func getPrompts() -> [String] {
         let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
         do {
-            return try context.fetch(fetchRequest)
+            return try context.performAndWait {
+                return try context.fetch(fetchRequest).compactMap { $0.prompt }
+            }
         } catch {
             logger.error("Failed to fetch prompts: \(error)")
             return []
@@ -89,9 +91,13 @@ class PromptManager: ObservableObject {
         fetchRequest.predicate = NSPredicate(format: "prompt ==[c] %@",
                                              label as CVarArg)
         do {
-            let fetchedObjects = try context.fetch(fetchRequest)
-            if let promptEntry = fetchedObjects.first {
-                return promptEntry
+            return try context.performAndWait {
+                let fetchedObjects = try context.fetch(fetchRequest)
+                if let promptEntry = fetchedObjects.first {
+                    return promptEntry
+                } else {
+                    return nil
+                }
             }
         } catch {
             // Handle the error appropriately

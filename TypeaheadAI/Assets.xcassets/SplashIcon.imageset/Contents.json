@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "typeahead_logo_16.png",
+      "filename" : "logo.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "typeahead_logo_32.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "typeahead_logo_64.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
