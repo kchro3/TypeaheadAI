@@ -8,6 +8,7 @@
 import AppKit
 import SwiftUI
 import Foundation
+import os.log
 
 class SettingsManager: ObservableObject {
     var toastWindow: ModalWindow?
@@ -17,13 +18,36 @@ class SettingsManager: ObservableObject {
 
     private let context: NSManagedObjectContext
 
+    private let logger = Logger(
+        subsystem: "ai.typeahead.TypeaheadAI",
+        category: "SettingsManager"
+    )
+
+    @AppStorage("settingsTab") var settingsTab: String?
+    @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
+
     init(context: NSManagedObjectContext) {
         self.context = context
+
+        startMonitoring()
+    }
+
+    private func startMonitoring() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.loginAndOpenWindow(_:)),
+            name: .oAuthCallback,
+            object: nil
+        )
     }
 
     @MainActor
-    func showModal() {
+    func showModal(tab: Tab? = nil) {
         toastWindow?.close()
+
+        if let tab = tab {
+            settingsTab = tab.id
+        }
 
         // Create the visual effect view with frosted glass effect
         let visualEffect = NSVisualEffectView()
@@ -86,5 +110,19 @@ class SettingsManager: ObservableObject {
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    @objc func loginAndOpenWindow(_ notification: NSNotification) {
+        guard hasOnboarded else {
+            self.logger.info("Deferring... needs to onboard")
+            return
+        }
+
+        guard let url = notification.userInfo?["url"] as? URL else { return }
+
+        Task {
+            try await self.supabaseManager?.signinWithURL(from: url)
+            await self.showModal(tab: Tab.account)
+        }
     }
 }

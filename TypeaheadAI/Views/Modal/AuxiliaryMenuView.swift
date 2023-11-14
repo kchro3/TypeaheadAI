@@ -19,14 +19,12 @@ struct AuxiliaryMenuView: View {
     var body: some View {
         VStack(spacing: 0) {
             MenuButtonView(title: "Manage Quick Actions") {
-                settingsTab = Tab.quickActions.id
-                settingsManager.showModal()
+                settingsManager.showModal(tab: .quickActions)
                 modalManager.closeModal()
             }
 
             MenuButtonView(title: "Settings") {
-                settingsTab = Tab.general.id
-                settingsManager.showModal()
+                settingsManager.showModal(tab: .general)
                 modalManager.closeModal()
             }
         }

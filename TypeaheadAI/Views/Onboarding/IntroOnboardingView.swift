@@ -61,6 +61,17 @@ struct IntroOnboardingView: View {
             }
 
             Spacer()
+
+
+            Text(
+            """
+            Try opening and closing the window a few times to get used to it.
+
+            You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.
+            """
+            )
+
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

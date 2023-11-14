@@ -13,7 +13,7 @@ struct LoggedOutOnboardingView: View {
     @State private var failedToSignIn: Bool = false
     @State private var failedToRegisterReason: String? = nil
 
-    var supabaseManager: SupabaseManager
+    @ObservedObject var supabaseManager: SupabaseManager
 
     var body: some View {
         VStack(alignment: .center) {
@@ -41,7 +41,21 @@ struct LoggedOutOnboardingView: View {
 
             Spacer()
 
-            AccountOptionButton(label: "Sign in", isAccent: true, width: 250)
+            AccountOptionButton(label: "Sign in", isAccent: true, width: 250) {
+                Task {
+                    do {
+                        try await supabaseManager.signinWithEmail(email: email, password: password)
+                        email = ""
+                        password = ""
+                    } catch {
+                        failedToRegisterReason = error.localizedDescription
+                        failedToSignIn = true
+                    }
+                }
+            }
+            .alert(isPresented: $failedToSignIn, content: {
+                Alert(title: Text("Failed to sign-in with email"), message: failedToRegisterReason.map { Text("\($0)") })
+            })
 
             AccountOptionButton(label: "Sign-in with Apple", width: 250) {
                 Task {
@@ -57,7 +71,19 @@ struct LoggedOutOnboardingView: View {
                 Alert(title: Text("Failed to sign-in with Apple"), message: failedToRegisterReason.map { Text("\($0)") })
             })
 
-            AccountOptionButton(label: "Sign in with Google", isAccent: false, width: 250)
+            AccountOptionButton(label: "Sign in with Google", isAccent: false, width: 250) {
+                Task {
+                    do {
+                        try await supabaseManager.signinWithGoogle()
+                    } catch {
+                        failedToRegisterReason = error.localizedDescription
+                        failedToSignIn = true
+                    }
+                }
+            }
+            .alert(isPresented: $failedToSignIn, content: {
+                Alert(title: Text("Failed to sign-in with Google"), message: failedToRegisterReason.map { Text("\($0)") })
+            })
 
             Spacer()
 

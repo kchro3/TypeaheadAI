@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             // Handle the URL
             if url.host == "login-callback" {
                 let urlDict: [String: URL] = ["url": url]
-                NotificationCenter.default.post(name: Notification.Name("OAuthCallBack"), object: nil, userInfo: urlDict)
+                NotificationCenter.default.post(name: .oAuthCallback, object: nil, userInfo: urlDict)
             }
         }
     }
@@ -32,6 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         }
 
         UNUserNotificationCenter.current().delegate = self
+        NotificationCenter.default.post(name: .startOnboarding, object: nil)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
