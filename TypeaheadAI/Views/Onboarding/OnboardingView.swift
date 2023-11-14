@@ -17,7 +17,7 @@ struct OnboardingView: View {
     var intentManager: IntentManager
 
     @State private var step: Int = 0
-    private let totalSteps: Int = 4
+    private let totalSteps: Int = 6
 
     init(
         supabaseManager: SupabaseManager,
@@ -44,9 +44,9 @@ struct OnboardingView: View {
                 LoggedOutOnboardingView(
                     supabaseManager: supabaseManager
                 )
-                .frame(width: 600, height: 650)
             }
         }
+        .frame(width: 500, height: 550)
     }
 
     @ViewBuilder
@@ -84,8 +84,19 @@ struct OnboardingView: View {
                 }
             )
         } else if step == 2 {
-            AnyView(SmartPasteOnboardingView())
+            AnyView(
+                IntentsOnboardingView()
+                    .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            step += 1
+                        }
+                    }
+            )
         } else if step == 3 {
+            AnyView(RefineOnboardingView())
+        } else if step == 4 {
+            AnyView(SmartPasteOnboardingView())
+        } else if step == 5 {
             AnyView(QuickActionExplanationOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
@@ -121,11 +132,19 @@ struct OnboardingView: View {
                     }
                 }
 
-                if step + 1 < totalSteps {
+                if step < totalSteps {
                     RoundedButton("Continue", isAccent: true) {
                         Task {
-                            await modalManager.closeModal()
+                            if step != 3 {
+                                await modalManager.closeModal()
+                            }
                             step += 1
+                        }
+                    }
+                } else if step == totalSteps {
+                    RoundedButton("Finish", isAccent: true) {
+                        if let window = NSApplication.shared.keyWindow {
+                            window.performClose(nil)
                         }
                     }
                 }

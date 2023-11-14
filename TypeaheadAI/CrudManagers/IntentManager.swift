@@ -26,7 +26,7 @@ class IntentManager {
     )
 
     init(context: NSManagedObjectContext) {
-        self.managedObjectContext = context
+        self.managedObjectContext = PersistenceController.shared.newBackgroundContext()
     }
 
     @discardableResult
@@ -151,15 +151,17 @@ class IntentManager {
         fetchRequest.fetchLimit = limit
 
         do {
-            let results = try managedObjectContext.fetch(fetchRequest) as? [NSDictionary]
-            let intents = results?.compactMap { dict -> String? in
-                if let prompt = dict["prompt"] as? String,
-                   let _ = dict["count"] as? Int {
-                    return prompt
+            return try managedObjectContext.performAndWait {
+                let results = try managedObjectContext.fetch(fetchRequest) as? [NSDictionary]
+                let intents = results?.compactMap { dict -> String? in
+                    if let prompt = dict["prompt"] as? String,
+                       let _ = dict["count"] as? Int {
+                        return prompt
+                    }
+                    return nil
                 }
-                return nil
+                return intents ?? []
             }
-            return intents ?? []
         } catch {
             logger.error("Failed to fetch top intents: \(error.localizedDescription)")
         }

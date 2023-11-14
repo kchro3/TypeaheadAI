@@ -35,6 +35,10 @@ struct Message: Codable, Identifiable, Equatable {
     var isEdited: Bool = false
 }
 
+extension Notification.Name {
+    static let userIntentSent = Notification.Name("userIntentSent")
+}
+
 class ModalManager: ObservableObject {
     @Published var messages: [Message]
     @Published var userIntents: [String]?
@@ -309,7 +313,12 @@ class ModalManager: ObservableObject {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
-        userIntents = nil
+
+        if userIntents != nil {
+            print("user intent sent")
+            NotificationCenter.default.post(name: .userIntentSent, object: nil)
+            userIntents = nil
+        }
 
         isPending = true
         self.clientManager?.refine(

@@ -19,7 +19,11 @@ struct OutroOnboardingView: View {
                 """
                 There are plenty of ways to get started!
 
-                You can change your keyboard shortcut configurations in the Settings, and you can manage your Quick Actions as well.
+                **Smart-copy** works on anything that you can copy, and **smart-paste** works anywhere that you can paste.
+
+                It even works in full-screen apps, so it's always at your fingertips.
+
+                You can access your settings from the menu bar.
                 """
             )
 
