@@ -5,6 +5,7 @@
 //  Created by Jeff Hara on 11/5/23.
 //
 
+import AudioToolbox
 import Foundation
 import KeyboardShortcuts
 import os.log
@@ -130,7 +131,14 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             Task {
-                try await self.specialCopyActor?.specialCopy(stickyMode: false)
+                do {
+                    try await self.specialCopyActor?.specialCopy(stickyMode: false)
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
+                    }
+                } catch {
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
             }
         }
 
@@ -142,7 +150,14 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
             Task {
-                try await specialPasteActor?.specialPaste()
+                do {
+                    try await specialPasteActor?.specialPaste()
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
+                    }
+                } catch {
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
             }
         }
 

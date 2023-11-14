@@ -57,9 +57,6 @@ actor SpecialCopyActor: CanSimulateCopy {
             messageType = .html(data: htmlString)
         }
 
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
-        }
         if let nCopies = self.numSmartCopies {
             self.numSmartCopies = nCopies + 1
         } else {

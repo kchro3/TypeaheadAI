@@ -111,9 +111,6 @@ actor SpecialPasteActor: CanSimulatePaste {
             try await self.simulatePaste()
         }
 
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
-        }
         if let nPastes = self.numSmartPastes {
             self.numSmartPastes = nPastes + 1
         } else {
