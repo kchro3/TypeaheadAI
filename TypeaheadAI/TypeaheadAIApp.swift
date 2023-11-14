@@ -10,10 +10,10 @@ import MenuBarExtraAccess
 
 @main
 struct TypeaheadAIApp {
-    static let onboardingKey = "hasOnboardedV3"
+    static let onboardingKey = "hasOnboardedV4"
 
     static func main() {
-        UserDefaults.standard.setValue(false, forKey: onboardingKey)
+//        UserDefaults.standard.setValue(false, forKey: onboardingKey)
 
         if UserDefaults.standard.bool(forKey: onboardingKey) {
             MacOS13AndLaterApp.main()

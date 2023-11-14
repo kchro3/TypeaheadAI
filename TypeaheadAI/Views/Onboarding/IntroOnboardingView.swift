@@ -10,12 +10,19 @@ import SwiftUI
 struct IntroOnboardingView: View {
     var body: some View {
         VStack {
-            Text("Basic Navigation")
+            Text("How to use Typeahead")
                 .font(.title)
+                .padding(10)
 
-            Spacer()
+            Text(
+            """
+            Welcome to the Typeahead tutorial!
 
-            Text("You can summon and dismiss Typeahead from anywhere with:")
+            Unlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you'll see the Typeahead logo in the top menu bar when the app is running.
+
+            The first thing you need to learn is how to **activate** Typeahead. You can open and close the Typeahead window with:
+            """
+            )
 
             Spacer()
 
@@ -43,7 +50,7 @@ struct IntroOnboardingView: View {
                 )
 
                 HStack {
-                    Text("T")
+                    Text("A")
                 }
                 .padding(5)
                 .cornerRadius(5)

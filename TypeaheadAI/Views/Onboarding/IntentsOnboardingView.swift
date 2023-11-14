@@ -12,15 +12,12 @@ struct IntentsOnboardingView: View {
         VStack {
             Text("Specify your intent")
                 .font(.title)
-
-            Spacer()
+                .padding(10)
 
             Text("""
             In the chat window, you can tell Typeahead what to do with the copied data, and Typeahead may also try to suggest relevant actions.
 
             For this tutorial, you can click on the "reply to this email" suggestion.
-
-            Now, Typeahead will try to generate an email reply.
             """)
             .padding(.horizontal, 30)
 

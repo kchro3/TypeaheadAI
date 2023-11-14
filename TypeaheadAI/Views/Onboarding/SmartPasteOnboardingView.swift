@@ -14,18 +14,15 @@ struct SmartPasteOnboardingView: View {
 
     var body: some View {
         VStack {
-            Text("Smart-paste")
+            Text("How to **Smart-paste**")
                 .font(.title)
-
-            Spacer()
+                .padding(10)
 
             Text(
             """
-            In the chat window, you can tell Typeahead what to do with the copied data, and Typeahead will also try to suggest relevant actions.
+            Once you're happy with Typeahead's response, you can **smart-paste** the latest draft into Gmail or your favorite email app.
 
-            In this case, you can press the "reply to this email" suggestion.
-
-            Then, Typeahead will try to generate an email, which you can paste with:
+            For this tutorial, you can **smart-paste** the response into the text box below with:
             """
             )
             .padding(.horizontal, 30)
@@ -66,7 +63,8 @@ struct SmartPasteOnboardingView: View {
                 )
             }
 
-            Spacer()
+            Divider()
+                .padding(10)
 
             TextEditor(text: $pastedContent)
                 .font(.system(.body))

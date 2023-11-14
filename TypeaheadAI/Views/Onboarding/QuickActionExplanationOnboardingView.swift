@@ -12,18 +12,17 @@ struct QuickActionExplanationOnboardingView: View {
         VStack {
             Text("Why use smart-copy and smart-paste?")
                 .font(.title)
-
-            Spacer()
+                .padding(10)
 
             Text(
             """
+            Let's break down what happened behind the scenes.
+
             At its core, **smart-copy** and **smart-paste** is an **interface** to make AI more accessible, but it also learns how you like to work.
 
             Every time you **smart-copy** and **smart-paste** something, Typeahead will use the copied input and the pasted output as an example for how to do that task again.
 
-            For example, if the AI-generated email wasn't quite right, you could **manually edit** the draft or **prompt** it some more (e.g. "make it more casual").
-
-            When you're happy with the latest draft, you can **smart-paste** the email, and your preferences will be saved for the next time you reply to an email.
+            For example, if you edited the email manually or by prompting, your preferences would be remembered for the next time you say "reply to this email." It can learn to generalize patterns across examples, and the more you use Typeahead, the better it will become.
             """
             )
             .padding(.horizontal, 30)

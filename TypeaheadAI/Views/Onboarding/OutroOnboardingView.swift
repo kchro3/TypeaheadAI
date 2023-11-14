@@ -12,12 +12,11 @@ struct OutroOnboardingView: View {
         VStack {
             Text("You're all set!")
                 .font(.title)
-
-            Spacer()
+                .padding(10)
 
             Text(
                 """
-                There are plenty of ways to get started!
+                There are plenty of ways to get started! You can think of Typeahead as a new tool in your toolkit, where you can ask it to convert meeting notes into follow-up emails or summarize news articles, and it is like a copilot for all of your apps.
 
                 **Smart-copy** works on anything that you can copy, and **smart-paste** works anywhere that you can paste.
 
@@ -26,42 +25,6 @@ struct OutroOnboardingView: View {
                 You can access your settings from the menu bar.
                 """
             )
-
-            Spacer()
-
-            HStack {
-                HStack {
-                    Text("Control")
-                    Image(systemName: "control")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Command")
-                    Image(systemName: "command")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("T")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-            }
 
             Spacer()
         }

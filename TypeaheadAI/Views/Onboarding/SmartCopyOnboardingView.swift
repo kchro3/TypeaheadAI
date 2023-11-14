@@ -10,15 +10,14 @@ import SwiftUI
 struct SmartCopyOnboardingView: View {
     var body: some View {
         VStack {
-            Text("Smart-copy")
+            Text("How to **smart-copy**")
                 .font(.title)
-
-            Spacer()
+                .padding(10)
 
             Text("""
-            The primary interface for Typeahead is smart-copy and smart-paste.
+            The primary interface for Typeahead is **smart-copy** and **smart-paste**. As the name suggests, it's a little bit smarter than your copy-paste clipboard because it uses AI to take what you've copied and predict what you want to paste.
 
-            For example, let's say you want to reply to this email. You can select the email below and smart-copy it with:
+            For example, let's say you want to reply to this email. You can select the email below and **smart-copy** it with:
             """)
             .padding(.horizontal, 30)
 

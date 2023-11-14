@@ -16,8 +16,8 @@ struct OnboardingView: View {
     var modalManager: ModalManager
     var intentManager: IntentManager
 
-    @State private var step: Int = 0
-    private let totalSteps: Int = 6
+    @State private var step: Int = 1
+    private let totalSteps: Int = 7
 
     init(
         supabaseManager: SupabaseManager,
@@ -39,7 +39,7 @@ struct OnboardingView: View {
 
                     navbar
                 }
-                .padding(20)
+                .padding(15)
             } else {
                 LoggedOutOnboardingView(
                     supabaseManager: supabaseManager
@@ -51,9 +51,9 @@ struct OnboardingView: View {
 
     @ViewBuilder
     var panel: some View {
-        if step == 0 {
+        if step == 1 {
             AnyView(IntroOnboardingView())
-        } else if step == 1 {
+        } else if step == 2 {
             AnyView(SmartCopyOnboardingView()
                 .onAppear(perform: {
                     /// NOTE: Seed the user intents
@@ -83,7 +83,7 @@ struct OnboardingView: View {
                     }
                 }
             )
-        } else if step == 2 {
+        } else if step == 3 {
             AnyView(
                 IntentsOnboardingView()
                     .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
@@ -92,11 +92,11 @@ struct OnboardingView: View {
                         }
                     }
             )
-        } else if step == 3 {
-            AnyView(RefineOnboardingView())
         } else if step == 4 {
-            AnyView(SmartPasteOnboardingView())
+            AnyView(RefineOnboardingView())
         } else if step == 5 {
+            AnyView(SmartPasteOnboardingView())
+        } else if step == 6 {
             AnyView(QuickActionExplanationOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
@@ -109,7 +109,7 @@ struct OnboardingView: View {
             HStack {
                 Spacer()
 
-                Text("Step \(step+1) of \(totalSteps)")
+                Text("Step \(step) of \(totalSteps)")
 
                 Spacer()
             }
@@ -123,7 +123,7 @@ struct OnboardingView: View {
 
                 Spacer()
 
-                if step > 0 {
+                if step > 1 {
                     RoundedButton("Back") {
                         Task {
                             await modalManager.closeModal()
@@ -135,7 +135,7 @@ struct OnboardingView: View {
                 if step < totalSteps {
                     RoundedButton("Continue", isAccent: true) {
                         Task {
-                            if step != 3 {
+                            if step != 4 {
                                 await modalManager.closeModal()
                             }
                             step += 1

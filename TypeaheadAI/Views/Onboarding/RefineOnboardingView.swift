@@ -12,12 +12,11 @@ struct RefineOnboardingView: View {
         VStack {
             Text("Personalize your email")
                 .font(.title)
-
-            Spacer()
+                .padding(10)
 
             Text(
             """
-            You may now customize the email by manually editing it or by providing feedback in the chat.
+            Typeahead will generate a first draft, but you can customize the email by manually editing it or by providing feedback in the chat.
 
             To manually edit, click on the edit button next to the Typeahead response. You can press **Enter** to save your changes. To add a new line, you can press **Shift-Enter**.
 
