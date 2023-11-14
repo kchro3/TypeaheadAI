@@ -30,8 +30,7 @@ final class AppState: ObservableObject {
     @Published var settingsManager: SettingsManager
     @Published var clientManager: ClientManager
     @Published var intentManager: IntentManager
-
-    var supabaseManager = SupabaseManager()
+    @Published var supabaseManager = SupabaseManager()
 
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager

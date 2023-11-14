@@ -10,36 +10,34 @@ import Supabase
 import SwiftUI
 import Foundation
 
-class SupabaseManager {
+extension Notification.Name {
+    static let oAuthCallback = Notification.Name("oauthCallback")
+    static let oAuthOnboardingCallback = Notification.Name("oauthOnboardingCallback")
+}
+
+class SupabaseManager: ObservableObject {
     let client = SupabaseClient(
         supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
         supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
     private let callbackURL: URL = URL(string: "app.typeahead://login-callback")!
+    private let onboardingCallbackURL: URL = URL(string: "app.typeahead://onboarding-callback")!
 
-    // Use this as a flag for checking if the user is signed in.
-    @AppStorage("token3") var token: String?
-    @AppStorage("uuid") var uuid: String?
-
-    init() {
-        // Register OAuth notifications
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(self.oAuthCallback(_:)),
-            name: NSNotification.Name(rawValue: "OAuthCallBack"),
-            object: nil)
-    }
-
+    @MainActor
     func registerWithEmail(email: String, password: String) async throws {
         try await client.auth.signUp(email: email, password: password)
         let session = try await client.auth.session
-
         let user = session.user
-        uuid = user.id.uuidString
-        token = "placeholder"
     }
 
-    func signinWithApple() async throws {
-        let url = try client.auth.getOAuthSignInURL(provider: Provider.apple, redirectTo: callbackURL)
+    @MainActor
+    func signinWithEmail(email: String, password: String) async throws {
+        let authResponse = try await client.auth.signIn(email: email, password: password)
+        let user = authResponse.user
+    }
+
+    func signinWithApple(onboarding: Bool = false) async throws {
+        let callback = onboarding ? onboardingCallbackURL : callbackURL
+        let url = try client.auth.getOAuthSignInURL(provider: Provider.apple, redirectTo: callback)
         NSWorkspace.shared.open(url)
     }
 
@@ -48,23 +46,13 @@ class SupabaseManager {
         NSWorkspace.shared.open(url)
     }
 
+    @MainActor
     func signout() async throws {
-        uuid = nil
-        token = nil
         try await client.auth.signOut()
     }
 
-    @objc func oAuthCallback(_ notification: NSNotification){
-        guard let url = notification.userInfo?["url"] as? URL  else { return }
-        Task {
-            do {
-                let session = try await client.auth.session(from: url)
-                let user = session.user
-                uuid = user.id.uuidString
-                token = "placeholder"
-            } catch {
-                print("### oAuthCallback error: \(error)")
-            }
-        }
+    func signinFromUrl(from: URL) async throws {
+        let session = try await client.auth.session(from: from)
+        let user = session.user
     }
 }

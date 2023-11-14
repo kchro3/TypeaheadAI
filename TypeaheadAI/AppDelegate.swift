@@ -16,7 +16,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             // Handle the URL
             if url.host == "login-callback" {
                 let urlDict: [String: URL] = ["url": url]
-                NotificationCenter.default.post(name: Notification.Name("OAuthCallBack"), object: nil, userInfo: urlDict)
+                NotificationCenter.default.post(name: .oAuthCallback, object: nil, userInfo: urlDict)
+            }
+            if url.host == "onboarding-callback" {
+                let urlDict: [String: URL] = ["url": url]
+                NotificationCenter.default.post(name: .oAuthOnboardingCallback, object: nil, userInfo: urlDict)
             }
         }
     }

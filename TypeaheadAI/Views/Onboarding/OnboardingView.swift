@@ -16,6 +16,7 @@ struct OnboardingView: View {
     var modalManager: ModalManager
     var intentManager: IntentManager
 
+    @State private var isLoggedIn: Bool = false
     @State private var step: Int = 1
     private let totalSteps: Int = 7
 
@@ -30,8 +31,8 @@ struct OnboardingView: View {
     }
 
     var body: some View {
-        VStack {
-            if let _ = supabaseManager.uuid {
+        Group {
+            if isLoggedIn {
                 VStack {
                     panel
 
@@ -44,6 +45,13 @@ struct OnboardingView: View {
                 LoggedOutOnboardingView(
                     supabaseManager: supabaseManager
                 )
+                .onReceive(NotificationCenter.default.publisher(for: .oAuthOnboardingCallback), perform: { notification in
+                    guard let url = notification.userInfo?["url"] as? URL else { return }
+                    Task {
+                        try await supabaseManager.signinFromUrl(from: url)
+                        isLoggedIn = true
+                    }
+                })
             }
         }
         .frame(width: 500, height: 550)

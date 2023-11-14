@@ -13,7 +13,7 @@ struct TypeaheadAIApp {
     static let onboardingKey = "hasOnboardedV4"
 
     static func main() {
-//        UserDefaults.standard.setValue(false, forKey: onboardingKey)
+        UserDefaults.standard.setValue(false, forKey: onboardingKey)
 
         if UserDefaults.standard.bool(forKey: onboardingKey) {
             MacOS13AndLaterApp.main()
@@ -62,6 +62,7 @@ struct MacOS13AndLaterApp: App {
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
                 settingsManager: appState.settingsManager,
+                supabaseManager: appState.supabaseManager,
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
@@ -101,6 +102,7 @@ struct MacOS13AndLaterAppWithOnboardingV2: App {
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
                 settingsManager: appState.settingsManager,
+                supabaseManager: appState.supabaseManager,
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
@@ -117,6 +119,7 @@ struct CommonMenuView: View {
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var settingsManager: SettingsManager
+    @ObservedObject var supabaseManager: SupabaseManager
     @Binding var isMenuVisible: Bool
 
     var body: some View {
@@ -124,6 +127,7 @@ struct CommonMenuView: View {
             promptManager: promptManager,
             modalManager: modalManager,
             settingsManager: settingsManager,
+            supabaseManager: supabaseManager,
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, persistenceController.container.viewContext)
