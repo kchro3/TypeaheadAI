@@ -46,7 +46,7 @@ struct LoggedOutOnboardingView: View {
             AccountOptionButton(label: "Sign-in with Apple", width: 250) {
                 Task {
                     do {
-                        try await supabaseManager.signinWithApple()
+                        try await supabaseManager.signinWithApple(onboarding: true)
                     } catch {
                         failedToRegisterReason = error.localizedDescription
                         failedToSignIn = true

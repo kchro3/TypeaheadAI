@@ -90,7 +90,6 @@ actor SpecialCopyActor: CanSimulateCopy {
     }
 }
 
-// Define the notification name extension somewhere in your codebase
 extension Notification.Name {
     static let smartCopyPerformed = Notification.Name("smartCopyPerformed")
 }

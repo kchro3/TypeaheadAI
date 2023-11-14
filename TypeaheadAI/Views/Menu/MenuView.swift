@@ -14,17 +14,16 @@ struct MenuView: View {
     @ObservedObject var promptManager: PromptManager
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var settingsManager: SettingsManager
-
-    private let supabaseManager = SupabaseManager()
+    @ObservedObject var supabaseManager: SupabaseManager
 
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
 
-    @AppStorage("token3") var token: String?
     @AppStorage("settingsTab") var settingsTab: String?
     @AppStorage("selectedModel") private var selectedModelURL: URL?
 
+    @State private var isLoggedIn: Bool = false
     @State private var currentPreset: String = ""
     @State private var isEditingID: UUID?
     @FocusState private var isTextFieldFocused: Bool
@@ -103,10 +102,12 @@ struct MenuView: View {
                     isMenuVisible = false
                 }
 
-                if token != nil {
+                if isLoggedIn {
                     MenuButtonView(title: "Sign out") {
-                        token = nil
-                        isMenuVisible = false
+                        Task {
+                            try await supabaseManager.signout()
+                            isMenuVisible = false
+                        }
                     }
                 } else {
                     MenuButtonView(title: "Sign in") {
@@ -156,6 +157,7 @@ struct MenuView_Previews: PreviewProvider {
             promptManager: promptManager,
             modalManager: modalManager,
             settingsManager: SettingsManager(context: context),
+            supabaseManager: SupabaseManager(),
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, context)
