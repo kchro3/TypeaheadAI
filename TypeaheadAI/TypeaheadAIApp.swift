@@ -8,23 +8,6 @@
 import SwiftUI
 import MenuBarExtraAccess
 
-struct SettingsScene: Scene {
-    let persistenceController = PersistenceController.shared
-    @StateObject var appState: AppState
-
-    var body: some Scene {
-        Settings {
-            SettingsView(
-                promptManager: appState.promptManager,
-                llamaModelManager: appState.llamaModelManager,
-                supabaseManager: appState.supabaseManager
-            )
-            .environment(\.managedObjectContext, persistenceController.container.viewContext)
-        }
-        .windowStyle(.hiddenTitleBar)
-    }
-}
-
 @main
 struct TypeaheadAIApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -35,8 +18,8 @@ struct TypeaheadAIApp: App {
 
     init() {
         #if DEBUG
-//        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
-//        UserDefaults.standard.synchronize()
+        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+        UserDefaults.standard.synchronize()
         #endif
 
         let context = persistenceController.container.viewContext
@@ -44,10 +27,17 @@ struct TypeaheadAIApp: App {
     }
 
     var body: some Scene {
-        SettingsScene(appState: appState)
+        Settings {
+            SettingsView(
+                promptManager: appState.promptManager,
+                llamaModelManager: appState.llamaModelManager,
+                supabaseManager: appState.supabaseManager
+            )
+        }
+        .windowStyle(.hiddenTitleBar)
 
         MenuBarExtra {
-            CommonMenuView(
+            MenuView(
                 promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
                 settingsManager: appState.settingsManager,
@@ -59,27 +49,6 @@ struct TypeaheadAIApp: App {
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
         .menuBarExtraStyle(.window)
-    }
-}
-
-struct CommonMenuView: View {
-    let persistenceController = PersistenceController.shared
-
-    @ObservedObject var promptManager: PromptManager
-    @ObservedObject var modalManager: ModalManager
-    @ObservedObject var settingsManager: SettingsManager
-    @ObservedObject var supabaseManager: SupabaseManager
-    @Binding var isMenuVisible: Bool
-
-    var body: some View {
-        MenuView(
-            promptManager: promptManager,
-            modalManager: modalManager,
-            settingsManager: settingsManager,
-            supabaseManager: supabaseManager,
-            isMenuVisible: $isMenuVisible
-        )
-        .environment(\.managedObjectContext, persistenceController.container.viewContext)
     }
 }
 

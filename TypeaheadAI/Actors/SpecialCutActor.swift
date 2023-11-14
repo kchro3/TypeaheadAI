@@ -18,7 +18,7 @@ struct ImageCaptionPayload: Codable {
 }
 
 /// This polls the clipboard to see if anything new has been added to the clipboard.
-class ClipboardMonitor {
+class LegacyClipboardMonitor {
     private var timer: Timer?
     private var pasteboardChangeCount: Int
     var onScreenshotDetected: (() -> Void)?
@@ -67,7 +67,7 @@ class ClipboardMonitor {
 }
 
 actor SpecialCutActor {
-    private let clipboardMonitor: ClipboardMonitor
+    private let clipboardMonitor: LegacyClipboardMonitor
     private let promptManager: PromptManager
     private let clientManager: ClientManager
     private let modalManager: ModalManager
@@ -92,7 +92,7 @@ actor SpecialCutActor {
          modalManager: ModalManager,
          appContextManager: AppContextManager
     ) {
-        self.clipboardMonitor = ClipboardMonitor(mouseEventMonitor: mouseEventMonitor)
+        self.clipboardMonitor = LegacyClipboardMonitor(mouseEventMonitor: mouseEventMonitor)
         self.promptManager = promptManager
         self.clientManager = clientManager
         self.modalManager = modalManager

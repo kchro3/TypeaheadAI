@@ -129,7 +129,6 @@ final class AppState: ObservableObject {
         checkAndRequestNotificationPermissions()
 
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
-            NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
             Task {
                 try await self.specialCopyActor?.specialCopy(stickyMode: false)
             }
@@ -142,7 +141,6 @@ final class AppState: ObservableObject {
         }
 
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
-            NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
             Task {
                 try await specialPasteActor?.specialPaste()
             }

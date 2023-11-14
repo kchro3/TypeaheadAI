@@ -94,27 +94,30 @@ actor SpecialPasteActor: CanSimulatePaste {
             numMessages: self.modalManager.messages.count
         )
 
+        if isTable {
+            if let url = appContext?.url,
+               let _ = self.shiftPasteUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
+                try await self.simulatePaste(flags: [.maskShift, .maskCommand])
+            } else if let appName = appContext?.appName,
+                      self.optionShiftCommandPasteApps.contains(appName) {
+                try await self.simulatePaste(flags: [.maskAlternate, .maskShift, .maskCommand])
+            } else if let appName = appContext?.appName,
+                      self.optionCommandPasteApps.contains(appName) {
+                try await self.simulatePaste(flags: [.maskAlternate, .maskCommand])
+            } else {
+                try await self.simulatePaste()
+            }
+        } else {
+            try await self.simulatePaste()
+        }
+
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
+        }
         if let nPastes = self.numSmartPastes {
             self.numSmartPastes = nPastes + 1
         } else {
             self.numSmartPastes = 1
-        }
-
-        if isTable {
-            if let url = appContext?.url,
-               let _ = self.shiftPasteUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
-                self.simulatePaste(flags: [.maskShift, .maskCommand])
-            } else if let appName = appContext?.appName,
-                      self.optionShiftCommandPasteApps.contains(appName) {
-                self.simulatePaste(flags: [.maskAlternate, .maskShift, .maskCommand])
-            } else if let appName = appContext?.appName,
-                      self.optionCommandPasteApps.contains(appName) {
-                self.simulatePaste(flags: [.maskAlternate, .maskCommand])
-            } else {
-                self.simulatePaste()
-            }
-        } else {
-            self.simulatePaste()
         }
 
         await self.modalManager.closeModal()

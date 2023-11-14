@@ -37,10 +37,8 @@ class PromptManager: ObservableObject {
     }
 
     @MainActor
-    func setActivePrompt(id: UUID) {
-        DispatchQueue.main.async {
-            self.activePromptID = id
-        }
+    func setActivePrompt(id: UUID?) {
+        self.activePromptID = id
     }
 
     func getActivePrompt() -> String? {
