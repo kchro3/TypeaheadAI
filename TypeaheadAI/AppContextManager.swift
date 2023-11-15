@@ -95,6 +95,7 @@ extension AppContextManager {
         ) else { return nil }
 
         return imageRef
+// NOTE: In the future, we should try to support only screenshotting the active window.
 //        guard let windowListInfo = CGWindowListCopyWindowInfo(
 //            [.optionOnScreenOnly],
 //            kCGNullWindowID
@@ -137,7 +138,7 @@ extension AppContextManager {
                 continuation.resume(returning: (allRecognizedText, imageWithBoxes))
             }
 
-            request.recognitionLevel = .fast
+            request.recognitionLevel = .accurate
             request.automaticallyDetectsLanguage = true
 
             let handler = VNImageRequestHandler(cgImage: image, options: [:])
@@ -220,6 +221,7 @@ extension AppContextManager {
         let result = groupedBoxesAndTexts.map { (group: (box: CGRect, texts: [(box: CGRect, text: String)])) -> (box: CGRect, text: String) in
             // Merge all the texts within each group
             let text = group.texts.map({ $0.text }).joined(separator: " ")
+            print(text)
             return (box: group.box, text: text)
         }
 
