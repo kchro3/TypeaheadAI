@@ -42,7 +42,7 @@ actor SpecialSaveActor: CanSimulateCopy {
                 await self.modalManager.showModal()
                 await self.modalManager.appendText("Saving...\n")
 
-                self.clientManager.predict(
+                try await self.clientManager.predict(
                     id: UUID(),
                     copiedText: copiedText,
                     incognitoMode: !self.modalManager.online,

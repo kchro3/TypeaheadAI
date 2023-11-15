@@ -29,29 +29,26 @@ actor SpecialOpenActor {
         self.modalManager = modalManager
     }
 
-    func specialOpen(forceRefresh: Bool = false) {
+    func specialOpen(forceRefresh: Bool = false) async throws {
         if forceRefresh {
             self.logger.debug("special new")
         } else {
             self.logger.debug("special open")
         }
 
-        self.appContextManager.getActiveAppInfo { appContext in
-            Task {
-                self.clientManager.currentAppContext = appContext
-                if let isVisible = await self.modalManager.isWindowVisible(), !forceRefresh {
-                    if !isVisible {
-                        await self.modalManager.showModal()
-                        await NSApp.activate(ignoringOtherApps: true)
-                    } else {
-                        await self.modalManager.closeModal()
-                    }
-                } else {
-                    await self.modalManager.forceRefresh()
-                    await self.modalManager.showModal()
-                    await NSApp.activate(ignoringOtherApps: true)
-                }
+        let appContext = try await self.appContextManager.getActiveAppInfo()
+        self.clientManager.currentAppContext = appContext
+        if let isVisible = await self.modalManager.isWindowVisible(), !forceRefresh {
+            if !isVisible {
+                await self.modalManager.showModal()
+                await NSApp.activate(ignoringOtherApps: true)
+            } else {
+                await self.modalManager.closeModal()
             }
+        } else {
+            await self.modalManager.forceRefresh()
+            await self.modalManager.showModal()
+            await NSApp.activate(ignoringOtherApps: true)
         }
     }
 }
