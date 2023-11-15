@@ -12,7 +12,6 @@ import os.log
 
 enum ScriptName: String, Identifiable {
     case getActiveTabURL = "GetActiveTabURL"
-    case screencaptureActiveWindow = "SCActiveWindow"
 
     var id: String { "\(self.rawValue).scpt" }
 }
@@ -68,26 +67,10 @@ class ScriptManager {
         end tell
         """
 
-        let activeWindowScreenshotScript = """
-        tell application "System Events"
-            set frontmostProcess to first process where it is frontmost
-            set windowID to id of window 1 of frontmostProcess
-        end tell
-
-        do shell script "screencapture -l" & windowID & " ~/Desktop/screenshot.png"
-        """
-
         do {
             // Write the chrome URL script
             try chromeURLScript.write(
                 to: directoryURL.appendingPathComponent(ScriptName.getActiveTabURL.id),
-                atomically: true,
-                encoding: .utf8
-            )
-
-            // Write the screencapture script
-            try activeWindowScreenshotScript.write(
-                to: directoryURL.appendingPathComponent(ScriptName.screencaptureActiveWindow.id),
                 atomically: true,
                 encoding: .utf8
             )
