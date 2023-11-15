@@ -163,7 +163,7 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
-                await self.specialCutActor?.specialCut(stickyMode: false)
+                try await self.specialCutActor?.specialCut(stickyMode: false)
             }
         }
 
@@ -175,13 +175,13 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
             Task {
-                await self.specialOpenActor?.specialOpen()
+                try await self.specialOpenActor?.specialOpen()
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
             Task {
-                await self.specialOpenActor?.specialOpen(forceRefresh: true)
+                try await self.specialOpenActor?.specialOpen(forceRefresh: true)
             }
         }
 

@@ -295,7 +295,7 @@ class ClientManager {
         stream: Bool = false,
         streamHandler: @escaping (Result<String, Error>) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>) -> Void
-    ) {
+    ) async throws {
         self.logger.info("incognito: \(incognitoMode)")
         // If objective is not specified in the request, fall back on the active prompt.
         let objective = userObjective ?? self.promptManager?.getActivePrompt()
@@ -306,25 +306,22 @@ class ClientManager {
             return
         }
 
-        appCtxManager.getActiveAppInfo { appContext in
-            Task {
-                await self.sendStreamRequest(
-                    id: id,
-                    username: NSUserName(),
-                    userFullName: NSFullUserName(),
-                    userObjective: objective,
-                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                    userLang: Locale.preferredLanguages.first ?? "",
-                    copiedText: copiedText,
-                    messages: [],
-                    history: history,
-                    appContext: appContext,
-                    incognitoMode: incognitoMode,
-                    streamHandler: streamHandler,
-                    completion: completion
-                )
-            }
-        }
+        let appContext = try await appCtxManager.getActiveAppInfo()
+        await self.sendStreamRequest(
+            id: id,
+            username: NSUserName(),
+            userFullName: NSFullUserName(),
+            userObjective: objective,
+            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+            userLang: Locale.preferredLanguages.first ?? "",
+            copiedText: copiedText,
+            messages: [],
+            history: history,
+            appContext: appContext,
+            incognitoMode: incognitoMode,
+            streamHandler: streamHandler,
+            completion: completion
+        )
     }
 
     /// Refine the currently cached request
