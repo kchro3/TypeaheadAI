@@ -11,7 +11,7 @@ import KeyboardShortcuts
 import SettingsAccess
 
 struct MenuView: View {
-    @ObservedObject var promptManager: PromptManager
+    @ObservedObject var promptManager: QuickActionManager
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var settingsManager: SettingsManager
     @ObservedObject var supabaseManager: SupabaseManager
@@ -139,7 +139,7 @@ struct MenuView_Previews: PreviewProvider {
         }
 
         let context = container.viewContext
-        let promptManager = PromptManager(context: context)
+        let promptManager = QuickActionManager(context: context)
 
         // Create some sample prompts
         let samplePrompts = ["this is a sample prompt", "this is an active prompt"]

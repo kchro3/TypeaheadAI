@@ -79,7 +79,7 @@ class ModalManager: ObservableObject {
 
     // TODO: Inject?
     var clientManager: ClientManager? = nil
-    var promptManager: PromptManager? = nil
+    var promptManager: QuickActionManager? = nil
     var intentManager: IntentManager? = nil
     var settingsManager: SettingsManager? = nil
 

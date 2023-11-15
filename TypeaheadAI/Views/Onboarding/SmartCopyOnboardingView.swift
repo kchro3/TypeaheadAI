@@ -72,7 +72,7 @@ struct SmartCopyOnboardingView: View {
             .padding(10)
             .background(
                 RoundedRectangle(cornerSize: CGSize(width: CGFloat(10), height: CGFloat(10)))
-                    .fill(Color.accentColor.opacity(0.1))
+                    .fill(Color.accentColor.opacity(0.4))
             )
             .padding(.horizontal, 30)
             .textSelection(.enabled)

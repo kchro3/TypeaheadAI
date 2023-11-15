@@ -39,7 +39,7 @@ struct QuickActionsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
 
-    @ObservedObject var promptManager: PromptManager
+    @ObservedObject var promptManager: QuickActionManager
 
     @State var activeQuickAction: PromptEntry? = nil
     @State private var isEditing: Bool = false
@@ -183,7 +183,7 @@ struct QuickActionsView: View {
     }
 
     let context = container.viewContext
-    let promptManager = PromptManager(context: context)
+    let promptManager = QuickActionManager(context: context)
 
     // Create some sample prompts
     let samplePrompts = [

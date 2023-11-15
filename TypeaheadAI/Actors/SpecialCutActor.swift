@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Carbon.HIToolbox
+
 import AppKit
 import Cocoa
 import Vision
@@ -26,7 +27,7 @@ class LegacyClipboardMonitor {
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
-        category: "ClipboardMonitor"
+        category: "LegacyClipboardMonitor"
     )
 
     init(mouseEventMonitor: MouseEventMonitor) {
@@ -68,7 +69,7 @@ class LegacyClipboardMonitor {
 
 actor SpecialCutActor {
     private let clipboardMonitor: LegacyClipboardMonitor
-    private let promptManager: PromptManager
+    private let promptManager: QuickActionManager
     private let clientManager: ClientManager
     private let modalManager: ModalManager
     private let appContextManager: AppContextManager
@@ -87,7 +88,7 @@ actor SpecialCutActor {
     }
 
     init(mouseEventMonitor: MouseEventMonitor,
-         promptManager: PromptManager,
+         promptManager: QuickActionManager,
          clientManager: ClientManager,
          modalManager: ModalManager,
          appContextManager: AppContextManager

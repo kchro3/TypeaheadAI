@@ -17,7 +17,8 @@ struct UserIntent: Codable {
 }
 
 class IntentManager {
-    private let managedObjectContext: NSManagedObjectContext
+    private let context: NSManagedObjectContext
+    private let backgroundContext: NSManagedObjectContext
     private let maxLength: Int = 1000  // Truncate each copiedText
 
     private let logger = Logger(
@@ -25,17 +26,18 @@ class IntentManager {
         category: "IntentManager"
     )
 
-    init(context: NSManagedObjectContext) {
-        self.managedObjectContext = PersistenceController.shared.newBackgroundContext()
+    init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
+        self.context = context
+        self.backgroundContext = backgroundContext
     }
 
-    @discardableResult
+    @MainActor
     func addIntentEntry(
         prompt: String,
         copiedText: String,
         appContext: AppContext?
-    ) -> IntentEntry {
-        let newEntry = IntentEntry(context: managedObjectContext)
+    ) {
+        let newEntry = IntentEntry(context: context)
         newEntry.prompt = prompt
         newEntry.copiedText = copiedText
         newEntry.url = appContext?.url?.host
@@ -45,13 +47,11 @@ class IntentManager {
         newEntry.updatedAt = Date()
 
         do {
-            try managedObjectContext.save()
+            try context.save()
             logger.debug("Created a new intent")
         } catch {
             logger.error("Failed to create new intent: \(error.localizedDescription)")
         }
-
-        return newEntry
     }
 
     private func decayedScore(originalScore: Float, timestamp: Date) -> Float {
@@ -90,7 +90,7 @@ class IntentManager {
         fetchRequest.fetchLimit = 50
 
         do {
-            let entries = try managedObjectContext.fetch(fetchRequest)
+            let entries = try context.fetch(fetchRequest)
 
             // NOTE: Count the most common recent prompts and construct a user message
             var promptCounts = [String: Int]()
@@ -151,8 +151,8 @@ class IntentManager {
         fetchRequest.fetchLimit = limit
 
         do {
-            return try managedObjectContext.performAndWait {
-                let results = try managedObjectContext.fetch(fetchRequest) as? [NSDictionary]
+            return try context.performAndWait {
+                let results = try context.fetch(fetchRequest) as? [NSDictionary]
                 let intents = results?.compactMap { dict -> String? in
                     if let prompt = dict["prompt"] as? String,
                        let _ = dict["count"] as? Int {

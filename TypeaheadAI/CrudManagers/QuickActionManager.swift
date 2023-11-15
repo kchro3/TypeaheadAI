@@ -1,5 +1,5 @@
 //
-//  PromptManager.swift
+//  QuickActionManager.swift
 //  TypeaheadAI
 //
 //  Created by Jeff Hara on 8/22/23.
@@ -9,7 +9,10 @@ import CoreData
 import Foundation
 import os.log
 
-class PromptManager: ObservableObject {
+/// The QuickActionManager handles reads and writes to the underlying CoreData.
+/// We originally called them PromptEntry, but we unmarshal them into QuickAction structs.
+/// The renaming is unfortunate, but the domain model is required for thread-safety.
+class QuickActionManager: ObservableObject {
     var activePromptID: UUID?
     private let context: NSManagedObjectContext
 
@@ -19,7 +22,7 @@ class PromptManager: ObservableObject {
     )
 
     init(context: NSManagedObjectContext) {
-        self.context = PersistenceController.shared.newBackgroundContext()
+        self.context = context
         self.activePromptID = nil
     }
 
@@ -61,7 +64,7 @@ class PromptManager: ObservableObject {
     }
 
     @discardableResult
-    func addPrompt(_ prompt: String, details: String? = nil) -> PromptEntry? {
+    func addPrompt(_ prompt: String, details: String? = nil) -> QuickAction? {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
         newPrompt.prompt = prompt
@@ -77,14 +80,14 @@ class PromptManager: ObservableObject {
         do {
             try context.save()
             self.activePromptID = newPrompt.id
-            return newPrompt
+            return QuickAction(from: newPrompt)
         } catch {
             logger.error("Failed to save prompt: \(error)")
             return nil
         }
     }
 
-    func getByLabel(_ label: String) -> PromptEntry? {
+    func getByLabel(_ label: String) -> QuickAction? {
         let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "prompt ==[c] %@",
                                              label as CVarArg)
@@ -92,7 +95,7 @@ class PromptManager: ObservableObject {
             return try context.performAndWait {
                 let fetchedObjects = try context.fetch(fetchRequest)
                 if let promptEntry = fetchedObjects.first {
-                    return promptEntry
+                    return QuickAction(from: promptEntry)
                 } else {
                     return nil
                 }

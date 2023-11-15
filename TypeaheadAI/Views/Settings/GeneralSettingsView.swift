@@ -11,7 +11,7 @@ import CoreData
 import LaunchAtLogin
 
 struct GeneralSettingsView: View {
-    @ObservedObject var promptManager: PromptManager
+    @ObservedObject var promptManager: QuickActionManager
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
     @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
@@ -125,7 +125,7 @@ struct GeneralSettingsView_Previews: PreviewProvider {
         }
 
         let context = container.viewContext
-        let promptManager = PromptManager(context: context)
+        let promptManager = QuickActionManager(context: context)
 
         // Create some sample prompts
         let samplePrompts = ["this is a sample prompt", "this is an active prompt"]

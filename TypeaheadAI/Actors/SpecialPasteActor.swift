@@ -13,7 +13,7 @@ import os.log
 
 actor SpecialPasteActor: CanSimulatePaste {
     private let historyManager: HistoryManager
-    private let promptManager: PromptManager
+    private let promptManager: QuickActionManager
     private let modalManager: ModalManager
     private let appContextManager: AppContextManager
 
@@ -38,7 +38,7 @@ actor SpecialPasteActor: CanSimulatePaste {
 
     init(
         historyManager: HistoryManager,
-        promptManager: PromptManager,
+        promptManager: QuickActionManager,
         modalManager: ModalManager,
         appContextManager: AppContextManager
     ) {
@@ -84,7 +84,7 @@ actor SpecialPasteActor: CanSimulatePaste {
             return
         }
 
-        _ = self.historyManager.addHistoryEntry(
+        await self.historyManager.addHistoryEntry(
             copiedText: firstMessage.text,
             pastedResponse: lastMessage.text,
             quickActionId: self.promptManager.activePromptID,
