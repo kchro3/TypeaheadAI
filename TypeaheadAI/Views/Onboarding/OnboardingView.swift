@@ -36,16 +36,15 @@ struct OnboardingView: View {
             if let _ = supabaseManager.uuid {
                 VStack {
                     panel
+                        .id(UUID())
+                        .transition(.opacity)
 
                     Spacer()
 
                     navbar
                 }
                 .padding(15)
-                .onDisappear {
-                    print("Mark as onboarded...")
-                    hasOnboarded = true
-                }
+                .animation(.easeInOut, value: UUID())
             } else {
                 LoggedOutOnboardingView(
                     supabaseManager: supabaseManager
@@ -60,6 +59,8 @@ struct OnboardingView: View {
         if step == 1 {
             AnyView(IntroOnboardingView())
         } else if step == 2 {
+            AnyView(PermissionsOnboardingView())
+        } else if step == 3 {
             AnyView(SmartCopyOnboardingView()
                 .onAppear(perform: {
                     /// NOTE: Seed the user intents
@@ -84,25 +85,25 @@ struct OnboardingView: View {
                 })
                 .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
                     // Add a delay so that there is time to copy the text
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         step += 1
                     }
                 }
             )
-        } else if step == 3 {
+        } else if step == 4 {
             AnyView(
                 IntentsOnboardingView()
                     .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             step += 1
                         }
                     }
             )
-        } else if step == 4 {
-            AnyView(RefineOnboardingView())
         } else if step == 5 {
-            AnyView(SmartPasteOnboardingView())
+            AnyView(RefineOnboardingView())
         } else if step == 6 {
+            AnyView(SmartPasteOnboardingView())
+        } else if step == 7 {
             AnyView(QuickActionExplanationOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
@@ -123,6 +124,8 @@ struct OnboardingView: View {
             HStack {
                 RoundedButton("Skip") {
                     if let window = NSApplication.shared.keyWindow {
+                        print("Mark as onboarded...")
+                        hasOnboarded = true
                         window.performClose(nil)
                     }
                 }
@@ -131,25 +134,23 @@ struct OnboardingView: View {
 
                 if step > 1 {
                     RoundedButton("Back") {
-                        Task {
-                            await modalManager.closeModal()
-                            step -= 1
-                        }
+                        modalManager.closeModal()
+                        step -= 1
                     }
                 }
 
                 if step < totalSteps {
                     RoundedButton("Continue", isAccent: true) {
-                        Task {
-                            if step != 4 {
-                                await modalManager.closeModal()
-                            }
-                            step += 1
+                        if step != 4 {
+                            modalManager.closeModal()
                         }
+                        step += 1
                     }
                 } else if step == totalSteps {
                     RoundedButton("Finish", isAccent: true) {
                         if let window = NSApplication.shared.keyWindow {
+                            print("Mark as onboarded...")
+                            hasOnboarded = true
                             window.performClose(nil)
                         }
                     }

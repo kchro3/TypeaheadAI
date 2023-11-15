@@ -15,6 +15,7 @@ actor SpecialCopyActor: CanSimulateCopy {
     private let promptManager: PromptManager
     private let modalManager: ModalManager
     private let appContextManager: AppContextManager
+    private let clipboardMonitor = ClipboardMonitor()
 
     @AppStorage("numSmartCopies") var numSmartCopies: Int?
 
@@ -39,7 +40,13 @@ actor SpecialCopyActor: CanSimulateCopy {
     
     func specialCopy(stickyMode: Bool) async throws {
         let appContext = try await self.appContextManager.getActiveAppInfo()
-        try await simulateCopy()
+        try await self.simulateCopy()
+
+        // Clear the current state
+        await promptManager.setActivePrompt(id: nil)
+        await self.modalManager.clearText(stickyMode: stickyMode)
+        await self.modalManager.showModal()
+        await NSApp.activate(ignoringOtherApps: true)
 
         var messageType: MessageType = .string
         guard let copiedText = NSPasteboard.general.string(forType: .string) else {
@@ -49,11 +56,6 @@ actor SpecialCopyActor: CanSimulateCopy {
         if let htmlString = self.extractHTML(appContext: appContext) {
             messageType = .html(data: htmlString)
         }
-
-        // Clear the modal text and reissue request
-        await self.modalManager.clearText(stickyMode: stickyMode)
-        await self.modalManager.showModal()
-        await NSApp.activate(ignoringOtherApps: true)
 
         if let nCopies = self.numSmartCopies {
             self.numSmartCopies = nCopies + 1

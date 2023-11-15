@@ -76,6 +76,8 @@
 		2BAA978D2B02EBE500EC6A63 /* RefineOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */; };
 		2BAA97912B0366C400EC6A63 /* OnboardingWindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA97902B0366C400EC6A63 /* OnboardingWindowManager.swift */; };
 		2BAA97932B03693A00EC6A63 /* Notification+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */; };
+		2BAA97952B042AD400EC6A63 /* PermissionsOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA97942B042AD400EC6A63 /* PermissionsOnboardingView.swift */; };
+		2BAA97972B0432D300EC6A63 /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAA97962B0432D300EC6A63 /* ClipboardMonitor.swift */; };
 		2BAC14762AF61DD000B33E13 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAC14752AF61DD000B33E13 /* WebView.swift */; };
 		2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB652AF58E0B009C8370 /* ConversationView.swift */; };
 		2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */; };
@@ -183,6 +185,8 @@
 		2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefineOnboardingView.swift; sourceTree = "<group>"; };
 		2BAA97902B0366C400EC6A63 /* OnboardingWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowManager.swift; sourceTree = "<group>"; };
 		2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification+Extension.swift"; sourceTree = "<group>"; };
+		2BAA97942B042AD400EC6A63 /* PermissionsOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsOnboardingView.swift; sourceTree = "<group>"; };
+		2BAA97962B0432D300EC6A63 /* ClipboardMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitor.swift; sourceTree = "<group>"; };
 		2BAC14752AF61DD000B33E13 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		2BAFDB652AF58E0B009C8370 /* ConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationView.swift; sourceTree = "<group>"; };
 		2BAFDB6A2AF60F64009C8370 /* MenuButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButtonView.swift; sourceTree = "<group>"; };
@@ -294,12 +298,13 @@
 				2B44FA972ABA783F00C6B542 /* OnboardingView.swift */,
 				2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */,
 				2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */,
-				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
+				2BAA97942B042AD400EC6A63 /* PermissionsOnboardingView.swift */,
 				2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */,
-				2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */,
-				2BAA97882B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift */,
 				2BAA978A2B02E81600EC6A63 /* IntentsOnboardingView.swift */,
 				2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */,
+				2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */,
+				2BAA97882B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift */,
+				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -470,6 +475,7 @@
 			isa = PBXGroup;
 			children = (
 				2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */,
+				2BAA97962B0432D300EC6A63 /* ClipboardMonitor.swift */,
 			);
 			path = Monitors;
 			sourceTree = "<group>";
@@ -709,8 +715,10 @@
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
 				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,
+				2BAA97952B042AD400EC6A63 /* PermissionsOnboardingView.swift in Sources */,
 				2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */,
 				2B0116F02AF88051000C78E1 /* SupabaseManager.swift in Sources */,
+				2BAA97972B0432D300EC6A63 /* ClipboardMonitor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -894,7 +902,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.37;
+				MARKETING_VERSION = 1.38;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -935,7 +943,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.37;
+				MARKETING_VERSION = 1.38;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

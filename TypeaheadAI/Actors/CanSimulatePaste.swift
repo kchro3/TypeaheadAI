@@ -9,11 +9,11 @@ import Foundation
 import Carbon.HIToolbox
 
 protocol CanSimulatePaste {
-    func simulatePaste(flags: CGEventFlags?)
+    func simulatePaste(flags: CGEventFlags?) async throws
 }
 
 extension CanSimulatePaste {
-    func simulatePaste(flags: CGEventFlags? = nil) {
+    func simulatePaste(flags: CGEventFlags? = nil) async throws {
         // Post a Command-V keystroke
         let source = CGEventSource(stateID: .hidSystemState)!
         let cmdVDown = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true)! // v key
@@ -28,6 +28,8 @@ extension CanSimulatePaste {
         }
 
         cmdVDown.post(tap: .cghidEventTap)
+        try await Task.sleep(for: .milliseconds(20))
         cmdVUp.post(tap: .cghidEventTap)
+        try await Task.sleep(for: .milliseconds(200))
     }
 }

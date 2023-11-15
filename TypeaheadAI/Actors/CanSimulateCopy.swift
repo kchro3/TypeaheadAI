@@ -17,6 +17,10 @@ let whitelistedUrls = [
     "https://docs.google.com/spreadsheets"
 ]
 
+enum CanSimulateCopyError: Error {
+    case noChangesDetected
+}
+
 protocol CanSimulateCopy {
     func simulateCopy() async throws
     func simulateCopy(completion: @escaping () -> Void)
@@ -31,9 +35,14 @@ extension CanSimulateCopy {
         let cmdCUp = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: false)! // c key
         cmdCUp.flags = [.maskCommand]
 
+        let changeCount = NSPasteboard.general.changeCount
         cmdCDown.post(tap: .cghidEventTap)
+        try await Task.sleep(for: .milliseconds(20))
         cmdCUp.post(tap: .cghidEventTap)
         try await Task.sleep(for: .milliseconds(200))
+        if changeCount == NSPasteboard.general.changeCount {
+            throw CanSimulateCopyError.noChangesDetected
+        }
     }
 
     func simulateCopy(completion: @escaping () -> Void) {
