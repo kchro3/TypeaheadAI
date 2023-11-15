@@ -9,19 +9,24 @@ import Foundation
 import CoreData
 import os.log
 
+/// The HistoryManager handles reads and writes to the underlying CoreData.
+/// The History domain model is required for thread-safety.
 class HistoryManager {
-    private let managedObjectContext: NSManagedObjectContext
+    private let context: NSManagedObjectContext
+    private let backgroundContext: NSManagedObjectContext
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "HistoryManager"
     )
 
-    init(context: NSManagedObjectContext) {
-        self.managedObjectContext = context
+    init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
+        self.context = context
+        self.backgroundContext = backgroundContext
     }
 
     // TODO: context other input/output types
+    @MainActor
     func addHistoryEntry(
         copiedText: String,
         pastedResponse: String,
@@ -30,8 +35,8 @@ class HistoryManager {
         activeAppName: String?,
         activeAppBundleIdentifier: String?,
         numMessages: Int
-    ) -> HistoryEntry {
-        let newEntry = HistoryEntry(context: managedObjectContext)
+    ) {
+        let newEntry = HistoryEntry(context: context)
         newEntry.id = UUID()
         newEntry.timestamp = Date()
         newEntry.quickActionId = quickActionId
@@ -43,13 +48,11 @@ class HistoryManager {
         newEntry.numMessages = Int16(numMessages)
 
         do {
-            try managedObjectContext.save()
+            try context.save()
             logger.debug("Added entry")
         } catch {
             logger.error("Failed to save new history entry: \(error.localizedDescription)")
         }
-
-        return newEntry
     }
 
     func fetchHistoryEntriesAsMessages(
@@ -85,14 +88,16 @@ class HistoryManager {
         fetchRequest.fetchLimit = limit
 
         do {
-            let entries = try managedObjectContext.fetch(fetchRequest)
-            var messages = [Message]()
-            for entry in entries {
-                let userMessage = Message(id: entry.id!, text: entry.copiedText!, isCurrentUser: true)
-                let assistantMessage = Message(id: entry.id!, text: entry.pastedResponse!, isCurrentUser: false)
-                messages.append(contentsOf: [userMessage, assistantMessage])
+            return try backgroundContext.performAndWait {
+                let entries = try backgroundContext.fetch(fetchRequest)
+                var messages = [Message]()
+                for entry in entries {
+                    let userMessage = Message(id: entry.id!, text: entry.copiedText!, isCurrentUser: true)
+                    let assistantMessage = Message(id: entry.id!, text: entry.pastedResponse!, isCurrentUser: false)
+                    messages.append(contentsOf: [userMessage, assistantMessage])
+                }
+                return messages
             }
-            return messages
         } catch {
             logger.error("Failed to fetch history entries: \(error.localizedDescription)")
             return []

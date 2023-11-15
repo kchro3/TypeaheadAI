@@ -25,7 +25,7 @@ final class AppState: ObservableObject {
     )
 
     // Managers
-    @Published var promptManager: PromptManager
+    @Published var promptManager: QuickActionManager
     @Published var llamaModelManager = LlamaModelManager()
     @Published var modalManager: ModalManager
     @Published var settingsManager: SettingsManager
@@ -61,13 +61,13 @@ final class AppState: ObservableObject {
 
     @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
 
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
 
         // Initialize managers
-        self.memoManager = MemoManager(context: context)
-        self.historyManager = HistoryManager(context: context)
-        self.promptManager = PromptManager(context: context)
-        self.intentManager = IntentManager(context: context)
+        self.memoManager = MemoManager(context: backgroundContext)
+        self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
+        self.promptManager = QuickActionManager(context: backgroundContext)
+        self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
         self.clientManager = ClientManager()
         self.modalManager = ModalManager()
         self.settingsManager = SettingsManager(context: context)

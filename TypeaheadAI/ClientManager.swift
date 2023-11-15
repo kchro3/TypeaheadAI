@@ -151,7 +151,7 @@ struct SuggestIntentsPayload: Codable {
 
 class ClientManager {
     var llamaModelManager: LlamaModelManager? = nil
-    var promptManager: PromptManager? = nil
+    var promptManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
     var intentManager: IntentManager? = nil
     var historyManager: HistoryManager? = nil
@@ -339,7 +339,7 @@ class ClientManager {
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
             Task {
                 var history: [Message]? = nil
-                var quickAction: PromptEntry? = nil
+                var quickAction: QuickAction? = nil
                 if let userIntent = userIntent {
                     // NOTE: Check if the user intent is also a Quick Action
                     quickAction = self.promptManager?.getByLabel(userIntent)
@@ -358,7 +358,7 @@ class ClientManager {
                     }
 
                     // NOTE: We cached the copiedText earlier
-                    _ = self.intentManager?.addIntentEntry(
+                    await self.intentManager?.addIntentEntry(
                         prompt: userIntent,
                         copiedText: payload.copiedText,
                         appContext: payload.appContext

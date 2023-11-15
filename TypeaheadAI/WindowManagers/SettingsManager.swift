@@ -12,7 +12,7 @@ import os.log
 
 class SettingsManager: ObservableObject {
     var toastWindow: ModalWindow?
-    var promptManager: PromptManager? = nil
+    var promptManager: QuickActionManager? = nil
     var llamaModelManager: LlamaModelManager? = nil
     var supabaseManager: SupabaseManager? = nil
 

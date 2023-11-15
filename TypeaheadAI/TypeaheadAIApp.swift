@@ -23,7 +23,8 @@ struct TypeaheadAIApp: App {
         #endif
 
         let context = persistenceController.container.viewContext
-        _appState = StateObject(wrappedValue: AppState(context: context))
+        let backgroundContext = persistenceController.container.newBackgroundContext()
+        _appState = StateObject(wrappedValue: AppState(context: context, backgroundContext: backgroundContext))
     }
 
     var body: some Scene {

@@ -174,6 +174,6 @@ struct OnboardingView: View {
     return OnboardingView(
         supabaseManager: SupabaseManager(),
         modalManager: ModalManager(),
-        intentManager: IntentManager(context: context)
+        intentManager: IntentManager(context: context, backgroundContext: context)
     )
 }

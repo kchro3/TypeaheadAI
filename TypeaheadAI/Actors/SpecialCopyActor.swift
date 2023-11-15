@@ -12,10 +12,9 @@ import os.log
 actor SpecialCopyActor: CanSimulateCopy {
     private let historyManager: HistoryManager
     private let clientManager: ClientManager
-    private let promptManager: PromptManager
+    private let promptManager: QuickActionManager
     private let modalManager: ModalManager
     private let appContextManager: AppContextManager
-    private let clipboardMonitor = ClipboardMonitor()
 
     @AppStorage("numSmartCopies") var numSmartCopies: Int?
 
@@ -27,7 +26,7 @@ actor SpecialCopyActor: CanSimulateCopy {
     init(
         historyManager: HistoryManager,
         clientManager: ClientManager,
-        promptManager: PromptManager,
+        promptManager: QuickActionManager,
         modalManager: ModalManager,
         appContextManager: AppContextManager
     ) {

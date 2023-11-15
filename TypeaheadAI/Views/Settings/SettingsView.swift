@@ -20,7 +20,7 @@ enum Tab: String, CaseIterable, Identifiable {
 }
 
 struct SettingsView: View {
-    var promptManager: PromptManager
+    var promptManager: QuickActionManager
     var llamaModelManager: LlamaModelManager
     @ObservedObject var supabaseManager: SupabaseManager
 
@@ -115,7 +115,7 @@ struct SettingsView_Previews: PreviewProvider {
         }
 
         let context = container.viewContext
-        let promptManager = PromptManager(context: context)
+        let promptManager = QuickActionManager(context: context)
 
         // Create some sample prompts
         let samplePrompts = ["this is a sample prompt", "this is an active prompt"]
