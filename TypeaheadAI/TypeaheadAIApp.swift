@@ -14,12 +14,11 @@ struct TypeaheadAIApp: App {
 
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
-    @State var text: String = ""
 
     init() {
         #if DEBUG
-        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
-        UserDefaults.standard.synchronize()
+//        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+//        UserDefaults.standard.synchronize()
         #endif
 
         let context = persistenceController.container.viewContext
