@@ -34,9 +34,21 @@ class AppContextManager {
         let bundleIdentifier = activeApp.bundleIdentifier
 
         var ocrText: String? = nil
+        var annotatedImage: NSImage? = nil
         let screenshot = takeScreenshot(activeApp: activeApp)
         if let image = screenshot {
-            (ocrText, _) = try await performOCR(image: image)  // NOTE: Figure out how we can use the annotated bounding box
+            logger.info("took screenshot")
+            (ocrText, annotatedImage) = try await performOCR(image: image)  // NOTE: Figure out how we can use the annotated bounding box
+
+            #if DEBUG
+            if let nsImage = annotatedImage {
+                copyImageToClipboard(nsImage: nsImage)
+            }
+            #endif
+
+            logger.info("OCR: \(ocrText ?? "none")")
+        } else {
+            logger.info("did not take screenshot")
         }
 
         if bundleIdentifier == "com.google.Chrome" {
@@ -77,26 +89,32 @@ extension AppContextManager {
     }
 
     func takeScreenshot(activeApp: NSRunningApplication) -> CGImage? {
-        guard let windowListInfo = CGWindowListCopyWindowInfo(
-            [.optionOnScreenOnly],
-            kCGNullWindowID
-        ) as NSArray? as? [[String: AnyObject]] else { return nil }
+        let screenRect = NSScreen.main?.frame ?? NSRect.zero
+        guard let imageRef = CGWindowListCreateImage(
+            screenRect, .optionOnScreenOnly, kCGNullWindowID, .boundsIgnoreFraming
+        ) else { return nil }
 
-        let windowInfo = windowListInfo.first {
-            $0[kCGWindowOwnerPID as String] as! Int32 == activeApp.processIdentifier &&
-            $0[kCGWindowLayer as String] as! Int32 == 0
-        }
-
-        if let windowIDNumber = windowInfo?[kCGWindowNumber as String] as? NSNumber {
-            let windowID = CGWindowID(windowIDNumber.uint32Value)
-            guard let imageRef = CGWindowListCreateImage(
-                CGRect.null, .optionIncludingWindow, windowID, .boundsIgnoreFraming
-            ) else { return nil }
-
-            return imageRef
-        }
-
-        return nil
+        return imageRef
+//        guard let windowListInfo = CGWindowListCopyWindowInfo(
+//            [.optionOnScreenOnly],
+//            kCGNullWindowID
+//        ) as NSArray? as? [[String: AnyObject]] else { return nil }
+//
+//        let windowInfo = windowListInfo.first {
+//            $0[kCGWindowOwnerPID as String] as! Int32 == activeApp.processIdentifier &&
+//            $0[kCGWindowLayer as String] as! Int32 == 0
+//        }
+//
+//        if let windowIDNumber = windowInfo?[kCGWindowNumber as String] as? NSNumber {
+//            let windowID = CGWindowID(windowIDNumber.uint32Value)
+//            guard let imageRef = CGWindowListCreateImage(
+//                CGRect.null, .optionIncludingWindow, windowID, .boundsIgnoreFraming
+//            ) else { return nil }
+//
+//            return imageRef
+//        }
+//
+//        return nil
     }
 
     func performOCR(image: CGImage) async throws -> (String, NSImage?) {
@@ -240,5 +258,11 @@ extension AppContextManager {
 
         guard let imageWithBoxes = context.makeImage() else { return NSImage() }
         return NSImage(cgImage: imageWithBoxes, size: imageSize)
+    }
+
+    func copyImageToClipboard(nsImage: NSImage) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.writeObjects([nsImage])
     }
 }
