@@ -12,143 +12,6 @@ import os.log
 import SwiftUI
 import Supabase
 
-struct RequestPayload: Codable {
-    let uuid: UUID
-    var username: String
-    var userFullName: String
-    var userObjective: String?
-    var userBio: String
-    var userLang: String
-    var copiedText: String
-    var messages: [Message]?
-    var history: [Message]?
-    var appContext: AppContext?
-    var version: String?
-    let freebies: Int?
-}
-
-struct OnboardingRequestPayload: Codable {
-    var username: String
-    var userFullName: String
-    var userBio: String
-    var userLang: String
-    var onboardingStep: Int
-    var version: String
-}
-
-/// https://replicate.com/stability-ai/sdxl
-struct ImageRequestPayload: Codable {
-    let prompt: String
-    let style: [String]?
-    var version: String?
-}
-
-struct ErrorResponse: Codable {
-    let detail: String
-}
-
-/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Enums/Images/ImageData.swift
-public enum ImageData: Codable, Equatable {
-    enum CodingKeys: String, CodingKey {
-        case url
-        case b64Json = "b64_json"
-    }
-
-    /// The image is stored as a URL string.
-    case url(String)
-
-    /// The image is stored as a Base64 binary.
-    case b64Json(String)
-
-    /// The image itself.
-    public var image: String {
-        switch self {
-        case let .b64Json(b64Json): return b64Json
-        case let .url(url): return url
-        }
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        if let url = try? container.decode(String.self, forKey: .url) {
-            if let data = try? Data(contentsOf: URL(string: url)!) {
-                let base64Json = data.base64EncodedString()
-                self = .b64Json(base64Json)
-                return
-            }
-        }
-
-        let b64Associate = try container.decode(String.self, forKey: .b64Json)
-        self = .b64Json(b64Associate)
-    }
-
-    func toURL() -> URL {
-        let tempURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("image-\(Date()).png")
-        // Write the image data to the temporary file
-        try? Data(base64Encoded: self.image)?.write(to: tempURL)
-        return tempURL
-    }
-}
-
-/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Structs/Schemas/Images/ImageResponse.swift
-public struct ImageResponse: Codable {
-    /// The creation date of the response.
-    public let created: Int
-
-    /// The data sent within the response containing either `URL` or `Base64` data.
-    public let data: [ImageData]
-}
-
-struct AppVersion: Codable, Equatable {
-    let major: Int
-    let minor: Int
-    let build: Int
-}
-
-struct ResponsePayload: Codable {
-    let textToPaste: String
-    let assumedIntent: String
-    let choices: [String]
-}
-
-enum Mode: String, Codable {
-    case text
-    case image
-}
-
-struct ChunkPayload: Codable {
-    var text: String?
-    var mode: Mode?
-    let finishReason: String?
-}
-
-enum ClientManagerError: Error {
-    case badRequest(_ message: String)
-    case retriesExceeded(_ message: String)
-    case clientError(_ message: String)
-    case serverError(_ message: String)
-    case appError(_ message: String)
-    case networkError(_ message: String)
-    case corruptedDataError(_ message: String)
-
-    var localizedDescription: String {
-        switch self {
-        case .badRequest(let message): message
-        case .retriesExceeded(let message): message
-        case .clientError(let message): message
-        case .serverError(let message): message
-        case .appError(let message): message
-        case .networkError(let message): message
-        case .corruptedDataError(let message): message
-        }
-    }
-}
-
-struct SuggestIntentsPayload: Codable {
-    let intents: [String]
-}
-
 class ClientManager {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: QuickActionManager? = nil
@@ -159,7 +22,7 @@ class ClientManager {
 
     private let session: URLSession
 
-    private let version: String = "v3"
+    private let version: String = "v4"
     @AppStorage("freebies") var freebies: Int = 10
 
     #if DEBUG
@@ -836,4 +699,141 @@ class ClientManager {
     func flushCache() {
         cached = nil
     }
+}
+
+struct RequestPayload: Codable {
+    let uuid: UUID
+    var username: String
+    var userFullName: String
+    var userObjective: String?
+    var userBio: String
+    var userLang: String
+    var copiedText: String
+    var messages: [Message]?
+    var history: [Message]?
+    var appContext: AppContext?
+    var version: String?
+    let freebies: Int?
+}
+
+struct OnboardingRequestPayload: Codable {
+    var username: String
+    var userFullName: String
+    var userBio: String
+    var userLang: String
+    var onboardingStep: Int
+    var version: String
+}
+
+/// https://replicate.com/stability-ai/sdxl
+struct ImageRequestPayload: Codable {
+    let prompt: String
+    let style: [String]?
+    var version: String?
+}
+
+struct ErrorResponse: Codable {
+    let detail: String
+}
+
+/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Enums/Images/ImageData.swift
+public enum ImageData: Codable, Equatable {
+    enum CodingKeys: String, CodingKey {
+        case url
+        case b64Json = "b64_json"
+    }
+
+    /// The image is stored as a URL string.
+    case url(String)
+
+    /// The image is stored as a Base64 binary.
+    case b64Json(String)
+
+    /// The image itself.
+    public var image: String {
+        switch self {
+        case let .b64Json(b64Json): return b64Json
+        case let .url(url): return url
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let url = try? container.decode(String.self, forKey: .url) {
+            if let data = try? Data(contentsOf: URL(string: url)!) {
+                let base64Json = data.base64EncodedString()
+                self = .b64Json(base64Json)
+                return
+            }
+        }
+
+        let b64Associate = try container.decode(String.self, forKey: .b64Json)
+        self = .b64Json(b64Associate)
+    }
+
+    func toURL() -> URL {
+        let tempURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("image-\(Date()).png")
+        // Write the image data to the temporary file
+        try? Data(base64Encoded: self.image)?.write(to: tempURL)
+        return tempURL
+    }
+}
+
+/// Copied from https://github.com/MarcoDotIO/OpenAIKit/blob/main/Sources/OpenAIKit/Types/Structs/Schemas/Images/ImageResponse.swift
+public struct ImageResponse: Codable {
+    /// The creation date of the response.
+    public let created: Int
+
+    /// The data sent within the response containing either `URL` or `Base64` data.
+    public let data: [ImageData]
+}
+
+struct AppVersion: Codable, Equatable {
+    let major: Int
+    let minor: Int
+    let build: Int
+}
+
+struct ResponsePayload: Codable {
+    let textToPaste: String
+    let assumedIntent: String
+    let choices: [String]
+}
+
+enum Mode: String, Codable {
+    case text
+    case image
+}
+
+struct ChunkPayload: Codable {
+    var text: String?
+    var mode: Mode?
+    let finishReason: String?
+}
+
+enum ClientManagerError: Error {
+    case badRequest(_ message: String)
+    case retriesExceeded(_ message: String)
+    case clientError(_ message: String)
+    case serverError(_ message: String)
+    case appError(_ message: String)
+    case networkError(_ message: String)
+    case corruptedDataError(_ message: String)
+
+    var localizedDescription: String {
+        switch self {
+        case .badRequest(let message): message
+        case .retriesExceeded(let message): message
+        case .clientError(let message): message
+        case .serverError(let message): message
+        case .appError(let message): message
+        case .networkError(let message): message
+        case .corruptedDataError(let message): message
+        }
+    }
+}
+
+struct SuggestIntentsPayload: Codable {
+    let intents: [String]
 }

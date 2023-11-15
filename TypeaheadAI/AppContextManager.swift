@@ -13,10 +13,13 @@ struct AppContext: Codable {
     let appName: String?
     let bundleIdentifier: String?
     let url: URL?
+    let ocrText: String?
 }
 
 class AppContextManager {
-    private let scriptManager: ScriptManager = ScriptManager()
+    private let scriptManager = ScriptManager()
+    private let screenshotManager = ScreenshotManager()
+    private let ocrManager = OCRManager()
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -24,28 +27,45 @@ class AppContextManager {
     )
 
     func getActiveAppInfo() async throws -> AppContext? {
-        if let activeApp = NSWorkspace.shared.frontmostApplication {
-            let appName = activeApp.localizedName
-            let bundleIdentifier = activeApp.bundleIdentifier
-
-            if bundleIdentifier == "com.google.Chrome" {
-                do {
-                    let result = try await self.scriptManager.executeScript()
-                    if let urlString = result.stringValue,
-                       let url = URL(string: urlString),
-                       let strippedUrl = self.stripQueryParameters(from: url) {
-                        return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: strippedUrl)
-                    }
-                } catch let error {
-                    self.logger.error("Failed to execute script: \(error.localizedDescription)")
-                }
-
-                return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
-            } else {
-                return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
-            }
-        } else {
+        guard let activeApp = NSWorkspace.shared.frontmostApplication else {
             return nil
+        }
+
+        let appName = activeApp.localizedName
+        let bundleIdentifier = activeApp.bundleIdentifier
+
+        var ocrText: String? = nil
+        let screenshot = screenshotManager.takeScreenshot(activeApp: activeApp)
+        if let image = screenshot {
+            let (_ocrText, annotatedImage) = try await ocrManager.performOCR(image: image)
+            ocrText = _ocrText
+            if let nsImage = annotatedImage {
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                pasteboard.writeObjects([nsImage])
+            }
+        }
+
+        if bundleIdentifier == "com.google.Chrome" {
+            do {
+                let result = try await self.scriptManager.executeScript(script: .getActiveTabURL)
+                if let urlString = result.stringValue,
+                   let url = URL(string: urlString),
+                   let strippedUrl = self.stripQueryParameters(from: url) {
+                    return AppContext(
+                        appName: appName,
+                        bundleIdentifier: bundleIdentifier,
+                        url: strippedUrl,
+                        ocrText: ocrText
+                    )
+                }
+            } catch let error {
+                self.logger.error("Failed to execute script: \(error.localizedDescription)")
+            }
+
+            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil, ocrText: ocrText)
+        } else {
+            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil, ocrText: ocrText)
         }
     }
 

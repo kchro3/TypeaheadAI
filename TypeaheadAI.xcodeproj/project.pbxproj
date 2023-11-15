@@ -53,6 +53,8 @@
 		2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
+		2B8CD48E2B04B0BB003E0589 /* ScreenshotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD48D2B04B0BB003E0589 /* ScreenshotManager.swift */; };
+		2B8CD4902B04B8ED003E0589 /* OCRManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD48F2B04B8ED003E0589 /* OCRManager.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
@@ -160,6 +162,8 @@
 		2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartPasteOnboardingView.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
+		2B8CD48D2B04B0BB003E0589 /* ScreenshotManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotManager.swift; sourceTree = "<group>"; };
+		2B8CD48F2B04B8ED003E0589 /* OCRManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRManager.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
@@ -368,6 +372,8 @@
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
 				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
+				2B8CD48D2B04B0BB003E0589 /* ScreenshotManager.swift */,
+				2B8CD48F2B04B8ED003E0589 /* OCRManager.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -679,6 +685,7 @@
 				2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */,
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
+				2B8CD4902B04B8ED003E0589 /* OCRManager.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
@@ -724,6 +731,7 @@
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
 				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,
+				2B8CD48E2B04B0BB003E0589 /* ScreenshotManager.swift in Sources */,
 				2BAA97952B042AD400EC6A63 /* PermissionsOnboardingView.swift in Sources */,
 				2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */,
 				2B0116F02AF88051000C78E1 /* SupabaseManager.swift in Sources */,
