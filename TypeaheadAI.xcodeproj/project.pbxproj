@@ -298,13 +298,13 @@
 				2B44FA972ABA783F00C6B542 /* OnboardingView.swift */,
 				2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */,
 				2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */,
-				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
+				2BAA97942B042AD400EC6A63 /* PermissionsOnboardingView.swift */,
 				2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */,
-				2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */,
-				2BAA97882B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift */,
 				2BAA978A2B02E81600EC6A63 /* IntentsOnboardingView.swift */,
 				2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */,
-				2BAA97942B042AD400EC6A63 /* PermissionsOnboardingView.swift */,
+				2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */,
+				2BAA97882B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift */,
+				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";

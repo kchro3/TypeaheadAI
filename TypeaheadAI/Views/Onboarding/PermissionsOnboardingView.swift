@@ -16,7 +16,7 @@ struct PermissionsOnboardingView: View {
 
             Text(
             """
-            The next thing we need to do is enable some Accessibility permissions.
+            The next thing we need to do is grant some permissions.
 
             In order for Typeahead to work, you will need to go into your **System Settings**, then to the **Privacy & Security** tab, and finally to the **Accessibility** options.
 
