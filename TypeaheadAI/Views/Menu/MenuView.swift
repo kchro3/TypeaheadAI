@@ -47,7 +47,7 @@ struct MenuView: View {
                             Task {
                                 do {
                                     try await manager.load()
-                                } catch let error {
+                                } catch {
                                     print(error.localizedDescription)
                                 }
                             }

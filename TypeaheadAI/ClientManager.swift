@@ -26,20 +26,17 @@ class ClientManager: ObservableObject {
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-//    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
 //    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
 //    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
     private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
-    private let apiOnboarding = URL(string: "http://localhost:8080/onboarding")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
     private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
     #else
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
-    private let apiOnboarding = URL(string: "https://typeahead-ai.fly.dev/onboarding")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
@@ -53,13 +50,7 @@ class ClientManager: ObservableObject {
 
     // Add a Task property to manage the streaming task
     @Published var currentStreamingTask: Task<Void, Error>? = nil
-    private var currentOnboardingTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
-
-    // NOTE: This can be set by the SpecialOpenActor.
-    // If a user opens a window and sends a message, the current app becomes TypeaheadAI,
-    // so we need to set the app context before the window is opened.
-    var currentAppContext: AppContext? = nil
 
     init(session: URLSession = .shared) {
         self.session = session
@@ -113,9 +104,12 @@ class ClientManager: ObservableObject {
         // NOTE: Cache the payload so we know what text was copied
         self.cacheResponse(nil, for: payload)
 
-        if let intents = self.intentManager?.fetchContextualIntents(limit: 10, appContext: appContext) {
+        if let intents = self.intentManager?.fetchContextualIntents(limit: 10, appContext: appContext), !intents.isEmpty {
             // If there are intents to show without making a network call
             return SuggestIntentsPayload(intents: intents)
+        } else if incognitoMode {
+            // Incognito mode doesn't support this yet
+            return nil
         } else {
             guard let httpBody = try? JSONEncoder().encode(payload) else {
                 throw ClientManagerError.badRequest("Request was malformed...")
@@ -254,83 +248,11 @@ class ClientManager: ObservableObject {
                     copiedText: "",
                     messages: self.sanitizeMessages(messages),
                     history: nil,
-                    appContext: self.currentAppContext,
+                    appContext: nil,
                     incognitoMode: incognitoMode,
                     streamHandler: streamHandler,
                     completion: completion
                 )
-            }
-        }
-    }
-
-    /// Onboarding flow
-    func onboarding(
-        onboardingStep: Int,
-        timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
-    ) {
-        Task {
-            await self.sendOnboardingRequest(
-                id: UUID(),
-                username: NSUserName(),
-                userFullName: NSFullUserName(),
-                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                userLang: Locale.preferredLanguages.first ?? "",
-                incognitoMode: false,
-                onboardingStep: onboardingStep,
-                streamHandler: streamHandler,
-                completion: completion
-            )
-        }
-    }
-
-    /// Sends a request to the server with the given parameters and listens for a stream of data.
-    ///
-    /// - Parameters:
-    ///   - Same as sendRequest
-    ///   - streamHandler: A closure to be executed for each chunk of data received.
-    private func sendOnboardingRequest(
-        id: UUID,
-        username: String,
-        userFullName: String,
-        userBio: String,
-        userLang: String,
-        incognitoMode: Bool,
-        onboardingStep: Int,
-        timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
-    ) async {
-        currentOnboardingTask?.cancel()
-        currentOnboardingTask = Task.detached { [weak self] in
-            let payload = OnboardingRequestPayload(
-                username: username,
-                userFullName: userFullName,
-                userBio: userBio,
-                userLang: userLang,
-                onboardingStep: onboardingStep,
-                version: "onboarding_v4"
-            )
-
-            do {
-                let stream = try self?.performOnboardingTask(
-                    payload: payload,
-                    timeout: timeout,
-                    completion: completion
-                )
-
-                guard let stream = stream else {
-                    self?.logger.debug("Failed to get stream")
-                    return
-                }
-
-                for try await text in stream {
-                    self?.logger.debug("stream: \(text)")
-                    streamHandler(.success(text))
-                }
-            } catch {
-                streamHandler(.failure(error))
             }
         }
     }
@@ -353,7 +275,6 @@ class ClientManager: ObservableObject {
         history: [Message]?,
         appContext: AppContext?,
         incognitoMode: Bool,
-        onboardingMode: Bool = false,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>) -> Void
@@ -579,63 +500,6 @@ class ClientManager: ObservableObject {
         }
     }
 
-    private func performOnboardingTask(
-        payload: OnboardingRequestPayload,
-        timeout: TimeInterval,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
-    ) throws -> AsyncThrowingStream<String, Error> {
-        guard let httpBody = try? JSONEncoder().encode(payload) else {
-            throw ClientManagerError.badRequest("Encoding error")
-        }
-
-        return AsyncThrowingStream { continuation in
-            Task {
-                var urlRequest = URLRequest(url: self.apiOnboarding, timeoutInterval: timeout)
-                urlRequest.httpMethod = "POST"
-                urlRequest.httpBody = httpBody
-                urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-                let (data, resp) = try await URLSession.shared.bytes(for: urlRequest)
-
-                guard let httpResponse = resp as? HTTPURLResponse else {
-                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
-                    return
-                }
-
-                guard 200...299 ~= httpResponse.statusCode else {
-                    continuation.finish(throwing: ClientManagerError.serverError("Something went wrong..."))
-                    return
-                }
-
-                // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
-                // but also making a function call. To support this, if a payload is something other than .text,
-                // it is a special payload and should be cached separately.
-                // In the future, we can think about how to support completions with a full response, but worry about that later.
-                var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
-                for try await line in data.lines {
-                    if let data = line.data(using: .utf8),
-                       let response = try? JSONDecoder().decode(ChunkPayload.self, from: data),
-                       let text = response.text {
-
-                        switch response.mode ?? .text {
-                        case .text:
-                            continuation.yield(text)
-                            if bufferedPayload.mode != .image {
-                                bufferedPayload.text = (bufferedPayload.text ?? "") + text
-                                bufferedPayload.mode = .text
-                            }
-                        case .image:
-                            bufferedPayload = response
-                        }
-                    }
-                }
-
-                completion(.success(bufferedPayload))
-                continuation.finish()
-            }
-        }
-    }
-
     private func performStreamOfflineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
@@ -714,15 +578,6 @@ struct RequestPayload: Codable {
     var history: [Message]?
     var appContext: AppContext?
     var version: String?
-}
-
-struct OnboardingRequestPayload: Codable {
-    var username: String
-    var userFullName: String
-    var userBio: String
-    var userLang: String
-    var onboardingStep: Int
-    var version: String
 }
 
 /// https://replicate.com/stability-ai/sdxl
@@ -812,7 +667,7 @@ struct ChunkPayload: Codable {
     let finishReason: String?
 }
 
-enum ClientManagerError: Error {
+enum ClientManagerError: LocalizedError {
     case badRequest(_ message: String)
     case retriesExceeded(_ message: String)
     case clientError(_ message: String)
@@ -820,16 +675,18 @@ enum ClientManagerError: Error {
     case appError(_ message: String)
     case networkError(_ message: String)
     case corruptedDataError(_ message: String)
+    case signInRequired(_ message: String)
 
-    var localizedDescription: String {
+    var errorDescription: String {
         switch self {
-        case .badRequest(let message): message
-        case .retriesExceeded(let message): message
-        case .clientError(let message): message
-        case .serverError(let message): message
-        case .appError(let message): message
-        case .networkError(let message): message
-        case .corruptedDataError(let message): message
+        case .badRequest(let message): return message
+        case .retriesExceeded(let message): return message
+        case .clientError(let message): return message
+        case .serverError(let message): return message
+        case .appError(let message): return message
+        case .networkError(let message): return message
+        case .corruptedDataError(let message): return message
+        case .signInRequired(let message): return message
         }
     }
 }

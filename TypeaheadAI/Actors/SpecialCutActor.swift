@@ -100,7 +100,7 @@ actor SpecialCutActor {
         self.appContextManager = appContextManager
     }
 
-    func specialCut(stickyMode: Bool) async throws {
+    func specialCut() async throws {
         let appContext = try await self.appContextManager.getActiveAppInfo()
 
         do {
@@ -117,7 +117,7 @@ actor SpecialCutActor {
                     self.performOCR(image: cgImage) { recognizedText, _ in
                         self.logger.info("OCRed text: \(recognizedText)")
                         Task {
-                            await self.modalManager.clearText(stickyMode: stickyMode)
+                            await self.modalManager.forceRefresh()
                             await self.modalManager.showModal()
                             await NSApp.activate(ignoringOtherApps: true)
 
@@ -160,7 +160,7 @@ actor SpecialCutActor {
                         self.logger.info("OCRed text: \(recognizedText)")
 
                         Task {
-                            await self.modalManager.clearText(stickyMode: stickyMode)
+                            await self.modalManager.forceRefresh()
                             await self.modalManager.showModal()
                             await NSApp.activate(ignoringOtherApps: true)
 

@@ -75,7 +75,7 @@ actor SpecialOpenActor: CanPerformOCR {
                 ) {
                     await self.modalManager.setUserIntents(intents: intents.intents)
                 }
-            } catch let error as ClientManagerError {
+            } catch {
                 self.logger.error("\(error.localizedDescription)")
                 await self.modalManager.setError(error.localizedDescription)
             }

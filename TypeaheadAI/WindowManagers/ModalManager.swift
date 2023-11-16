@@ -44,7 +44,6 @@ class ModalManager: ObservableObject {
     @Published var userIntents: [String]?
 
     @Published var triggerFocus: Bool
-    @Published var onboardingMode: Bool
     @Published var isVisible: Bool
     @Published var online: Bool
     @Published var isPending: Bool
@@ -71,7 +70,6 @@ class ModalManager: ObservableObject {
         self.messages = []
         self.userIntents = nil
         self.triggerFocus = false
-        self.onboardingMode = false
         self.isVisible = false
         self.online = true
         self.isPending = false
@@ -99,6 +97,7 @@ class ModalManager: ObservableObject {
         return toastWindow?.isVisible ?? false
     }
 
+    /// DEPRECATED: This should not be used because it doesn't clear state entirely. Use forceRefresh
     @MainActor
     func clearText(stickyMode: Bool) {
         if stickyMode {
@@ -122,7 +121,6 @@ class ModalManager: ObservableObject {
         self.clientManager?.flushCache()
         self.promptManager?.activePromptID = nil
 
-        onboardingMode = false
         messages = []
         currentTextCount = 0
         currentOutput = nil
@@ -311,7 +309,6 @@ class ModalManager: ObservableObject {
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
 
         if userIntents != nil {
-            print("user intent sent")
             NotificationCenter.default.post(name: .userIntentSent, object: nil)
             userIntents = nil
         }
@@ -545,10 +542,6 @@ class ModalManager: ObservableObject {
                             } else {
                                 await self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
                             }
-                        }
-                    } catch let error as ClientManagerError {
-                        DispatchQueue.main.async {
-                            self.setError(error.localizedDescription)
                         }
                     } catch {
                         DispatchQueue.main.async {
