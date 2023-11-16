@@ -73,7 +73,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
 
         // Try to predict the user intent
         do {
-            if let intents = try await self.clientManager.suggestIntents(
+            if let intents = try? await self.clientManager.suggestIntents(
                 id: UUID(),
                 username: NSUserName(),
                 userFullName: NSFullUserName(),

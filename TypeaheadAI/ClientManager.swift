@@ -112,6 +112,9 @@ class ClientManager: ObservableObject {
         if let intents = self.intentManager?.fetchContextualIntents(limit: 10, appContext: appContext) {
             // If there are intents to show without making a network call
             return SuggestIntentsPayload(intents: intents)
+        } else if incognitoMode {
+            // Incognito mode doesn't support this yet
+            return nil
         } else {
             guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
                 self.logger.error("Not logged in")
