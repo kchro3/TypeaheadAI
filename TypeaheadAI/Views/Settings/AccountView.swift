@@ -10,9 +10,6 @@ import Supabase
 import AuthenticationServices
 
 struct AccountView: View {
-    // Use this as a flag for checking if the user is signed in.
-    @AppStorage("token3") var token: String?
-
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var supabaseManager: SupabaseManager
 

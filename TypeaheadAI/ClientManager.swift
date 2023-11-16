@@ -97,7 +97,6 @@ class ClientManager {
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
         let uuid: UUID? = try? await supabaseManager?.client.auth.session.user.id
-        freebies -= 1
         let payload = RequestPayload(
             uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
             username: username,
@@ -120,6 +119,7 @@ class ClientManager {
             // If there are intents to show without making a network call
             return SuggestIntentsPayload(intents: intents)
         } else {
+            freebies -= 1
             guard let httpBody = try? JSONEncoder().encode(payload) else {
                 throw ClientManagerError.badRequest("Request was malformed...")
             }
@@ -213,7 +213,7 @@ class ClientManager {
                         // Create a few-shot prompt from smart-copy-paste history
                         history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickActionID)
                     } else {
-                        quickAction = self.promptManager?.addPrompt(userIntent)
+                        quickAction = await self.promptManager?.addPrompt(userIntent)
                         history = self.intentManager?.fetchIntentsAsMessages(
                             limit: 10,
                             appContext: payload.appContext

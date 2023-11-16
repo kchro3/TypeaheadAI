@@ -20,7 +20,6 @@ struct MenuView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
 
-    @AppStorage("token3") var token: String?
     @AppStorage("settingsTab") var settingsTab: String?
     @AppStorage("selectedModel") private var selectedModelURL: URL?
 
@@ -103,7 +102,6 @@ struct MenuView: View {
                 if supabaseManager.uuid != nil {
                     MenuButtonView(title: "Sign out") {
                         Task {
-                            token = nil
                             isMenuVisible = false
                             try await supabaseManager.signout()
                         }
@@ -139,7 +137,7 @@ struct MenuView_Previews: PreviewProvider {
         }
 
         let context = container.viewContext
-        let promptManager = QuickActionManager(context: context)
+        let promptManager = QuickActionManager(context: context, backgroundContext: context)
 
         // Create some sample prompts
         let samplePrompts = ["this is a sample prompt", "this is an active prompt"]

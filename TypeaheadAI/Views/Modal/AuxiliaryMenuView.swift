@@ -44,7 +44,7 @@ struct AuxiliaryMenuView: View {
     }
 
     let context = container.viewContext
-    let promptManager = QuickActionManager(context: context)
+    let promptManager = QuickActionManager(context: context, backgroundContext: context)
 
     // Create some sample prompts
     let samplePrompts = ["this is a sample prompt", "this is an active prompt"]

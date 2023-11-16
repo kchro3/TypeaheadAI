@@ -54,6 +54,7 @@
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B8CD4922B056CCA003E0589 /* ScreenshotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */; };
+		2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
@@ -162,6 +163,7 @@
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotManager.swift; sourceTree = "<group>"; };
+		2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanPerformOCR.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
@@ -271,6 +273,7 @@
 				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
 				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
+				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -681,6 +684,7 @@
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
 				2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */,
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
+				2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
