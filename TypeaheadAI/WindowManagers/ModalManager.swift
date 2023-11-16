@@ -95,8 +95,8 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func isWindowVisible() -> Bool? {
-        return toastWindow?.isVisible
+    func isWindowVisible() -> Bool {
+        return toastWindow?.isVisible ?? false
     }
 
     @MainActor
@@ -128,10 +128,6 @@ class ModalManager: ObservableObject {
         currentOutput = nil
         isPending = false
         userIntents = nil
-
-        if (toastWindow?.isVisible ?? false) {
-            NSApp.activate(ignoringOtherApps: true)
-        }
     }
 
     func setText(_ text: String) {

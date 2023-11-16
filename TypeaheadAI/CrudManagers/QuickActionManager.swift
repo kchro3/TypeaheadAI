@@ -15,14 +15,16 @@ import os.log
 class QuickActionManager: ObservableObject {
     var activePromptID: UUID?
     private let context: NSManagedObjectContext
+    private let backgroundContext: NSManagedObjectContext
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "PromptManager"
     )
 
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
         self.context = context
+        self.backgroundContext = backgroundContext
         self.activePromptID = nil
     }
 
@@ -30,8 +32,8 @@ class QuickActionManager: ObservableObject {
     func getPrompts() -> [String] {
         let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
         do {
-            return try context.performAndWait {
-                return try context.fetch(fetchRequest).compactMap { $0.prompt }
+            return try backgroundContext.performAndWait {
+                return try backgroundContext.fetch(fetchRequest).compactMap { $0.prompt }
             }
         } catch {
             logger.error("Failed to fetch prompts: \(error)")
@@ -64,6 +66,7 @@ class QuickActionManager: ObservableObject {
     }
 
     @discardableResult
+    @MainActor
     func addPrompt(_ prompt: String, details: String? = nil) -> QuickAction? {
         let newPrompt = PromptEntry(context: context)
         newPrompt.id = UUID()
@@ -92,8 +95,8 @@ class QuickActionManager: ObservableObject {
         fetchRequest.predicate = NSPredicate(format: "prompt ==[c] %@",
                                              label as CVarArg)
         do {
-            return try context.performAndWait {
-                let fetchedObjects = try context.fetch(fetchRequest)
+            return try backgroundContext.performAndWait {
+                let fetchedObjects = try backgroundContext.fetch(fetchRequest)
                 if let promptEntry = fetchedObjects.first {
                     return QuickAction(from: promptEntry)
                 } else {
@@ -108,6 +111,7 @@ class QuickActionManager: ObservableObject {
         return nil
     }
 
+    @MainActor
     func updatePrompt(with id: UUID, newLabel: String? = nil, newDetails: String? = nil) {
         let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@",
@@ -133,6 +137,7 @@ class QuickActionManager: ObservableObject {
         }
     }
 
+    @MainActor
     func removePrompt(with id: UUID) {
         if activePromptID == id {
             activePromptID = nil
@@ -152,6 +157,7 @@ class QuickActionManager: ObservableObject {
         }
     }
 
+    @MainActor
     func clearPrompts() {
         let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
 

@@ -158,7 +158,7 @@ struct ModalView_Previews: PreviewProvider {
             }
         }
 
-        let promptManager = QuickActionManager(context: container.viewContext)
+        let promptManager = QuickActionManager(context: container.viewContext, backgroundContext: container.newBackgroundContext())
         modalManager.promptManager = promptManager
 
         return Group {

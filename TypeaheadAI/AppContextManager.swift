@@ -14,7 +14,8 @@ struct AppContext: Codable {
     let appName: String?
     let bundleIdentifier: String?
     let url: URL?
-    let ocrText: String?
+    var screenshotPath: String? = nil
+    var ocrText: String? = nil
 }
 
 class AppContextManager {
@@ -33,24 +34,10 @@ class AppContextManager {
 
         let appName = activeApp.localizedName
         let bundleIdentifier = activeApp.bundleIdentifier
+        self.logger.info("active app: \(bundleIdentifier ?? "<unk>")")
 
-        var ocrText: String? = nil
-        var annotatedImage: NSImage? = nil
-        let screenshot = screenshotManager.takeScreenshot(activeApp: activeApp)
-        if let image = screenshot {
-            logger.info("took screenshot")
-            (ocrText, annotatedImage) = try await screenshotManager.performOCR(image: image)  // NOTE: Figure out how we can use the annotated bounding box
-
-            #if DEBUG
-            if let nsImage = annotatedImage {
-                screenshotManager.copyImageToClipboard(nsImage: nsImage)
-            }
-            #endif
-
-            logger.info("OCR: \(ocrText ?? "none")")
-        } else {
-            logger.info("did not take screenshot")
-        }
+        // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
+        let screenshotPath = screenshotManager.takeScreenshot(activeApp: activeApp)
 
         if bundleIdentifier == "com.google.Chrome" {
             do {
@@ -62,16 +49,16 @@ class AppContextManager {
                         appName: appName,
                         bundleIdentifier: bundleIdentifier,
                         url: strippedUrl,
-                        ocrText: ocrText
+                        screenshotPath: screenshotPath
                     )
                 }
             } catch let error {
                 self.logger.error("Failed to execute script: \(error.localizedDescription)")
             }
 
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil, ocrText: ocrText)
+            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
         } else {
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil, ocrText: ocrText)
+            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
         }
     }
 
