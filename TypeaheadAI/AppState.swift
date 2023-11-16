@@ -51,10 +51,6 @@ final class AppState: ObservableObject {
     // NOTE: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
 
-    // Constants
-    private let maxConcurrentRequests = 5
-    private let stickyMode = true
-
     private var appVersion: AppVersion? = nil
     // This represents the latest app version that the user has acknowledged
     private var latestAppVersion: AppVersion? = nil
@@ -133,22 +129,11 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             Task {
                 do {
-                    try await self.specialCopyActor?.specialCopy(stickyMode: false)
+                    try await self.specialCopyActor?.specialCopy()
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
                     }
                 } catch {
-                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
-                }
-            }
-        }
-
-        KeyboardShortcuts.onKeyUp(for: .stickyCopy) { [self] in
-            Task {
-                do {
-                    try await self.specialCopyActor?.specialCopy(stickyMode: true)
-                } catch {
-                    self.logger.error("\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -170,7 +155,7 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
                 do {
-                    try await self.specialCutActor?.specialCut(stickyMode: false)
+                    try await self.specialCutActor?.specialCut()
                 } catch {
                     self.logger.error("\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)

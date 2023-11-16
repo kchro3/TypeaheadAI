@@ -37,13 +37,13 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         self.appContextManager = appContextManager
     }
     
-    func specialCopy(stickyMode: Bool) async throws {
+    func specialCopy() async throws {
         var appContext = try await self.appContextManager.getActiveAppInfo()
         try await self.simulateCopy()
 
         // Clear the current state
         await promptManager.setActivePrompt(id: nil)
-        await self.modalManager.clearText(stickyMode: stickyMode)
+        await self.modalManager.forceRefresh()
         await self.modalManager.showModal()
         await NSApp.activate(ignoringOtherApps: true)
 
@@ -73,7 +73,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
 
         // Try to predict the user intent
         do {
-            if let intents = try? await self.clientManager.suggestIntents(
+            if let intents = try await self.clientManager.suggestIntents(
                 id: UUID(),
                 username: NSUserName(),
                 userFullName: NSFullUserName(),

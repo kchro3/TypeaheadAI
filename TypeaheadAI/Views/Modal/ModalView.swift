@@ -106,85 +106,100 @@ struct ModalView: View {
     }
 }
 
-struct ModalView_Previews: PreviewProvider {
-    @State static var showModal = true
-    @State static var incognito = false
+#Preview {
+    var modalManager = ModalManager()
+    modalManager.clientManager = ClientManager()
+    modalManager.setText("hello world")
+    return ModalView(showModal: .constant(true), modalManager: modalManager)
+}
 
-    static var previews: some View {
-        let modalManager = ModalManager()
-        modalManager.setText("hello world")
+#Preview {
+    var modalManager = ModalManager()
+    modalManager.clientManager = ClientManager()
+    modalManager.messages = [
+        Message(id: UUID(), text: "hello world", isCurrentUser: false),
+        Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+    ]
+    return ModalView(showModal: .constant(true), modalManager: modalManager)
+}
 
-        let modalManagerWithMessages = ModalManager()
-        modalManagerWithMessages.messages = [
-            Message(id: UUID(), text: "hello world", isCurrentUser: false),
-            Message(id: UUID(), text: "hello bot", isCurrentUser: true)
-        ]
+#Preview {
+    var modalManager = ModalManager()
+    modalManager.clientManager = ClientManager()
+    modalManager.messages = [
+        Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Request took too long"),
+        Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+    ]
+    return ModalView(showModal: .constant(true), modalManager: modalManager)
+}
 
-        let modalManagerWithErrors = ModalManager()
-        modalManagerWithErrors.messages = [
-            Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Request took too long"),
-            Message(id: UUID(), text: "hello bot", isCurrentUser: true)
-        ]
+#Preview {
+    var modalManager = ModalManager()
+    modalManager.clientManager = ClientManager()
 
-        let modalManagerWithCodeblock = ModalManager()
-        modalManagerWithCodeblock.messages = [
-            Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: [parserResult]), isCurrentUser: false)
-        ]
+    let markdownString = """
+```swift
+let api = ChatGPTAPI(apiKey: "API_KEY")
 
-        let modalManagerWithLongMessages = ModalManager()
-        modalManagerWithLongMessages.messages = [
-            Message(id: UUID(), text: "hello world", isCurrentUser: false),
-            Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true)
-        ]
-
-        let modalManagerWithIntents = ModalManager()
-        modalManagerWithIntents.userIntents = [
-            "testing a new idea", "test a test", "testing a test test test testing a test test test testing a test test test testing a test test test"
-        ]
-
-        // Create an in-memory Core Data store
-        let container = NSPersistentContainer(name: "TypeaheadAI")
-        container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
-        container.loadPersistentStores { _, error in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
+Task {
+    do {
+        let stream = try await api.sendMessageStream(text: "What is ChatGPT?")
+        for try await line in stream {
+            print(line)
         }
-
-        let promptManager = QuickActionManager(context: container.viewContext, backgroundContext: container.newBackgroundContext())
-        modalManager.promptManager = promptManager
-
-        return Group {
-            ModalView(showModal: $showModal, modalManager: modalManager)
-            ModalView(showModal: $showModal, modalManager: modalManagerWithMessages)
-            ModalView(showModal: $showModal, modalManager: modalManagerWithErrors)
-            ModalView(showModal: $showModal, modalManager: modalManagerWithCodeblock)
-            ModalView(showModal: $showModal, modalManager: modalManagerWithLongMessages)
-            ModalView(showModal: $showModal, modalManager: modalManagerWithIntents)
-        }
+    } catch {
+        print(error.localizedDescription)
     }
+}
+```
+"""
 
-    static var markdownString = """
-    ```swift
-    let api = ChatGPTAPI(apiKey: "API_KEY")
-
-    Task {
-        do {
-            let stream = try await api.sendMessageStream(text: "What is ChatGPT?")
-            for try await line in stream {
-                print(line)
-            }
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
-    ```
-    """
-
-    static let parserResult: ParserResult = {
+    let parserResult: ParserResult = {
         let document = Document(parsing: markdownString)
         let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
         var parser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
         return parser.parserResults(from: document)[0]
     }()
+
+    modalManager.messages = [
+        Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: [parserResult]), isCurrentUser: false)
+    ]
+    return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
+
+#Preview {
+    var modalManager = ModalManager()
+    modalManager.clientManager = ClientManager()
+    modalManager.messages = [
+        Message(id: UUID(), text: "hello world", isCurrentUser: false),
+        Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true)
+    ]
+    return ModalView(showModal: .constant(true), modalManager: modalManager)
+}
+
+#Preview {
+    // Create an in-memory Core Data store
+    let container = NSPersistentContainer(name: "TypeaheadAI")
+    container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+    container.loadPersistentStores { _, error in
+        if let error = error as NSError? {
+            fatalError("Unresolved error \(error), \(error.userInfo)")
+        }
+    }
+
+    var modalManager = ModalManager()
+    modalManager.userIntents = [
+        "testing a new idea", "test a test", "testing a test test test testing a test test test testing a test test test testing a test test test"
+    ]
+    modalManager.clientManager = ClientManager()
+    modalManager.messages = [
+        Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Request took too long"),
+        Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+    ]
+
+    let promptManager = QuickActionManager(context: container.viewContext, backgroundContext: container.newBackgroundContext())
+    modalManager.promptManager = promptManager
+
+    return ModalView(showModal: .constant(true), modalManager: modalManager)
+}
+

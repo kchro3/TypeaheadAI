@@ -52,11 +52,6 @@ class ClientManager: ObservableObject {
     @Published var currentStreamingTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
 
-    // NOTE: This can be set by the SpecialOpenActor.
-    // If a user opens a window and sends a message, the current app becomes TypeaheadAI,
-    // so we need to set the app context before the window is opened.
-    var currentAppContext: AppContext? = nil
-
     init(session: URLSession = .shared) {
         self.session = session
     }
@@ -109,18 +104,13 @@ class ClientManager: ObservableObject {
         // NOTE: Cache the payload so we know what text was copied
         self.cacheResponse(nil, for: payload)
 
-        if let intents = self.intentManager?.fetchContextualIntents(limit: 10, appContext: appContext) {
+        if let intents = self.intentManager?.fetchContextualIntents(limit: 10, appContext: appContext), !intents.isEmpty {
             // If there are intents to show without making a network call
             return SuggestIntentsPayload(intents: intents)
         } else if incognitoMode {
             // Incognito mode doesn't support this yet
             return nil
         } else {
-            guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
-                self.logger.error("Not logged in")
-                throw ClientManagerError.signInRequired("Must be signed in!")
-            }
-
             guard let httpBody = try? JSONEncoder().encode(payload) else {
                 throw ClientManagerError.badRequest("Request was malformed...")
             }
@@ -258,7 +248,7 @@ class ClientManager: ObservableObject {
                     copiedText: "",
                     messages: self.sanitizeMessages(messages),
                     history: nil,
-                    appContext: self.currentAppContext,
+                    appContext: nil,
                     incognitoMode: incognitoMode,
                     streamHandler: streamHandler,
                     completion: completion

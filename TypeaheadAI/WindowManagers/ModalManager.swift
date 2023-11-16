@@ -97,6 +97,7 @@ class ModalManager: ObservableObject {
         return toastWindow?.isVisible ?? false
     }
 
+    /// DEPRECATED: This should not be used because it doesn't clear state entirely. Use forceRefresh
     @MainActor
     func clearText(stickyMode: Bool) {
         if stickyMode {
