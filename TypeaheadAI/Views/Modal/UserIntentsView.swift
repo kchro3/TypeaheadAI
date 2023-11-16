@@ -10,6 +10,7 @@ import SwiftUI
 struct UserIntentsView: View {
     let userIntents: [String]
     let onButtonClick: ((String) -> Void)?
+    let maxWidth: CGFloat = 200
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -27,12 +28,12 @@ struct UserIntentsView: View {
             onButtonClick?(userIntents[index])
         }) {
             Text(userIntents[index])
-                .foregroundStyle(.white)
                 .lineLimit(1)
+                .truncationMode(.tail)
                 .foregroundColor(.primary)
-                .textSelection(.enabled)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 15)
+                .frame(maxWidth: maxWidth)
                 .background(
                     RoundedRectangle(cornerRadius: 15)
                         .fill(Color.accentColor.opacity(0.4))

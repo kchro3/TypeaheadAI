@@ -12,7 +12,7 @@ import os.log
 import SwiftUI
 import Supabase
 
-class ClientManager {
+class ClientManager: ObservableObject {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
@@ -23,7 +23,6 @@ class ClientManager {
     private let session: URLSession
 
     private let version: String = "v4"
-    @AppStorage("freebies") var freebies: Int = 10
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
@@ -53,7 +52,7 @@ class ClientManager {
     )
 
     // Add a Task property to manage the streaming task
-    private var currentStreamingTask: Task<Void, Error>? = nil
+    @Published var currentStreamingTask: Task<Void, Error>? = nil
     private var currentOnboardingTask: Task<Void, Error>? = nil
     private var cached: (String, String?)? = nil
 
@@ -108,8 +107,7 @@ class ClientManager {
             messages: self.sanitizeMessages(messages),
             history: history,
             appContext: appContext,
-            version: version,
-            freebies: freebies
+            version: version
         )
 
         // NOTE: Cache the payload so we know what text was copied
@@ -119,7 +117,6 @@ class ClientManager {
             // If there are intents to show without making a network call
             return SuggestIntentsPayload(intents: intents)
         } else {
-            freebies -= 1
             guard let httpBody = try? JSONEncoder().encode(payload) else {
                 throw ClientManagerError.badRequest("Request was malformed...")
             }
@@ -343,6 +340,7 @@ class ClientManager {
     /// - Parameters:
     ///   - Same as sendRequest
     ///   - streamHandler: A closure to be executed for each chunk of data received.
+    @MainActor
     func sendStreamRequest(
         id: UUID,
         username: String,
@@ -362,7 +360,6 @@ class ClientManager {
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
-            self?.freebies -= 1
             let uuid = try? await self?.supabaseManager?.client.auth.session.user.id
             let payload = RequestPayload(
                 uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
@@ -375,8 +372,7 @@ class ClientManager {
                 messages: self?.sanitizeMessages(messages),
                 history: history,
                 appContext: appContext,
-                version: self?.version,
-                freebies: self?.freebies
+                version: self?.version
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -435,6 +431,9 @@ class ClientManager {
                 }
             }
         }
+
+        try? await currentStreamingTask?.value
+        currentStreamingTask = nil
     }
 
     func generateImage(
@@ -649,8 +648,10 @@ class ClientManager {
         return await modelManager.predict(payload: payload, streamHandler: streamHandler)
     }
 
+    @MainActor
     func cancelStreamingTask() {
         currentStreamingTask?.cancel()
+        currentStreamingTask = nil
     }
 
     private func generateCacheKey(from payload: RequestPayload) -> String? {
@@ -713,7 +714,6 @@ struct RequestPayload: Codable {
     var history: [Message]?
     var appContext: AppContext?
     var version: String?
-    let freebies: Int?
 }
 
 struct OnboardingRequestPayload: Codable {
