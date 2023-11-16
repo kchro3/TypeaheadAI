@@ -10,6 +10,7 @@ import SwiftUI
 import os.log
 
 actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
+    private let intentManager: IntentManager
     private let historyManager: HistoryManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
@@ -24,12 +25,14 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
     )
 
     init(
+        intentManager: IntentManager,
         historyManager: HistoryManager,
         clientManager: ClientManager,
         promptManager: QuickActionManager,
         modalManager: ModalManager,
         appContextManager: AppContextManager
     ) {
+        self.intentManager = intentManager
         self.historyManager = historyManager
         self.clientManager = clientManager
         self.promptManager = promptManager
@@ -72,7 +75,11 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         }
 
         // Try to predict the user intent
-        do {
+        let contextualIntents = self.intentManager.fetchContextualIntents(limit: 10, appContext: appContext)
+        await self.modalManager.setUserIntents(intents: contextualIntents)
+
+        // Kick off async
+        Task {
             if let intents = try await self.clientManager.suggestIntents(
                 id: UUID(),
                 username: NSUserName(),
@@ -86,13 +93,8 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
                 appContext: appContext,
                 incognitoMode: !self.modalManager.online
             ), !intents.intents.isEmpty {
-                await self.modalManager.setUserIntents(intents: intents.intents)
-            } else {
-                await self.modalManager.replyToUserMessage(refresh: false)
+                await self.modalManager.appendUserIntents(intents: intents.intents)
             }
-        } catch {
-            self.logger.error("\(error.localizedDescription)")
-            await self.modalManager.setError(error.localizedDescription)
         }
     }
 }

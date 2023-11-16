@@ -358,16 +358,11 @@
 				2B33D8812AAC4E0F001193A2 /* Actors */,
 				2B3FAC1D2AAAF20F00B2D405 /* Llama */,
 				2BE0EC252AA17F8400E47C52 /* Monitors */,
-				2BE0EC242AA17DB600E47C52 /* Info.plist */,
 				2BA7F0AF2A9ABC62003D38BA /* Views */,
 				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
 				2B0116EA2AF86E88000C78E1 /* AppState.swift */,
 				2B0116EC2AF878D1000C78E1 /* AppDelegate.swift */,
-				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
-				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
-				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
-				2BA7F07E2A9ABBA8003D38BA /* Preview Content */,
 				2BA7F0A82A9ABBE2003D38BA /* ClientManager.swift */,
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
 				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
@@ -376,6 +371,11 @@
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
 				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
 				2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */,
+				2BE0EC242AA17DB600E47C52 /* Info.plist */,
+				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
+				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
+				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
+				2BA7F07E2A9ABBA8003D38BA /* Preview Content */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";

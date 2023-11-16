@@ -72,6 +72,7 @@ final class AppState: ObservableObject {
 
         // Initialize actors
         self.specialCopyActor = SpecialCopyActor(
+            intentManager: intentManager,
             historyManager: historyManager,
             clientManager: clientManager,
             promptManager: promptManager,
@@ -97,6 +98,7 @@ final class AppState: ObservableObject {
             memoManager: memoManager
         )
         self.specialOpenActor = SpecialOpenActor(
+            intentManager: intentManager,
             clientManager: clientManager,
             promptManager: promptManager,
             modalManager: modalManager,

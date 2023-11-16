@@ -402,6 +402,11 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
+    func appendUserIntents(intents: [String]) {
+        userIntents?.append(contentsOf: intents)
+    }
+
+    @MainActor
     func closeModal() {
         toastWindow?.close()
         isVisible = false
