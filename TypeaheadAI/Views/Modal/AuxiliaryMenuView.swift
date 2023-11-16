@@ -18,6 +18,10 @@ struct AuxiliaryMenuView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            MenuButtonView(title: "Clear chat") {
+                modalManager.forceRefresh()
+            }
+
             MenuButtonView(title: "Manage Quick Actions") {
                 settingsManager.showModal(tab: .quickActions)
                 modalManager.closeModal()
