@@ -90,22 +90,24 @@ class IntentManager {
         fetchRequest.fetchLimit = 50
 
         do {
-            let entries = try context.fetch(fetchRequest)
+            return try backgroundContext.performAndWait {
+                let entries = try backgroundContext.fetch(fetchRequest)
 
-            // NOTE: Count the most common recent prompts and construct a user message
-            var promptCounts = [String: Int]()
-            for entry in entries {
-                if let prompt = entry.prompt {
-                    promptCounts[prompt] = (promptCounts[prompt] ?? 0) + 1
+                // NOTE: Count the most common recent prompts and construct a user message
+                var promptCounts = [String: Int]()
+                for entry in entries {
+                    if let prompt = entry.prompt {
+                        promptCounts[prompt] = (promptCounts[prompt] ?? 0) + 1
+                    }
                 }
-            }
 
-            var topPromptsString = "Most common user intents for this context:\n"
-            for (prompt, count) in promptCounts.sorted(by: { $0.value > $1.value }).prefix(limit) {
-                topPromptsString += "- \(prompt) (used \(count)x)\n"
-            }
+                var topPromptsString = "Most common user intents for this context:\n"
+                for (prompt, count) in promptCounts.sorted(by: { $0.value > $1.value }).prefix(limit) {
+                    topPromptsString += "- \(prompt) (used \(count)x)\n"
+                }
 
-            return [Message(id: UUID(), text: topPromptsString, isCurrentUser: true)]
+                return [Message(id: UUID(), text: topPromptsString, isCurrentUser: true)]
+            }
         } catch {
             logger.error("Failed to fetch history entries: \(error.localizedDescription)")
             return []
@@ -151,8 +153,8 @@ class IntentManager {
         fetchRequest.fetchLimit = limit
 
         do {
-            return try context.performAndWait {
-                let results = try context.fetch(fetchRequest) as? [NSDictionary]
+            return try backgroundContext.performAndWait {
+                let results = try backgroundContext.fetch(fetchRequest) as? [NSDictionary]
                 let intents = results?.compactMap { dict -> String? in
                     if let prompt = dict["prompt"] as? String,
                        let _ = dict["count"] as? Int {

@@ -26,6 +26,22 @@ class SupabaseManager: ObservableObject {
     @AppStorage("token3") var token: String?
     @Published var uuid: String?
 
+    init() {
+        Task {
+            await signinOnInit()
+        }
+    }
+
+    @MainActor
+    private func signinOnInit() async {
+        do {
+            let session = try await client.auth.session
+            self.uuid = session.user.id.uuidString
+        } catch {
+            logger.info("Not signed-in")
+        }
+    }
+
     func registerWithEmail(email: String, password: String) async throws {
         try await client.auth.signUp(email: email, password: password)
         let session = try await client.auth.session
