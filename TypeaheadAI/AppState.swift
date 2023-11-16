@@ -66,7 +66,7 @@ final class AppState: ObservableObject {
         // Initialize managers
         self.memoManager = MemoManager(context: backgroundContext)
         self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
-        self.promptManager = QuickActionManager(context: backgroundContext)
+        self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
         self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
         self.clientManager = ClientManager()
         self.modalManager = ModalManager()
@@ -102,6 +102,7 @@ final class AppState: ObservableObject {
         )
         self.specialOpenActor = SpecialOpenActor(
             clientManager: clientManager,
+            promptManager: promptManager,
             modalManager: modalManager,
             appContextManager: appContextManager
         )
@@ -144,7 +145,12 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .stickyCopy) { [self] in
             Task {
-                try await self.specialCopyActor?.specialCopy(stickyMode: true)
+                do {
+                    try await self.specialCopyActor?.specialCopy(stickyMode: true)
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
             }
         }
 
@@ -163,7 +169,12 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
             Task {
-                try await self.specialCutActor?.specialCut(stickyMode: false)
+                do {
+                    try await self.specialCutActor?.specialCut(stickyMode: false)
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
             }
         }
 
@@ -175,13 +186,23 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
             Task {
-                try await self.specialOpenActor?.specialOpen()
+                do {
+                    try await self.specialOpenActor?.specialOpen()
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
             }
         }
 
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
             Task {
-                try await self.specialOpenActor?.specialOpen(forceRefresh: true)
+                do {
+                    try await self.specialOpenActor?.specialOpen(forceRefresh: true)
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
             }
         }
 

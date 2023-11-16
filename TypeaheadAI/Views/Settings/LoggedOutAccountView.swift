@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct LoggedOutAccountView: View {
-    // Use this as a flag for checking if the user is signed in.
-    @AppStorage("token3") var token: String?
     @AppStorage("uuid") var uuid: String?
 
     @Environment(\.colorScheme) var colorScheme
@@ -96,7 +94,6 @@ struct LoggedOutAccountView: View {
                             let authResponse = try await supabaseManager.client.auth.signIn(email: email, password: password)
                             let user = authResponse.user
                             uuid = user.id.uuidString
-                            token = "placeholder"
                             let _ = try await supabaseManager.client.auth.session
                             email = ""
                             password = ""

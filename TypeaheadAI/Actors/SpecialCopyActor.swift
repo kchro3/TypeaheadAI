@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialCopyActor: CanSimulateCopy {
+actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
     private let historyManager: HistoryManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
@@ -38,7 +38,7 @@ actor SpecialCopyActor: CanSimulateCopy {
     }
     
     func specialCopy(stickyMode: Bool) async throws {
-        let appContext = try await self.appContextManager.getActiveAppInfo()
+        var appContext = try await self.appContextManager.getActiveAppInfo()
         try await self.simulateCopy()
 
         // Clear the current state
@@ -64,6 +64,12 @@ actor SpecialCopyActor: CanSimulateCopy {
 
         // Set the copied text as a new message
         await self.modalManager.setUserMessage(copiedText, messageType: messageType)
+
+        // Set the OCR'ed text
+        if let screenshot = appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
+            let (ocrText, _) = try await performOCR(image: screenshot)
+            appContext?.ocrText = ocrText
+        }
 
         // Try to predict the user intent
         do {

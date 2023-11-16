@@ -22,8 +22,6 @@ class SupabaseManager: ObservableObject {
         category: "SupabaseManager"
     )
 
-    // Use this as a flag for checking if the user is signed in.
-    @AppStorage("token3") var token: String?
     @Published var uuid: String?
 
     init() {
@@ -42,20 +40,20 @@ class SupabaseManager: ObservableObject {
         }
     }
 
+    @MainActor
     func registerWithEmail(email: String, password: String) async throws {
         try await client.auth.signUp(email: email, password: password)
         let session = try await client.auth.session
 
         let user = session.user
         uuid = user.id.uuidString
-        token = "placeholder"
     }
 
+    @MainActor
     func signinWithEmail(email: String, password: String) async throws {
         let response = try await client.auth.signIn(email: email, password: password)
         let user = response.user
         uuid = user.id.uuidString
-        token = "placeholder"
         let _ = try await client.auth.session
     }
 
@@ -72,7 +70,6 @@ class SupabaseManager: ObservableObject {
     @MainActor
     func signout() async throws {
         uuid = nil
-        token = nil
         try await client.auth.signOut()
     }
 
@@ -81,6 +78,5 @@ class SupabaseManager: ObservableObject {
         let session = try await client.auth.session(from: from)
         let user = session.user
         self.uuid = user.id.uuidString
-        self.token = "placeholder"
     }
 }
