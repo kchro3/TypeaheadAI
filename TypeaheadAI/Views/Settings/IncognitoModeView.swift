@@ -66,7 +66,7 @@ struct IncognitoModeView: View {
                             Task {
                                 do {
                                     try await self.llamaModelManager.load()
-                                } catch let error {
+                                } catch {
                                     print(error.localizedDescription)
                                 }
                             }
@@ -146,7 +146,7 @@ struct IncognitoModeView: View {
             Task {
                 do {
                     try await self.llamaModelManager.load()
-                } catch let error {
+                } catch {
                     showAlert = true
                     print(error.localizedDescription)
                 }

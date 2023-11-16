@@ -52,7 +52,7 @@ class AppContextManager {
                         screenshotPath: screenshotPath
                     )
                 }
-            } catch let error {
+            } catch {
                 self.logger.error("Failed to execute script: \(error.localizedDescription)")
             }
 

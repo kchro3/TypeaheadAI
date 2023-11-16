@@ -90,7 +90,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
             } else {
                 await self.modalManager.replyToUserMessage(refresh: false)
             }
-        } catch let error as ClientManagerError {
+        } catch {
             self.logger.error("\(error.localizedDescription)")
             await self.modalManager.setError(error.localizedDescription)
         }
