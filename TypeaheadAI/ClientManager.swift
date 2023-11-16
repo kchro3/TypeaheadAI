@@ -50,6 +50,7 @@ class ClientManager: ObservableObject {
 
     // Add a Task property to manage the streaming task
     @Published var currentStreamingTask: Task<Void, Error>? = nil
+
     private var cached: (String, String?)? = nil
 
     init(session: URLSession = .shared) {
@@ -104,10 +105,7 @@ class ClientManager: ObservableObject {
         // NOTE: Cache the payload so we know what text was copied
         self.cacheResponse(nil, for: payload)
 
-        if let intents = self.intentManager?.fetchContextualIntents(limit: 10, appContext: appContext), !intents.isEmpty {
-            // If there are intents to show without making a network call
-            return SuggestIntentsPayload(intents: intents)
-        } else if incognitoMode {
+        if incognitoMode {
             // Incognito mode doesn't support this yet
             return nil
         } else {

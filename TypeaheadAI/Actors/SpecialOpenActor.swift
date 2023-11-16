@@ -10,6 +10,7 @@ import Foundation
 import os.log
 
 actor SpecialOpenActor: CanPerformOCR {
+    private let intentManager: IntentManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
     private let modalManager: ModalManager
@@ -21,11 +22,13 @@ actor SpecialOpenActor: CanPerformOCR {
     )
 
     init(
+        intentManager: IntentManager,
         clientManager: ClientManager,
         promptManager: QuickActionManager,
         modalManager: ModalManager,
         appContextManager: AppContextManager
     ) {
+        self.intentManager = intentManager
         self.clientManager = clientManager
         self.promptManager = promptManager
         self.modalManager = modalManager
@@ -52,19 +55,25 @@ actor SpecialOpenActor: CanPerformOCR {
         }
 
         if self.modalManager.messages.isEmpty {
-            // Set the OCR'ed text
-            if let screenshot = appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
-                let (ocrText, _) = try await performOCR(image: screenshot)
-                appContext?.ocrText = ocrText
-            }
-
             // Try to predict the user intent
-            do {
+            let contextualIntents = self.intentManager.fetchContextualIntents(limit: 3, appContext: appContext)
+            await self.modalManager.setUserIntents(intents: contextualIntents)
+
+            // Kick off async
+            Task {
+                // Set the OCR'ed text
+                if let screenshot = appContext?.screenshotPath.flatMap({
+                    NSImage(contentsOfFile: $0)?.toCGImage()
+                }) {
+                    let (ocrText, _) = try await performOCR(image: screenshot)
+                    appContext?.ocrText = ocrText
+                }
+
                 if let intents = try await self.clientManager.suggestIntents(
                     id: UUID(),
                     username: NSUserName(),
                     userFullName: NSFullUserName(),
-                    userObjective: nil,
+                    userObjective: self.promptManager.getActivePrompt(),
                     userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                     userLang: Locale.preferredLanguages.first ?? "",
                     copiedText: "",
@@ -72,12 +81,9 @@ actor SpecialOpenActor: CanPerformOCR {
                     history: [],
                     appContext: appContext,
                     incognitoMode: !self.modalManager.online
-                ) {
-                    await self.modalManager.setUserIntents(intents: intents.intents)
+                ), !intents.intents.isEmpty {
+                    await self.modalManager.appendUserIntents(intents: intents.intents)
                 }
-            } catch {
-                self.logger.error("\(error.localizedDescription)")
-                await self.modalManager.setError(error.localizedDescription)
             }
         }
     }
