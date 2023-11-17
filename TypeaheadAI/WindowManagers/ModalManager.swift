@@ -549,28 +549,34 @@ class ModalManager: ObservableObject {
                             }
                         }
                     } catch {
-                        DispatchQueue.main.async {
-                            self.setError(error.localizedDescription)
-                        }
+                        await self.setError(error.localizedDescription)
+                    }
+                }
+            case .function:
+                Task {
+                    do {
+                        try await Functions.parseAndCallFunction(jsonString: text, modalManager: self)
+                    } catch {
+                        await self.setError(error.localizedDescription)
                     }
                 }
             }
         case .failure(let error as ClientManagerError):
             switch error {
             case .badRequest(let message):
-                DispatchQueue.main.async {
-                    self.setError(message)
+                Task {
+                    await self.setError(message)
                 }
             default:
-                DispatchQueue.main.async {
-                    self.setError("Something went wrong. Please try again.")
+                Task {
+                    await self.setError("Something went wrong. Please try again.")
+                    self.logger.error("Something went wrong.")
                 }
-                self.logger.error("Something went wrong.")
             }
         case .failure(let error):
-            self.logger.error("Error: \(error.localizedDescription)")
-            DispatchQueue.main.async {
-                self.setError(error.localizedDescription)
+            Task {
+                self.logger.error("Error: \(error.localizedDescription)")
+                await self.setError(error.localizedDescription)
             }
         }
     }
