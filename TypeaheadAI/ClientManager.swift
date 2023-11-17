@@ -22,7 +22,7 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v4"
+    private let version: String = "v5"
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
@@ -482,16 +482,18 @@ class ClientManager: ObservableObject {
                             }
                         case .image:
                             bufferedPayload = response
+                        case .function:
+                            bufferedPayload = response
                         }
                     } else if let finishReason = response.finishReason,
-                              finishReason != "stop" {
+                              (finishReason != "stop" && finishReason != "function_call") {
                         let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
                         continuation.finish(throwing: error)
                         completion(.failure(error))
                         return
                     }
                 }
-                
+
                 completion(.success(bufferedPayload))
                 continuation.finish()
             }
@@ -657,6 +659,7 @@ struct ResponsePayload: Codable {
 enum Mode: String, Codable {
     case text
     case image
+    case function
 }
 
 struct ChunkPayload: Codable {
