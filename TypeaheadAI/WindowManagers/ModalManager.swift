@@ -39,7 +39,7 @@ extension Notification.Name {
     static let userIntentSent = Notification.Name("userIntentSent")
 }
 
-class ModalManager: ObservableObject {
+class ModalManager: ObservableObject, CanPerformOCR {
     @Published var messages: [Message]
     @Published var userIntents: [String]?
 
@@ -303,7 +303,7 @@ class ModalManager: ObservableObject {
     /// 
     /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String, implicit: Bool = false) {
+    func addUserMessage(_ text: String, implicit: Bool = false) async throws {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
@@ -314,33 +314,34 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        self.clientManager?.refine(
+        var appContext = try await self.clientManager?.appContextManager?.getActiveAppInfo()
+        // Set the OCR'ed text
+        if let screenshot = appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
+            let (ocrText, _) = try await performOCR(image: screenshot)
+            appContext?.ocrText = ocrText
+        }
+
+        await self.clientManager?.refine(
             messages: self.messages,
+            appContext: appContext,
             incognitoMode: !online,
             userIntent: implicit ? text : nil,
             streamHandler: { result in
-
             switch result {
             case .success(let chunk):
-                Task {
-                    await self.appendText(chunk)
-                }
+                await self.appendText(chunk)
             case .failure(let error as ClientManagerError):
-                Task {
-                    self.setError(error.localizedDescription)
-                }
+                self.setError(error.localizedDescription)
                 self.logger.error("An error occurred: \(error)")
             case .failure(let error):
-                Task {
-                    self.setError(error.localizedDescription)
-                }
+                self.setError(error.localizedDescription)
                 self.logger.error("An error occurred: \(error)")
             }
         }, completion: defaultCompletionHandler)
     }
 
     @MainActor
-    func updateMessage(index: Int, newContent: String) {
+    func updateMessage(index: Int, newContent: String) async throws {
         self.messages[index].text = newContent
 
         let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
@@ -355,25 +356,30 @@ class ModalManager: ObservableObject {
             isPending = true
             userIntents = nil
 
-            self.clientManager?.refine(
+            var appContext = try await self.clientManager?.appContextManager?.getActiveAppInfo()
+            // Set the OCR'ed text
+            if let screenshot = appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
+                let (ocrText, _) = try await performOCR(image: screenshot)
+                appContext?.ocrText = ocrText
+            }
+            await self.clientManager?.refine(
                 messages: self.messages,
+                appContext: appContext,
                 incognitoMode: !online,
                 streamHandler: defaultHandler,
                 completion: defaultCompletionHandler
             )
         } else {
             // Reparse the AI message
-            Task {
-                let output = await parsingTask.parse(text: newContent, isDarkMode: isDarkMode)
-                self.messages[index].attributed = output
-            }
+            let output = await parsingTask.parse(text: newContent, isDarkMode: isDarkMode)
+            self.messages[index].attributed = output
         }
     }
 
     /// Reply to the user
     /// If refresh, then pop the previous message before responding.
     @MainActor
-    func replyToUserMessage(refresh: Bool) {
+    func replyToUserMessage(refresh: Bool) async throws {
         isPending = true
         userIntents = nil
 
@@ -387,8 +393,15 @@ class ModalManager: ObservableObject {
             }
         }
 
-        self.clientManager?.refine(
+        var appContext = try await self.clientManager?.appContextManager?.getActiveAppInfo()
+        // Set the OCR'ed text
+        if let screenshot = appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
+            let (ocrText, _) = try await performOCR(image: screenshot)
+            appContext?.ocrText = ocrText
+        }
+        await self.clientManager?.refine(
             messages: self.messages,
+            appContext: appContext,
             incognitoMode: !online,
             streamHandler: defaultHandler,
             completion: defaultCompletionHandler

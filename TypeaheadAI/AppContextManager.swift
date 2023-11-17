@@ -28,7 +28,7 @@ class AppContextManager {
     )
 
     func getActiveAppInfo() async throws -> AppContext? {
-        guard let activeApp = NSWorkspace.shared.frontmostApplication else {
+        guard let activeApp = NSWorkspace.shared.menuBarOwningApplication else {
             return nil
         }
 

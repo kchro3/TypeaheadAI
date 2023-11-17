@@ -179,79 +179,80 @@ class ClientManager: ObservableObject {
     /// Refine the currently cached request
     func refine(
         messages: [Message],
+        appContext: AppContext?,
         incognitoMode: Bool,
         userIntent: String? = nil,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>) -> Void
-    ) {
+    ) async {
         self.logger.info("incognito: \(incognitoMode)")
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
-            Task {
-                var history: [Message]? = nil
-                var quickAction: QuickAction? = nil
-                if let userIntent = userIntent {
-                    // NOTE: Check if the user intent is also a Quick Action
-                    quickAction = self.promptManager?.getByLabel(userIntent)
-                    if let quickActionID = quickAction?.id {
-                        // NOTE: This is probably a stupid way of managing the state
-                        await self.promptManager?.setActivePrompt(id: quickActionID)
+            var history: [Message]? = nil
+            var quickAction: QuickAction? = nil
+            if let userIntent = userIntent {
+                // NOTE: Check if the user intent is also a Quick Action
+                quickAction = self.promptManager?.getByLabel(userIntent)
+                if let quickActionID = quickAction?.id {
+                    // NOTE: This is probably a stupid way of managing the state
+                    await self.promptManager?.setActivePrompt(id: quickActionID)
 
-                        // Create a few-shot prompt from smart-copy-paste history
-                        history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickActionID)
-                    } else {
-                        quickAction = await self.promptManager?.addPrompt(userIntent)
-                        history = self.intentManager?.fetchIntentsAsMessages(
-                            limit: 10,
-                            appContext: payload.appContext
-                        )
-                    }
-
-                    // NOTE: We cached the copiedText earlier
-                    await self.intentManager?.addIntentEntry(
-                        prompt: userIntent,
-                        copiedText: payload.copiedText,
-                        appContext: payload.appContext
+                    // Create a few-shot prompt from smart-copy-paste history
+                    history = self.historyManager?.fetchHistoryEntriesAsMessages(
+                        limit: 10,
+                        appContext: appContext,
+                        quickActionID: quickActionID
+                    )
+                } else {
+                    quickAction = await self.promptManager?.addPrompt(userIntent)
+                    history = self.intentManager?.fetchIntentsAsMessages(
+                        limit: 10,
+                        appContext: appContext
                     )
                 }
 
-                await self.sendStreamRequest(
-                    id: UUID(),
-                    username: payload.username,
-                    userFullName: payload.userFullName,
-                    userObjective: quickAction?.details ?? payload.userObjective,
-                    userBio: payload.userBio,
-                    userLang: payload.userLang,
+                // NOTE: We cached the copiedText earlier
+                await self.intentManager?.addIntentEntry(
+                    prompt: userIntent,
                     copiedText: payload.copiedText,
-                    messages: self.sanitizeMessages(messages),
-                    history: history,
-                    appContext: payload.appContext,
-                    incognitoMode: incognitoMode,
-                    streamHandler: streamHandler,
-                    completion: completion
+                    appContext: appContext
                 )
             }
+
+            await self.sendStreamRequest(
+                id: UUID(),
+                username: payload.username,
+                userFullName: payload.userFullName,
+                userObjective: quickAction?.details ?? payload.userObjective,
+                userBio: payload.userBio,
+                userLang: payload.userLang,
+                copiedText: payload.copiedText,
+                messages: self.sanitizeMessages(messages),
+                history: history,
+                appContext: appContext,
+                incognitoMode: incognitoMode,
+                streamHandler: streamHandler,
+                completion: completion
+            )
         } else {
             logger.error("No cached request to refine")
-            Task {
-                await self.sendStreamRequest(
-                    id: UUID(),
-                    username: NSUserName(),
-                    userFullName: NSFullUserName(),
-                    userObjective: "",
-                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                    userLang: Locale.preferredLanguages.first ?? "",
-                    copiedText: "",
-                    messages: self.sanitizeMessages(messages),
-                    history: nil,
-                    appContext: nil,
-                    incognitoMode: incognitoMode,
-                    streamHandler: streamHandler,
-                    completion: completion
-                )
-            }
+            await self.sendStreamRequest(
+                id: UUID(),
+                username: NSUserName(),
+                userFullName: NSFullUserName(),
+                userObjective: "",
+                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                userLang: Locale.preferredLanguages.first ?? "",
+                copiedText: "",
+                messages: self.sanitizeMessages(messages),
+                history: nil,
+                appContext: appContext,
+                incognitoMode: incognitoMode,
+                streamHandler: streamHandler,
+                completion: completion
+            )
         }
     }
 

@@ -22,17 +22,21 @@ struct ConversationView: View {
                     MessageView(
                         message: modalManager.messages[index],
                         onEdit: { newContent in
-                            if newContent != modalManager.messages[index].text {
-                                modalManager.updateMessage(index: index, newContent: newContent)
-                            } else {
-                                modalManager.messages[index].isEdited.toggle()
+                            Task {
+                                if newContent != modalManager.messages[index].text {
+                                    try await modalManager.updateMessage(index: index, newContent: newContent)
+                                } else {
+                                    modalManager.messages[index].isEdited.toggle()
+                                }
                             }
                         },
                         onEditAppear: {
                             modalManager.messages[index].isEdited.toggle()
                         },
                         onRefresh: {
-                            modalManager.replyToUserMessage(refresh: true)
+                            Task {
+                                try await modalManager.replyToUserMessage(refresh: true)
+                            }
                         },
                         onTruncate: {
                             modalManager.messages[index].isTruncated.toggle()

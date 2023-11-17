@@ -50,12 +50,14 @@ struct ModalView: View {
             autoCompleteSuggestions: self.modalManager.promptManager?.getPrompts() ?? []
         ) { text in
             if !text.isEmpty {
-                if let _ = modalManager.userIntents {
-                    // If userIntents is non-nil, reset it.
-                    modalManager.addUserMessage(text, implicit: true)
-                    modalManager.userIntents = nil
-                } else {
-                    modalManager.addUserMessage(text)
+                Task {
+                    if let _ = modalManager.userIntents {
+                        // If userIntents is non-nil, reset it.
+                        try await modalManager.addUserMessage(text, implicit: true)
+                        modalManager.userIntents = nil
+                    } else {
+                        try await modalManager.addUserMessage(text)
+                    }
                 }
             }
         }
