@@ -11,8 +11,8 @@ struct OutroOnboardingView: View {
     var body: some View {
         VStack {
             Text("You're all set!")
-                .font(.title)
-                .padding(10)
+                .font(.largeTitle)
+                .padding(.vertical, 10)
 
             Text(
                 """

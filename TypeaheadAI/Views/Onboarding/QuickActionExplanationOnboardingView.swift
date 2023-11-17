@@ -11,8 +11,8 @@ struct QuickActionExplanationOnboardingView: View {
     var body: some View {
         VStack {
             Text("Why use smart-copy and smart-paste?")
-                .font(.title)
-                .padding(10)
+                .font(.largeTitle)
+                .padding(.vertical, 10)
 
             Text(
             """

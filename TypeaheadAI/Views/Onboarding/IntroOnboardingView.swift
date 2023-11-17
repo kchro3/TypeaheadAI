@@ -11,63 +11,16 @@ struct IntroOnboardingView: View {
     var body: some View {
         VStack {
             Text("How to use Typeahead")
-                .font(.title)
-                .padding(10)
+                .font(.largeTitle)
+                .padding(.vertical, 10)
 
             Text(
             """
-            Welcome to the Typeahead tutorial!
+            Typeahead is an **AI-powered clipboard** for Mac.
 
-            Unlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you'll see the Typeahead logo in the top menu bar when the app is running.
+            In this short tutorial, you will learn about Typeahead's basic features.
 
-            The first thing you need to learn is how to **activate** Typeahead. You can open and close the Typeahead window with:
-            """
-            )
-
-            Spacer()
-
-            HStack {
-                HStack {
-                    Text("Control")
-                    Image(systemName: "control")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Command")
-                    Image(systemName: "command")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("A")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-            }
-
-            Spacer()
-
-
-            Text(
-            """
-            Try opening and closing the window a few times to get used to it.
-
-            You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.
+            We will also explain how Typeahead works behind the scenes.
             """
             )
 

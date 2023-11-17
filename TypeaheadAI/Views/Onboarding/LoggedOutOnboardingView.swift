@@ -101,12 +101,12 @@ struct LoggedOutOnboardingView: View {
                     .font(.caption)
                 Link("Privacy Policy", destination: URL(string: "https://typeahead.ai/privacy-policy")!)
                     .font(.caption)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.accentColor)
                 Text(" and ")
                     .font(.caption)
                 Link("Terms of Use", destination: URL(string: "https://typeahead.ai/terms-of-use")!)
                     .font(.caption)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.accentColor)
             }
         }
         .padding(30)

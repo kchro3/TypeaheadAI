@@ -11,23 +11,39 @@ struct RefineOnboardingView: View {
     var body: some View {
         VStack {
             Text("Personalize your email")
-                .font(.title)
-                .padding(10)
+                .font(.largeTitle)
+                .padding(.vertical, 10)
 
             Text(
             """
-            Typeahead will generate a first draft, but you can customize the email by manually editing it or by providing feedback in the chat.
+            Edit your email by clicking the edit button next to the Typeahead response. Press **Enter** to save or **Shift-Enter** for a new line.
 
-            To manually edit, click on the edit button next to the Typeahead response. You can press **Enter** to save your changes. To add a new line, you can press **Shift-Enter**.
+            Alternatively, you can type feedback like "make it more concise" or "more casual," and it will provide a revised draft.
 
-            To prompt-edit, you can type in feedback like: "make it more concise" or "more casual". Typeahead will then generate a new draft based on your feedback.
-
-            If you're happy with the email, press continue.
+            Click continue when satisfied.
             """
             )
             .padding(.horizontal, 30)
 
             Spacer()
+
+            Text(
+            """
+            Hi,
+
+            Thanks for trying out Typeahead! We are working on new features and fixing bugs every day, so we appreciate your support. Please let us know if you run into any issues.
+
+            Best,
+            The Typeahead Team
+            """
+            )
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerSize: CGSize(width: CGFloat(10), height: CGFloat(10)))
+                    .fill(Color.accentColor.opacity(0.4))
+            )
+            .padding(30)
+            .textSelection(.enabled)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

@@ -1,25 +1,28 @@
 //
-//  SmartCopyOnboardingView.swift
+//  ActivateOnboardingView.swift
 //  TypeaheadAI
 //
-//  Created by Jeff Hara on 11/12/23.
+//  Created by Jeff Hara on 11/17/23.
 //
 
 import SwiftUI
 
-struct SmartCopyOnboardingView: View {
+struct ActivateOnboardingView: View {
     var body: some View {
         VStack {
-            Text("How to **smart-copy**")
+            Text("How to **activate** a Typeahead window")
                 .font(.largeTitle)
                 .padding(.vertical, 10)
 
-            Text("""
-            The primary interface for Typeahead is **smart-copy** and **smart-paste**. It is smarter than your standard clipboard because it uses AI to take what you've copied and predict what you want to paste.
+            Text(
+                """
+                The first thing you will need to learn is how to **activate** Typeahead.
 
-            For example, let's say you want to reply to this email. You can select the email below and **smart-copy** it with:
-            """)
-            .padding(.horizontal, 30)
+                Unlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you will see the Typeahead logo in the menu bar to indicate when the app is running.
+
+                To open and close a Typeahead window, you can press:
+                """
+            )
 
             Spacer()
 
@@ -47,7 +50,7 @@ struct SmartCopyOnboardingView: View {
                 )
 
                 HStack {
-                    Text("C")
+                    Text("A")
                 }
                 .padding(5)
                 .cornerRadius(5)
@@ -59,28 +62,23 @@ struct SmartCopyOnboardingView: View {
 
             Spacer()
 
+
             Text(
             """
-            Hi,
+            When you activate Typeahead, it will take a **screenshot** and try to get context on what you're doing.
 
-            Thanks for trying out Typeahead! We are working on new features and fixing bugs every day, so we appreciate your support. Please let us know if you run into any issues.
+            You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.
 
-            Best,
-            The Typeahead Team
+            NOTE: All hotkeys can be reconfigured in your Settings.
             """
             )
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerSize: CGSize(width: CGFloat(10), height: CGFloat(10)))
-                    .fill(Color.accentColor.opacity(0.4))
-            )
-            .padding(30)
-            .textSelection(.enabled)
+
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 #Preview {
-    SmartCopyOnboardingView()
+    ActivateOnboardingView()
 }

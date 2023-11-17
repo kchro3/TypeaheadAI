@@ -15,8 +15,8 @@ struct SmartPasteOnboardingView: View {
     var body: some View {
         VStack {
             Text("How to **Smart-paste**")
-                .font(.title)
-                .padding(10)
+                .font(.largeTitle)
+                .padding(.vertical, 10)
 
             Text(
             """

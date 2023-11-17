@@ -19,7 +19,7 @@ class ScreenshotManager {
         category: "ScreenshotManager"
     )
 
-    func takeScreenshot(activeApp: NSRunningApplication) -> String? {
+    func takeScreenshot(activeApp: NSRunningApplication?) -> String? {
         let path = getScreenShotFilePath()
         task = Process()
         task?.executableURL = screenCaptureURL

@@ -8,28 +8,40 @@
 import SwiftUI
 
 struct PermissionsOnboardingView: View {
+    private let screenshotManager = ScreenshotManager()
+
     var body: some View {
         VStack {
             Text("Getting Started")
-                .font(.title)
-                .padding(10)
+                .font(.largeTitle)
+                .padding(.vertical, 10)
 
             Text(
             """
-            The next thing we need to do is grant some permissions.
+            Before we can get started, Typeahead will need some permissions in order to use your clipboard and to see what's on your screen, but it will only use your clipboard and your screen when you activate it.
 
-            In order for Typeahead to work, you will need to go into your **System Settings**, then to the **Privacy & Security** tab, and finally to the **Accessibility** options.
+            In **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.
 
-            You may also press the button below to request the permissions. (Note: this only needs to be done once, so if you have already granted permissions, then nothing will happen when you press the button.)
+            Then please navigate to the **Screen Sharing** option and add Typeahead to your allowed apps. This will require you to restart the app.
+
+            You may also press the buttons below to request these permissions. If you have already granted permissions, the buttons will not do anything.
             """
             )
 
             Spacer()
 
             RoundedButton("Check Accessibility Permissions", isAccent: true) {
+                // Simulate a key press to trigger permission request
                 let source = CGEventSource(stateID: .hidSystemState)!
                 let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)!
                 cmdCDown.post(tap: .cghidEventTap)
+            }
+
+            Spacer()
+
+            RoundedButton("Check Screen Sharing Permissions", isAccent: true) {
+                // Take a screenshot to trigger permission request
+                _ = screenshotManager.takeScreenshot(activeApp: nil)
             }
 
             Spacer()

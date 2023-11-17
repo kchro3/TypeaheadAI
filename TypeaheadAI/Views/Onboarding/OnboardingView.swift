@@ -16,9 +16,8 @@ struct OnboardingView: View {
     var modalManager: ModalManager
     var intentManager: IntentManager
 
-    @State private var step: Int = 1
-    private let totalSteps: Int = 7
-
+    @AppStorage("step") var step: Int = 1
+    private let totalSteps: Int = 8
     @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
 
     init(
@@ -43,7 +42,7 @@ struct OnboardingView: View {
 
                     navbar
                 }
-                .padding(15)
+                .padding(30)
                 .animation(.easeInOut, value: UUID())
             } else {
                 LoggedOutOnboardingView(
@@ -61,6 +60,8 @@ struct OnboardingView: View {
         } else if step == 2 {
             AnyView(PermissionsOnboardingView())
         } else if step == 3 {
+            AnyView(ActivateOnboardingView())
+        } else if step == 4 {
             AnyView(SmartCopyOnboardingView()
                 .onAppear(perform: {
                     /// NOTE: Seed the user intents
@@ -90,7 +91,7 @@ struct OnboardingView: View {
                     }
                 }
             )
-        } else if step == 4 {
+        } else if step == 5 {
             AnyView(
                 IntentsOnboardingView()
                     .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
@@ -99,11 +100,11 @@ struct OnboardingView: View {
                         }
                     }
             )
-        } else if step == 5 {
-            AnyView(RefineOnboardingView())
         } else if step == 6 {
-            AnyView(SmartPasteOnboardingView())
+            AnyView(RefineOnboardingView())
         } else if step == 7 {
+            AnyView(SmartPasteOnboardingView())
+        } else if step == 8 {
             AnyView(QuickActionExplanationOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
@@ -141,7 +142,7 @@ struct OnboardingView: View {
 
                 if step < totalSteps {
                     RoundedButton("Continue", isAccent: true) {
-                        if step != 4 {
+                        if step != 5 {
                             modalManager.closeModal()
                         }
                         step += 1
