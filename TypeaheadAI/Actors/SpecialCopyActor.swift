@@ -45,7 +45,6 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         try await self.simulateCopy()
 
         // Clear the current state
-        await promptManager.setActivePrompt(id: nil)
         await self.modalManager.forceRefresh()
         await self.modalManager.showModal()
         await NSApp.activate(ignoringOtherApps: true)

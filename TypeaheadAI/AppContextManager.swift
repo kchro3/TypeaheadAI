@@ -10,14 +10,6 @@ import Foundation
 import Vision
 import os.log
 
-struct AppContext: Codable {
-    let appName: String?
-    let bundleIdentifier: String?
-    let url: URL?
-    var screenshotPath: String? = nil
-    var ocrText: String? = nil
-}
-
 class AppContextManager {
     private let scriptManager = ScriptManager()
     private let screenshotManager = ScreenshotManager()
@@ -28,7 +20,7 @@ class AppContextManager {
     )
 
     func getActiveAppInfo() async throws -> AppContext? {
-        guard let activeApp = NSWorkspace.shared.frontmostApplication else {
+        guard let activeApp = NSWorkspace.shared.menuBarOwningApplication else {
             return nil
         }
 
@@ -39,6 +31,10 @@ class AppContextManager {
         // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
         let screenshotPath = screenshotManager.takeScreenshot(activeApp: activeApp)
 
+        // NOTE: Get contents from Pasteboard (including Universal clipboard if phone is nearby)
+        let copiedText = NSPasteboard.general.string(forType: .string)
+
+        // TODO: Smarter to make this a trait or something.
         if bundleIdentifier == "com.google.Chrome" {
             do {
                 let result = try await self.scriptManager.executeScript(script: .getActiveTabURL)
@@ -49,17 +45,22 @@ class AppContextManager {
                         appName: appName,
                         bundleIdentifier: bundleIdentifier,
                         url: strippedUrl,
-                        screenshotPath: screenshotPath
+                        screenshotPath: screenshotPath,
+                        copiedText: copiedText
                     )
                 }
             } catch {
                 self.logger.error("Failed to execute script: \(error.localizedDescription)")
             }
-
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
-        } else {
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
         }
+
+        return AppContext(
+            appName: appName,
+            bundleIdentifier: bundleIdentifier,
+            url: nil,
+            screenshotPath: screenshotPath,
+            copiedText: copiedText
+        )
     }
 
     private func stripQueryParameters(from url: URL) -> URL? {
