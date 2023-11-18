@@ -80,10 +80,12 @@ final class AppState: ObservableObject {
             appContextManager: appContextManager
         )
         self.specialPasteActor = SpecialPasteActor(
+            appContextManager: appContextManager,
+            clientManager: clientManager,
             historyManager: historyManager,
-            promptManager: promptManager,
+            intentManager: intentManager,
             modalManager: modalManager,
-            appContextManager: appContextManager
+            promptManager: promptManager
         )
         self.specialCutActor = SpecialCutActor(
             mouseEventMonitor: mouseEventMonitor,
