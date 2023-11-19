@@ -63,12 +63,13 @@ actor SpecialPasteActor: CanSimulatePaste {
 
         let markdownContent = MarkdownContent(lastMessage.text)
 
-        // If there is at least one code block, then store the code block in the clipboard
-        if let codeBlock = self.hasSpecialBlock(markdownContent) {
-            switch codeBlock {
+        if let specialBlock = self.hasSpecialBlock(markdownContent) {
+            switch specialBlock {
             case .codeBlock(_, let content):
+                // If there is at least one code block, then store the first code block in the clipboard
                 pasteboard.setString(content, forType: .string)
             case .table(_, let rows):
+                // If there is at least one table, then store the first table in the clipboard as a TSV
                 isTable = true
                 let tsv = rows.map { row in
                     row.cells.map { cell in
