@@ -8,6 +8,7 @@
 import AVFoundation
 import Foundation
 import UserNotifications
+import MarkdownUI
 import SwiftUI
 import os.log
 
@@ -59,21 +60,27 @@ actor SpecialPasteActor: CanSimulatePaste {
 
         // just a proof of concept
         var isTable = false
-        // NOTE: We should reimplement this idea
-//        if let results = lastMessage. attributed?.results {
-//            pasteboard.setString(lastMessage.text, forType: .string)
-//            for result in results {
-//                if case .table = result.parsedType {
-//                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
-//                    isTable = true
-//                    break
-//                } else if case .codeBlock(_) = result.parsedType {
-//                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
-//                    break
-//                }
-//            }
-//        } else 
-        if case .image(let imageData) = lastMessage.messageType {
+
+        let markdownContent = MarkdownContent(lastMessage.text)
+
+        // If there is at least one code block, then store the code block in the clipboard
+        if let codeBlock = self.hasSpecialBlock(markdownContent) {
+            switch codeBlock {
+            case .codeBlock(_, let content):
+                pasteboard.setString(content, forType: .string)
+            case .table(_, let rows):
+                isTable = true
+                let tsv = rows.map { row in
+                    row.cells.map { cell in
+                        self.getCellContent(content: cell.content)
+                    }.joined(separator: "\t")
+                }.joined(separator: "\n")
+
+                pasteboard.setString(tsv, forType: .string)
+            default:
+                pasteboard.setString(lastMessage.text, forType: .string)
+            }
+        } else if case .image(let imageData) = lastMessage.messageType {
             if let data = Data(base64Encoded: imageData.image) {
                 pasteboard.setData(data, forType: .tiff)
             }
@@ -120,6 +127,45 @@ actor SpecialPasteActor: CanSimulatePaste {
         }
 
         await self.modalManager.closeModal()
+    }
+
+    private func hasSpecialBlock(_ markdown: MarkdownContent) -> BlockNode? {
+        return markdown.blocks.first(where: { node in
+            switch node {
+            case .codeBlock: return true
+            case .table: return true
+            default: return false
+            }
+        })
+    }
+
+    private func hasTable(_ markdown: MarkdownContent) -> BlockNode? {
+        return markdown.blocks.first(where: { node in
+            switch node {
+            case .table: return true
+            default: return false
+            }
+        })
+    }
+
+    private func getCellContent(content: [InlineNode]) -> String {
+        if content.count == 1 {
+            switch content[0] {
+            case .text(let text): return text
+            case .emphasis(let children):
+                return getCellContent(content: children)
+            case .strong(let children):
+                return getCellContent(content: children)
+            case .strikethrough(let children):
+                return getCellContent(content: children)
+            case .link(let destination, _): return destination
+            default: return "<not supported>"
+            }
+        }
+
+        return content.map { c in
+            getCellContent(content: [c])
+        }.joined(separator: "")
     }
 }
 

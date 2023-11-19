@@ -57,10 +57,10 @@
 		2B8CD4992B06DD36003E0589 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4982B06DD36003E0589 /* Functions.swift */; };
 		2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */; };
 		2B8CD4A22B09C3A8003E0589 /* CanScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */; };
-		2B8CD4B12B0A79E4003E0589 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 2B8CD4B02B0A79E4003E0589 /* MarkdownUI */; };
 		2B8CD4B42B0A9A11003E0589 /* Theme+Custom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4B32B0A9A11003E0589 /* Theme+Custom.swift */; };
 		2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4B52B0AA450003E0589 /* CustomSyntaxHighlighter.swift */; };
 		2B8CD4BB2B0AAC09003E0589 /* CopyButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4BA2B0AAC09003E0589 /* CopyButtonView.swift */; };
+		2B8CD4BE2B0AB13B003E0589 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 2B8CD4BD2B0AB13B003E0589 /* MarkdownUI */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
@@ -226,7 +226,7 @@
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 				2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */,
 				2BF4A7E32AF1A52600AA2512 /* GoogleSignIn in Frameworks */,
-				2B8CD4B12B0A79E4003E0589 /* MarkdownUI in Frameworks */,
+				2B8CD4BE2B0AB13B003E0589 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -561,7 +561,7 @@
 				2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */,
 				2BF4A7E22AF1A52600AA2512 /* GoogleSignIn */,
 				2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */,
-				2B8CD4B02B0A79E4003E0589 /* MarkdownUI */,
+				2B8CD4BD2B0AB13B003E0589 /* MarkdownUI */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -645,7 +645,7 @@
 				2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				2B1F3B7F2AEDBDFF00F1BB60 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2BC52A202AF1A27C00721033 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
-				2B8CD4AF2B0A79E4003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -1151,12 +1151,12 @@
 				minimumVersion = 1.2.0;
 			};
 		};
-		2B8CD4AF2B0A79E4003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+		2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			repositoryURL = "https://github.com/kchro3/swift-markdown-ui";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.0;
+				branch = "kchro3/make-blocknodes-public";
+				kind = branch;
 			};
 		};
 		2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */ = {
@@ -1214,9 +1214,9 @@
 			package = 2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */;
 			productName = SettingsAccess;
 		};
-		2B8CD4B02B0A79E4003E0589 /* MarkdownUI */ = {
+		2B8CD4BD2B0AB13B003E0589 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 2B8CD4AF2B0A79E4003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			package = 2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
 		};
 		2BA3C2342AADAC5700537F95 /* llama */ = {
