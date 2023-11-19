@@ -11,9 +11,6 @@ import Vision
 import os.log
 
 class ScreenshotManager {
-    var task: Process?
-    let screenCaptureURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
-
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ScreenshotManager"
@@ -21,22 +18,20 @@ class ScreenshotManager {
 
     func takeScreenshot(activeApp: NSRunningApplication?) -> String? {
         let path = getScreenShotFilePath()
-        task = Process()
-        task?.executableURL = screenCaptureURL
-        task?.arguments = [
+        var task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
+        task.arguments = [
             "-x", getScreenShotFilePath()
         ]
 
         do {
-            try task?.run()
+            try task.run()
         } catch {
             self.logger.error("Failed to capture")
-            task = nil
             return nil
         }
 
-        task?.waitUntilExit()
-        task = nil
+        task.waitUntilExit()
         return path
     }
 

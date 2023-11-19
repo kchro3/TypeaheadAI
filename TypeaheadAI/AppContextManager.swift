@@ -38,28 +38,31 @@ class AppContextManager {
 
         // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
         let screenshotPath = screenshotManager.takeScreenshot(activeApp: activeApp)
+        
+        let url = await getUrl(bundleIdentifier: bundleIdentifier)
 
+        return AppContext(
+            appName: appName,
+            bundleIdentifier: bundleIdentifier,
+            url: url
+        )
+    }
+
+    private func getUrl(bundleIdentifier: String?) async -> URL? {
         if bundleIdentifier == "com.google.Chrome" {
             do {
                 let result = try await self.scriptManager.executeScript(script: .getActiveTabURL)
                 if let urlString = result.stringValue,
                    let url = URL(string: urlString),
                    let strippedUrl = self.stripQueryParameters(from: url) {
-                    return AppContext(
-                        appName: appName,
-                        bundleIdentifier: bundleIdentifier,
-                        url: strippedUrl,
-                        screenshotPath: screenshotPath
-                    )
+                    return strippedUrl
                 }
             } catch {
                 self.logger.error("Failed to execute script: \(error.localizedDescription)")
             }
-
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
-        } else {
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
         }
+
+        return nil
     }
 
     private func stripQueryParameters(from url: URL) -> URL? {

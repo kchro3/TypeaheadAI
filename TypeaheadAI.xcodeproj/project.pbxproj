@@ -274,12 +274,9 @@
 				2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */,
 				2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */,
 				2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */,
-				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
 				2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */,
 				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
-				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
-				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -340,6 +337,17 @@
 			path = Functions;
 			sourceTree = "<group>";
 		};
+		2B8CD4A02B09C357003E0589 /* Traits */ = {
+			isa = PBXGroup;
+			children = (
+				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
+				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
+				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
+				2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */,
+			);
+			path = Traits;
+			sourceTree = "<group>";
+		};
 		2BA7F06C2A9ABBA7003D38BA = {
 			isa = PBXGroup;
 			children = (
@@ -364,6 +372,7 @@
 		2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */ = {
 			isa = PBXGroup;
 			children = (
+				2B8CD4A02B09C357003E0589 /* Traits */,
 				2B8CD4972B06DD1D003E0589 /* Functions */,
 				2BAA978F2B03668E00EC6A63 /* WindowManagers */,
 				2BFBCA9F2B048AB1004F8374 /* Models */,
@@ -384,7 +393,6 @@
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
 				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
-				2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */,
 				2BE0EC242AA17DB600E47C52 /* Info.plist */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
 				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
