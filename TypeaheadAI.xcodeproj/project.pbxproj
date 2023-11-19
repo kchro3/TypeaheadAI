@@ -53,11 +53,11 @@
 		2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
-		2B8CD4922B056CCA003E0589 /* ScreenshotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */; };
 		2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */; };
 		2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */; };
 		2B8CD4992B06DD36003E0589 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4982B06DD36003E0589 /* Functions.swift */; };
 		2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */; };
+		2B8CD4A22B09C3A8003E0589 /* CanScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
@@ -165,11 +165,11 @@
 		2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartPasteOnboardingView.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
-		2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotManager.swift; sourceTree = "<group>"; };
 		2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanPerformOCR.swift; sourceTree = "<group>"; };
 		2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalFooterView.swift; sourceTree = "<group>"; };
 		2B8CD4982B06DD36003E0589 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivateOnboardingView.swift; sourceTree = "<group>"; };
+		2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanScreenshot.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
@@ -274,12 +274,9 @@
 				2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */,
 				2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */,
 				2B2745092AB01CF400F37D3E /* SpecialSaveActor.swift */,
-				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
 				2BF929862AB16C4C00FC105B /* ResponseParsingTask.swift */,
 				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
-				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
-				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -340,6 +337,17 @@
 			path = Functions;
 			sourceTree = "<group>";
 		};
+		2B8CD4A02B09C357003E0589 /* Traits */ = {
+			isa = PBXGroup;
+			children = (
+				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
+				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
+				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
+				2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */,
+			);
+			path = Traits;
+			sourceTree = "<group>";
+		};
 		2BA7F06C2A9ABBA7003D38BA = {
 			isa = PBXGroup;
 			children = (
@@ -364,6 +372,7 @@
 		2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */ = {
 			isa = PBXGroup;
 			children = (
+				2B8CD4A02B09C357003E0589 /* Traits */,
 				2B8CD4972B06DD1D003E0589 /* Functions */,
 				2BAA978F2B03668E00EC6A63 /* WindowManagers */,
 				2BFBCA9F2B048AB1004F8374 /* Models */,
@@ -384,7 +393,6 @@
 				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BF929812AB13F7900FC105B /* MarkdownAttributedStringParser.swift */,
 				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
-				2B8CD4912B056CCA003E0589 /* ScreenshotManager.swift */,
 				2BE0EC242AA17DB600E47C52 /* Info.plist */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
 				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
@@ -751,9 +759,9 @@
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
 				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,
-				2B8CD4922B056CCA003E0589 /* ScreenshotManager.swift in Sources */,
 				2BAA97952B042AD400EC6A63 /* PermissionsOnboardingView.swift in Sources */,
 				2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */,
+				2B8CD4A22B09C3A8003E0589 /* CanScreenshot.swift in Sources */,
 				2B0116F02AF88051000C78E1 /* SupabaseManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

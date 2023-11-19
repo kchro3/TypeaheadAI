@@ -7,9 +7,7 @@
 
 import SwiftUI
 
-struct PermissionsOnboardingView: View {
-    private let screenshotManager = ScreenshotManager()
-
+struct PermissionsOnboardingView: View, CanScreenshot {
     var body: some View {
         VStack {
             Text("Getting Started")
@@ -41,7 +39,9 @@ struct PermissionsOnboardingView: View {
 
             RoundedButton("Check Screen Sharing Permissions", isAccent: true) {
                 // Take a screenshot to trigger permission request
-                _ = screenshotManager.takeScreenshot(activeApp: nil)
+                Task {
+                    _ = try await screenshot()
+                }
             }
 
             Spacer()
