@@ -18,9 +18,8 @@ struct AppContext: Codable {
     var ocrText: String? = nil
 }
 
-class AppContextManager {
+class AppContextManager: CanScreenshot {
     private let scriptManager = ScriptManager()
-    private let screenshotManager = ScreenshotManager()
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -37,8 +36,8 @@ class AppContextManager {
         self.logger.info("active app: \(bundleIdentifier ?? "<unk>")")
 
         // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
-        let screenshotPath = screenshotManager.takeScreenshot(activeApp: activeApp)
-        
+        let screenshotPath = try await screenshot()
+
         let url = await getUrl(bundleIdentifier: bundleIdentifier)
 
         return AppContext(
