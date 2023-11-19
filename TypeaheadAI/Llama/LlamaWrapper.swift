@@ -31,7 +31,8 @@ class LlamaWrapper {
         category: "LlamaWrapper"
     )
 
-    private var params: llama_context_params
+    private var cparams: llama_context_params  // context params
+    private var mparams: llama_model_params    // model params
     private var model: OpaquePointer!
     private var ctx: OpaquePointer?
 
@@ -39,13 +40,10 @@ class LlamaWrapper {
 
     init(_ modelPath: URL) {
         llama_backend_init(true)
-        params = llama_context_default_params()
-        params.n_gpu_layers = 32
-        if #available(macOS 13.0, *) {
-            model = llama_load_model_from_file(modelPath.path(), params)
-        } else {
-            model = llama_load_model_from_file(modelPath.path, params)
-        }
+        cparams = llama_context_default_params()
+        mparams = llama_model_default_params()
+        mparams.n_gpu_layers = 32
+        model = llama_load_model_from_file(modelPath.path(), mparams)
     }
 
     func isLoaded() -> Bool {
@@ -62,7 +60,7 @@ class LlamaWrapper {
             LlamaWrapper.handler = { _ in }
         }
 
-        ctx = llama_new_context_with_model(model, params)
+        ctx = llama_new_context_with_model(model, cparams)  // NOTE: We could expose context params in the predict API?
         guard let cstr = simple_predict(ctx, prompt, 1, globalHandler) else {
             return .failure(LlamaWrapperError.serverError("Failed to run simple_predict"))
         }

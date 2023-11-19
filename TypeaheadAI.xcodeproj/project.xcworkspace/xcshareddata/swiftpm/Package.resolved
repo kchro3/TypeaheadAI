@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/supabase-community/functions-swift",
       "state" : {
-        "revision" : "98878a6e3aebfeb6aaeda234db66d64196e4cf31",
-        "version" : "1.1.0"
+        "revision" : "d2fac1980cf5b589077b635d4e18249f7939a9db",
+        "version" : "1.1.1"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/smittytone/HighlighterSwift",
       "state" : {
-        "revision" : "c0d8c22d9548c5cf9e5f15b8e015cf788553adcc",
-        "version" : "1.1.3"
+        "revision" : "0d691dc4228f0454f559c5c69529afce9f5d5acf",
+        "version" : "1.1.4"
       }
     },
     {
@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
       "state" : {
-        "revision" : "b878f8132be59576fc87e39405b1914eff9f55d3",
-        "version" : "1.14.1"
+        "revision" : "731615a24c71de2e228cecfcb1535e04c0390019",
+        "version" : "1.16.0"
       }
     },
     {
@@ -114,7 +114,7 @@
       "location" : "https://github.com/ggerganov/llama.cpp",
       "state" : {
         "branch" : "master",
-        "revision" : "21ac3a1503001020122db5dce6adf34b761675f5"
+        "revision" : "e937066420b79a757bf80e9836eb12b88420a218"
       }
     },
     {
@@ -131,8 +131,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/supabase-community/postgrest-swift",
       "state" : {
-        "revision" : "e9dae74d410b13383bf804f84efc16700c5a61c1",
-        "version" : "1.0.2"
+        "revision" : "2afb40a2f91ba881db8f04131e1b5146001813a5",
+        "version" : "1.0.3"
       }
     },
     {
@@ -149,8 +149,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/orchetect/SettingsAccess",
       "state" : {
-        "revision" : "dbd2726bda227ff1b8eac32c043668c3b390d6b5",
-        "version" : "1.2.0"
+        "revision" : "0fd73c8b5892e88acb13adb7f36a4ba9293a0061",
+        "version" : "1.4.0"
       }
     },
     {
@@ -176,8 +176,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-cmark.git",
       "state" : {
-        "revision" : "29d9c97e6310b87c4799268eaa2fc76164b2dbd8",
-        "version" : "0.2.0"
+        "revision" : "f218e5d7691f78b55bfa39b367763f4612486c35",
+        "version" : "0.3.0"
       }
     },
     {
@@ -185,8 +185,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-markdown",
       "state" : {
-        "revision" : "68b2fed9fb12fb71ac81e537f08bed430b189e35",
-        "version" : "0.2.0"
+        "revision" : "e4f95e2dc23097a1a9a1dfdfe3fe3ee44de77378",
+        "version" : "0.3.0"
       }
     },
     {
