@@ -32,6 +32,11 @@ actor SpecialPasteActor: CanSimulatePaste {
         "https://docs.google.com/spreadsheets"
     ]
 
+    // NOTE: This is a whitelist of URLs where the expected output is HTML
+    private let htmlUrls = [
+        "https://mail.google.com"
+    ]
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialPasteActor"
@@ -81,10 +86,12 @@ actor SpecialPasteActor: CanSimulatePaste {
             default:
                 pasteboard.setString(lastMessage.text, forType: .string)
             }
-        } else if case .image(let imageData) = lastMessage.messageType {
-            if let data = Data(base64Encoded: imageData.image) {
-                pasteboard.setData(data, forType: .tiff)
-            }
+        } else if case .image(let imageData) = lastMessage.messageType,
+                  let data = Data(base64Encoded: imageData.image) {
+            pasteboard.setData(data, forType: .tiff)
+        } else if let url = appContext?.url,
+                  let _ = self.htmlUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
+            pasteboard.setData(Data(markdownContent.renderHTML().utf8), forType: .html)
         } else {
             pasteboard.setString(lastMessage.text, forType: .string)
         }
