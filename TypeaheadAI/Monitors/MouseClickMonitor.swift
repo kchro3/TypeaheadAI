@@ -25,7 +25,7 @@ class MouseEventMonitor {
     func startMonitoring() {
         logger.debug("Starting to monitor mouse clicks.")
         mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(
-            matching: [.leftMouseDown, .leftMouseUp],
+            matching: [.leftMouseDown, .leftMouseUp, .rightMouseDown],
             handler: { [weak self] event in
                 switch event.type {
                 case .leftMouseDown:
@@ -38,6 +38,8 @@ class MouseEventMonitor {
                             self?.mouseDragged = true
                         }
                     }
+                case .rightMouseDown:
+                    print("detected")
                 default:
                     break
                 }

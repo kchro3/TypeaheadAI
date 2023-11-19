@@ -413,7 +413,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func showModal() {
+    func showModal(mousePos: NSPoint? = nil) {
         toastWindow?.close()
 
         // Create the visual effect view with frosted glass effect
@@ -469,8 +469,14 @@ class ModalManager: ObservableObject {
             hostingView.trailingAnchor.constraint(equalTo: baseView.trailingAnchor)
         ])
 
-        // Set the x, y coordinates and the size to the user's last preference or the center by default
-        if let x = toastX, let y = toastY {
+        if let mousePos = mousePos {
+            toastWindow?.setFrame(NSRect(
+                x: mousePos.x + 50,
+                y: mousePos.y + 50,
+                width: toastWidth,
+                height: toastHeight
+            ), display: true)
+        } else if let x = toastX, let y = toastY {
             toastWindow?.setFrame(NSRect(x: x, y: y, width: toastWidth, height: toastHeight), display: true)
         } else {
             toastWindow?.setFrame(NSRect(x: 0, y: 0, width: toastWidth, height: toastHeight), display: true)

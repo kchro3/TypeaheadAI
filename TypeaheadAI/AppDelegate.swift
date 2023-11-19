@@ -5,12 +5,16 @@
 //  Created by Jeff Hara on 11/5/23.
 //
 
+import Cocoa
+import CoreGraphics
 import Foundation
 import Supabase
 import SwiftUI
 import UserNotifications
 
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+    var eventTap: CFMachPort?
+
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
             // Handle the URL
@@ -33,10 +37,38 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         UNUserNotificationCenter.current().delegate = self
         NotificationCenter.default.post(name: .startOnboarding, object: nil)
+
+        let eventMask = (1 << CGEventType.rightMouseDown.rawValue)
+        guard let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: CGEventMask(eventMask),
+            callback: { (proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?) in
+                if type == .rightMouseDown && event.flags.contains(.maskCommand) {
+                    // Suppress the right-click and publish smart-click event
+                    NotificationCenter.default.post(name: .smartClick, object: nil)
+                    return nil
+                }
+
+                return Unmanaged.passRetained(event)
+            },
+            userInfo: nil
+        ) else {
+            print("Failed to create event tap")
+            exit(1)
+        }
+
+        eventTap = tap
+        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+        if let tap = eventTap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+        }
     }
 
     // MARK: - UNUserNotificationCenterDelegate

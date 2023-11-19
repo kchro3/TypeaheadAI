@@ -14,6 +14,7 @@ struct AppContext: Codable {
     let appName: String?
     let bundleIdentifier: String?
     let url: URL?
+    let mousePos: NSPoint
     var screenshotPath: String? = nil
     var ocrText: String? = nil
 }
@@ -28,9 +29,11 @@ class AppContextManager {
     )
 
     func getActiveAppInfo() async throws -> AppContext? {
-        guard let activeApp = NSWorkspace.shared.frontmostApplication else {
+        guard let activeApp = NSWorkspace.shared.menuBarOwningApplication else {
             return nil
         }
+
+        let mousePos = NSEvent.mouseLocation
 
         let appName = activeApp.localizedName
         let bundleIdentifier = activeApp.bundleIdentifier
@@ -49,17 +52,21 @@ class AppContextManager {
                         appName: appName,
                         bundleIdentifier: bundleIdentifier,
                         url: strippedUrl,
+                        mousePos: mousePos,
                         screenshotPath: screenshotPath
                     )
                 }
             } catch {
                 self.logger.error("Failed to execute script: \(error.localizedDescription)")
             }
-
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
-        } else {
-            return AppContext(appName: appName, bundleIdentifier: bundleIdentifier, url: nil)
         }
+
+        return AppContext(
+            appName: appName,
+            bundleIdentifier: bundleIdentifier,
+            url: nil,
+            mousePos: mousePos
+        )
     }
 
     private func stripQueryParameters(from url: URL) -> URL? {

@@ -34,7 +34,7 @@ class IntentManager {
     @MainActor
     func addIntentEntry(
         prompt: String,
-        copiedText: String,
+        copiedText: String?,
         appContext: AppContext?
     ) {
         let newEntry = IntentEntry(context: context)
