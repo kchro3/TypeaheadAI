@@ -555,7 +555,6 @@ class ClientManager: ObservableObject {
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
-            messageCopy.attributed = nil
             messageCopy.messageType = .string
             return messageCopy
         }

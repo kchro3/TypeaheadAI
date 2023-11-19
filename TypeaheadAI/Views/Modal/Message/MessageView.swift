@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Markdown
+import MarkdownUI
 import UniformTypeIdentifiers
 
 struct MessageView: View {
@@ -41,9 +41,6 @@ struct MessageView: View {
     var body: some View {
         if let error = message.responseError {
             messageFailed(error: error)
-        } else if let attributed = message.attributed,
-                  isMarkdown(attributed: attributed) {
-            aiMarkdown(results: attributed.results)
         } else if message.text.isEmpty && !message.isCurrentUser {
             // NOTE: This is broken...
             Divider()
@@ -175,7 +172,11 @@ struct MessageView: View {
                             localContent = message.text
                         })
                     } else {
-                        Text(message.text)
+                        Markdown(message.text)
+                            .markdownTheme(.custom)
+                            .markdownCodeSyntaxHighlighter(.custom(
+                                theme: colorScheme == .dark ? HighlighterConstants.darkTheme : HighlighterConstants.lightTheme
+                            ))
                             .padding(.vertical, 10)
                             .padding(.horizontal, 15)
                             .foregroundColor(.primary)
@@ -225,68 +226,6 @@ struct MessageView: View {
         }
     }
 
-    private func aiMarkdown(results: [ParserResult]) -> some View {
-        ChatBubble(direction: .left, onEdit: {
-            isEditing.toggle()
-        }, onRefresh: onRefresh) {
-            Group {
-                if isEditing {
-                    CustomTextField(text: $localContent, placeholderText: "", autoCompleteSuggestions: [], onEnter: { newContent in
-                        isEditing = false
-                        if !localContent.isEmpty {
-                            onEdit?(localContent)
-                        }
-                    })
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .foregroundColor(.primary)
-                    .background(Color.accentColor.opacity(0.4))
-                    .onAppear(perform: {
-                        localContent = message.text
-                        onEditAppear?()
-                    })
-                } else {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(results) { parsed in
-                            if case .codeBlock(_) = parsed.parsedType {
-                                CodeBlockView(parserResult: parsed)
-                                    .padding(.bottom, 24)
-                            } else if case .table = parsed.parsedType {
-                                MarkdownTableView(parserResult: parsed)
-                                    .textSelection(.enabled)
-                            } else {
-                                Text(parsed.attributedString)
-                                    .textSelection(.enabled)
-                                    .foregroundStyle(.primary)
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 15)
-            .background(colorScheme == .dark ? Color.black.opacity(0.2) : Color.secondary.opacity(0.15))
-        }
-    }
-
-    /// This is simply a heuristic.
-    private func isMarkdown(attributed: AttributedOutput) -> Bool {
-        if attributed.results.count == 0 {
-            // If no text, then not Markdown
-            return false
-        } else if attributed.results.count > 1 {
-            return true
-        } else if attributed.results[0].parsedType != .plaintext {
-            return true
-        } else {
-            // Check for artifacts of markdown
-            return attributed.string.contains("##") || attributed.string.contains("**") ||
-                attributed.string.contains("[//]: #") ||
-                attributed.string.contains("`") ||
-                attributed.string.contains("](")
-        }
-    }
-
     private func decodeImage(_ data: Data) throws -> NSImage? {
         guard let image = NSImage(data: data) else {
             return nil
@@ -327,6 +266,10 @@ struct MessageView: View {
 
 #Preview {
     let markdownString = """
+Here's an implementation of a **thing** [link](https://typeahead.ai)
+
+Here's an `inline code`
+
 ```swift
 let api = ChatGPTAPI(apiKey: "API_KEY")
 
@@ -347,12 +290,17 @@ Task {
 | 1     | 2   | 3    |
 """
 
-    let parserResults: [ParserResult] = {
-        let document = Document(parsing: markdownString)
-        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
-        var parser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
-        return parser.parserResults(from: document)
-    }()
+    return MessageView(message: Message(id: UUID(), text: markdownString, isCurrentUser: false))
+}
 
-    return MessageView(message: Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: parserResults), isCurrentUser: false))
+#Preview {
+    let markdownString = """
+Dear Cynthia,
+
+Thanks for trying out the app, really appreciate your candidness in the interviews.
+
+Jeff
+"""
+
+    return MessageView(message: Message(id: UUID(), text: markdownString, isCurrentUser: false))
 }

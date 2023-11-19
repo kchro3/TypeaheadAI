@@ -59,19 +59,21 @@ actor SpecialPasteActor: CanSimulatePaste {
 
         // just a proof of concept
         var isTable = false
-        if let results = lastMessage.attributed?.results {
-            pasteboard.setString(lastMessage.text, forType: .string)
-            for result in results {
-                if case .table = result.parsedType {
-                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
-                    isTable = true
-                    break
-                } else if case .codeBlock(_) = result.parsedType {
-                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
-                    break
-                }
-            }
-        } else if case .image(let imageData) = lastMessage.messageType {
+        // NOTE: We should reimplement this idea
+//        if let results = lastMessage. attributed?.results {
+//            pasteboard.setString(lastMessage.text, forType: .string)
+//            for result in results {
+//                if case .table = result.parsedType {
+//                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+//                    isTable = true
+//                    break
+//                } else if case .codeBlock(_) = result.parsedType {
+//                    pasteboard.setString(NSAttributedString(result.attributedString).string, forType: .string)
+//                    break
+//                }
+//            }
+//        } else 
+        if case .image(let imageData) = lastMessage.messageType {
             if let data = Data(base64Encoded: imageData.image) {
                 pasteboard.setData(data, forType: .tiff)
             }

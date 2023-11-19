@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Markdown
 
 struct ModalView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -154,15 +153,8 @@ Task {
 ```
 """
 
-    let parserResult: ParserResult = {
-        let document = Document(parsing: markdownString)
-        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
-        var parser = MarkdownAttributedStringParser(isDarkMode: isDarkMode)
-        return parser.parserResults(from: document)[0]
-    }()
-
     modalManager.messages = [
-        Message(id: UUID(), text: markdownString, attributed: AttributedOutput(string: markdownString, results: [parserResult]), isCurrentUser: false)
+        Message(id: UUID(), text: markdownString, isCurrentUser: false)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
