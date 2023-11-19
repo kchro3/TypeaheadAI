@@ -8,7 +8,7 @@
 import AppKit
 import SwiftUI
 import Foundation
-import Markdown
+import MarkdownUI
 import os.log
 
 enum MessageType: Codable, Equatable {
@@ -18,16 +18,10 @@ enum MessageType: Codable, Equatable {
     case data(data: Data)
 }
 
-struct AttributedOutput: Codable, Equatable {
-    let string: String
-    let results: [ParserResult]
-}
-
 // TODO: Add to persistence
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
     var text: String
-    var attributed: AttributedOutput? = nil
     let isCurrentUser: Bool
     var responseError: String?
     var messageType: MessageType = .string
@@ -57,14 +51,8 @@ class ModalManager: ObservableObject {
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ModalManager"
     )
-    // When streaming a result, we want to batch process tokens.
-    // Since we stream tokens one at a time, we need a global variable to
-    // track the token counts per batch.
-    private var currentTextCount = 0
-    private let parserThresholdTextCount = 5
+
     private let maxMessages = 20
-    private var currentOutput: AttributedOutput?
-    private let parsingTask = ResponseParsingTask()
 
     init() {
         self.messages = []
@@ -109,8 +97,6 @@ class ModalManager: ObservableObject {
         } else {
             messages = []
         }
-        currentTextCount = 0
-        currentOutput = nil
         isPending = false
         userIntents = nil
     }
@@ -122,8 +108,6 @@ class ModalManager: ObservableObject {
         self.promptManager?.activePromptID = nil
 
         messages = []
-        currentTextCount = 0
-        currentOutput = nil
         isPending = false
         userIntents = nil
     }
@@ -161,97 +145,11 @@ class ModalManager: ObservableObject {
             // If the AI response doesn't exist yet, create one.
             messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
             userIntents = nil
-
-            currentTextCount = 0
-            currentOutput = nil
             isPending = false
             return
         }
 
-        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
-
         messages[idx].text += text
-        let streamText = messages[idx].text
-
-        do {
-            currentTextCount += text.count
-
-            if currentTextCount >= parserThresholdTextCount {
-                currentOutput = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
-                try Task.checkCancellation()
-                currentTextCount = 0
-            }
-
-            // Check if the parser detected anything
-            if let currentOutput = currentOutput, !currentOutput.results.isEmpty {
-                let suffixText = streamText.trimmingPrefix(currentOutput.string)
-                var results = currentOutput.results
-                let lastResult = results[results.count - 1]
-                var lastAttrString = lastResult.attributedString
-                if case .codeBlock(_) = lastResult.parsedType,
-                   let font = NSFont.preferredFont(forTextStyle: .body).apply(newTraits: .monoSpace) {
-                    lastAttrString.append(
-                        AttributedString(
-                            String(suffixText),
-                            attributes: .init([
-                                .font: font,
-                                .foregroundColor: NSColor.white
-                            ])
-                        )
-                    )
-                } else {
-                    lastAttrString.append(AttributedString(String(suffixText)))
-                }
-
-                results[results.count - 1] = ParserResult(
-                    id: UUID(),
-                    attributedString: lastAttrString,
-                    parsedType: lastResult.parsedType
-                )
-
-                try Task.checkCancellation()
-                if idx < messages.count {
-                    messages[idx].attributed = AttributedOutput(string: streamText, results: results)
-                } else {
-                    // NOTE: Not sure if I need to throw here.
-                    return
-                }
-            } else {
-                try Task.checkCancellation()
-                if idx < messages.count {
-                    messages[idx].attributed = AttributedOutput(string: streamText, results: [
-                        ParserResult(
-                            id: UUID(),
-                            attributedString: AttributedString(stringLiteral: streamText),
-                            parsedType: .plaintext
-                        )
-                    ])
-                } else {
-                    // NOTE: Not sure if I need to throw here.
-                    return
-                }
-            }
-        } catch {
-            try? Task.checkCancellation()
-            if idx < messages.count {
-                messages[idx].responseError = error.localizedDescription
-            } else {
-                // NOTE: Not sure if I need to throw here.
-                return
-            }
-        }
-
-        // Check if the parsed string is different than the full string.
-        if let currentString = currentOutput?.string, currentString != streamText {
-            let output = await parsingTask.parse(text: streamText, isDarkMode: isDarkMode)
-            try? Task.checkCancellation()
-            if idx < messages.count {
-                messages[idx].attributed = output
-            } else {
-                // NOTE: Not sure if I need to throw here.
-                return
-            }
-        }
     }
 
     @MainActor
@@ -343,8 +241,6 @@ class ModalManager: ObservableObject {
     func updateMessage(index: Int, newContent: String) {
         self.messages[index].text = newContent
 
-        let isDarkMode = (NSAppearance.currentDrawing().bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
-
         if self.messages[index].isCurrentUser {
             // Reissue the message
             let excess = self.messages.count - index - 1
@@ -361,12 +257,6 @@ class ModalManager: ObservableObject {
                 streamHandler: defaultHandler,
                 completion: defaultCompletionHandler
             )
-        } else {
-            // Reparse the AI message
-            Task {
-                let output = await parsingTask.parse(text: newContent, isDarkMode: isDarkMode)
-                self.messages[index].attributed = output
-            }
         }
     }
 
