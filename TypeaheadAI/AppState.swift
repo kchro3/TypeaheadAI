@@ -45,6 +45,7 @@ final class AppState: ObservableObject {
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialSaveActor: SpecialSaveActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
+    private var smartClickActor: SmartClickActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -98,6 +99,13 @@ final class AppState: ObservableObject {
             memoManager: memoManager
         )
         self.specialOpenActor = SpecialOpenActor(
+            intentManager: intentManager,
+            clientManager: clientManager,
+            promptManager: promptManager,
+            modalManager: modalManager,
+            appContextManager: appContextManager
+        )
+        self.smartClickActor = SmartClickActor(
             intentManager: intentManager,
             clientManager: clientManager,
             promptManager: promptManager,
@@ -197,9 +205,6 @@ final class AppState: ObservableObject {
         mouseEventMonitor.onLeftMouseDown = { [weak self] in
             self?.mouseEventMonitor.mouseClicked = true
 
-            // If the toast window is open and the user clicks out,
-            // we can close the window.
-            // NOTE: If the user has chatted, then keep it open.
             if let window = self?.modalManager.toastWindow,
                (self?.modalManager.messages.count ?? 0) < 2 {
                 let mouseLocation = NSEvent.mouseLocation
@@ -215,6 +220,19 @@ final class AppState: ObservableObject {
 
         appVersion = getAppVersion()
         startCheckingForUpdates()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.smartClickWrapper(_:)),
+            name: .smartClick,
+            object: nil
+        )
+    }
+
+    @objc private func smartClickWrapper(_ notification: NSNotification) {
+        Task {
+            try await smartClickActor?.smartClick()
+        }
     }
 
     deinit {

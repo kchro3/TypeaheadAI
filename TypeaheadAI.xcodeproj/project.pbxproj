@@ -58,6 +58,7 @@
 		2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */; };
 		2B8CD4992B06DD36003E0589 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4982B06DD36003E0589 /* Functions.swift */; };
 		2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */; };
+		2B8CD49F2B084779003E0589 /* SmartClickActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD49E2B084779003E0589 /* SmartClickActor.swift */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
@@ -170,6 +171,7 @@
 		2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalFooterView.swift; sourceTree = "<group>"; };
 		2B8CD4982B06DD36003E0589 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivateOnboardingView.swift; sourceTree = "<group>"; };
+		2B8CD49E2B084779003E0589 /* SmartClickActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartClickActor.swift; sourceTree = "<group>"; };
 		2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModalWindow.swift; sourceTree = "<group>"; };
 		2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalManager.swift; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
@@ -280,6 +282,7 @@
 				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
 				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
+				2B8CD49E2B084779003E0589 /* SmartClickActor.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -714,6 +717,7 @@
 				2B27450A2AB01CF400F37D3E /* SpecialSaveActor.swift in Sources */,
 				2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */,
 				2B7D35842B01B14100E85AEF /* IntroOnboardingView.swift in Sources */,
+				2B8CD49F2B084779003E0589 /* SmartClickActor.swift in Sources */,
 				2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */,
 				2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */,
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,

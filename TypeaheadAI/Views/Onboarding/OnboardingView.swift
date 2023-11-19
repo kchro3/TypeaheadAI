@@ -68,7 +68,8 @@ struct OnboardingView: View {
                     let appContext = AppContext(
                         appName: "TypeaheadAI",
                         bundleIdentifier: "ai.typeahead.TypeaheadAI",
-                        url: nil
+                        url: nil,
+                        mousePos: NSEvent.mouseLocation
                     )
                     if self.intentManager.fetchContextualIntents(
                         limit: 1, appContext: appContext
@@ -79,7 +80,8 @@ struct OnboardingView: View {
                             appContext: AppContext(
                                 appName: "TypeaheadAI",
                                 bundleIdentifier: "ai.typeahead.TypeaheadAI",
-                                url: nil
+                                url: nil,
+                                mousePos: NSEvent.mouseLocation
                             )
                         )
                     }

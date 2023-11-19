@@ -80,7 +80,7 @@ class ClientManager: ObservableObject {
         userObjective: String?,
         userBio: String,
         userLang: String,
-        copiedText: String,
+        copiedText: String?,
         messages: [Message],
         history: [Message]?,
         appContext: AppContext?,
@@ -268,7 +268,7 @@ class ClientManager: ObservableObject {
         userObjective: String?,
         userBio: String,
         userLang: String,
-        copiedText: String,
+        copiedText: String?,
         messages: [Message],
         history: [Message]?,
         appContext: AppContext?,
@@ -573,7 +573,7 @@ struct RequestPayload: Codable {
     var userObjective: String?
     var userBio: String
     var userLang: String
-    var copiedText: String
+    var copiedText: String?
     var messages: [Message]?
     var history: [Message]?
     var appContext: AppContext?

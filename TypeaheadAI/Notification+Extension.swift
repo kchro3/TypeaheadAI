@@ -8,6 +8,8 @@
 import Foundation
 
 extension Notification.Name {
+    static let smartClick = Notification.Name("smartClick")
+
     static let smartCopyPerformed = Notification.Name("smartCopyPerformed")
 
     static let startOnboarding = Notification.Name("startOnboarding")

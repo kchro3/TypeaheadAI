@@ -15,11 +15,11 @@ private struct Constants {
 }
 
 protocol CanPerformOCR {
-    func performOCR(image: CGImage) async throws -> (String, NSImage?)
+    func performOCR(image: CGImage, level: VNRequestTextRecognitionLevel) async throws -> (String, NSImage?)
 }
 
 extension CanPerformOCR {
-    func performOCR(image: CGImage) async throws -> (String, NSImage?) {
+    func performOCR(image: CGImage, level: VNRequestTextRecognitionLevel = .accurate) async throws -> (String, NSImage?) {
         try await withCheckedThrowingContinuation { continuation in
             let request = VNRecognizeTextRequest { (request, error) in
                 if let error = error {
@@ -39,7 +39,7 @@ extension CanPerformOCR {
                 continuation.resume(returning: (allRecognizedText, imageWithBoxes))
             }
 
-            request.recognitionLevel = .accurate
+            request.recognitionLevel = level
             request.automaticallyDetectsLanguage = true
 
             let handler = VNImageRequestHandler(cgImage: image, options: [:])
@@ -140,7 +140,7 @@ extension CanPerformOCR {
             bitsPerComponent: image.bitsPerComponent,
             bytesPerRow: image.bytesPerRow,
             space: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!,
-            bitmapInfo: image.bitmapInfo.rawValue
+            bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
         ) else {
             return nil
         }
