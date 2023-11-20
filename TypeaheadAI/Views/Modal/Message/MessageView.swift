@@ -141,6 +141,10 @@ struct MessageView: View {
                 WebView(html: data, dynamicHeight: $webViewHeight)
                     .frame(width: 400, height: webViewHeight)
                     .background(Color.accentColor.opacity(0.8))
+            case .url(let data):
+                WebView(url: data, dynamicHeight: $webViewHeight)
+                    .frame(width: 400, height: webViewHeight)
+                    .background(Color.accentColor.opacity(0.8))
             case .image(let data):
                 if let imageData = try? self.decodeBase64Image(data.image) {
                     Image(nsImage: imageData)
@@ -211,6 +215,10 @@ struct MessageView: View {
                     }
                 case .html(let data):
                     WebView(html: data, dynamicHeight: $webViewHeight)
+                        .frame(width: 400, height: webViewHeight)
+                        .background(Color.accentColor.opacity(0.8))
+                case .url(let data):
+                    WebView(url: data, dynamicHeight: $webViewHeight)
                         .frame(width: 400, height: webViewHeight)
                         .background(Color.accentColor.opacity(0.8))
                 case .image(let data):

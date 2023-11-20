@@ -12,7 +12,7 @@ import os.log
 actor SpecialSaveActor: CanSimulateCopy {
     private let modalManager: ModalManager
     private let clientManager: ClientManager
-    private let memoManager: MemoManager
+//    private let memoManager: MemoManager
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -26,7 +26,7 @@ actor SpecialSaveActor: CanSimulateCopy {
     ) {
         self.modalManager = modalManager
         self.clientManager = clientManager
-        self.memoManager = memoManager
+//        self.memoManager = memoManager
     }
 
     func specialSave() {
@@ -53,7 +53,8 @@ actor SpecialSaveActor: CanSimulateCopy {
                         switch result {
                         case .success(let output):
                             if let text = output.text {
-                                _ = self.memoManager.createEntry(summary: text, content: copiedText)
+                                print(text)
+//                                _ = self.memoManager.createEntry(summary: text, content: copiedText)
                             }
                         case .failure(let error):
                             DispatchQueue.main.async {
