@@ -10,12 +10,14 @@ import SwiftUI
 import Foundation
 import MarkdownUI
 import os.log
+import WebKit
 
 enum MessageType: Codable, Equatable {
     case string
     case html(data: String)
     case image(data: ImageData)
     case data(data: Data)
+    case url(data: URL)
 }
 
 // TODO: Add to persistence
@@ -68,6 +70,8 @@ class ModalManager: ObservableObject {
     var promptManager: QuickActionManager? = nil
     var intentManager: IntentManager? = nil
     var settingsManager: SettingsManager? = nil
+
+    private let functionManager = FunctionManager()
 
     var toastWindow: CustomModalWindow?
 
@@ -150,6 +154,19 @@ class ModalManager: ObservableObject {
         }
 
         messages[idx].text += text
+    }
+
+    @MainActor
+    func appendURL(_ url: URL) async {
+        isPending = false
+        userIntents = nil
+
+        messages.append(Message(
+            id: UUID(),
+            text: "<placeholder: Typeahead has opened \(url)>",
+            isCurrentUser: false,
+            messageType: .url(data: url)
+        ))
     }
 
     @MainActor
@@ -445,7 +462,7 @@ class ModalManager: ObservableObject {
             case .function:
                 Task {
                     do {
-                        try await Functions.parseAndCallFunction(jsonString: text, modalManager: self)
+                        try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
                     } catch {
                         await self.setError(error.localizedDescription)
                     }

@@ -9,7 +9,8 @@ import SwiftUI
 import WebKit
 
 struct WebView: NSViewRepresentable {
-    var html: String
+    var html: String?
+    var url: URL?
     @Binding var dynamicHeight: CGFloat
 
     func makeNSView(context: Context) -> WKWebView  {
@@ -19,7 +20,11 @@ struct WebView: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: WKWebView, context: Context) {
-        nsView.loadHTMLString(html, baseURL: nil)
+        if let url = url {
+            nsView.load(URLRequest(url: url))
+        } else if let html = html {
+            nsView.loadHTMLString(html, baseURL: nil)
+        }
     }
 
     func makeCoordinator() -> Coordinator {
