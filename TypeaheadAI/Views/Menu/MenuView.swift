@@ -72,8 +72,8 @@ struct MenuView: View {
 
                 if modalManager.isVisible {
                     MenuButtonView(
-                        title: "New chat",
-                        shortcut: KeyboardShortcuts.Name.chatNew
+                        title: "New chat"
+//                        shortcut: KeyboardShortcuts.Name.chatNew
                     ) {
                         modalManager.forceRefresh()
                         NSApp.activate(ignoringOtherApps: true)

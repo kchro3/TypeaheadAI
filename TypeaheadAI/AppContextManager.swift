@@ -43,7 +43,8 @@ class AppContextManager: CanScreenshot {
         return AppContext(
             appName: appName,
             bundleIdentifier: bundleIdentifier,
-            url: url
+            url: url,
+            screenshotPath: screenshotPath
         )
     }
 

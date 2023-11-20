@@ -93,9 +93,11 @@ final class AppState: ObservableObject {
             appContextManager: appContextManager
         )
         self.specialSaveActor = SpecialSaveActor(
+            appContextManager: appContextManager,
             modalManager: modalManager,
             clientManager: clientManager,
-            memoManager: memoManager
+            memoManager: memoManager,
+            settingsManager: settingsManager
         )
         self.specialOpenActor = SpecialOpenActor(
             intentManager: intentManager,
@@ -167,7 +169,12 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .specialSave) { [self] in
             Task {
-                await self.specialSaveActor?.specialSave()
+                do {
+                    try await self.specialSaveActor?.specialSave()
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
             }
         }
 
@@ -182,16 +189,16 @@ final class AppState: ObservableObject {
             }
         }
 
-        KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
-            Task {
-                do {
-                    try await self.specialOpenActor?.specialOpen(forceRefresh: true)
-                } catch {
-                    self.logger.error("\(error.localizedDescription)")
-                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
-                }
-            }
-        }
+//        KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
+//            Task {
+//                do {
+//                    try await self.specialOpenActor?.specialOpen(forceRefresh: true)
+//                } catch {
+//                    self.logger.error("\(error.localizedDescription)")
+//                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+//                }
+//            }
+//        }
 
         // Configure mouse-click handler
         mouseEventMonitor.onLeftMouseDown = { [weak self] in

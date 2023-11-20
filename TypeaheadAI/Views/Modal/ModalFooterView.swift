@@ -40,7 +40,7 @@ struct ModalFooterView: View {
                 }
             }
 
-            HStack {
+            HStack(alignment: .bottom) {
                 CustomTextField(
                     text: $text,
                     placeholderText: (
@@ -79,6 +79,15 @@ struct ModalFooterView: View {
                         return event
                     }
                 }
+
+                Button {
+                    print("test")
+                } label: {
+                    Image(systemName: "bolt.circle")
+                        .font(.title)
+                        .foregroundStyle(Color.accentColor)
+                }
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 10)

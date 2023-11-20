@@ -59,11 +59,11 @@ struct GeneralSettingsView: View {
                 .padding(.bottom, 5)
 
             Form {
-                HStack {
-                    KeyboardShortcuts.Recorder("New Chat:", name: .chatNew)
-                    Text("Opens a new chat window")
-                        .frame(width: 325, alignment: .leading)
-                }
+//                HStack {
+//                    KeyboardShortcuts.Recorder("New Chat:", name: .chatNew)
+//                    Text("Opens a new chat window")
+//                        .frame(width: 325, alignment: .leading)
+//                }
                 HStack {
                     KeyboardShortcuts.Recorder("Open Chat:", name: .chatOpen)
                     Text("Opens an existing chat window")

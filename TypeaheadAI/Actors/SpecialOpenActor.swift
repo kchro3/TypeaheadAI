@@ -54,7 +54,7 @@ actor SpecialOpenActor: CanPerformOCR {
             }
         }
 
-        if self.modalManager.messages.isEmpty {
+        if self.modalManager.messages.isEmpty && (self.modalManager.userIntents?.isEmpty ?? true) {
             // Try to predict the user intent
             let contextualIntents = self.intentManager.fetchContextualIntents(limit: 3, appContext: appContext)
             await self.modalManager.setUserIntents(intents: contextualIntents)

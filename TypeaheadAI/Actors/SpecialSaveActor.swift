@@ -9,10 +9,22 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialSaveActor: CanSimulateCopy {
+enum SpecialSaveActorError: LocalizedError {
+    case notImplemented(message: String)
+
+    var errorDescription: String {
+        switch self {
+        case .notImplemented(let message): return message
+        }
+    }
+}
+
+actor SpecialSaveActor: CanSimulateSelectAll, CanSimulateCopy {
+    private let appContextManager: AppContextManager
     private let modalManager: ModalManager
     private let clientManager: ClientManager
     private let memoManager: MemoManager
+    private let settingsManager: SettingsManager
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -20,50 +32,38 @@ actor SpecialSaveActor: CanSimulateCopy {
     )
 
     init(
+        appContextManager: AppContextManager,
         modalManager: ModalManager,
         clientManager: ClientManager,
-        memoManager: MemoManager
+        memoManager: MemoManager,
+        settingsManager: SettingsManager
     ) {
+        self.appContextManager = appContextManager
         self.modalManager = modalManager
         self.clientManager = clientManager
         self.memoManager = memoManager
+        self.settingsManager = settingsManager
     }
 
-    func specialSave() {
-        simulateCopy() {
-            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
-                return
-            }
+    func specialSave() async throws {
+        let appContext = try await self.appContextManager.getActiveAppInfo()
 
-            self.logger.debug("saved '\(copiedText)'")
-            Task {
-                // Force sticky-mode so that it saves the message to the session.
-                await self.modalManager.clearText(stickyMode: true)
-                await self.modalManager.showModal()
-                await self.modalManager.appendText("Saving...\n")
+        print(appContext)
 
-                try await self.clientManager.predict(
-                    id: UUID(),
-                    copiedText: copiedText,
-                    incognitoMode: !self.modalManager.online,
-                    userObjective: "tldr the copied text in 20 words or less",
-                    stream: true,
-                    streamHandler: self.modalManager.defaultHandler,
-                    completion: { result in
-                        switch result {
-                        case .success(let output):
-                            if let text = output.text {
-                                _ = self.memoManager.createEntry(summary: text, content: copiedText)
-                            }
-                        case .failure(let error):
-                            DispatchQueue.main.async {
-                                self.modalManager.setError(error.localizedDescription)
-                            }
-                            self.logger.error("An error occurred: \(error)")
-                        }
-                    }
-                )
-            }
+        guard let copiedText = NSPasteboard.general.string(forType: .string) else {
+            // We can extend this by taking context from the screen
+            throw SpecialSaveActorError.notImplemented(message: "User needs something highlighted next!")
         }
+
+        print(copiedText)
+
+        try await simulateCopy()
+        guard let textToPaste = NSPasteboard.general.string(forType: .string) else {
+            throw SpecialSaveActorError.notImplemented(message: "Something went wrong!")
+        }
+
+        print(textToPaste)
+
+        await settingsManager.showModal(tab: Tab.quickActions)
     }
 }
