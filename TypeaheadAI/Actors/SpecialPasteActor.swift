@@ -32,11 +32,6 @@ actor SpecialPasteActor: CanSimulatePaste {
         "https://docs.google.com/spreadsheets"
     ]
 
-    // NOTE: This is a whitelist of URLs where the expected output is HTML
-    private let htmlUrls = [
-        "https://mail.google.com"
-    ]
-
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialPasteActor"
@@ -86,14 +81,19 @@ actor SpecialPasteActor: CanSimulatePaste {
             default:
                 pasteboard.setString(lastMessage.text, forType: .string)
             }
+        } else if self.hasThematicBreaks(markdownContent) {
+            // If there are thematic breaks, we can assume that ChatGPT has added some extraneous leading and ending content.
+            let blocks = markdownContent.blocks
+            let truncatedMarkdownContent = MarkdownContent(blocks: Array(blocks[2..<(blocks.count - 2)]))
+
+            pasteboard.setString(truncatedMarkdownContent.renderPlainText(), forType: .string)
+            pasteboard.setData(Data(truncatedMarkdownContent.renderHTML().utf8), forType: .html)
         } else if case .image(let imageData) = lastMessage.messageType,
                   let data = Data(base64Encoded: imageData.image) {
             pasteboard.setData(data, forType: .tiff)
-        } else if let url = appContext?.url,
-                  let _ = self.htmlUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
-            pasteboard.setData(Data(markdownContent.renderHTML().utf8), forType: .html)
         } else {
             pasteboard.setString(lastMessage.text, forType: .string)
+            pasteboard.setData(Data(markdownContent.renderHTML().utf8), forType: .html)
         }
 
         guard let firstMessage = self.modalManager.messages.first else {
@@ -174,6 +174,32 @@ actor SpecialPasteActor: CanSimulatePaste {
         return content.map { c in
             getCellContent(content: [c])
         }.joined(separator: "")
+    }
+
+    /// NOTE: This is just a heuristic... Need to test if it works more than it fails.
+    private func hasThematicBreaks(_ markdownContent: MarkdownContent) -> Bool {
+        let blocks = markdownContent.blocks
+        return (
+            blocks.count > 4 &&
+            isParagraph(blocks[0]) &&
+            isThematicBreak(blocks[1]) &&
+            isParagraph(blocks[blocks.count - 1]) &&
+            isThematicBreak(blocks[blocks.count - 2])
+        )
+    }
+
+    private func isParagraph(_ blockNode: BlockNode) -> Bool {
+        switch blockNode {
+        case .paragraph: return true
+        default: return false
+        }
+    }
+
+    private func isThematicBreak(_ blockNode: BlockNode) -> Bool {
+        switch blockNode {
+        case .thematicBreak: return true
+        default: return false
+        }
     }
 }
 

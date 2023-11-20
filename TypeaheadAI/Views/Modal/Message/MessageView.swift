@@ -23,6 +23,7 @@ struct MessageView: View {
     @State private var localContent: String = ""
 
     private let maxMessageLength = 280
+    private let isMarkdown: Bool
 
     init(
         message: Message,
@@ -36,6 +37,24 @@ struct MessageView: View {
         self.onEditAppear = onEditAppear
         self.onRefresh = onRefresh
         self.onTruncate = onTruncate
+
+        if !message.isCurrentUser {
+            // Just a heuristic
+            self.isMarkdown = (
+                message.text.contains("#") ||
+                message.text.contains("](") ||
+                message.text.contains("*") ||
+                message.text.contains("__") ||
+                message.text.contains("---") ||
+                message.text.contains("[//]: #") ||
+                message.text.contains("`") ||
+                message.text.contains("- ") ||
+                message.text.contains("1.")
+            )
+        } else {
+            // Never render user text as markdown
+            self.isMarkdown = false
+        }
     }
 
     var body: some View {
@@ -171,12 +190,19 @@ struct MessageView: View {
                         .onAppear(perform: {
                             localContent = message.text
                         })
-                    } else {
+                    } else if isMarkdown {
                         Markdown(message.text)
                             .markdownTheme(.custom)
                             .markdownCodeSyntaxHighlighter(.custom(
                                 theme: colorScheme == .dark ? HighlighterConstants.darkTheme : HighlighterConstants.lightTheme
                             ))
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 15)
+                            .foregroundColor(.primary)
+                            .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                            .textSelection(.enabled)
+                    } else {
+                        Text(message.text)
                             .padding(.vertical, 10)
                             .padding(.horizontal, 15)
                             .foregroundColor(.primary)
