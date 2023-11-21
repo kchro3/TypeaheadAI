@@ -20,6 +20,10 @@
 		2B0B30102ACF8C8000338B76 /* SpecialOpenActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */; };
 		2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B30182ADCBF1600338B76 /* QuickActionsView.swift */; };
 		2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */; };
+		2B11FCE12B0C468100325F38 /* CanSimulateClose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE02B0C468100325F38 /* CanSimulateClose.swift */; };
+		2B11FCE32B0C47FA00325F38 /* CanSimulateSelectAll.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE22B0C47FA00325F38 /* CanSimulateSelectAll.swift */; };
+		2B11FCE52B0C555000325F38 /* CanFetchAppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */; };
+		2B11FCE72B0C55CD00325F38 /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE62B0C55CD00325F38 /* AppContext.swift */; };
 		2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B7D2AEC5F8500F1BB60 /* Supabase */; };
 		2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
@@ -53,7 +57,7 @@
 		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */; };
 		2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */; };
-		2B8CD4992B06DD36003E0589 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4982B06DD36003E0589 /* Functions.swift */; };
+		2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4982B06DD36003E0589 /* FunctionManager.swift */; };
 		2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */; };
 		2B8CD4A22B09C3A8003E0589 /* CanScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */; };
 		2B8CD4B42B0A9A11003E0589 /* Theme+Custom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4B32B0A9A11003E0589 /* Theme+Custom.swift */; };
@@ -131,6 +135,10 @@
 		2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialOpenActor.swift; sourceTree = "<group>"; };
 		2B0B30182ADCBF1600338B76 /* QuickActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsView.swift; sourceTree = "<group>"; };
 		2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		2B11FCE02B0C468100325F38 /* CanSimulateClose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateClose.swift; sourceTree = "<group>"; };
+		2B11FCE22B0C47FA00325F38 /* CanSimulateSelectAll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateSelectAll.swift; sourceTree = "<group>"; };
+		2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanFetchAppContext.swift; sourceTree = "<group>"; };
+		2B11FCE62B0C55CD00325F38 /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
 		2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
@@ -162,7 +170,7 @@
 		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanPerformOCR.swift; sourceTree = "<group>"; };
 		2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalFooterView.swift; sourceTree = "<group>"; };
-		2B8CD4982B06DD36003E0589 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		2B8CD4982B06DD36003E0589 /* FunctionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionManager.swift; sourceTree = "<group>"; };
 		2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivateOnboardingView.swift; sourceTree = "<group>"; };
 		2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanScreenshot.swift; sourceTree = "<group>"; };
 		2B8CD4B32B0A9A11003E0589 /* Theme+Custom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+Custom.swift"; sourceTree = "<group>"; };
@@ -324,7 +332,7 @@
 		2B8CD4972B06DD1D003E0589 /* Functions */ = {
 			isa = PBXGroup;
 			children = (
-				2B8CD4982B06DD36003E0589 /* Functions.swift */,
+				2B8CD4982B06DD36003E0589 /* FunctionManager.swift */,
 			);
 			path = Functions;
 			sourceTree = "<group>";
@@ -332,10 +340,13 @@
 		2B8CD4A02B09C357003E0589 /* Traits */ = {
 			isa = PBXGroup;
 			children = (
-				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
-				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
+				2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */,
 				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
 				2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */,
+				2B11FCE02B0C468100325F38 /* CanSimulateClose.swift */,
+				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
+				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
+				2B11FCE22B0C47FA00325F38 /* CanSimulateSelectAll.swift */,
 			);
 			path = Traits;
 			sourceTree = "<group>";
@@ -373,32 +384,32 @@
 		2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */ = {
 			isa = PBXGroup;
 			children = (
+				2B33D8812AAC4E0F001193A2 /* Actors */,
+				2BF929772AB04D0800FC105B /* CrudManagers */,
+				2B8CD4972B06DD1D003E0589 /* Functions */,
+				2B3FAC1D2AAAF20F00B2D405 /* Llama */,
+				2BFBCA9F2B048AB1004F8374 /* Models */,
+				2BE0EC252AA17F8400E47C52 /* Monitors */,
+				2BA7F07E2A9ABBA8003D38BA /* Preview Content */,
+				2B0116EE2AF88042000C78E1 /* Supabase */,
 				2B8CD4B22B0A9A04003E0589 /* Theme */,
 				2B8CD4A02B09C357003E0589 /* Traits */,
-				2B8CD4972B06DD1D003E0589 /* Functions */,
-				2BAA978F2B03668E00EC6A63 /* WindowManagers */,
-				2BFBCA9F2B048AB1004F8374 /* Models */,
-				2B0116EE2AF88042000C78E1 /* Supabase */,
-				2BF929772AB04D0800FC105B /* CrudManagers */,
-				2B33D8812AAC4E0F001193A2 /* Actors */,
-				2B3FAC1D2AAAF20F00B2D405 /* Llama */,
-				2BE0EC252AA17F8400E47C52 /* Monitors */,
 				2BA7F0AF2A9ABC62003D38BA /* Views */,
-				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
-				2B0116EA2AF86E88000C78E1 /* AppState.swift */,
+				2BAA978F2B03668E00EC6A63 /* WindowManagers */,
+				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2B0116EC2AF878D1000C78E1 /* AppDelegate.swift */,
-				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
+				2B0116EA2AF86E88000C78E1 /* AppState.swift */,
 				2BA7F0A82A9ABBE2003D38BA /* ClientManager.swift */,
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
-				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
-				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
-				2B27450D2AB0380C00F37D3E /* AppContextManager.swift */,
 				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
-				2BE0EC242AA17DB600E47C52 /* Info.plist */,
+				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
+				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
+				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
+				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
-				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
 				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
-				2BA7F07E2A9ABBA8003D38BA /* Preview Content */,
+				2BE0EC242AA17DB600E47C52 /* Info.plist */,
+				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -525,6 +536,7 @@
 			isa = PBXGroup;
 			children = (
 				2BFBCAA02B048AC0004F8374 /* QuickAction.swift */,
+				2B11FCE62B0C55CD00325F38 /* AppContext.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -684,7 +696,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B520D812AC7FD4800310426 /* AuxiliaryMenuView.swift in Sources */,
+				2B11FCE72B0C55CD00325F38 /* AppContext.swift in Sources */,
 				2B0B30102ACF8C8000338B76 /* SpecialOpenActor.swift in Sources */,
+				2B11FCE12B0C468100325F38 /* CanSimulateClose.swift in Sources */,
 				2BA7F0822A9ABBA8003D38BA /* Persistence.swift in Sources */,
 				2B0116EB2AF86E88000C78E1 /* AppState.swift in Sources */,
 				2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */,
@@ -710,8 +724,10 @@
 				2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */,
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
 				2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */,
+				2B11FCE52B0C555000325F38 /* CanFetchAppContext.swift in Sources */,
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */,
+				2B11FCE32B0C47FA00325F38 /* CanSimulateSelectAll.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
@@ -733,7 +749,7 @@
 				2B2EF1522AC40CB500EF2BD4 /* MessagePendingView.swift in Sources */,
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
 				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
-				2B8CD4992B06DD36003E0589 /* Functions.swift in Sources */,
+				2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */,
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,

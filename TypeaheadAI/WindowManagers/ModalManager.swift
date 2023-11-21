@@ -23,6 +23,7 @@ struct Message: Codable, Identifiable, Equatable {
     let id: UUID
     var text: String
     let isCurrentUser: Bool
+    let isHidden: Bool
     var responseError: String?
     var messageType: MessageType = .string
     var isTruncated: Bool = true
@@ -53,6 +54,7 @@ class ModalManager: ObservableObject {
     )
 
     private let maxMessages = 20
+    private let functionManager = FunctionManager()
 
     init() {
         self.messages = []
@@ -85,22 +87,6 @@ class ModalManager: ObservableObject {
         return toastWindow?.isVisible ?? false
     }
 
-    /// DEPRECATED: This should not be used because it doesn't clear state entirely. Use forceRefresh
-    @MainActor
-    func clearText(stickyMode: Bool) {
-        if stickyMode {
-            // TODO: Should we do something smarter here?
-            if let lastMessage = messages.last, !lastMessage.isCurrentUser {
-                messages.append(Message(id: UUID(), text: "", isCurrentUser: false))
-                messages = messages.suffix(maxMessages)
-            }
-        } else {
-            messages = []
-        }
-        isPending = false
-        userIntents = nil
-    }
-
     @MainActor
     func forceRefresh() {
         self.clientManager?.cancelStreamingTask()
@@ -112,18 +98,20 @@ class ModalManager: ObservableObject {
         userIntents = nil
     }
 
-    func setText(_ text: String) {
-        if let idx = messages.indices.last,
-                !messages[idx].isCurrentUser {
+    @MainActor
+    func setText(_ text: String, isHidden: Bool = false) {
+        if !isHidden,
+           let idx = messages.indices.last,
+           !messages[idx].isCurrentUser {
             messages[idx].text += text
         } else {
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: isHidden))
         }
     }
 
     /// Set an error message.
     @MainActor
-    func setError(_ responseError: String) {
+    func setError(_ responseError: String, isHidden: Bool = false) {
         isPending = false
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
@@ -133,6 +121,7 @@ class ModalManager: ObservableObject {
                 id: UUID(),
                 text: "",
                 isCurrentUser: false,
+                isHidden: isHidden,
                 responseError: responseError)
             )
         }
@@ -143,7 +132,7 @@ class ModalManager: ObservableObject {
     func appendText(_ text: String) async {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
             // If the AI response doesn't exist yet, create one.
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false))
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: false))
             userIntents = nil
             isPending = false
             return
@@ -167,6 +156,7 @@ class ModalManager: ObservableObject {
             id: UUID(),
             text: placeholder,
             isCurrentUser: false,
+            isHidden: false,
             messageType: .image(data: image)
         ))
     }
@@ -177,13 +167,14 @@ class ModalManager: ObservableObject {
             id: UUID(),
             text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
             isCurrentUser: true,
+            isHidden: true,
             messageType: .data(data: data)
         ))
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
-    func setUserMessage(_ text: String, messageType: MessageType = .string) {
+    func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false) {
         isPending = true
         userIntents = nil
 
@@ -192,6 +183,7 @@ class ModalManager: ObservableObject {
                 id: UUID(),
                 text: text,
                 isCurrentUser: true,
+                isHidden: isHidden,
                 messageType: messageType
             )
         )
@@ -201,10 +193,10 @@ class ModalManager: ObservableObject {
     /// 
     /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String, implicit: Bool = false) {
+    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false) {
         self.clientManager?.cancelStreamingTask()
 
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true))
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true, isHidden: isHidden))
 
         if userIntents != nil {
             NotificationCenter.default.post(name: .userIntentSent, object: nil)
@@ -445,7 +437,7 @@ class ModalManager: ObservableObject {
             case .function:
                 Task {
                     do {
-                        try await Functions.parseAndCallFunction(jsonString: text, modalManager: self)
+                        try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
                     } catch {
                         await self.setError(error.localizedDescription)
                     }

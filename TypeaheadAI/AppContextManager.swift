@@ -10,15 +10,7 @@ import Foundation
 import Vision
 import os.log
 
-struct AppContext: Codable {
-    let appName: String?
-    let bundleIdentifier: String?
-    let url: URL?
-    var screenshotPath: String? = nil
-    var ocrText: String? = nil
-}
-
-class AppContextManager: CanScreenshot {
+class AppContextManager: CanFetchAppContext, CanScreenshot {
     private let scriptManager = ScriptManager()
 
     private let logger = Logger(
@@ -27,24 +19,15 @@ class AppContextManager: CanScreenshot {
     )
 
     func getActiveAppInfo() async throws -> AppContext? {
-        guard let activeApp = NSWorkspace.shared.menuBarOwningApplication else {
+        guard var appContext = try await fetchAppContext() else {
             return nil
         }
-
-        let appName = activeApp.localizedName
-        let bundleIdentifier = activeApp.bundleIdentifier
-        self.logger.info("active app: \(bundleIdentifier ?? "<unk>")")
+        self.logger.info("active app: \(appContext.bundleIdentifier ?? "<unk>")")
 
         // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
-        let screenshotPath = try await screenshot()
-
-        let url = await getUrl(bundleIdentifier: bundleIdentifier)
-
-        return AppContext(
-            appName: appName,
-            bundleIdentifier: bundleIdentifier,
-            url: url
-        )
+        appContext.screenshotPath = try await screenshot()
+        appContext.url = await getUrl(bundleIdentifier: appContext.bundleIdentifier)
+        return appContext
     }
 
     private func getUrl(bundleIdentifier: String?) async -> URL? {
