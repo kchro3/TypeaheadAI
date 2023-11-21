@@ -203,10 +203,6 @@ class ClientManager: ObservableObject {
                         history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickActionID)
                     } else {
                         quickAction = await self.promptManager?.addPrompt(userIntent)
-                        history = self.intentManager?.fetchIntentsAsMessages(
-                            limit: 10,
-                            appContext: payload.appContext
-                        )
                     }
 
                     // NOTE: We cached the copiedText earlier
