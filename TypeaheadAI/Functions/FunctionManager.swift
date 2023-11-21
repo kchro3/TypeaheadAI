@@ -53,7 +53,7 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             await modalManager.appendText("Opening \(functionCall.args["url"] ?? "url")...")
             try await openURL(functionCall.args["url"]!)
             await modalManager.closeModal()
-            try await Task.sleep(for: .seconds(3))
+            try await Task.sleep(for: .seconds(5))
             try await simulateSelectAll()
             try await simulateCopy()
             try await simulateClose()
