@@ -116,8 +116,8 @@ struct ModalView: View {
     var modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), text: "hello world", isCurrentUser: false),
-        Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+        Message(id: UUID(), text: "hello world", isCurrentUser: false, isHidden: false),
+        Message(id: UUID(), text: "hello bot", isCurrentUser: true, isHidden: false)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -126,8 +126,8 @@ struct ModalView: View {
     var modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Request took too long"),
-        Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+        Message(id: UUID(), text: "", isCurrentUser: false, isHidden: false, responseError: "Request took too long"),
+        Message(id: UUID(), text: "hello bot", isCurrentUser: true, isHidden: false)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -154,7 +154,7 @@ Task {
 """
 
     modalManager.messages = [
-        Message(id: UUID(), text: markdownString, isCurrentUser: false)
+        Message(id: UUID(), text: markdownString, isCurrentUser: false, isHidden: false)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -163,8 +163,8 @@ Task {
     var modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), text: "hello world", isCurrentUser: false),
-        Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true)
+        Message(id: UUID(), text: "hello world", isCurrentUser: false, isHidden: false),
+        Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true, isHidden: false)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -185,8 +185,8 @@ Task {
     ]
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Request took too long"),
-        Message(id: UUID(), text: "hello bot", isCurrentUser: true)
+        Message(id: UUID(), text: "", isCurrentUser: false, isHidden: false, responseError: "Request took too long"),
+        Message(id: UUID(), text: "hello bot", isCurrentUser: true, isHidden: false)
     ]
 
     let promptManager = QuickActionManager(context: container.viewContext, backgroundContext: container.newBackgroundContext())

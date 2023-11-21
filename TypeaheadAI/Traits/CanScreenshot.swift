@@ -16,7 +16,7 @@ extension CanScreenshot {
         let directory = NSTemporaryDirectory()
         let screenshotPath = NSURL.fileURL(withPathComponents: [directory, "capture_\(Date().ISO8601Format()).png"])!
 
-        var task = Process()
+        let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
         task.arguments = [
             "-x", screenshotPath.path

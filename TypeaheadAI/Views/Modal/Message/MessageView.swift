@@ -274,19 +274,19 @@ struct MessageView: View {
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), text: "", isCurrentUser: false, responseError: "Something has gone horribly wrong."))
+    MessageView(message: Message(id: UUID(), text: "", isCurrentUser: false, isHidden: false, responseError: "Something has gone horribly wrong."))
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true))
+    MessageView(message: Message(id: UUID(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true, isHidden: false))
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), text: "hello bot", isCurrentUser: true))
+    MessageView(message: Message(id: UUID(), text: "hello bot", isCurrentUser: true, isHidden: false))
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), text: "hello user", isCurrentUser: false))
+    MessageView(message: Message(id: UUID(), text: "hello user", isCurrentUser: false, isHidden: false))
 }
 
 
@@ -316,7 +316,7 @@ Task {
 | 1     | 2   | 3    |
 """
 
-    return MessageView(message: Message(id: UUID(), text: markdownString, isCurrentUser: false))
+    return MessageView(message: Message(id: UUID(), text: markdownString, isCurrentUser: false, isHidden: false))
 }
 
 #Preview {
@@ -328,5 +328,5 @@ Thanks for trying out the app, really appreciate your candidness in the intervie
 Jeff
 """
 
-    return MessageView(message: Message(id: UUID(), text: markdownString, isCurrentUser: false))
+    return MessageView(message: Message(id: UUID(), text: markdownString, isCurrentUser: false, isHidden: false))
 }
