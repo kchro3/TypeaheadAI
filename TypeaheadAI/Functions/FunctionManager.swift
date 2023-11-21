@@ -25,7 +25,7 @@ struct FunctionCall: Codable {
     let args: [String: String]
 }
 
-class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy, CanSimulateClose {
+class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy, CanSimulateClose, CanScreenshot, CanPerformOCR {
     func openURL(_ url: String) async throws {
         guard let url = URL(string: url) else {
             throw FunctionError.openURL("URL not found")
@@ -54,6 +54,7 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             try await openURL(functionCall.args["url"]!)
             await modalManager.closeModal()
             try await Task.sleep(for: .seconds(3))
+            let screenshotPath = try await screenshot()
             try await simulateSelectAll()
             try await simulateCopy()
             try await simulateClose()
@@ -67,10 +68,14 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             await modalManager.showModal()
 
             if let copiedText = NSPasteboard.general.string(forType: .string) {
-                await modalManager.setText("Here's what I copied from \(url):\n\(copiedText)", isHidden: true)
+                await modalManager.setUserMessage("Here's what I copied from \(url):\n\(copiedText)\n\n\(prompt)", isHidden: true)
             }
 
-            await modalManager.setUserMessage(prompt, isHidden: true)
+            if let screenshot = screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
+                let (ocrText, _) = try await performOCR(image: screenshot)
+                await modalManager.setUserMessage("Here's what I OCR'ed from \(url):\n\(ocrText)\n\n\(prompt)", isHidden: true)
+            }
+
             await modalManager.replyToUserMessage(refresh: false)
         default:
             throw FunctionError.notFound("Function \(functionCall.name) not found.")

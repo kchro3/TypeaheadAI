@@ -15,31 +15,31 @@ struct ModalFooterView: View {
 
     var body: some View {
         VStack(spacing: 5) {
-            if let userIntents = modalManager.userIntents,
-               userIntents.count > 0 {
-                UserIntentsView(userIntents: userIntents) { userIntent in
-                    // On button click, set the new message & reset the user intents
-                    modalManager.addUserMessage(userIntent, implicit: true)
-                    modalManager.userIntents = nil
-                }
-            } else if clientManager.currentStreamingTask != nil {
-                HStack {
-                    Spacer()
-                    Button {
-                        clientManager.cancelStreamingTask()
-                    } label: {
-                        HStack(spacing: 5) {
-                            Image(systemName: "stop.circle")
-                                .font(.title2)
-                            Text("Cancel")
-                        }
-                        .padding(5)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.trailing, 10)
-                }
-            }
-
+//            if let userIntents = modalManager.userIntents,
+//               userIntents.count > 0 {
+//                UserIntentsView(userIntents: userIntents) { userIntent in
+//                    // On button click, set the new message & reset the user intents
+//                    modalManager.addUserMessage(userIntent, implicit: true)
+//                    modalManager.userIntents = nil
+//                }
+//            } else if clientManager.currentStreamingTask != nil {
+//                HStack {
+//                    Spacer()
+//                    Button {
+//                        clientManager.cancelStreamingTask()
+//                    } label: {
+//                        HStack(spacing: 5) {
+//                            Image(systemName: "stop.circle")
+//                                .font(.title2)
+//                            Text("Cancel")
+//                        }
+//                        .padding(5)
+//                    }
+//                    .buttonStyle(.plain)
+//                    .padding(.trailing, 10)
+//                }
+//            }
+//
             HStack {
                 CustomTextField(
                     text: $text,

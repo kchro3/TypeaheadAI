@@ -19,44 +19,44 @@ struct ConversationView: View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 ForEach(modalManager.messages.indices, id: \.self) { index in
-                    if !modalManager.messages[index].isHidden {
-                        MessageView(
-                            message: modalManager.messages[index],
-                            onEdit: { newContent in
-                                if newContent != modalManager.messages[index].text {
-                                    modalManager.updateMessage(index: index, newContent: newContent)
-                                } else {
-                                    modalManager.messages[index].isEdited.toggle()
-                                }
-                            },
-                            onEditAppear: {
+                    MessageView(
+                        message: modalManager.messages[index],
+                        onEdit: { newContent in
+                            if newContent != modalManager.messages[index].text {
+                                modalManager.updateMessage(index: index, newContent: newContent)
+                            } else {
                                 modalManager.messages[index].isEdited.toggle()
-                            },
-                            onRefresh: {
-                                modalManager.replyToUserMessage(refresh: true)
-                            },
-                            onTruncate: {
-                                modalManager.messages[index].isTruncated.toggle()
                             }
-                        )
-                        .padding(5)
-                    }
+                        },
+                        onEditAppear: {
+                            modalManager.messages[index].isEdited.toggle()
+                        },
+                        onRefresh: {
+                            modalManager.replyToUserMessage(refresh: true)
+                        },
+                        onTruncate: {
+                            modalManager.messages[index].isTruncated.toggle()
+                        }
+                    )
+                    .padding(5)
                 }
 
-                MessagePendingView(isPending: modalManager.isPending)
-                    .padding(5)
+//                MessagePendingView(isPending: modalManager.isPending)
+//                    .padding(5)
 
                 // HACK: This is a way to make sure that the chat stays scrolled to the bottom.
-                Text("").font(.system(size: 1.0)).opacity(0)
+                Text("test")
+                    .font(.system(size: 10.0))
+                    .opacity(1)
                     .id(bottomID)
             }
             .scrollContentBackground(.hidden)
             .onChange(of: modalManager.messages.last?.text as? String) { _ in
                 if !userHasScrolled {
-                    DispatchQueue.main.async {
-                        withAnimation {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+//                        withAnimation {
                             proxy.scrollTo(bottomID, anchor: .bottom)
-                        }
+//                        }
                     }
                 }
             }

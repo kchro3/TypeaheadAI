@@ -18,12 +18,11 @@ struct MessageView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var webViewHeight: CGFloat = .zero
-    @State private var isMessageTruncated = true
     @State private var isEditing = false
     @State private var localContent: String = ""
 
     private let maxMessageLength = 280
-    private let isMarkdown: Bool
+    private let isMarkdown: Bool = true
 
     init(
         message: Message,
@@ -38,23 +37,23 @@ struct MessageView: View {
         self.onRefresh = onRefresh
         self.onTruncate = onTruncate
 
-        if !message.isCurrentUser {
-            // Just a heuristic
-            self.isMarkdown = (
-                message.text.contains("#") ||
-                message.text.contains("](") ||
-                message.text.contains("*") ||
-                message.text.contains("__") ||
-                message.text.contains("---") ||
-                message.text.contains("[//]: #") ||
-                message.text.contains("`") ||
-                message.text.contains("- ") ||
-                message.text.contains("1.")
-            )
-        } else {
-            // Never render user text as markdown
-            self.isMarkdown = false
-        }
+//        if !message.isCurrentUser {
+//            // Just a heuristic
+//            self.isMarkdown = (
+//                message.text.contains("#") ||
+//                message.text.contains("](") ||
+//                message.text.contains("*") ||
+//                message.text.contains("__") ||
+//                message.text.contains("---") ||
+//                message.text.contains("[//]: #") ||
+//                message.text.contains("`") ||
+//                message.text.contains("- ") ||
+//                message.text.contains("1.")
+//            )
+//        } else {
+//            // Never render user text as markdown
+//            self.isMarkdown = false
+//        }
     }
 
     var body: some View {
