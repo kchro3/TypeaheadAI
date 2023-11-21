@@ -62,58 +62,6 @@ class IntentManager {
         return originalScore * exp(-decayConstant * deltaTime)
     }
 
-    func fetchIntentsAsMessages(
-        limit: Int,
-        appContext: AppContext?
-    ) -> [Message] {
-        guard let appContext = appContext else {
-            return []
-        }
-
-        let fetchRequest: NSFetchRequest<IntentEntry> = IntentEntry.fetchRequest()
-        var predicates = [NSPredicate]()
-
-        if let url = appContext.url?.host {
-            predicates.append(NSPredicate(format: "url == %@", url))
-        }
-
-        if let appName = appContext.appName {
-            predicates.append(NSPredicate(format: "appName == %@", appName))
-        }
-
-        if let bundleIdentifier = appContext.bundleIdentifier {
-            predicates.append(NSPredicate(format: "bundleIdentifier == %@", bundleIdentifier))
-        }
-
-        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
-        fetchRequest.fetchLimit = 50
-
-        do {
-            return try backgroundContext.performAndWait {
-                let entries = try backgroundContext.fetch(fetchRequest)
-
-                // NOTE: Count the most common recent prompts and construct a user message
-                var promptCounts = [String: Int]()
-                for entry in entries {
-                    if let prompt = entry.prompt {
-                        promptCounts[prompt] = (promptCounts[prompt] ?? 0) + 1
-                    }
-                }
-
-                var topPromptsString = "Most common user intents for this context:\n"
-                for (prompt, count) in promptCounts.sorted(by: { $0.value > $1.value }).prefix(limit) {
-                    topPromptsString += "- \(prompt) (used \(count)x)\n"
-                }
-
-                return [Message(id: UUID(), text: topPromptsString, isCurrentUser: true)]
-            }
-        } catch {
-            logger.error("Failed to fetch history entries: \(error.localizedDescription)")
-            return []
-        }
-    }
-
     func fetchContextualIntents(
         limit: Int,
         appContext: AppContext?
