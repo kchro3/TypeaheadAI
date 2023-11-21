@@ -9,59 +9,6 @@ import SwiftUI
 import AppKit
 import CoreData
 
-struct MemoView: View {
-    private let memoEntry: MemoEntry
-    private var onDelete: (() -> Void)?
-
-    init(_ memoEntry: MemoEntry, onDelete: (() -> Void)? = nil) {
-        self.memoEntry = memoEntry
-        self.onDelete = onDelete
-    }
-
-    var body: some View {
-        HStack {
-            Text("Date: \(formattedDate(for: memoEntry.createdAt))")
-                .font(.footnote)
-                .foregroundColor(.primary)
-
-            Spacer()
-
-            Menu {
-                Button {
-                    onDelete?()
-                } label: {
-                    Text("Delete")
-                }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 15)
-                    .imageScale(.large)
-                    .foregroundColor(.secondary)
-            }
-            .buttonStyle(.plain)
-        }
-
-        Text(memoEntry.summary!)
-            .font(.headline)
-            .foregroundColor(.primary)
-
-        Text("\(String(memoEntry.content!.prefix(280)))...")
-            .font(.body)
-            .foregroundColor(.secondary)
-    }
-
-    private func formattedDate(for date: Date?) -> String {
-        guard let date = date else { return "N/A" }
-
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-
-        return formatter.string(from: date)
-    }
-}
-
 struct ProfileView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var isShowingMenu = false
@@ -69,16 +16,6 @@ struct ProfileView: View {
     @State private var isHovered: Bool = false
 
     @AppStorage("bio") private var bio: String = ""
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \MemoEntry.createdAt, ascending: false)],
-        predicate: nil,
-        animation: .default
-    )
-    private var memoEntries: FetchedResults<MemoEntry>
-
-    @State private var fetchLimit: Int = 10
-    @State private var hasMore: Bool = true
 
     private let maxCharacterCount = 500
 
@@ -108,43 +45,10 @@ struct ProfileView: View {
                     .font(.footnote)
                     .foregroundColor(bio.count > maxCharacterCount ? .red : .primary)
 
-                Divider()
-
-                Text("Saved memos").font(.headline)
-
-                ForEach(memoEntries, id: \.self) { memoEntry in
-                    VStack(alignment: .leading, spacing: 4) {
-                        MemoView(memoEntry) {
-                            // Perform the deletion logic here
-                            viewContext.delete(memoEntry)
-
-                            // Save the changes to the managed object context
-                            do {
-                                try viewContext.save()
-                            } catch {
-                                // Handle the error, if any
-                                print("Error deleting memo entry: \(error)")
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(.primary.opacity(0.1))
-                    .cornerRadius(8)
-                    .padding(.bottom, 8)
-                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
-    }
-
-    private func loadMoreItems() {
-        if memoEntries.count == fetchLimit {
-            fetchLimit += 10
-            hasMore = true
-        } else {
-            hasMore = false
-        }
     }
 }
 
