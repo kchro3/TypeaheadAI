@@ -29,7 +29,7 @@ extension Theme {
         .code {
             FontFamilyVariant(.monospaced)
             ForegroundColor(.code)
-            FontSize(.em(0.85))
+//            FontSize(.em(0.85))
         }
         .strong {
             FontWeight(.semibold)
@@ -40,8 +40,8 @@ extension Theme {
         .heading1 { configuration in
             VStack(alignment: .leading, spacing: 0) {
                 configuration.label
-                    .relativePadding(.bottom, length: .em(0.3))
-                    .relativeLineSpacing(.em(0.125))
+//                    .relativePadding(.bottom, length: .em(0.3))
+//                    .relativeLineSpacing(.em(0.125))
                     .markdownMargin(top: 24, bottom: 16)
                     .markdownTextStyle {
                         FontWeight(.semibold)
@@ -53,8 +53,8 @@ extension Theme {
         .heading2 { configuration in
             VStack(alignment: .leading, spacing: 0) {
                 configuration.label
-                    .relativePadding(.bottom, length: .em(0.3))
-                    .relativeLineSpacing(.em(0.125))
+//                    .relativePadding(.bottom, length: .em(0.3))
+//                    .relativeLineSpacing(.em(0.125))
                     .markdownMargin(top: 24, bottom: 16)
                     .markdownTextStyle {
                         FontWeight(.semibold)
@@ -65,7 +65,7 @@ extension Theme {
         }
         .heading3 { configuration in
             configuration.label
-                .relativeLineSpacing(.em(0.125))
+//                .relativeLineSpacing(.em(0.125))
                 .markdownMargin(top: 24, bottom: 16)
                 .markdownTextStyle {
                     FontWeight(.semibold)
@@ -74,7 +74,7 @@ extension Theme {
         }
         .heading4 { configuration in
             configuration.label
-                .relativeLineSpacing(.em(0.125))
+//                .relativeLineSpacing(.em(0.125))
                 .markdownMargin(top: 24, bottom: 16)
                 .markdownTextStyle {
                     FontWeight(.semibold)
@@ -82,7 +82,7 @@ extension Theme {
         }
         .heading5 { configuration in
             configuration.label
-                .relativeLineSpacing(.em(0.125))
+//                .relativeLineSpacing(.em(0.125))
                 .markdownMargin(top: 24, bottom: 16)
                 .markdownTextStyle {
                     FontWeight(.semibold)
@@ -91,7 +91,7 @@ extension Theme {
         }
         .heading6 { configuration in
             configuration.label
-                .relativeLineSpacing(.em(0.125))
+//                .relativeLineSpacing(.em(0.125))
                 .markdownMargin(top: 24, bottom: 16)
                 .markdownTextStyle {
                     FontWeight(.semibold)
@@ -102,17 +102,17 @@ extension Theme {
         .paragraph { configuration in
             configuration.label
                 .fixedSize(horizontal: false, vertical: true)
-                .relativeLineSpacing(.em(0.25))
+//                .relativeLineSpacing(.em(0.25))
                 .markdownMargin(top: 0, bottom: 16)
         }
         .blockquote { configuration in
             HStack(spacing: 0) {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.border)
-                    .relativeFrame(width: .em(0.2))
+//                    .relativeFrame(width: .em(0.2))
                 configuration.label
                     .markdownTextStyle { ForegroundColor(.secondaryText) }
-                    .relativePadding(.horizontal, length: .em(1))
+//                    .relativePadding(.horizontal, length: .em(1))
             }
             .fixedSize(horizontal: false, vertical: true)
         }
@@ -140,7 +140,7 @@ extension Theme {
                 ScrollView(.horizontal) {
                     configuration.label
                         .fixedSize(horizontal: false, vertical: true)
-                        .relativeLineSpacing(.em(0.225))
+//                        .relativeLineSpacing(.em(0.225))
                         .markdownTextStyle {
                             FontFamilyVariant(.monospaced)
                             FontSize(.em(0.85))
@@ -154,14 +154,14 @@ extension Theme {
         }
         .listItem { configuration in
             configuration.label
-                .markdownMargin(top: .em(0.25))
+//                .markdownMargin(top: .em(0.25))
         }
         .taskListMarker { configuration in
             Image(systemName: configuration.isCompleted ? "checkmark.square.fill" : "square")
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(Color.checkbox, Color.checkboxBackground)
                 .imageScale(.small)
-                .relativeFrame(minWidth: .em(1.5), alignment: .trailing)
+//                .relativeFrame(minWidth: .em(1.5), alignment: .trailing)
         }
         .table { configuration in
             configuration.label
@@ -183,11 +183,11 @@ extension Theme {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.vertical, 6)
                 .padding(.horizontal, 13)
-                .relativeLineSpacing(.em(0.25))
+//                .relativeLineSpacing(.em(0.25))
         }
         .thematicBreak {
             Divider()
-                .relativeFrame(height: .em(0.25))
+//                .relativeFrame(height: .em(0.25))
                 .overlay(Color.border)
                 .markdownMargin(top: 24, bottom: 24)
         }

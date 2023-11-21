@@ -5,9 +5,12 @@
 //  Created by Jeff Hara on 11/3/23.
 //
 
+import MarkdownUI
 import SwiftUI
 
-struct ConversationView: View {
+struct ConversationView: View {    
+    @Environment(\.colorScheme) private var colorScheme
+
     @StateObject var modalManager: ModalManager
 
     @State private var userHasScrolled: Bool = false
@@ -42,6 +45,10 @@ struct ConversationView: View {
                         .padding(5)
                     }
                 }
+                .markdownTheme(.custom)
+                .markdownCodeSyntaxHighlighter(.custom(
+                    theme: colorScheme == .dark ? HighlighterConstants.darkTheme : HighlighterConstants.lightTheme
+                ))
 
                 MessagePendingView(isPending: modalManager.isPending)
                     .padding(5)

@@ -192,10 +192,6 @@ struct MessageView: View {
                         })
                     } else if isMarkdown {
                         Markdown(message.text)
-                            .markdownTheme(.custom)
-                            .markdownCodeSyntaxHighlighter(.custom(
-                                theme: colorScheme == .dark ? HighlighterConstants.darkTheme : HighlighterConstants.lightTheme
-                            ))
                             .padding(.vertical, 10)
                             .padding(.horizontal, 15)
                             .foregroundColor(.primary)
