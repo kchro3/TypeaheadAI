@@ -32,6 +32,7 @@ final class AppState: ObservableObject {
     @Published var onboardingWindowManager: OnboardingWindowManager
     @Published var clientManager: ClientManager
     @Published var intentManager: IntentManager
+    @Published var contextWindowManager: ContextWindowManager
 
     var supabaseManager = SupabaseManager()
 
@@ -43,6 +44,7 @@ final class AppState: ObservableObject {
     private var specialPasteActor: SpecialPasteActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
+    private var smartClickActor: SmartClickActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
@@ -66,6 +68,7 @@ final class AppState: ObservableObject {
         self.settingsManager = SettingsManager(context: context)
         self.onboardingWindowManager = OnboardingWindowManager(context: context)
         self.appContextManager = AppContextManager()
+        self.contextWindowManager = ContextWindowManager(context: context)
 
         // Initialize actors
         self.specialCopyActor = SpecialCopyActor(
@@ -95,6 +98,14 @@ final class AppState: ObservableObject {
             promptManager: promptManager,
             modalManager: modalManager,
             appContextManager: appContextManager
+        )
+        self.smartClickActor = SmartClickActor(
+            intentManager: intentManager,
+            clientManager: clientManager,
+            promptManager: promptManager,
+            modalManager: modalManager,
+            appContextManager: appContextManager,
+            contextWindowManager: contextWindowManager
         )
 
         // Set lazy params
@@ -201,6 +212,13 @@ final class AppState: ObservableObject {
 
         appVersion = getAppVersion()
         startCheckingForUpdates()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.smartClickWrapper(_:)),
+            name: .smartClick,
+            object: nil
+        )
     }
 
     deinit {
@@ -318,6 +336,12 @@ final class AppState: ObservableObject {
             } else if let error = error {
                 self.logger.error("Notification permission error: \(error.localizedDescription)")
             }
+        }
+    }
+
+    @objc private func smartClickWrapper(_ notification: NSNotification) {
+        Task {
+            try await smartClickActor?.smartClick()
         }
     }
 }
