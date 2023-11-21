@@ -43,11 +43,6 @@ struct GeneralSettingsView: View {
                         Text("Responds to what you've screen-captured.")
                             .frame(width: 325, alignment: .leading)
                     }
-                    HStack {
-                        KeyboardShortcuts.Recorder("Smart Save:", name: .specialSave)
-                        Text("Remembers what you've selected. (Work in Progress)")
-                            .frame(width: 325, alignment: .leading)
-                    }
                 }
             }
             .padding(.horizontal, 10)

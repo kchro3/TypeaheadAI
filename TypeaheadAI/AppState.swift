@@ -37,13 +37,11 @@ final class AppState: ObservableObject {
 
     private let historyManager: HistoryManager
     private let appContextManager: AppContextManager
-    private let memoManager: MemoManager
 
     // Actors
     private var specialCutActor: SpecialCutActor? = nil
     private var specialPasteActor: SpecialPasteActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
-    private var specialSaveActor: SpecialSaveActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
 
     // Monitors
@@ -60,7 +58,6 @@ final class AppState: ObservableObject {
     init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
 
         // Initialize managers
-        self.memoManager = MemoManager(context: backgroundContext)
         self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
         self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
         self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
@@ -91,11 +88,6 @@ final class AppState: ObservableObject {
             clientManager: clientManager,
             modalManager: modalManager,
             appContextManager: appContextManager
-        )
-        self.specialSaveActor = SpecialSaveActor(
-            modalManager: modalManager,
-            clientManager: clientManager,
-            memoManager: memoManager
         )
         self.specialOpenActor = SpecialOpenActor(
             intentManager: intentManager,
@@ -162,12 +154,6 @@ final class AppState: ObservableObject {
                     self.logger.error("\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
-            }
-        }
-
-        KeyboardShortcuts.onKeyUp(for: .specialSave) { [self] in
-            Task {
-                await self.specialSaveActor?.specialSave()
             }
         }
 
