@@ -30,17 +30,21 @@ class ClientManager: ObservableObject {
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
 //    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+//    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
     private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
     private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
+    private let apiFeedback = URL(string: "http://localhost:8080/v2/feedback")!
+
     #else
     private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
     private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
     #endif
 
     private let logger = Logger(
@@ -68,6 +72,37 @@ class ClientManager: ObservableObject {
         } catch {
             self.logger.error("\(error.localizedDescription)")
             return nil
+        }
+    }
+
+    func sendFeedback(feedback: String, timeout: TimeInterval = 30) async throws {
+        guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
+            throw ClientManagerError.signInRequired("Must be signed in to share feedback!")
+        }
+        
+        let payload = FeedbackPayload(uuid: uuid, feedback: feedback)
+
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            throw ClientManagerError.badRequest("Request was malformed...")
+        }
+
+        var urlRequest = URLRequest(url: self.apiFeedback, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, resp) = try await self.session.data(for: urlRequest)
+
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Something went wrong...")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw ClientManagerError.serverError(errorResponse.detail)
+            } else {
+                throw ClientManagerError.serverError("Something went wrong...")
+            }
         }
     }
 
@@ -689,4 +724,9 @@ enum ClientManagerError: LocalizedError {
 
 struct SuggestIntentsPayload: Codable {
     let intents: [String]
+}
+
+struct FeedbackPayload: Codable {
+    let uuid: UUID
+    let feedback: String
 }

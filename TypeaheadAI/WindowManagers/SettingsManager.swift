@@ -12,6 +12,7 @@ import os.log
 
 class SettingsManager: ObservableObject {
     var toastWindow: ModalWindow?
+    var clientManager: ClientManager? = nil
     var promptManager: QuickActionManager? = nil
     var llamaModelManager: LlamaModelManager? = nil
     var supabaseManager: SupabaseManager? = nil
@@ -56,7 +57,8 @@ class SettingsManager: ObservableObject {
         visualEffect.material = .hudWindow
 
         let contentView = SettingsView(
-            promptManager: promptManager!, 
+            clientManager: clientManager!,
+            promptManager: promptManager!,
             llamaModelManager: llamaModelManager!,
             supabaseManager: supabaseManager!
         )

@@ -99,6 +99,13 @@ struct MenuView: View {
                     isMenuVisible = false
                 }
 
+                MenuButtonView(
+                    title: "Feedback"
+                ) {
+                    settingsManager.showModal(tab: .feedback)
+                    isMenuVisible = false
+                }
+
                 if supabaseManager.uuid != nil {
                     MenuButtonView(title: "Sign out") {
                         Task {

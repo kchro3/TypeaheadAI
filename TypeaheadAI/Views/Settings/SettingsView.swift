@@ -20,6 +20,7 @@ enum Tab: String, CaseIterable, Identifiable {
 }
 
 struct SettingsView: View {
+    var clientManager: ClientManager
     var promptManager: QuickActionManager
     var llamaModelManager: LlamaModelManager
     @ObservedObject var supabaseManager: SupabaseManager
@@ -68,7 +69,9 @@ struct SettingsView: View {
         case .account:
             return AnyView(AccountView(supabaseManager: supabaseManager))
         case .feedback:
-            return AnyView(Text("Work in progress!"))
+            return AnyView(FeedbackView(onSubmit: { feedback in
+                try await clientManager.sendFeedback(feedback: feedback)
+            }))
         }
     }
 }
@@ -130,12 +133,15 @@ struct SettingsView_Previews: PreviewProvider {
 
         return Group {
             SettingsView(
+                clientManager: ClientManager(),
                 promptManager: promptManager,
                 llamaModelManager: llamaModelManager,
                 supabaseManager: supabaseManager
             )
             .environment(\.managedObjectContext, context)
+
             SettingsView(
+                clientManager: ClientManager(),
                 promptManager: promptManager,
                 llamaModelManager: llamaModelManager,
                 supabaseManager: supabaseManager
