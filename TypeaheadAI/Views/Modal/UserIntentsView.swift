@@ -10,6 +10,7 @@ import SwiftUI
 /// NOTE: Singular, see below for the side-scrolling intent
 struct UserIntentView: View {
     let userIntent: String
+    let rank: Int
     let onButtonClick: ((String) -> Void)?
     let maxWidth: CGFloat = 200
 
@@ -17,19 +18,27 @@ struct UserIntentView: View {
         Button(action: {
             onButtonClick?(userIntent)
         }) {
-            Text(userIntent)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .foregroundColor(.primary)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 15)
-                .frame(maxWidth: maxWidth)
-                .background(
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.accentColor.opacity(0.4))
-                )
+            HStack {
+                HStack(spacing: 2) {
+                    Image(systemName: "command")
+                    Text("\(rank)")
+                }
+
+                Text(userIntent)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .foregroundColor(.primary)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 15)
+            .frame(maxWidth: maxWidth)
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.accentColor.opacity(0.4))
+            )
         }
         .buttonStyle(.plain)
+        .keyboardShortcut(KeyEquivalent(Character("\(rank)")), modifiers: .command)
     }
 }
 
@@ -44,6 +53,7 @@ struct UserIntentsView: View {
                 ForEach(userIntents.indices, id: \.self) { index in
                     UserIntentView(
                         userIntent: userIntents[index],
+                        rank: index + 1,
                         onButtonClick: onButtonClick
                     )
                     .padding([.horizontal, .vertical], 5)
