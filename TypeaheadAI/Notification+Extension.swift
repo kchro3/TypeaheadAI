@@ -13,4 +13,6 @@ extension Notification.Name {
     static let startOnboarding = Notification.Name("startOnboarding")
 
     static let oAuthCallback = Notification.Name("OAuthCallBack")
+
+    static let chatComplete = Notification.Name("chatComplete")
 }

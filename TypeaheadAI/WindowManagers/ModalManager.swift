@@ -403,7 +403,8 @@ class ModalManager: ObservableObject {
         }
     }
 
-    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) {
+    @MainActor
+    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) async {
         switch result {
         case .success(let success):
             guard let text = success.text else {
@@ -414,53 +415,43 @@ class ModalManager: ObservableObject {
             case .text:
                 return // no-op
             case .image:
-                Task {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.isPending = true
-                    }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.isPending = true
+                }
 
-                    do {
-                        if let data = text.data(using: .utf8),
-                           let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
-                           let imageData = try await self.clientManager?.generateImage(payload: imageRequest) {
-                            if self.online,
-                               let data = Data(base64Encoded: imageData.image) {
-                                let captionPayload = await self.clientManager?.captionImage(tiffData: data)
-                                await self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption)
-                            } else {
-                                await self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
-                            }
+                do {
+                    if let data = text.data(using: .utf8),
+                       let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
+                       let imageData = try await self.clientManager?.generateImage(payload: imageRequest) {
+                        if self.online,
+                           let data = Data(base64Encoded: imageData.image) {
+                            let captionPayload = await self.clientManager?.captionImage(tiffData: data)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption)
+                        } else {
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
                         }
-                    } catch {
-                        await self.setError(error.localizedDescription)
                     }
+                } catch {
+                    self.setError(error.localizedDescription)
                 }
             case .function:
-                Task {
-                    do {
-                        try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
-                    } catch {
-                        await self.setError(error.localizedDescription)
-                    }
+                do {
+                    try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
+                } catch {
+                    self.setError(error.localizedDescription)
                 }
             }
         case .failure(let error as ClientManagerError):
             switch error {
             case .badRequest(let message):
-                Task {
-                    await self.setError(message)
-                }
+                self.setError(message)
             default:
-                Task {
-                    await self.setError("Something went wrong. Please try again.")
-                    self.logger.error("Something went wrong.")
-                }
+                self.setError("Something went wrong. Please try again.")
+                self.logger.error("Something went wrong.")
             }
         case .failure(let error):
-            Task {
-                self.logger.error("Error: \(error.localizedDescription)")
-                await self.setError(error.localizedDescription)
-            }
+            self.logger.error("Error: \(error.localizedDescription)")
+            self.setError(error.localizedDescription)
         }
     }
 

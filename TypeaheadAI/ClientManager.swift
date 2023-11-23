@@ -218,7 +218,7 @@ class ClientManager: ObservableObject {
         userIntent: String? = nil,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
     ) {
         self.logger.info("incognito: \(incognitoMode)")
         if let (key, _) = cached,
@@ -306,7 +306,7 @@ class ClientManager: ObservableObject {
         incognitoMode: Bool,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -334,7 +334,7 @@ class ClientManager: ObservableObject {
                 if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
                     payload: payload, timeout: timeout, streamHandler: streamHandler) {
 
-                    completion(result)
+                    await completion(result)
 
                     // Cache successful requests
                     switch result {
@@ -346,7 +346,7 @@ class ClientManager: ObservableObject {
                         break
                     }
                 } else {
-                    completion(.failure(ClientManagerError.appError("Something went wrong...")))
+                    await completion(.failure(ClientManagerError.appError("Something went wrong...")))
                 }
             } else {
                 do {
@@ -354,7 +354,7 @@ class ClientManager: ObservableObject {
                         payload: payload,
                         timeout: timeout,
                         completion: { result in
-                            completion(result)
+                            await completion(result)
 
                             // Cache successful response
                             switch result {
@@ -447,7 +447,7 @@ class ClientManager: ObservableObject {
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
     ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
@@ -499,7 +499,7 @@ class ClientManager: ObservableObject {
                           let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
-                        completion(.failure(error))
+                        await completion(.failure(error))
                         return
                     }
 
@@ -520,12 +520,12 @@ class ClientManager: ObservableObject {
                               (finishReason != "stop" && finishReason != "function_call") {
                         let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
                         continuation.finish(throwing: error)
-                        completion(.failure(error))
+                        await completion(.failure(error))
                         return
                     }
                 }
 
-                completion(.success(bufferedPayload))
+                await completion(.success(bufferedPayload))
                 continuation.finish()
             }
         }
