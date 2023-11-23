@@ -162,7 +162,7 @@ const char * simple_predict(struct llama_context * ctx,
                             const int n_threads,
                             TokenCallback callback) {
     // total length of the sequence including the prompt
-    const int n_len = 64;  // TODO: change this?
+    const int n_len = 32;  // TODO: change this?
 
     const struct llama_model * model = llama_get_model(ctx);
 
