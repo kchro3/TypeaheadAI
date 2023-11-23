@@ -38,6 +38,7 @@ struct UserIntentView: View {
             )
         }
         .buttonStyle(.plain)
+        .keyboardShortcut(KeyEquivalent(Character("\(rank)")), modifiers: .command)
     }
 }
 

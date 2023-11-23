@@ -48,7 +48,6 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         await promptManager.setActivePrompt(id: nil)
         await self.modalManager.forceRefresh()
         await self.modalManager.showModal()
-        await NSApp.activate(ignoringOtherApps: true)
 
         var messageType: MessageType = .string
         guard let copiedText = NSPasteboard.general.string(forType: .string) else {
@@ -77,6 +76,8 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         // Try to predict the user intent
         let contextualIntents = self.intentManager.fetchContextualIntents(limit: 10, appContext: appContext)
         await self.modalManager.setUserIntents(intents: contextualIntents)
+
+        await NSApp.activate(ignoringOtherApps: true)
 
         // Kick off async
         Task {
