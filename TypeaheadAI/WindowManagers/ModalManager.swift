@@ -193,7 +193,7 @@ class ModalManager: ObservableObject {
     /// 
     /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false) {
+    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false) async throws {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true, isHidden: isHidden))
@@ -204,7 +204,7 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        self.clientManager?.refine(
+        try await self.clientManager?.refine(
             messages: self.messages,
             incognitoMode: !online,
             userIntent: implicit ? text : nil,
@@ -230,7 +230,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func updateMessage(index: Int, newContent: String) {
+    func updateMessage(index: Int, newContent: String) async throws {
         self.messages[index].text = newContent
 
         if self.messages[index].isCurrentUser {
@@ -243,7 +243,7 @@ class ModalManager: ObservableObject {
             isPending = true
             userIntents = nil
 
-            self.clientManager?.refine(
+            try await self.clientManager?.refine(
                 messages: self.messages,
                 incognitoMode: !online,
                 streamHandler: defaultHandler,
@@ -255,7 +255,7 @@ class ModalManager: ObservableObject {
     /// Reply to the user
     /// If refresh, then pop the previous message before responding.
     @MainActor
-    func replyToUserMessage(refresh: Bool) {
+    func replyToUserMessage(refresh: Bool) async throws {
         isPending = true
         userIntents = nil
 
@@ -269,7 +269,7 @@ class ModalManager: ObservableObject {
             }
         }
 
-        self.clientManager?.refine(
+        try await self.clientManager?.refine(
             messages: self.messages,
             incognitoMode: !online,
             streamHandler: defaultHandler,
@@ -403,7 +403,8 @@ class ModalManager: ObservableObject {
         }
     }
 
-    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) {
+    @MainActor
+    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) async {
         switch result {
         case .success(let success):
             guard let text = success.text else {
@@ -414,53 +415,43 @@ class ModalManager: ObservableObject {
             case .text:
                 return // no-op
             case .image:
-                Task {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.isPending = true
-                    }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.isPending = true
+                }
 
-                    do {
-                        if let data = text.data(using: .utf8),
-                           let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
-                           let imageData = try await self.clientManager?.generateImage(payload: imageRequest) {
-                            if self.online,
-                               let data = Data(base64Encoded: imageData.image) {
-                                let captionPayload = await self.clientManager?.captionImage(tiffData: data)
-                                await self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption)
-                            } else {
-                                await self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
-                            }
+                do {
+                    if let data = text.data(using: .utf8),
+                       let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
+                       let imageData = try await self.clientManager?.generateImage(payload: imageRequest) {
+                        if self.online,
+                           let data = Data(base64Encoded: imageData.image) {
+                            let captionPayload = await self.clientManager?.captionImage(tiffData: data)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption)
+                        } else {
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
                         }
-                    } catch {
-                        await self.setError(error.localizedDescription)
                     }
+                } catch {
+                    self.setError(error.localizedDescription)
                 }
             case .function:
-                Task {
-                    do {
-                        try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
-                    } catch {
-                        await self.setError(error.localizedDescription)
-                    }
+                do {
+                    try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
+                } catch {
+                    self.setError(error.localizedDescription)
                 }
             }
         case .failure(let error as ClientManagerError):
             switch error {
             case .badRequest(let message):
-                Task {
-                    await self.setError(message)
-                }
+                self.setError(message)
             default:
-                Task {
-                    await self.setError("Something went wrong. Please try again.")
-                    self.logger.error("Something went wrong.")
-                }
+                self.setError("Something went wrong. Please try again.")
+                self.logger.error("Something went wrong.")
             }
         case .failure(let error):
-            Task {
-                self.logger.error("Error: \(error.localizedDescription)")
-                await self.setError(error.localizedDescription)
-            }
+            self.logger.error("Error: \(error.localizedDescription)")
+            self.setError(error.localizedDescription)
         }
     }
 
