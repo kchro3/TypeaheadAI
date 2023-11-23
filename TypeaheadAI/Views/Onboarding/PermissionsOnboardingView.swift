@@ -20,7 +20,7 @@ struct PermissionsOnboardingView: View, CanScreenshot {
 
             In **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.
 
-            Then please navigate to the **Screen Sharing** option and add Typeahead to your allowed apps. This will require you to restart the app.
+            Then please navigate to the **Screen Recording** option and add Typeahead to your allowed apps. This will require you to restart the app.
 
             You may also press the buttons below to request these permissions. If you have already granted permissions, the buttons will not do anything.
             """
@@ -37,7 +37,7 @@ struct PermissionsOnboardingView: View, CanScreenshot {
 
             Spacer()
 
-            RoundedButton("Check Screen Sharing Permissions", isAccent: true) {
+            RoundedButton("Check Screen Recording Permissions", isAccent: true) {
                 // Take a screenshot to trigger permission request
                 Task {
                     _ = try await screenshot()
