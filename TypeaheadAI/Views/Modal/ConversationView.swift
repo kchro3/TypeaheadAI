@@ -27,7 +27,9 @@ struct ConversationView: View {
                             message: modalManager.messages[index],
                             onEdit: { newContent in
                                 if newContent != modalManager.messages[index].text {
-                                    modalManager.updateMessage(index: index, newContent: newContent)
+                                    Task {
+                                        try await modalManager.updateMessage(index: index, newContent: newContent)
+                                    }
                                 } else {
                                     modalManager.messages[index].isEdited.toggle()
                                 }
@@ -36,7 +38,9 @@ struct ConversationView: View {
                                 modalManager.messages[index].isEdited.toggle()
                             },
                             onRefresh: {
-                                modalManager.replyToUserMessage(refresh: true)
+                                Task {
+                                    try await modalManager.replyToUserMessage(refresh: true)
+                                }
                             },
                             onTruncate: {
                                 modalManager.messages[index].isTruncated.toggle()

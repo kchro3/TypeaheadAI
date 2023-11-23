@@ -218,72 +218,70 @@ class ClientManager: ObservableObject {
         userIntent: String? = nil,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
-    ) {
+        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
+    ) async throws {
         self.logger.info("incognito: \(incognitoMode)")
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
-            Task {
-                var history: [Message]? = nil
-                var quickAction: QuickAction? = nil
-                if let userIntent = userIntent {
-                    // NOTE: Check if the user intent is also a Quick Action
-                    quickAction = self.promptManager?.getByLabel(userIntent)
-                    if let quickActionID = quickAction?.id {
-                        // NOTE: This is probably a stupid way of managing the state
-                        await self.promptManager?.setActivePrompt(id: quickActionID)
+            var history: [Message]? = nil
+            var quickAction: QuickAction? = nil
+            if let userIntent = userIntent {
+                // NOTE: Check if the user intent is also a Quick Action
+                quickAction = self.promptManager?.getByLabel(userIntent)
+                if let quickActionID = quickAction?.id {
+                    // NOTE: This is probably a stupid way of managing the state
+                    await self.promptManager?.setActivePrompt(id: quickActionID)
 
-                        // Create a few-shot prompt from smart-copy-paste history
-                        history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickActionID)
-                    } else {
-                        quickAction = await self.promptManager?.addPrompt(userIntent)
-                    }
-
-                    // NOTE: We cached the copiedText earlier
-                    await self.intentManager?.addIntentEntry(
-                        prompt: userIntent,
-                        copiedText: payload.copiedText,
-                        appContext: payload.appContext
-                    )
+                    // Create a few-shot prompt from smart-copy-paste history
+                    history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickActionID)
+                } else {
+                    quickAction = await self.promptManager?.addPrompt(userIntent)
                 }
 
-                await self.sendStreamRequest(
-                    id: UUID(),
-                    username: payload.username,
-                    userFullName: payload.userFullName,
-                    userObjective: quickAction?.details ?? payload.userObjective,
-                    userBio: payload.userBio,
-                    userLang: payload.userLang,
+                // NOTE: We cached the copiedText earlier
+                await self.intentManager?.addIntentEntry(
+                    prompt: userIntent,
                     copiedText: payload.copiedText,
-                    messages: self.sanitizeMessages(messages),
-                    history: history,
-                    appContext: payload.appContext,
-                    incognitoMode: incognitoMode,
-                    streamHandler: streamHandler,
-                    completion: completion
+                    appContext: payload.appContext
                 )
             }
+
+            await self.sendStreamRequest(
+                id: UUID(),
+                username: payload.username,
+                userFullName: payload.userFullName,
+                userObjective: quickAction?.details ?? payload.userObjective,
+                userBio: payload.userBio,
+                userLang: payload.userLang,
+                copiedText: payload.copiedText,
+                messages: self.sanitizeMessages(messages),
+                history: history,
+                appContext: payload.appContext,
+                incognitoMode: incognitoMode,
+                streamHandler: streamHandler,
+                completion: completion
+            )
         } else {
             logger.error("No cached request to refine")
-            Task {
-                await self.sendStreamRequest(
-                    id: UUID(),
-                    username: NSUserName(),
-                    userFullName: NSFullUserName(),
-                    userObjective: "",
-                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                    userLang: Locale.preferredLanguages.first ?? "",
-                    copiedText: "",
-                    messages: self.sanitizeMessages(messages),
-                    history: nil,
-                    appContext: nil,
-                    incognitoMode: incognitoMode,
-                    streamHandler: streamHandler,
-                    completion: completion
-                )
-            }
+            await self.sendStreamRequest(
+                id: UUID(),
+                username: NSUserName(),
+                userFullName: NSFullUserName(),
+                userObjective: "",
+                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                userLang: Locale.preferredLanguages.first ?? "",
+                copiedText: "",
+                messages: self.sanitizeMessages(messages),
+                history: nil,
+                appContext: nil,
+                incognitoMode: incognitoMode,
+                streamHandler: streamHandler,
+                completion: completion
+            )
         }
+
+        NotificationCenter.default.post(name: .chatComplete, object: nil)
     }
 
     /// Sends a request to the server with the given parameters and listens for a stream of data.
@@ -306,7 +304,7 @@ class ClientManager: ObservableObject {
         incognitoMode: Bool,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -334,7 +332,7 @@ class ClientManager: ObservableObject {
                 if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
                     payload: payload, timeout: timeout, streamHandler: streamHandler) {
 
-                    completion(result)
+                    await completion(result)
 
                     // Cache successful requests
                     switch result {
@@ -346,7 +344,7 @@ class ClientManager: ObservableObject {
                         break
                     }
                 } else {
-                    completion(.failure(ClientManagerError.appError("Something went wrong...")))
+                    await completion(.failure(ClientManagerError.appError("Something went wrong...")))
                 }
             } else {
                 do {
@@ -354,7 +352,7 @@ class ClientManager: ObservableObject {
                         payload: payload,
                         timeout: timeout,
                         completion: { result in
-                            completion(result)
+                            await completion(result)
 
                             // Cache successful response
                             switch result {
@@ -447,7 +445,7 @@ class ClientManager: ObservableObject {
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
+        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
     ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
@@ -499,7 +497,7 @@ class ClientManager: ObservableObject {
                           let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
-                        completion(.failure(error))
+                        await completion(.failure(error))
                         return
                     }
 
@@ -520,12 +518,12 @@ class ClientManager: ObservableObject {
                               (finishReason != "stop" && finishReason != "function_call") {
                         let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
                         continuation.finish(throwing: error)
-                        completion(.failure(error))
+                        await completion(.failure(error))
                         return
                     }
                 }
 
-                completion(.success(bufferedPayload))
+                await completion(.success(bufferedPayload))
                 continuation.finish()
             }
         }

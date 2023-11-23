@@ -71,7 +71,7 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             }
 
             await modalManager.setUserMessage(prompt, isHidden: true)
-            await modalManager.replyToUserMessage(refresh: false)
+            try await modalManager.replyToUserMessage(refresh: false)
         default:
             throw FunctionError.notFound("Function \(functionCall.name) not found.")
         }
