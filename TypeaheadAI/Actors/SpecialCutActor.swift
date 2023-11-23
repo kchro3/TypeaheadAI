@@ -146,7 +146,7 @@ actor SpecialCutActor {
                                     ), !intents.intents.isEmpty {
                                         await self.modalManager.setUserIntents(intents: intents.intents)
                                     } else {
-                                        await self.modalManager.replyToUserMessage(refresh: false)
+                                        try await self.modalManager.replyToUserMessage(refresh: false)
                                     }
                                 } catch {
                                     self.logger.error("\(error.localizedDescription)")
@@ -192,7 +192,7 @@ actor SpecialCutActor {
                                 ), !intents.intents.isEmpty {
                                     await self.modalManager.setUserIntents(intents: intents.intents)
                                 } else {
-                                    await self.modalManager.replyToUserMessage(refresh: false)
+                                    try await self.modalManager.replyToUserMessage(refresh: false)
                                 }
                             } catch {
                                 self.logger.error("\(error.localizedDescription)")

@@ -18,9 +18,11 @@ struct ModalFooterView: View {
             if let userIntents = modalManager.userIntents,
                userIntents.count > 0 {
                 UserIntentsView(userIntents: userIntents) { userIntent in
-                    // On button click, set the new message & reset the user intents
-                    modalManager.addUserMessage(userIntent, implicit: true)
-                    modalManager.userIntents = nil
+                    Task {
+                        // On button click, set the new message & reset the user intents
+                        try await modalManager.addUserMessage(userIntent, implicit: true)
+                        modalManager.userIntents = nil
+                    }
                 }
             } else if clientManager.currentStreamingTask != nil {
                 HStack {
@@ -55,12 +57,14 @@ struct ModalFooterView: View {
                     autoCompleteSuggestions: self.modalManager.promptManager?.getPrompts() ?? []
                 ) { text in
                     if !text.isEmpty {
-                        if let _ = modalManager.userIntents {
-                            // If userIntents is non-nil, reset it.
-                            modalManager.addUserMessage(text, implicit: true)
-                            modalManager.userIntents = nil
-                        } else {
-                            modalManager.addUserMessage(text)
+                        Task {
+                            if let _ = modalManager.userIntents {
+                                // If userIntents is non-nil, reset it.
+                                try await modalManager.addUserMessage(text, implicit: true)
+                                modalManager.userIntents = nil
+                            } else {
+                                try await modalManager.addUserMessage(text)
+                            }
                         }
                     }
                 }

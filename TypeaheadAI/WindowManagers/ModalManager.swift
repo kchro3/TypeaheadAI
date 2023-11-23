@@ -193,7 +193,7 @@ class ModalManager: ObservableObject {
     /// 
     /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false) {
+    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false) async throws {
         self.clientManager?.cancelStreamingTask()
 
         messages.append(Message(id: UUID(), text: text, isCurrentUser: true, isHidden: isHidden))
@@ -204,7 +204,7 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        self.clientManager?.refine(
+        try await self.clientManager?.refine(
             messages: self.messages,
             incognitoMode: !online,
             userIntent: implicit ? text : nil,
@@ -230,7 +230,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func updateMessage(index: Int, newContent: String) {
+    func updateMessage(index: Int, newContent: String) async throws {
         self.messages[index].text = newContent
 
         if self.messages[index].isCurrentUser {
@@ -243,7 +243,7 @@ class ModalManager: ObservableObject {
             isPending = true
             userIntents = nil
 
-            self.clientManager?.refine(
+            try await self.clientManager?.refine(
                 messages: self.messages,
                 incognitoMode: !online,
                 streamHandler: defaultHandler,
@@ -255,7 +255,7 @@ class ModalManager: ObservableObject {
     /// Reply to the user
     /// If refresh, then pop the previous message before responding.
     @MainActor
-    func replyToUserMessage(refresh: Bool) {
+    func replyToUserMessage(refresh: Bool) async throws {
         isPending = true
         userIntents = nil
 
@@ -269,7 +269,7 @@ class ModalManager: ObservableObject {
             }
         }
 
-        self.clientManager?.refine(
+        try await self.clientManager?.refine(
             messages: self.messages,
             incognitoMode: !online,
             streamHandler: defaultHandler,
