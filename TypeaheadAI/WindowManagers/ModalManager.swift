@@ -323,7 +323,8 @@ class ModalManager: ObservableObject {
                 .closable,
                 .fullSizeContentView,
                 .resizable,
-                .titled
+                .titled,
+                .miniaturizable
             ],
             backing: .buffered,
             defer: false
