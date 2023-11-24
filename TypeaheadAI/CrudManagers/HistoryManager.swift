@@ -92,8 +92,8 @@ class HistoryManager {
                 let entries = try backgroundContext.fetch(fetchRequest)
                 var messages = [Message]()
                 for entry in entries {
-                    let userMessage = Message(id: entry.id!, text: entry.copiedText!, isCurrentUser: true, isHidden: false)
-                    let assistantMessage = Message(id: entry.id!, text: entry.pastedResponse!, isCurrentUser: false, isHidden: false)
+                    let userMessage = Message(id: entry.id!, text: entry.copiedText!, isCurrentUser: true, isHidden: false, appContext: appContext)
+                    let assistantMessage = Message(id: entry.id!, text: entry.pastedResponse!, isCurrentUser: false, isHidden: false, appContext: appContext)
                     messages.append(contentsOf: [userMessage, assistantMessage])
                 }
                 return messages

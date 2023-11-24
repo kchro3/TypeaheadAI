@@ -65,7 +65,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         }
 
         // Set the copied text as a new message
-        await self.modalManager.setUserMessage(copiedText, messageType: messageType)
+        await self.modalManager.setUserMessage(copiedText, messageType: messageType, appContext: appContext)
 
         // Set the OCR'ed text
         if let screenshot = appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {

@@ -11,25 +11,6 @@ import Foundation
 import MarkdownUI
 import os.log
 
-enum MessageType: Codable, Equatable {
-    case string
-    case html(data: String)
-    case image(data: ImageData)
-    case data(data: Data)
-}
-
-// TODO: Add to persistence
-struct Message: Codable, Identifiable, Equatable {
-    let id: UUID
-    var text: String
-    let isCurrentUser: Bool
-    let isHidden: Bool
-    var responseError: String?
-    var messageType: MessageType = .string
-    var isTruncated: Bool = true
-    var isEdited: Bool = false
-}
-
 extension Notification.Name {
     static let userIntentSent = Notification.Name("userIntentSent")
 }
@@ -99,19 +80,19 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func setText(_ text: String, isHidden: Bool = false) {
+    func setText(_ text: String, isHidden: Bool = false, appContext: AppContext?) {
         if !isHidden,
            let idx = messages.indices.last,
            !messages[idx].isCurrentUser {
             messages[idx].text += text
         } else {
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: isHidden))
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: isHidden, appContext: appContext))
         }
     }
 
     /// Set an error message.
     @MainActor
-    func setError(_ responseError: String, isHidden: Bool = false) {
+    func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
@@ -122,6 +103,7 @@ class ModalManager: ObservableObject {
                 text: "",
                 isCurrentUser: false,
                 isHidden: isHidden,
+                appContext: appContext,
                 responseError: responseError)
             )
         }
@@ -129,10 +111,10 @@ class ModalManager: ObservableObject {
 
     /// Append text to the AI response. Creates a new message if there is nothing to append to.
     @MainActor
-    func appendText(_ text: String) async {
+    func appendText(_ text: String, appContext: AppContext?) async {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
             // If the AI response doesn't exist yet, create one.
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: false))
+            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: false, appContext: appContext))
             userIntents = nil
             isPending = false
             return
@@ -142,7 +124,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func appendImage(_ image: ImageData, prompt: String, caption: String?) {
+    func appendImage(_ image: ImageData, prompt: String, caption: String?, appContext: AppContext?) {
         isPending = false
         userIntents = nil
 
@@ -157,24 +139,26 @@ class ModalManager: ObservableObject {
             text: placeholder,
             isCurrentUser: false,
             isHidden: false,
+            appContext: appContext,
             messageType: .image(data: image)
         ))
     }
 
     @MainActor
-    func appendUserImage(_ data: Data, caption: String, ocrText: String) {
+    func appendUserImage(_ data: Data, caption: String, ocrText: String, appContext: AppContext?) {
         messages.append(Message(
             id: UUID(),
             text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
             isCurrentUser: true,
             isHidden: true,
+            appContext: appContext,
             messageType: .data(data: data)
         ))
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
-    func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false) {
+    func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false, appContext: AppContext?) {
         isPending = true
         userIntents = nil
 
@@ -184,6 +168,7 @@ class ModalManager: ObservableObject {
                 text: text,
                 isCurrentUser: true,
                 isHidden: isHidden,
+                appContext: appContext,
                 messageType: messageType
             )
         )
@@ -193,10 +178,10 @@ class ModalManager: ObservableObject {
     /// 
     /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false) async throws {
+    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false, appContext: AppContext?) async throws {
         self.clientManager?.cancelStreamingTask()
 
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true, isHidden: isHidden))
+        messages.append(Message(id: UUID(), text: text, isCurrentUser: true, isHidden: isHidden, appContext: appContext))
 
         if userIntents != nil {
             NotificationCenter.default.post(name: .userIntentSent, object: nil)
@@ -208,21 +193,21 @@ class ModalManager: ObservableObject {
             messages: self.messages,
             incognitoMode: !online,
             userIntent: implicit ? text : nil,
-            streamHandler: { result in
+            streamHandler: { result, appContext in
 
             switch result {
             case .success(let chunk):
                 Task {
-                    await self.appendText(chunk)
+                    await self.appendText(chunk, appContext: appContext)
                 }
             case .failure(let error as ClientManagerError):
                 Task {
-                    self.setError(error.localizedDescription)
+                    self.setError(error.localizedDescription, appContext: appContext)
                 }
                 self.logger.error("An error occurred: \(error)")
             case .failure(let error):
                 Task {
-                    self.setError(error.localizedDescription)
+                    self.setError(error.localizedDescription, appContext: appContext)
                 }
                 self.logger.error("An error occurred: \(error)")
             }
@@ -404,7 +389,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) async {
+    func defaultCompletionHandler(result: Result<ChunkPayload, Error>, appContext: AppContext?) async {
         switch result {
         case .success(let success):
             guard let text = success.text else {
@@ -426,54 +411,54 @@ class ModalManager: ObservableObject {
                         if self.online,
                            let data = Data(base64Encoded: imageData.image) {
                             let captionPayload = await self.clientManager?.captionImage(tiffData: data)
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption, appContext: appContext)
                         } else {
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil, appContext: appContext)
                         }
                     }
                 } catch {
-                    self.setError(error.localizedDescription)
+                    self.setError(error.localizedDescription, appContext: appContext)
                 }
             case .function:
                 do {
                     try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
                 } catch {
-                    self.setError(error.localizedDescription)
+                    self.setError(error.localizedDescription, appContext: appContext)
                 }
             }
         case .failure(let error as ClientManagerError):
             switch error {
             case .badRequest(let message):
-                self.setError(message)
+                self.setError(message, appContext: appContext)
             default:
-                self.setError("Something went wrong. Please try again.")
+                self.setError("Something went wrong. Please try again.", appContext: appContext)
                 self.logger.error("Something went wrong.")
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
-            self.setError(error.localizedDescription)
+            self.setError(error.localizedDescription, appContext: appContext)
         }
     }
 
-    func defaultHandler(result: Result<String, Error>) async {
+    func defaultHandler(result: Result<String, Error>, appContext: AppContext?) async {
         switch result {
         case .success(let chunk):
-            await self.appendText(chunk)
+            await self.appendText(chunk, appContext: appContext)
         case .failure(let error as ClientManagerError):
             self.logger.error("Error: \(error.localizedDescription)")
             switch error {
             case .badRequest(let message):
-                await self.setError(message)
+                await self.setError(message, appContext: appContext)
             case .serverError(let message):
-                await self.setError(message)
+                await self.setError(message, appContext: appContext)
             case .clientError(let message):
-                await self.setError(message)
+                await self.setError(message, appContext: appContext)
             default:
-                await self.setError("Something went wrong. Please try again.")
+                await self.setError("Something went wrong. Please try again.", appContext: appContext)
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
-            await self.setError(error.localizedDescription)
+            await self.setError(error.localizedDescription, appContext: appContext)
         }
     }
 }

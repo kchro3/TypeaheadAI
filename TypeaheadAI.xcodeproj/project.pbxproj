@@ -25,6 +25,7 @@
 		2B11FCE52B0C555000325F38 /* CanFetchAppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */; };
 		2B11FCE72B0C55CD00325F38 /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE62B0C55CD00325F38 /* AppContext.swift */; };
 		2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */; };
+		2B11FCF22B114C3F00325F38 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF12B114C3F00325F38 /* Message.swift */; };
 		2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B7D2AEC5F8500F1BB60 /* Supabase */; };
 		2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
@@ -141,6 +142,7 @@
 		2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanFetchAppContext.swift; sourceTree = "<group>"; };
 		2B11FCE62B0C55CD00325F38 /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
 		2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
+		2B11FCF12B114C3F00325F38 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
 		2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
@@ -540,6 +542,7 @@
 			children = (
 				2BFBCAA02B048AC0004F8374 /* QuickAction.swift */,
 				2B11FCE62B0C55CD00325F38 /* AppContext.swift */,
+				2B11FCF12B114C3F00325F38 /* Message.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -717,6 +720,7 @@
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* QuickActionManager.swift in Sources */,
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
+				2B11FCF22B114C3F00325F38 /* Message.swift in Sources */,
 				2B8CD4BB2B0AAC09003E0589 /* CopyButtonView.swift in Sources */,
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */,

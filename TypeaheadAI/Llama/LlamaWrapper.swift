@@ -16,7 +16,7 @@ func globalHandler(_ token: UnsafePointer<CChar>?) {
     if let token = token {
         print("offline stream: \(token)")
         Task {
-            await LlamaWrapper.handler?(.success(String(cString: token)))
+            await LlamaWrapper.handler?(.success(String(cString: token)), nil)
         }
     }
 }
@@ -36,7 +36,7 @@ class LlamaWrapper {
     private var model: OpaquePointer!
     private var ctx: OpaquePointer?
 
-    static var handler: ((Result<String, Error>) async -> Void)?
+    static var handler: ((Result<String, Error>, AppContext?) async -> Void)?
 
     init(_ modelPath: URL) {
         llama_backend_init(true)
@@ -52,12 +52,12 @@ class LlamaWrapper {
 
     func predict(
         _ prompt: String,
-        handler: ((Result<String, Error>) async -> Void)? = nil
+        handler: ((Result<String, Error>, AppContext?) async -> Void)? = nil
     ) async -> Result<ChunkPayload, Error> {
         if let handler = handler {
             LlamaWrapper.handler = handler
         } else {
-            LlamaWrapper.handler = { _ in }
+            LlamaWrapper.handler = { _, _ in }
         }
 
         ctx = llama_new_context_with_model(model, cparams)  // NOTE: We could expose context params in the predict API?

@@ -225,20 +225,20 @@ class LlamaModelManager: ObservableObject {
 
     func predict(
         payload: RequestPayload,
-        streamHandler: @escaping (Result<String, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
     ) async -> Result<ChunkPayload, Error> {
         var payloadCopy = payload
         payloadCopy.messages = []
 
         guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
             let error = ClientManagerError.badRequest("Encoding error")
-            await streamHandler(.failure(error))
+            await streamHandler(.failure(error), nil)
             return .failure(error)
         }
 
         guard let model = self.model else {
             let error = LlamaManagerError.modelNotFound("Model not found")
-            await streamHandler(.failure(error))
+            await streamHandler(.failure(error), nil)
             return .failure(error)
         }
 

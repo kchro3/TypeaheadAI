@@ -122,7 +122,7 @@ actor SpecialCutActor {
                             await NSApp.activate(ignoringOtherApps: true)
 
                             if let captionPayload = await self.clientManager.captionImage(tiffData: tiffData) {
-                                await self.modalManager.appendUserImage(tiffData, caption: captionPayload.caption, ocrText: recognizedText)
+                                await self.modalManager.appendUserImage(tiffData, caption: captionPayload.caption, ocrText: recognizedText, appContext: appContext)
 
                                 if let nCuts = self.numSmartCuts {
                                     self.numSmartCuts = nCuts + 1
@@ -150,7 +150,7 @@ actor SpecialCutActor {
                                     }
                                 } catch {
                                     self.logger.error("\(error.localizedDescription)")
-                                    await self.modalManager.setError(error.localizedDescription)
+                                    await self.modalManager.setError(error.localizedDescription, appContext: appContext)
                                 }
                             }
                         }
@@ -165,9 +165,9 @@ actor SpecialCutActor {
                             await NSApp.activate(ignoringOtherApps: true)
 
                             if let activePrompt = self.clientManager.getActivePrompt() {
-                                await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
+                                await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)", appContext: appContext)
                             } else {
-                                await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)")
+                                await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)", appContext: appContext)
                             }
 
                             if let nCuts = self.numSmartCuts {
@@ -196,7 +196,7 @@ actor SpecialCutActor {
                                 }
                             } catch {
                                 self.logger.error("\(error.localizedDescription)")
-                                await self.modalManager.setError(error.localizedDescription)
+                                await self.modalManager.setError(error.localizedDescription, appContext: appContext)
                             }
                         }
                     }
