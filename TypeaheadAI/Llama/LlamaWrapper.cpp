@@ -23,7 +23,7 @@ std::vector<llama_token> llama_tokenize(
     n_tokens = llama_tokenize(model, text.data(), (int) text.length(), result.data(), (int) result.size(), add_bos, special);
     if (n_tokens < 0) {
         result.resize(-n_tokens);
-        int check = llama_tokenize(model, text.data(), (int) text.length(), result.data(), (int) result.size(), add_bos, special);
+        llama_tokenize(model, text.data(), (int) text.length(), result.data(), (int) result.size(), add_bos, special);
     } else {
         result.resize(n_tokens);
     }
@@ -36,7 +36,7 @@ std::string llama_token_to_piece(const struct llama_context * ctx, llama_token t
     const int n_tokens = llama_token_to_piece(llama_get_model(ctx), token, result.data(), (int) result.size());
     if (n_tokens < 0) {
         result.resize(-n_tokens);
-        int check = llama_token_to_piece(llama_get_model(ctx), token, result.data(), (int) result.size());
+        llama_token_to_piece(llama_get_model(ctx), token, result.data(), (int) result.size());
     } else {
         result.resize(n_tokens);
     }

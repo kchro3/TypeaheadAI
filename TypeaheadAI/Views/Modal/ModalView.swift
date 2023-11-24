@@ -63,14 +63,14 @@ struct ModalView: View {
 }
 
 #Preview {
-    var modalManager = ModalManager()
+    let modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
     modalManager.setText("hello world", appContext: nil)
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
 
 #Preview {
-    var modalManager = ModalManager()
+    let modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
         Message(id: UUID(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
@@ -80,7 +80,7 @@ struct ModalView: View {
 }
 
 #Preview {
-    var modalManager = ModalManager()
+    let modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
         Message(id: UUID(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Request took too long"),
@@ -90,7 +90,7 @@ struct ModalView: View {
 }
 
 #Preview {
-    var modalManager = ModalManager()
+    let modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
 
     let markdownString = """
@@ -117,7 +117,7 @@ Task {
 }
 
 #Preview {
-    var modalManager = ModalManager()
+    let modalManager = ModalManager()
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
         Message(id: UUID(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
