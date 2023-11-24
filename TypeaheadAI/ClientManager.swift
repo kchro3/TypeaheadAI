@@ -329,23 +329,29 @@ class ClientManager: ObservableObject {
             }
 
             if incognitoMode {
-                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
-                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
-
-                    await completion(result)
-
-                    // Cache successful requests
-                    switch result {
-                    case .success(let output):
-                        self?.cacheResponse(output.text, for: payload)
-                        break
-                    case .failure(_):
-                        self?.cacheResponse(nil, for: payload)
-                        break
-                    }
-                } else {
-                    await completion(.failure(ClientManagerError.appError("Something went wrong...")))
+                guard let llamaModelManager = self?.llamaModelManager else {
+                    return
                 }
+
+                try await llamaModelManager.predict(payload: payload, streamHandler: streamHandler)
+//
+//                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
+//                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
+//
+//                    await completion(result)
+//
+//                    // Cache successful requests
+//                    switch result {
+//                    case .success(let output):
+//                        self?.cacheResponse(output.text, for: payload)
+//                        break
+//                    case .failure(_):
+//                        self?.cacheResponse(nil, for: payload)
+//                        break
+//                    }
+//                } else {
+//                    await completion(.failure(ClientManagerError.appError("Something went wrong...")))
+//                }
             } else {
                 do {
                     let stream = try self?.performStreamOnlineTask(
@@ -538,7 +544,7 @@ class ClientManager: ObservableObject {
             return .failure(ClientManagerError.appError("Model Manager not found"))
         }
 
-        return await modelManager.predict(payload: payload, streamHandler: streamHandler)
+        return await modelManager.predict2(payload: payload, streamHandler: streamHandler)
     }
 
     @MainActor

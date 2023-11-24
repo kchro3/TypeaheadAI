@@ -21,6 +21,12 @@ func globalHandler(_ token: UnsafePointer<CChar>?) {
     }
 }
 
+func newGlobalHandler(_ token: UnsafePointer<CChar>?) {
+    if let token = token {
+        LlamaWrapper.newHandler?(String(cString: token))
+    }
+}
+
 enum LlamaWrapperError: Error {
     case serverError(_ message: String)
 }
@@ -37,12 +43,12 @@ class LlamaWrapper {
     private var ctx: OpaquePointer?
 
     static var handler: ((Result<String, Error>) async -> Void)?
+    static var newHandler: ((String) -> Void)?
 
     init(_ modelPath: URL) {
         llama_backend_init(true)
         cparams = llama_context_default_params()
         mparams = llama_model_default_params()
-        mparams.n_gpu_layers = 32
         model = llama_load_model_from_file(modelPath.path(), mparams)
     }
 
@@ -50,7 +56,14 @@ class LlamaWrapper {
         return model != nil
     }
 
-    func predict(
+    /// WIP: Keep chipping away at this.
+    func main() {
+        ctx = llama_new_context_with_model(model, cparams)
+        main2(ctx, 1, nil)
+    }
+
+    /// Deprecated
+    func predict2(
         _ prompt: String,
         handler: ((Result<String, Error>) async -> Void)? = nil
     ) async -> Result<ChunkPayload, Error> {
@@ -74,5 +87,33 @@ class LlamaWrapper {
         llama_free(ctx)
         llama_free_model(model)
         llama_backend_free()
+    }
+}
+
+extension LlamaWrapper {
+    func predict(_ prompt: String) -> AsyncThrowingStream<String, Error> {
+        return AsyncThrowingStream { continuation in
+            Task {
+                LlamaWrapper.newHandler = { token in
+                    continuation.yield(token)
+                }
+
+                ctx = llama_new_context_with_model(model, cparams)  // NOTE: We could expose context params in the predict API?
+                guard let cstr = simple_predict(
+                    ctx,
+                    prompt,
+                    1,
+                    newGlobalHandler
+                ) else {
+                    print("Failed to predict")
+                    return
+                }
+
+                let token = String(cString: cstr)
+                free(UnsafeMutableRawPointer(mutating: cstr)) // Needs to be manually freed
+                print(token)
+                continuation.finish()
+            }
+        }
     }
 }

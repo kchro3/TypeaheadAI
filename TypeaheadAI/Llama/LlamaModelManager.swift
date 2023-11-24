@@ -14,6 +14,7 @@ enum LlamaManagerError: Error {
     case modelNotFound(_ message: String)
     case modelNotLoaded(_ message: String)
     case modelDirectoryNotAuthorized(_ message: String)
+    case modelFailed(_ message: String)
 }
 
 class LlamaModelManager: ObservableObject {
@@ -65,6 +66,8 @@ class LlamaModelManager: ObservableObject {
         if let urlString = selectedModelURL {
             try await self.loadModel(from: urlString)
         }
+
+        model?.main()
     }
 
     deinit {
@@ -210,7 +213,7 @@ class LlamaModelManager: ObservableObject {
 
         print(prompt)
 
-        let result = await model.predict(prompt)
+        let result = await model.predict2(prompt)
         switch result {
         case .success(let data):
             if let values = data.text?.split(separator: ",") {
@@ -224,6 +227,64 @@ class LlamaModelManager: ObservableObject {
     }
 
     func predict(
+        payload: RequestPayload,
+        streamHandler: @escaping (Result<String, Error>) async -> Void
+    ) async throws {
+        guard let model = model else {
+            throw LlamaManagerError.modelNotLoaded("No model loaded.")
+        }
+
+        var payloadCopy = payload
+        payloadCopy.messages = []
+
+        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
+            throw ClientManagerError.badRequest("Encoding error")
+        }
+
+        var refinements = ""
+        if let messages = payload.messages {
+            for message in messages {
+                if message.isCurrentUser {
+                    refinements += """
+                    \(message.text)
+
+                    ### Response:
+                    """
+                } else {
+                    refinements += """
+                    \(message.text)
+
+                    ### Input:
+
+                    """
+                }
+            }
+        }
+
+        let prompt = """
+        ### Instruction:
+        Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+        ### Input:
+        \(jsonPayload)
+
+        ### Response:
+        \(refinements)
+
+        """
+
+        print(prompt)
+
+        do {
+            for try await token in model.predict(prompt) {
+                await streamHandler(.success(token))
+            }
+        } catch {
+            throw LlamaManagerError.modelFailed(error.localizedDescription)
+        }
+    }
+
+    func predict2(
         payload: RequestPayload,
         streamHandler: @escaping (Result<String, Error>) async -> Void
     ) async -> Result<ChunkPayload, Error> {
@@ -276,7 +337,7 @@ class LlamaModelManager: ObservableObject {
 
         print(prompt)
 
-        return await model.predict(prompt, handler: streamHandler)
+        return await model.predict2(prompt, handler: streamHandler)
     }
 
     private func encodeToJSONString<T: Codable>(from object: T) -> String? {
