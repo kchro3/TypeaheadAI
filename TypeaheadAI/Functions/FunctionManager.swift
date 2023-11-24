@@ -46,11 +46,11 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
         case "open_url":
             
             guard let url = functionCall.args["url"], let prompt = functionCall.args["prompt"] else {
-                await modalManager.setError("Failed to open url...")
+                await modalManager.setError("Failed to open url...", appContext: appContext)
                 return
             }
 
-            await modalManager.appendText("Opening \(functionCall.args["url"] ?? "url")...")
+            await modalManager.appendText("Opening \(functionCall.args["url"] ?? "url")...", appContext: appContext)
             try await openURL(functionCall.args["url"]!)
             await modalManager.closeModal()
             try await Task.sleep(for: .seconds(5))
@@ -67,10 +67,10 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             await modalManager.showModal()
 
             if let copiedText = NSPasteboard.general.string(forType: .string) {
-                await modalManager.setText("Here's what I copied from \(url):\n\(copiedText)", isHidden: true)
+                await modalManager.setText("Here's what I copied from \(url):\n\(copiedText)", isHidden: true, appContext: appContext)
             }
 
-            await modalManager.setUserMessage(prompt, isHidden: true)
+            await modalManager.setUserMessage(prompt, isHidden: true, appContext: appContext)
             try await modalManager.replyToUserMessage(refresh: false)
         default:
             throw FunctionError.notFound("Function \(functionCall.name) not found.")

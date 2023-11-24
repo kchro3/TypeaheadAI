@@ -180,8 +180,8 @@ class ClientManager: ObservableObject {
         userObjective: String? = nil,
         timeout: TimeInterval = 30,
         stream: Bool = false,
-        streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) -> Void
     ) async throws {
         self.logger.info("incognito: \(incognitoMode)")
         // If objective is not specified in the request, fall back on the active prompt.
@@ -189,7 +189,7 @@ class ClientManager: ObservableObject {
 
         guard let appCtxManager = appContextManager else {
             self.logger.error("Something is wrong with the initialization")
-            completion(.failure(ClientManagerError.appError("Something went wrong.")))
+            completion(.failure(ClientManagerError.appError("Something went wrong.")), nil)
             return
         }
 
@@ -217,10 +217,11 @@ class ClientManager: ObservableObject {
         incognitoMode: Bool,
         userIntent: String? = nil,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) async -> Void
     ) async throws {
         self.logger.info("incognito: \(incognitoMode)")
+        let appContext = try await appContextManager?.getActiveAppInfo()
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
@@ -243,7 +244,7 @@ class ClientManager: ObservableObject {
                 await self.intentManager?.addIntentEntry(
                     prompt: userIntent,
                     copiedText: payload.copiedText,
-                    appContext: payload.appContext
+                    appContext: appContext
                 )
             }
 
@@ -257,7 +258,7 @@ class ClientManager: ObservableObject {
                 copiedText: payload.copiedText,
                 messages: self.sanitizeMessages(messages),
                 history: history,
-                appContext: payload.appContext,
+                appContext: appContext,
                 incognitoMode: incognitoMode,
                 streamHandler: streamHandler,
                 completion: completion
@@ -274,7 +275,7 @@ class ClientManager: ObservableObject {
                 copiedText: "",
                 messages: self.sanitizeMessages(messages),
                 history: nil,
-                appContext: nil,
+                appContext: appContext,
                 incognitoMode: incognitoMode,
                 streamHandler: streamHandler,
                 completion: completion
@@ -303,8 +304,8 @@ class ClientManager: ObservableObject {
         appContext: AppContext?,
         incognitoMode: Bool,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) async -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -324,7 +325,7 @@ class ClientManager: ObservableObject {
             )
 
             if let output = self?.getCachedResponse(for: payload) {
-                await streamHandler(.success(output))
+                await streamHandler(.success(output), appContext)
                 return
             }
 
@@ -332,7 +333,7 @@ class ClientManager: ObservableObject {
                 if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
                     payload: payload, timeout: timeout, streamHandler: streamHandler) {
 
-                    await completion(result)
+                    await completion(result, appContext)
 
                     // Cache successful requests
                     switch result {
@@ -344,7 +345,7 @@ class ClientManager: ObservableObject {
                         break
                     }
                 } else {
-                    await completion(.failure(ClientManagerError.appError("Something went wrong...")))
+                    await completion(.failure(ClientManagerError.appError("Something went wrong...")), appContext)
                 }
             } else {
                 do {
@@ -352,7 +353,7 @@ class ClientManager: ObservableObject {
                         payload: payload,
                         timeout: timeout,
                         completion: { result in
-                            await completion(result)
+                            await completion(result, appContext)
 
                             // Cache successful response
                             switch result {
@@ -371,11 +372,11 @@ class ClientManager: ObservableObject {
 
                     for try await text in stream {
                         self?.logger.debug("stream: \(text)")
-                        await streamHandler(.success(text))
+                        await streamHandler(.success(text), appContext)
                     }
                 } catch {
                     self?.cacheResponse(nil, for: payload)
-                    await streamHandler(.failure(error))
+                    await streamHandler(.failure(error), appContext)
                 }
             }
         }
@@ -532,7 +533,7 @@ class ClientManager: ObservableObject {
     private func performStreamOfflineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
     ) async -> Result<ChunkPayload, Error> {
         guard let modelManager = self.llamaModelManager else {
             return .failure(ClientManagerError.appError("Model Manager not found"))
@@ -585,6 +586,8 @@ class ClientManager: ObservableObject {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
             messageCopy.messageType = .string
+            messageCopy.appContext?.screenshotPath = nil
+            messageCopy.appContext?.ocrText = nil
             return messageCopy
         }
     }

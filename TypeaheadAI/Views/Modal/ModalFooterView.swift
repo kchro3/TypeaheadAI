@@ -20,7 +20,7 @@ struct ModalFooterView: View {
                 UserIntentsView(userIntents: userIntents) { userIntent in
                     Task {
                         // On button click, set the new message & reset the user intents
-                        try await modalManager.addUserMessage(userIntent, implicit: true)
+                        try await modalManager.addUserMessage(userIntent, implicit: true, appContext: nil)
                         modalManager.userIntents = nil
                     }
                 }
@@ -60,10 +60,10 @@ struct ModalFooterView: View {
                         Task {
                             if let _ = modalManager.userIntents {
                                 // If userIntents is non-nil, reset it.
-                                try await modalManager.addUserMessage(text, implicit: true)
+                                try await modalManager.addUserMessage(text, implicit: true, appContext: nil)
                                 modalManager.userIntents = nil
                             } else {
-                                try await modalManager.addUserMessage(text)
+                                try await modalManager.addUserMessage(text, appContext: nil)
                             }
                         }
                     }
