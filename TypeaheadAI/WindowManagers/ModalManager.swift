@@ -34,6 +34,7 @@ class ModalManager: ObservableObject {
         category: "ModalManager"
     )
 
+    private let maxIntents = 9
     private let maxMessages = 20
     private let functionManager = FunctionManager()
 
@@ -265,12 +266,22 @@ class ModalManager: ObservableObject {
     @MainActor
     func setUserIntents(intents: [String]) {
         isPending = false
-        userIntents = intents
+
+        if (userIntents?.count ?? 0) + intents.count > maxIntents {
+            userIntents = Array(intents.prefix(upTo: maxIntents))
+        } else {
+            userIntents = intents
+        }
     }
 
     @MainActor
     func appendUserIntents(intents: [String]) {
-        userIntents?.append(contentsOf: intents)
+        if (userIntents?.count ?? 0) + intents.count > maxIntents {
+            let upTo = maxIntents - (userIntents?.count ?? 0)  // If there are 10 max & 3 intents, we should only add up to 7 new intents
+            userIntents?.append(contentsOf: intents.prefix(upTo: upTo))
+        } else {
+            userIntents?.append(contentsOf: intents)
+        }
     }
 
     @MainActor
