@@ -5,6 +5,7 @@
 //  Created by Jeff Hara on 11/24/23.
 //
 
+import CoreData
 import Foundation
 
 enum MessageType: Codable, Equatable {
@@ -29,4 +30,23 @@ struct Message: Codable, Identifiable, Equatable {
     var messageType: MessageType = .string
     var isTruncated: Bool = true
     var isEdited: Bool = false
+}
+
+struct Conversation: Codable, Identifiable {
+    let id: UUID
+    let messages: [Message]
+}
+
+extension Message {
+    init?(from entry: MessageEntry) {
+        guard let id = entry.id,
+              let text = entry.text else {
+            return nil
+        }
+
+        self.id = id
+        self.isCurrentUser = entry.isCurrentUser
+        self.isHidden = entry.isHidden
+        self.text = text
+    }
 }

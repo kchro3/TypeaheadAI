@@ -31,11 +31,12 @@
     </entity>
     <entity name="MessageEntry" representedClassName="MessageEntry" syncable="YES" codeGenerationType="class">
         <attribute name="appContext" optional="YES" attributeType="Binary"/>
-        <attribute name="attribute" optional="YES"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="isCurrentUser" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isHidden" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="text" optional="YES" attributeType="String"/>
+        <attribute name="threadId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="ts" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
     <entity name="PromptEntry" representedClassName="PromptEntry" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
