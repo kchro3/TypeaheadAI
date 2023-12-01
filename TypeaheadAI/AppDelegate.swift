@@ -48,8 +48,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         switch response.actionIdentifier {
-        case "OPEN_TESTFLIGHT":
-            if let url = URL(string: "itms-beta://") {
+        case "DOWNLOAD":
+            if let urlString = response.notification.request.content.userInfo["url"] as? String,
+               let url = URL(string: urlString) {
                 NSWorkspace.shared.open(url)
             }
         case "DISMISS_FOREVER":

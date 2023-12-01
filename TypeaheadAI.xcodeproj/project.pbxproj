@@ -26,6 +26,7 @@
 		2B11FCE72B0C55CD00325F38 /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE62B0C55CD00325F38 /* AppContext.swift */; };
 		2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */; };
 		2B11FCF22B114C3F00325F38 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF12B114C3F00325F38 /* Message.swift */; };
+		2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF32B196E1500325F38 /* VersionManager.swift */; };
 		2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B7D2AEC5F8500F1BB60 /* Supabase */; };
 		2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
@@ -143,6 +144,7 @@
 		2B11FCE62B0C55CD00325F38 /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
 		2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		2B11FCF12B114C3F00325F38 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		2B11FCF32B196E1500325F38 /* VersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionManager.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
 		2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
@@ -409,6 +411,7 @@
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
 				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
+				2B11FCF32B196E1500325F38 /* VersionManager.swift */,
 				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
 				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
@@ -775,6 +778,7 @@
 				2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
 				2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */,
+				2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */,
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
