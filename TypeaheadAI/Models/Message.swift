@@ -14,7 +14,11 @@ enum MessageType: Codable, Equatable {
     case data(data: Data)
 }
 
-// TODO: Add to persistence
+struct Conversation: Identifiable, Equatable {
+    let id: UUID
+    let messages: [Message]
+}
+
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
     var text: String
@@ -29,4 +33,42 @@ struct Message: Codable, Identifiable, Equatable {
     var messageType: MessageType = .string
     var isTruncated: Bool = true
     var isEdited: Bool = false
+}
+
+extension Message {
+    init?(from entry: MessageEntry) {
+        guard let id = entry.id,
+              let text = entry.text else {
+            return nil
+        }
+
+        self.id = id
+        self.text = text
+        self.isCurrentUser = entry.isCurrentUser
+        self.isHidden = entry.isHidden
+        
+        if let serializedAppContext = entry.serializedAppContext?.data(using: .utf8),
+           let appContext = try? JSONDecoder().decode(AppContext.self, from: serializedAppContext) {
+            self.appContext = appContext
+        }
+
+        self.responseError = entry.responseError
+    }
+
+    func serialize(conversationId: UUID) -> MessageEntry {
+        let entry = MessageEntry()
+        entry.id = self.id
+        entry.text = self.text
+        entry.conversationId = conversationId
+        entry.isCurrentUser = self.isCurrentUser
+        entry.isHidden = self.isHidden
+
+        if let appContext = self.appContext,
+           let data = try? JSONEncoder().encode(appContext),
+           let serialized = String(data: data, encoding: .utf8) {
+            entry.serializedAppContext = serialized
+        }
+
+        return entry
+    }
 }

@@ -19,7 +19,9 @@ struct AuxiliaryMenuView: View {
     var body: some View {
         VStack(spacing: 0) {
             MenuButtonView(title: "Clear chat") {
-                modalManager.forceRefresh()
+                Task {
+                    try await modalManager.forceRefresh()
+                }
             }
 
             MenuButtonView(title: "Manage Quick Actions") {

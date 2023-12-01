@@ -29,6 +29,8 @@ class ModalManager: ObservableObject {
     @AppStorage("toastWidth") var toastWidth: Double = 400.0
     @AppStorage("toastHeight") var toastHeight: Double = 400.0
 
+    var conversationId: UUID? = nil
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ModalManager"
@@ -46,10 +48,12 @@ class ModalManager: ObservableObject {
         self.isPending = false
     }
 
+    // Alphabetize
     // TODO: Inject?
     var clientManager: ClientManager? = nil
-    var promptManager: QuickActionManager? = nil
+    var conversationManager: ConversationManager? = nil
     var intentManager: IntentManager? = nil
+    var promptManager: QuickActionManager? = nil
     var settingsManager: SettingsManager? = nil
 
     var toastWindow: CustomModalWindow?
@@ -69,10 +73,12 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func forceRefresh() {
+    func forceRefresh() throws {
         self.clientManager?.cancelStreamingTask()
         self.clientManager?.flushCache()
         self.promptManager?.activePromptID = nil
+
+        self.conversationId = try? self.conversationManager?.startConversation()
 
         messages = []
         isPending = false
@@ -285,6 +291,9 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func closeModal() {
+        if let id = conversationId {
+            try? conversationManager?.saveConversation(conversationId: id, messages: messages)
+        }
         toastWindow?.close()
         isVisible = false
     }
