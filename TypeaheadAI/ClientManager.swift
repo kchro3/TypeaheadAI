@@ -22,7 +22,7 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v5"
+    private let version: String = "v6"
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!

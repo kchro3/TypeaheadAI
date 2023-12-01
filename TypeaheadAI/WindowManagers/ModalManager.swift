@@ -112,7 +112,7 @@ class ModalManager: ObservableObject {
     /// Append text to the AI response. Creates a new message if there is nothing to append to.
     @MainActor
     func appendText(_ text: String, appContext: AppContext?) async {
-        guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
+        guard let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden else {
             // If the AI response doesn't exist yet, create one.
             messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: false, appContext: appContext))
             userIntents = nil
@@ -253,6 +253,19 @@ class ModalManager: ObservableObject {
                 _ = self.messages.popLast()
             }
         }
+
+        try await self.clientManager?.refine(
+            messages: self.messages,
+            incognitoMode: !online,
+            streamHandler: defaultHandler,
+            completion: defaultCompletionHandler
+        )
+    }
+
+    @MainActor
+    func continueReplying() async throws {
+        isPending = true
+        userIntents = nil
 
         try await self.clientManager?.refine(
             messages: self.messages,
