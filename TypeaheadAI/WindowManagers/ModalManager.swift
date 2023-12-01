@@ -21,9 +21,9 @@ class ModalManager: ObservableObject {
 
     @Published var triggerFocus: Bool
     @Published var isVisible: Bool
-    @Published var online: Bool
     @Published var isPending: Bool
 
+    @AppStorage("online") var online: Bool = true
     @AppStorage("toastX") var toastX: Double?
     @AppStorage("toastY") var toastY: Double?
     @AppStorage("toastWidth") var toastWidth: Double = 400.0
@@ -43,7 +43,6 @@ class ModalManager: ObservableObject {
         self.userIntents = nil
         self.triggerFocus = false
         self.isVisible = false
-        self.online = true
         self.isPending = false
     }
 

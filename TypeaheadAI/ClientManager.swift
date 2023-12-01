@@ -29,13 +29,13 @@ class ClientManager: ObservableObject {
 //    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v3/latest")!
 //    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
     private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
+    private let apiLatest = URL(string: "http://localhost:8080/v3/latest")!
     private let apiFeedback = URL(string: "http://localhost:8080/v2/feedback")!
 
     #else
@@ -43,7 +43,7 @@ class ClientManager: ObservableObject {
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v3/latest")!
     private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
     #endif
 
@@ -65,7 +65,7 @@ class ClientManager: ObservableObject {
         return self.promptManager?.getActivePrompt()
     }
 
-    func checkUpdates() async -> AppVersion? {
+    func getLatestVersion() async -> AppVersion? {
         do {
             let (data, _) = try await URLSession.shared.data(from: apiLatest)
             return try? JSONDecoder().decode(AppVersion.self, from: data)
@@ -678,7 +678,8 @@ public struct ImageResponse: Codable {
 struct AppVersion: Codable, Equatable {
     let major: Int
     let minor: Int
-    let build: Int
+    let patch: Int
+    let url: String?
 }
 
 struct ResponsePayload: Codable {

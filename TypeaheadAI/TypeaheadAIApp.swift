@@ -39,10 +39,11 @@ struct TypeaheadAIApp: App {
 
         MenuBarExtra {
             MenuView(
-                promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
+                promptManager: appState.promptManager,
                 settingsManager: appState.settingsManager,
                 supabaseManager: appState.supabaseManager,
+                versionManager: appState.versionManager,
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {
