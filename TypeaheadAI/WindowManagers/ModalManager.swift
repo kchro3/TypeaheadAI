@@ -16,6 +16,8 @@ extension Notification.Name {
 }
 
 class ModalManager: ObservableObject {
+    private let context: NSManagedObjectContext
+
     @Published var messages: [Message]
     @Published var userIntents: [String]?
 
@@ -38,7 +40,8 @@ class ModalManager: ObservableObject {
     private let maxMessages = 20
     private let functionManager = FunctionManager()
 
-    init() {
+    init(context: NSManagedObjectContext) {
+        self.context = context
         self.messages = []
         self.userIntents = nil
         self.triggerFocus = false
@@ -46,10 +49,12 @@ class ModalManager: ObservableObject {
         self.isPending = false
     }
 
+    // Alphabetize
     // TODO: Inject?
     var clientManager: ClientManager? = nil
-    var promptManager: QuickActionManager? = nil
+    var conversationManager: ConversationManager? = nil
     var intentManager: IntentManager? = nil
+    var promptManager: QuickActionManager? = nil
     var settingsManager: SettingsManager? = nil
 
     var toastWindow: CustomModalWindow?
@@ -69,7 +74,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func forceRefresh() {
+    func forceRefresh() throws {
         self.clientManager?.cancelStreamingTask()
         self.clientManager?.flushCache()
         self.promptManager?.activePromptID = nil
@@ -86,7 +91,34 @@ class ModalManager: ObservableObject {
            !messages[idx].isCurrentUser {
             messages[idx].text += text
         } else {
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: isHidden, appContext: appContext))
+            if let lastMessage = messages.last {
+                messages.append(
+                    Message(
+                        id: UUID(),
+                        rootId: lastMessage.rootId,
+                        inReplyToId: lastMessage.id,
+                        createdAt: Date(),
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext
+                    )
+                )
+            } else {
+                let id = UUID()
+                messages.append(
+                    Message(
+                        id: id,
+                        rootId: id,
+                        inReplyToId: nil,
+                        createdAt: Date(),
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext
+                    )
+                )
+            }
         }
     }
 
@@ -98,14 +130,34 @@ class ModalManager: ObservableObject {
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
             messages[idx].responseError = responseError
         } else {
-            messages.append(Message(
-                id: UUID(),
-                text: "",
-                isCurrentUser: false,
-                isHidden: isHidden,
-                appContext: appContext,
-                responseError: responseError)
-            )
+            if let lastMessage = messages.last {
+                messages.append(
+                    Message(
+                        id: UUID(),
+                        rootId: lastMessage.rootId,
+                        inReplyToId: lastMessage.id,
+                        createdAt: Date(),
+                        text: "",
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext
+                    )
+                )
+            } else {
+                let id = UUID()
+                messages.append(
+                    Message(
+                        id: id,
+                        rootId: id,
+                        inReplyToId: nil,
+                        createdAt: Date(),
+                        text: "",
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext
+                    )
+                )
+            }
         }
     }
 
@@ -114,7 +166,34 @@ class ModalManager: ObservableObject {
     func appendText(_ text: String, appContext: AppContext?) async {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden else {
             // If the AI response doesn't exist yet, create one.
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: false, appContext: appContext))
+            if let lastMessage = messages.last {
+                messages.append(
+                    Message(
+                        id: UUID(),
+                        rootId: lastMessage.rootId,
+                        inReplyToId: lastMessage.id,
+                        createdAt: Date(),
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: false,
+                        appContext: appContext
+                    )
+                )
+            } else {
+                let id = UUID()
+                messages.append(
+                    Message(
+                        id: id,
+                        rootId: id,
+                        inReplyToId: nil,
+                        createdAt: Date(),
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: false,
+                        appContext: appContext
+                    )
+                )
+            }
             userIntents = nil
             isPending = false
             return
@@ -134,26 +213,70 @@ class ModalManager: ObservableObject {
             placeholder += " - caption generated: \(caption)"
         }
 
-        messages.append(Message(
-            id: UUID(),
-            text: placeholder,
-            isCurrentUser: false,
-            isHidden: false,
-            appContext: appContext,
-            messageType: .image(data: image)
-        ))
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    text: placeholder,
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    messageType: .image(data: image)
+                )
+            )
+        } else {
+            let id = UUID()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: Date(),
+                    text: placeholder,
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    messageType: .image(data: image)
+                )
+            )
+        }
     }
 
     @MainActor
     func appendUserImage(_ data: Data, caption: String, ocrText: String, appContext: AppContext?) {
-        messages.append(Message(
-            id: UUID(),
-            text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
-            isCurrentUser: true,
-            isHidden: true,
-            appContext: appContext,
-            messageType: .data(data: data)
-        ))
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
+                    isCurrentUser: false,
+                    isHidden: true,
+                    appContext: appContext,
+                    messageType: .data(data: data)
+                )
+            )
+        } else {
+            let id = UUID()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: Date(),
+                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
+                    isCurrentUser: false,
+                    isHidden: true,
+                    appContext: appContext,
+                    messageType: .data(data: data)
+                )
+            )
+        }
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
@@ -162,16 +285,36 @@ class ModalManager: ObservableObject {
         isPending = true
         userIntents = nil
 
-        messages.append(
-            Message(
-                id: UUID(),
-                text: text,
-                isCurrentUser: true,
-                isHidden: isHidden,
-                appContext: appContext,
-                messageType: messageType
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext,
+                    messageType: messageType
+                )
             )
-        )
+        } else {
+            let id = UUID()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: Date(),
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext,
+                    messageType: messageType
+                )
+            )
+        }
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
@@ -181,7 +324,34 @@ class ModalManager: ObservableObject {
     func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false, appContext: AppContext?) async throws {
         self.clientManager?.cancelStreamingTask()
 
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true, isHidden: isHidden, appContext: appContext))
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext
+                )
+            )
+        } else {
+            let id = UUID()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: Date(),
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext
+                )
+            )
+        }
 
         if userIntents != nil {
             NotificationCenter.default.post(name: .userIntentSent, object: nil)
@@ -297,6 +467,14 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
+    func load(rootId: UUID, messageId: UUID) throws {
+        if let messages = try conversationManager?.getConversation(rootId: rootId) {
+            try conversationManager?.saveConversation(messages: self.messages)
+            self.messages = messages
+        }
+    }
+
+    @MainActor
     func closeModal() {
         toastWindow?.close()
         isVisible = false
@@ -317,6 +495,7 @@ class ModalManager: ObservableObject {
             showModal: .constant(true),
             modalManager: self
         )
+        .environment(\.managedObjectContext, context)
 
         let hostingView = NSHostingView(rootView: contentView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false

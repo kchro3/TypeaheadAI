@@ -46,7 +46,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
 
         // Clear the current state
         await promptManager.setActivePrompt(id: nil)
-        await self.modalManager.forceRefresh()
+        try await self.modalManager.forceRefresh()
         await self.modalManager.showModal()
 
         var messageType: MessageType = .string

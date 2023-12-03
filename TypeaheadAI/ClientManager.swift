@@ -171,46 +171,6 @@ class ClientManager: ObservableObject {
         }
     }
 
-    /// Easier to use this wrapper function.
-    func predict(
-        id: UUID,
-        copiedText: String,
-        incognitoMode: Bool,
-        history: [Message]? = nil,
-        userObjective: String? = nil,
-        timeout: TimeInterval = 30,
-        stream: Bool = false,
-        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) -> Void
-    ) async throws {
-        self.logger.info("incognito: \(incognitoMode)")
-        // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt()
-
-        guard let appCtxManager = appContextManager else {
-            self.logger.error("Something is wrong with the initialization")
-            completion(.failure(ClientManagerError.appError("Something went wrong.")), nil)
-            return
-        }
-
-        let appContext = try await appCtxManager.getActiveAppInfo()
-        await self.sendStreamRequest(
-            id: id,
-            username: NSUserName(),
-            userFullName: NSFullUserName(),
-            userObjective: objective,
-            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-            userLang: Locale.preferredLanguages.first ?? "",
-            copiedText: copiedText,
-            messages: [],
-            history: history,
-            appContext: appContext,
-            incognitoMode: incognitoMode,
-            streamHandler: streamHandler,
-            completion: completion
-        )
-    }
-
     /// Refine the currently cached request
     func refine(
         messages: [Message],
@@ -282,7 +242,14 @@ class ClientManager: ObservableObject {
             )
         }
 
-        NotificationCenter.default.post(name: .chatComplete, object: nil)
+        // Add in any other relevant metadata
+        NotificationCenter.default.post(
+            name: .chatComplete,
+            object: nil,
+            userInfo: [
+                "messages": messages
+            ]
+        )
     }
 
     /// Sends a request to the server with the given parameters and listens for a stream of data.

@@ -117,7 +117,7 @@ actor SpecialCutActor {
                     self.logger.info("OCRed text: \(recognizedText)")
 
                     Task {
-                        await self.modalManager.forceRefresh()
+                        try await self.modalManager.forceRefresh()
                         await self.modalManager.showModal()
                         await NSApp.activate(ignoringOtherApps: true)
 

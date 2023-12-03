@@ -22,6 +22,8 @@ struct TypeaheadAIApp: App {
         #endif
 
         let context = persistenceController.container.viewContext
+        context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyStoreTrumpMergePolicyType)
+
         let backgroundContext = persistenceController.container.newBackgroundContext()
         _appState = StateObject(wrappedValue: AppState(context: context, backgroundContext: backgroundContext))
     }

@@ -24,20 +24,19 @@ final class AppState: ObservableObject {
         category: "AppState"
     )
 
-    // Managers
-    @Published var promptManager: QuickActionManager
-    @Published var llamaModelManager = LlamaModelManager()
-    @Published var modalManager: ModalManager
-    @Published var settingsManager: SettingsManager
-    @Published var onboardingWindowManager: OnboardingWindowManager
+    // Managers (alphabetize)
+    private let appContextManager: AppContextManager = AppContextManager()
     @Published var clientManager: ClientManager
+    var conversationManager: ConversationManager
+    private let historyManager: HistoryManager
     @Published var intentManager: IntentManager
-
+    @Published var promptManager: QuickActionManager
+    @Published var modalManager: ModalManager
+    @Published var onboardingWindowManager: OnboardingWindowManager
+    @Published var llamaModelManager = LlamaModelManager()
+    @Published var settingsManager: SettingsManager
     var supabaseManager = SupabaseManager()
     var versionManager = VersionManager()
-
-    private let historyManager: HistoryManager
-    private let appContextManager: AppContextManager
 
     // Actors
     private var specialCutActor: SpecialCutActor? = nil
@@ -52,15 +51,15 @@ final class AppState: ObservableObject {
 
     init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
 
-        // Initialize managers
-        self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
-        self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
-        self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
+        // Initialize managers (alphabetize)
         self.clientManager = ClientManager()
-        self.modalManager = ModalManager()
-        self.settingsManager = SettingsManager(context: context)
+        self.conversationManager = ConversationManager(context: context)
+        self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
+        self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
+        self.modalManager = ModalManager(context: context)
+        self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
         self.onboardingWindowManager = OnboardingWindowManager(context: context)
-        self.appContextManager = AppContextManager()
+        self.settingsManager = SettingsManager(context: context)
 
         // Initialize actors
         self.specialCopyActor = SpecialCopyActor(
@@ -102,6 +101,7 @@ final class AppState: ObservableObject {
         self.clientManager.supabaseManager = supabaseManager
 
         self.modalManager.clientManager = clientManager
+        self.modalManager.conversationManager = conversationManager
         self.modalManager.promptManager = promptManager
         self.modalManager.settingsManager = settingsManager
 
