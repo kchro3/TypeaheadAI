@@ -56,7 +56,7 @@ final class AppState: ObservableObject {
         self.conversationManager = ConversationManager(context: context)
         self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
         self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
-        self.modalManager = ModalManager()
+        self.modalManager = ModalManager(context: context)
         self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
         self.onboardingWindowManager = OnboardingWindowManager(context: context)
         self.settingsManager = SettingsManager(context: context)

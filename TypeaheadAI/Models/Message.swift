@@ -5,6 +5,7 @@
 //  Created by Jeff Hara on 11/24/23.
 //
 
+import AppKit
 import Foundation
 
 enum MessageType: Codable, Equatable {
@@ -14,13 +15,12 @@ enum MessageType: Codable, Equatable {
     case data(data: Data)
 }
 
-struct Conversation: Identifiable, Equatable {
-    let id: UUID
-    let messages: [Message]
-}
-
 struct Message: Codable, Identifiable, Equatable {
     let id: UUID
+    let rootId: UUID
+    let inReplyToId: UUID?
+    let createdAt: Date
+
     var text: String
     let isCurrentUser: Bool
     let isHidden: Bool
@@ -38,11 +38,17 @@ struct Message: Codable, Identifiable, Equatable {
 extension Message {
     init?(from entry: MessageEntry) {
         guard let id = entry.id,
-              let text = entry.text else {
+              let rootId = entry.rootId,
+              let text = entry.text,
+              let createdAt = entry.createdAt else {
             return nil
         }
 
         self.id = id
+        self.rootId = rootId
+        self.inReplyToId = entry.inReplyToId
+        self.createdAt = createdAt
+
         self.text = text
         self.isCurrentUser = entry.isCurrentUser
         self.isHidden = entry.isHidden
@@ -55,11 +61,13 @@ extension Message {
         self.responseError = entry.responseError
     }
 
-    func serialize(conversationId: UUID) -> MessageEntry {
-        let entry = MessageEntry()
+    func serialize(context: NSManagedObjectContext) -> MessageEntry {
+        let entry = MessageEntry(context: context)
         entry.id = self.id
+        entry.rootId = self.rootId
+        entry.inReplyToId = self.inReplyToId
+        entry.createdAt = self.createdAt
         entry.text = self.text
-        entry.conversationId = conversationId
         entry.isCurrentUser = self.isCurrentUser
         entry.isHidden = self.isHidden
 
