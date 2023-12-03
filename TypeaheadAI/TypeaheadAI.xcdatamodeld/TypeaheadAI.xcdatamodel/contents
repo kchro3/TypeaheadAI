@@ -36,6 +36,7 @@
         <attribute name="isCurrentUser" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="isHidden" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="responseError" optional="YES" attributeType="String"/>
+        <attribute name="rootCreatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="rootId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="serializedAppContext" optional="YES" attributeType="String"/>
         <attribute name="text" optional="YES" attributeType="String"/>

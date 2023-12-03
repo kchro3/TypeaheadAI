@@ -273,19 +273,19 @@ struct MessageView: View {
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Something has gone horribly wrong."))
+    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Something has gone horribly wrong."))
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true, isHidden: false, appContext: nil))
+    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true, isHidden: false, appContext: nil))
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil))
+    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil))
 }
 
 #Preview {
-    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello user", isCurrentUser: false, isHidden: false, appContext: nil))
+    MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello user", isCurrentUser: false, isHidden: false, appContext: nil))
 }
 
 
@@ -315,7 +315,7 @@ Task {
 | 1     | 2   | 3    |
 """
 
-    return MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: markdownString, isCurrentUser: false, isHidden: false, appContext: nil))
+    return MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: markdownString, isCurrentUser: false, isHidden: false, appContext: nil))
 }
 
 #Preview {
@@ -327,5 +327,5 @@ Thanks for trying out the app, really appreciate your candidness in the intervie
 Jeff
 """
 
-    return MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: markdownString, isCurrentUser: false, isHidden: false, appContext: nil))
+    return MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: markdownString, isCurrentUser: false, isHidden: false, appContext: nil))
 }

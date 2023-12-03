@@ -20,6 +20,7 @@ struct Message: Codable, Identifiable, Equatable {
     let rootId: UUID
     let inReplyToId: UUID?
     let createdAt: Date
+    let rootCreatedAt: Date
 
     var text: String
     let isCurrentUser: Bool
@@ -37,11 +38,11 @@ struct Message: Codable, Identifiable, Equatable {
 
 extension Message {
     init?(from entry: MessageEntry) {
-        print(entry)
         guard let id = entry.id,
               let rootId = entry.rootId,
               let text = entry.text,
-              let createdAt = entry.createdAt else {
+              let createdAt = entry.createdAt,
+              let rootCreatedAt = entry.rootCreatedAt else {
             return nil
         }
 
@@ -49,6 +50,7 @@ extension Message {
         self.rootId = rootId
         self.inReplyToId = entry.inReplyToId
         self.createdAt = createdAt
+        self.rootCreatedAt = rootCreatedAt
 
         self.text = text
         self.isCurrentUser = entry.isCurrentUser
@@ -60,7 +62,6 @@ extension Message {
         }
 
         self.responseError = entry.responseError
-        print(self)
     }
 
     func serialize(context: NSManagedObjectContext) -> MessageEntry {
@@ -69,6 +70,7 @@ extension Message {
         entry.rootId = self.rootId
         entry.inReplyToId = self.inReplyToId
         entry.createdAt = self.createdAt
+        entry.rootCreatedAt = self.rootCreatedAt
         entry.text = self.text
         entry.isCurrentUser = self.isCurrentUser
         entry.isHidden = self.isHidden
