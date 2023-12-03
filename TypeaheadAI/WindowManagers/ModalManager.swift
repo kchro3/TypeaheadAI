@@ -467,6 +467,14 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
+    func load(rootId: UUID, messageId: UUID) throws {
+        if let messages = try conversationManager?.getConversation(rootId: rootId) {
+            try conversationManager?.saveConversation(messages: self.messages)
+            self.messages = messages
+        }
+    }
+
+    @MainActor
     func closeModal() {
         toastWindow?.close()
         isVisible = false

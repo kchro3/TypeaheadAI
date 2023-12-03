@@ -58,15 +58,20 @@ struct ModalView: View {
             modalHeaderView
 
             if isSearchBarVisible {
-                SearchResultsView(messages: messageEntries.compactMap { Message(from: $0) })
+                SearchResultsView(messages: messageEntries.compactMap { Message(from: $0) }) { (rootId, messageId) in
+                    Task {
+                        try modalManager.load(rootId: rootId, messageId: messageId)
+                        isSearchBarVisible = false
+                    }
+                }
             } else {
                 ConversationView(modalManager: modalManager)
-            }
 
-            ModalFooterView(
-                modalManager: modalManager,
-                clientManager: modalManager.clientManager!
-            )
+                ModalFooterView(
+                    modalManager: modalManager,
+                    clientManager: modalManager.clientManager!
+                )
+            }
         }
         .font(.system(size: fontSize))
         .foregroundColor(Color.primary)

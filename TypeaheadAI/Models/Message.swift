@@ -37,6 +37,7 @@ struct Message: Codable, Identifiable, Equatable {
 
 extension Message {
     init?(from entry: MessageEntry) {
+        print(entry)
         guard let id = entry.id,
               let rootId = entry.rootId,
               let text = entry.text,
@@ -59,6 +60,7 @@ extension Message {
         }
 
         self.responseError = entry.responseError
+        print(self)
     }
 
     func serialize(context: NSManagedObjectContext) -> MessageEntry {

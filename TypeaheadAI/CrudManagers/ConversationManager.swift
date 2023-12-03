@@ -15,6 +15,16 @@ class ConversationManager {
 
     init(context: NSManagedObjectContext) {
         self.context = context
+        startMonitoring()
+    }
+
+    private func startMonitoring() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.saveConversationWrapper(_:)),
+            name: .chatComplete,
+            object: nil
+        )
     }
 
     @MainActor
@@ -31,7 +41,7 @@ class ConversationManager {
     func getConversation(rootId: UUID) throws -> [Message] {
         let fetchRequest: NSFetchRequest<MessageEntry> = MessageEntry.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "rootId == %@", rootId as CVarArg)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
 
         let messages = try context.fetch(fetchRequest)
         return messages.compactMap { Message(from: $0) }
@@ -51,5 +61,17 @@ class ConversationManager {
 
         print("saving...")
         try context.save()
+    }
+
+    @objc func saveConversationWrapper(_ notification: NSNotification) {
+        guard let messages = notification.userInfo?["messages"] as? [Message] else { return }
+
+        Task {
+            do {
+                try await saveConversation(messages: messages)
+            } catch {
+                print("\(error.localizedDescription)")
+            }
+        }
     }
 }

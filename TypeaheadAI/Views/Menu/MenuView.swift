@@ -67,6 +67,7 @@ struct MenuView: View {
 
             VStack(spacing: 0) {
                 MenuButtonView(title: "Settings") {
+                    modalManager.closeModal()
                     settingsManager.showModal()
                     isMenuVisible = false
                 }
@@ -74,6 +75,7 @@ struct MenuView: View {
                 MenuButtonView(
                     title: "Quick Actions"
                 ) {
+                    modalManager.closeModal()
                     settingsManager.showModal(tab: .quickActions)
                     isMenuVisible = false
                 }
@@ -84,7 +86,7 @@ struct MenuView: View {
                         shortcut: KeyboardShortcuts.Name.chatNew
                     ) {
                         Task {
-                            try await modalManager.forceRefresh()
+                            try modalManager.forceRefresh()
                             NSApp.activate(ignoringOtherApps: true)
                             isMenuVisible = false
                         }
@@ -107,6 +109,7 @@ struct MenuView: View {
                 MenuButtonView(
                     title: "Feedback"
                 ) {
+                    modalManager.closeModal()
                     settingsManager.showModal(tab: .feedback)
                     isMenuVisible = false
                 }
@@ -124,6 +127,7 @@ struct MenuView: View {
                     }
                 } else {
                     MenuButtonView(title: "Sign in") {
+                        modalManager.closeModal()
                         settingsManager.showModal(tab: .account)
                         isMenuVisible = false
                     }
