@@ -45,6 +45,7 @@ struct SearchResultsView: View {
                                 .padding(10)
                         }
                         .buttonStyle(.plain)
+                        .padding(.trailing, 10)
                     }
                 }
                 .markdownTheme(.custom)
