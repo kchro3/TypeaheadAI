@@ -98,6 +98,7 @@ class ModalManager: ObservableObject {
                         rootId: lastMessage.rootId,
                         inReplyToId: lastMessage.id,
                         createdAt: Date(),
+                        rootCreatedAt: lastMessage.rootCreatedAt,
                         text: text,
                         isCurrentUser: false,
                         isHidden: isHidden,
@@ -106,12 +107,14 @@ class ModalManager: ObservableObject {
                 )
             } else {
                 let id = UUID()
+                let date = Date()
                 messages.append(
                     Message(
                         id: id,
                         rootId: id,
                         inReplyToId: nil,
-                        createdAt: Date(),
+                        createdAt: date,
+                        rootCreatedAt: date,
                         text: text,
                         isCurrentUser: false,
                         isHidden: isHidden,
@@ -137,6 +140,7 @@ class ModalManager: ObservableObject {
                         rootId: lastMessage.rootId,
                         inReplyToId: lastMessage.id,
                         createdAt: Date(),
+                        rootCreatedAt: lastMessage.rootCreatedAt,
                         text: "",
                         isCurrentUser: false,
                         isHidden: isHidden,
@@ -145,12 +149,14 @@ class ModalManager: ObservableObject {
                 )
             } else {
                 let id = UUID()
+                let date = Date()
                 messages.append(
                     Message(
                         id: id,
                         rootId: id,
                         inReplyToId: nil,
-                        createdAt: Date(),
+                        createdAt: date,
+                        rootCreatedAt: date,
                         text: "",
                         isCurrentUser: false,
                         isHidden: isHidden,
@@ -173,6 +179,7 @@ class ModalManager: ObservableObject {
                         rootId: lastMessage.rootId,
                         inReplyToId: lastMessage.id,
                         createdAt: Date(),
+                        rootCreatedAt: lastMessage.rootCreatedAt,
                         text: text,
                         isCurrentUser: false,
                         isHidden: false,
@@ -181,12 +188,14 @@ class ModalManager: ObservableObject {
                 )
             } else {
                 let id = UUID()
+                let date = Date()
                 messages.append(
                     Message(
                         id: id,
                         rootId: id,
                         inReplyToId: nil,
-                        createdAt: Date(),
+                        createdAt: date,
+                        rootCreatedAt: date,
                         text: text,
                         isCurrentUser: false,
                         isHidden: false,
@@ -220,6 +229,7 @@ class ModalManager: ObservableObject {
                     rootId: lastMessage.rootId,
                     inReplyToId: lastMessage.id,
                     createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
                     text: placeholder,
                     isCurrentUser: false,
                     isHidden: false,
@@ -229,12 +239,14 @@ class ModalManager: ObservableObject {
             )
         } else {
             let id = UUID()
+            let date = Date()
             messages.append(
                 Message(
                     id: id,
                     rootId: id,
                     inReplyToId: nil,
-                    createdAt: Date(),
+                    createdAt: date,
+                    rootCreatedAt: date,
                     text: placeholder,
                     isCurrentUser: false,
                     isHidden: false,
@@ -254,6 +266,7 @@ class ModalManager: ObservableObject {
                     rootId: lastMessage.rootId,
                     inReplyToId: lastMessage.id,
                     createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
                     text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
                     isCurrentUser: false,
                     isHidden: true,
@@ -263,12 +276,14 @@ class ModalManager: ObservableObject {
             )
         } else {
             let id = UUID()
+            let date = Date()
             messages.append(
                 Message(
                     id: id,
                     rootId: id,
                     inReplyToId: nil,
-                    createdAt: Date(),
+                    createdAt: date,
+                    rootCreatedAt: date,
                     text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
                     isCurrentUser: false,
                     isHidden: true,
@@ -292,6 +307,7 @@ class ModalManager: ObservableObject {
                     rootId: lastMessage.rootId,
                     inReplyToId: lastMessage.id,
                     createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
                     text: text,
                     isCurrentUser: true,
                     isHidden: isHidden,
@@ -301,12 +317,14 @@ class ModalManager: ObservableObject {
             )
         } else {
             let id = UUID()
+            let date = Date()
             messages.append(
                 Message(
                     id: id,
                     rootId: id,
                     inReplyToId: nil,
-                    createdAt: Date(),
+                    createdAt: date,
+                    rootCreatedAt: date,
                     text: text,
                     isCurrentUser: true,
                     isHidden: isHidden,
@@ -331,6 +349,7 @@ class ModalManager: ObservableObject {
                     rootId: lastMessage.rootId,
                     inReplyToId: lastMessage.id,
                     createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
                     text: text,
                     isCurrentUser: true,
                     isHidden: isHidden,
@@ -339,12 +358,14 @@ class ModalManager: ObservableObject {
             )
         } else {
             let id = UUID()
+            let date = Date()
             messages.append(
                 Message(
                     id: id,
                     rootId: id,
                     inReplyToId: nil,
-                    createdAt: Date(),
+                    createdAt: date,
+                    rootCreatedAt: date,
                     text: text,
                     isCurrentUser: true,
                     isHidden: isHidden,
@@ -467,7 +488,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func load(rootId: UUID, messageId: UUID) throws {
+    func load(rootId: UUID) throws {
         if let messages = try conversationManager?.getConversation(rootId: rootId) {
             try conversationManager?.saveConversation(messages: self.messages)
             self.messages = messages

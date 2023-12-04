@@ -45,6 +45,7 @@ struct SearchResultsView: View {
                                 .padding(10)
                         }
                         .buttonStyle(.plain)
+                        .padding(.trailing, 10)
                     }
                 }
                 .markdownTheme(.custom)
@@ -70,6 +71,6 @@ struct SearchResultsView: View {
 
 #Preview {
     return SearchResultsView(messages: [
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "test message", isCurrentUser: true, isHidden: false, appContext: nil)
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "test message", isCurrentUser: true, isHidden: false, appContext: nil)
     ])
 }

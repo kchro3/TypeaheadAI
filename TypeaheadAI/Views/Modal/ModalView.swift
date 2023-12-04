@@ -45,7 +45,13 @@ struct ModalView: View {
 
         let request = NSFetchRequest<MessageEntry>(entityName: "MessageEntry")
         request.predicate = NSPredicate(value: false)
-        request.sortDescriptors = []
+
+        // First, sort the messages in reverse-chron by conversation (thread)
+        // Then, sort the messages in chron within a conversation (thread)
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "rootCreatedAt", ascending: false),
+            NSSortDescriptor(key: "createdAt", ascending: true)
+        ]
         request.fetchLimit = 10
         request.fetchOffset = 0
 
@@ -60,8 +66,11 @@ struct ModalView: View {
             if isSearchBarVisible {
                 SearchResultsView(messages: messageEntries.compactMap { Message(from: $0) }) { (rootId, messageId) in
                     Task {
-                        try modalManager.load(rootId: rootId, messageId: messageId)
+                        try modalManager.load(rootId: rootId)
                         isSearchBarVisible = false
+                        NotificationCenter.default.post(name: .scrollToMessage, object: nil, userInfo: [
+                            "messageId": messageId
+                        ])
                     }
                 }
             } else {
@@ -174,8 +183,8 @@ struct ModalView: View {
     let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil)
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -185,8 +194,8 @@ struct ModalView: View {
     let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Request took too long"),
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil)
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Request took too long"),
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -214,7 +223,7 @@ Task {
 """
 
     modalManager.messages = [
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: markdownString, isCurrentUser: false, isHidden: false, appContext: nil)
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: markdownString, isCurrentUser: false, isHidden: false, appContext: nil)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -224,8 +233,8 @@ Task {
     let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true, isHidden: false, appContext: nil)
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot bot hello bot hello bot hello bot hello bot hello bot hello bot ", isCurrentUser: true, isHidden: false, appContext: nil)
     ]
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }
@@ -247,8 +256,8 @@ Task {
     ]
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Request took too long"),
-        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil)
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Request took too long"),
+        Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil)
     ]
 
     let promptManager = QuickActionManager(context: container.viewContext, backgroundContext: container.newBackgroundContext())
