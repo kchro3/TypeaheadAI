@@ -771,10 +771,10 @@ void llama_sampling_free(struct llama_sampling_context * ctx) {
     delete ctx;
 }
 
-int main2(struct llama_context * ctx,
-          const char* prompt_c,
-          const int n_threads,
-          TokenCallback callback) {
+int main_predict(struct llama_context * ctx,
+                 const char* prompt_c,
+                 const int n_threads,
+                 TokenCallback callback) {
 
     const struct llama_model * model = llama_get_model(ctx);
 

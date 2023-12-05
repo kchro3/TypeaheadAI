@@ -68,7 +68,7 @@ extension LlamaWrapper {
 
             Task {
                 ctx = llama_new_context_with_model(model, cparams)  // NOTE: We could expose context params in the predict API?
-                main2(ctx, prompt, 1, globalHandler)
+                main_predict(ctx, prompt, 1, globalHandler)
                 continuation.finish()
             }
         }

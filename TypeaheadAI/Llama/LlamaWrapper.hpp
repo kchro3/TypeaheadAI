@@ -20,10 +20,11 @@ typedef void (*TokenCallback)(const char* token);
 /// C-friendly version of simple.cpp
 const char * simple_predict(struct llama_context* ctx, const char* prompt_c, const int n_threads, TokenCallback callback);
 
-int main2(struct llama_context* ctx, 
-          const char* prompt_c,
-          const int n_threads,
-          TokenCallback callback);
+/// C-friendly version of main.cpp
+int main_predict(struct llama_context* ctx,
+                 const char* prompt_c,
+                 const int n_threads,
+                 TokenCallback callback);
 
 #ifdef __cplusplus
 }

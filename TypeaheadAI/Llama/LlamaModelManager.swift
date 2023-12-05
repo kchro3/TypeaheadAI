@@ -26,6 +26,7 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
+    @AppStorage("online") private var isOnline: Bool = true
     @AppStorage("modelDirectoryBookmark") private var modelDirectoryBookmark: Data?
     @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL? {
@@ -58,6 +59,14 @@ class LlamaModelManager: ObservableObject {
 
         if let urlString = selectedModelURL {
             try await self.loadModel(from: urlString)
+        }
+    }
+
+    init() {
+        if !isOnline {
+            Task {
+                try await self.load()
+            }
         }
     }
 
@@ -225,7 +234,7 @@ class LlamaModelManager: ObservableObject {
         streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
     ) async throws {
         guard let model = model else {
-            throw ClientManagerError.modelNotLoaded("No model loaded.")
+            throw ClientManagerError.modelNotLoaded("Open Settings > Offline Mode to select a model for offline mode.")
         }
 
         var payloadCopy = payload
