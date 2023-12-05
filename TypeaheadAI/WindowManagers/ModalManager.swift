@@ -144,7 +144,8 @@ class ModalManager: ObservableObject {
                         text: "",
                         isCurrentUser: false,
                         isHidden: isHidden,
-                        appContext: appContext
+                        appContext: appContext,
+                        responseError: responseError
                     )
                 )
             } else {
@@ -160,7 +161,8 @@ class ModalManager: ObservableObject {
                         text: "",
                         isCurrentUser: false,
                         isHidden: isHidden,
-                        appContext: appContext
+                        appContext: appContext,
+                        responseError: responseError
                     )
                 )
             }
@@ -384,25 +386,9 @@ class ModalManager: ObservableObject {
             messages: self.messages,
             incognitoMode: !online,
             userIntent: implicit ? text : nil,
-            streamHandler: { result, appContext in
-
-            switch result {
-            case .success(let chunk):
-                Task {
-                    await self.appendText(chunk, appContext: appContext)
-                }
-            case .failure(let error as ClientManagerError):
-                Task {
-                    self.setError(error.localizedDescription, appContext: appContext)
-                }
-                self.logger.error("An error occurred: \(error)")
-            case .failure(let error):
-                Task {
-                    self.setError(error.localizedDescription, appContext: appContext)
-                }
-                self.logger.error("An error occurred: \(error)")
-            }
-        }, completion: defaultCompletionHandler)
+            streamHandler: defaultHandler,
+            completion: defaultCompletionHandler
+        )
     }
 
     @MainActor
