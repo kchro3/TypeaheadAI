@@ -54,8 +54,8 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
             return
         }
 
-        if let htmlString = self.extractHTML(appContext: appContext) {
-            messageType = .html(data: htmlString)
+        if let markdownString = try? getMarkdownFromPasteboard() {
+            messageType = .markdown(data: markdownString)
         }
 
         if let nCopies = self.numSmartCopies {

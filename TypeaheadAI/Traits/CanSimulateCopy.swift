@@ -6,15 +6,17 @@
 //
 
 import AppKit
-import Foundation
 import Carbon.HIToolbox
+import Foundation
+import HtmlMarkdown
 
 let whitelistedApps = [
     "Numbers"
 ]
 
 let whitelistedUrls = [
-    "https://docs.google.com/spreadsheets"
+    "https://docs.google.com/spreadsheets",
+    "https://twitter.com",
 ]
 
 enum CanSimulateCopyError: Error {
@@ -44,21 +46,10 @@ extension CanSimulateCopy {
         }
     }
 
-    // TODO: Only support HTML tables from specific allowlisted apps / urls for now.
-    func extractHTML(appContext: AppContext?) -> String? {
-        var isWhitelisted = false
-        if let appName = appContext?.appName, whitelistedApps.contains(appName) {
-            isWhitelisted = true
-        }
-        if let url = appContext?.url, let _ = whitelistedUrls.first(where: { url.absoluteString.starts(with: $0) }) {
-            isWhitelisted = true
-        }
-
-        if isWhitelisted,
-           let html = NSPasteboard.general.data(forType: .html),
-           let htmlString = String(data: html, encoding: .utf8),
-           htmlString.contains("</table>") {
-            return htmlString
+    func getMarkdownFromPasteboard() throws -> String? {
+        if let htmlString = NSPasteboard.general.string(forType: .html),
+           let sanitizedHTML = try? htmlString.sanitizeHTML() {
+            return sanitizedHTML.renderXMLToMarkdown(.init(throwUnkownElement: .ignore))
         } else {
             return nil
         }

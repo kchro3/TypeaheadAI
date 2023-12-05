@@ -82,7 +82,7 @@ struct MessageView: View {
             } : nil
         ) {
             switch message.messageType {
-            case .string:
+            case .string, .markdown:
                 if isEditing {
                     CustomTextField(
                         text: $localContent,
@@ -173,7 +173,7 @@ struct MessageView: View {
                 } : nil,
                 onRefresh: onRefresh) {
                 switch message.messageType {
-                case .string:
+                case .string, .markdown:
                     if isEditing {
                         CustomTextField(
                             text: $localContent,
@@ -287,7 +287,6 @@ struct MessageView: View {
 #Preview {
     MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello user", isCurrentUser: false, isHidden: false, appContext: nil))
 }
-
 
 #Preview {
     let markdownString = """

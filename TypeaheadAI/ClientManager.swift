@@ -552,7 +552,13 @@ class ClientManager: ObservableObject {
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
-            messageCopy.messageType = .string
+
+            switch messageCopy.messageType {
+            case .data, .html, .image:
+                messageCopy.messageType = .string
+            default:
+                messageCopy.messageType = messageCopy.messageType  // NO-OP
+            }
             messageCopy.appContext?.screenshotPath = nil
             messageCopy.appContext?.ocrText = nil
             return messageCopy

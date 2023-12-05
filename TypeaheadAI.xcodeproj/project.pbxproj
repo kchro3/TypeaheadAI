@@ -38,6 +38,9 @@
 		2B2EF1522AC40CB500EF2BD4 /* MessagePendingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */; };
 		2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D87C2AAC3330001193A2 /* ProfileView.swift */; };
 		2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */; };
+		2B3434FD2B1E859100423EE8 /* HtmlMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3434FC2B1E859100423EE8 /* HtmlMarkdown */; };
+		2B3435002B1E86A000423EE8 /* HtmlMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3434FF2B1E86A000423EE8 /* HtmlMarkdown */; };
+		2B3435032B1EA33500423EE8 /* String+HTMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */; };
 		2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */; };
 		2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3792302AB83739008D812F /* CanSimulatePaste.swift */; };
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
@@ -156,6 +159,7 @@
 		2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagePendingView.swift; sourceTree = "<group>"; };
 		2B33D87C2AAC3330001193A2 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCutActor.swift; sourceTree = "<group>"; };
+		2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+HTMLParser.swift"; sourceTree = "<group>"; };
 		2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialPasteActor.swift; sourceTree = "<group>"; };
 		2B3792302AB83739008D812F /* CanSimulatePaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulatePaste.swift; sourceTree = "<group>"; };
 		2B3FAC1E2AAAF22400B2D405 /* TypeaheadAI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TypeaheadAI-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -237,7 +241,9 @@
 				2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */,
 				2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */,
 				2BF4A7E52AF1A52600AA2512 /* GoogleSignInSwift in Frameworks */,
+				2B3434FD2B1E859100423EE8 /* HtmlMarkdown in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
+				2B3435002B1E86A000423EE8 /* HtmlMarkdown in Frameworks */,
 				2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */,
 				2BF4A7E32AF1A52600AA2512 /* GoogleSignIn in Frameworks */,
 				2B8CD4BE2B0AB13B003E0589 /* MarkdownUI in Frameworks */,
@@ -421,6 +427,7 @@
 				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
 				2BE0EC242AA17DB600E47C52 /* Info.plist */,
 				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
+				2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -583,6 +590,8 @@
 				2BF4A7E22AF1A52600AA2512 /* GoogleSignIn */,
 				2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */,
 				2B8CD4BD2B0AB13B003E0589 /* MarkdownUI */,
+				2B3434FC2B1E859100423EE8 /* HtmlMarkdown */,
+				2B3434FF2B1E86A000423EE8 /* HtmlMarkdown */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -667,6 +676,7 @@
 				2B1F3B7F2AEDBDFF00F1BB60 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2BC52A202AF1A27C00721033 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				2B3434FE2B1E86A000423EE8 /* XCRemoteSwiftPackageReference "SwiftHtmlMarkdown" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -790,6 +800,7 @@
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
+				2B3435032B1EA33500423EE8 /* String+HTMLParser.swift in Sources */,
 				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,
 				2BAA97952B042AD400EC6A63 /* PermissionsOnboardingView.swift in Sources */,
 				2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */,
@@ -1163,6 +1174,14 @@
 				kind = branch;
 			};
 		};
+		2B3434FE2B1E86A000423EE8 /* XCRemoteSwiftPackageReference "SwiftHtmlMarkdown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kchro3/SwiftHtmlMarkdown";
+			requirement = {
+				branch = "kchro3/ignore-meta";
+				kind = branch;
+			};
+		};
 		2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
@@ -1231,6 +1250,15 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2B1F3B7F2AEDBDFF00F1BB60 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
 			productName = LaunchAtLogin;
+		};
+		2B3434FC2B1E859100423EE8 /* HtmlMarkdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HtmlMarkdown;
+		};
+		2B3434FF2B1E86A000423EE8 /* HtmlMarkdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B3434FE2B1E86A000423EE8 /* XCRemoteSwiftPackageReference "SwiftHtmlMarkdown" */;
+			productName = HtmlMarkdown;
 		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
