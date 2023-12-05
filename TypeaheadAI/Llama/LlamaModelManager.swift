@@ -10,13 +10,6 @@ import SwiftUI
 import Foundation
 import os.log
 
-enum LlamaManagerError: Error {
-    case modelNotFound(_ message: String)
-    case modelNotLoaded(_ message: String)
-    case modelDirectoryNotAuthorized(_ message: String)
-    case modelFailed(_ message: String)
-}
-
 class LlamaModelManager: ObservableObject {
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -66,8 +59,6 @@ class LlamaModelManager: ObservableObject {
         if let urlString = selectedModelURL {
             try await self.loadModel(from: urlString)
         }
-
-        model?.main()
     }
 
     deinit {
@@ -173,7 +164,7 @@ class LlamaModelManager: ObservableObject {
         self.model = LlamaWrapper(url)
 
         guard let _ = self.model?.isLoaded() else {
-            throw LlamaManagerError.modelNotLoaded("Model could not be loaded")
+            throw ClientManagerError.modelNotLoaded("Model could not be loaded")
         }
 
         self.logger.info("model loaded successfully: \(url.lastPathComponent)")
@@ -187,51 +178,54 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
+    /// Disable suggest intents for offline mode
     func suggestIntents(
         payload: RequestPayload
     ) async throws -> SuggestIntentsPayload {
-        guard let model = self.model else {
-            throw LlamaManagerError.modelNotFound("Model not found")
-        }
-
-        var payloadCopy = payload
-        payloadCopy.messages = []
-        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
-            throw ClientManagerError.badRequest("Encoding error")
-        }
-
-        let prompt = """
-        ### Instruction:
-        Below is an instruction that describes a task. Predict three possible user intents based on the copied text and context, and return them as a tab-separated, unquoted string.
-
-        ### Input:
-        \(jsonPayload)
-
-        ## Response:
-
-        """
-
-        print(prompt)
-
-        let result = await model.predict2(prompt)
-        switch result {
-        case .success(let data):
-            if let values = data.text?.split(separator: ",") {
-                return SuggestIntentsPayload(intents: values.map { String($0) })
-            } else {
-                return SuggestIntentsPayload(intents: [])
-            }
-        case .failure(let error):
-            throw error
-        }
+        return SuggestIntentsPayload(intents: [])
     }
+//        guard let model = self.model else {
+//            throw ClientManagerError.modelNotFound("Model not found")
+//        }
+//
+//        var payloadCopy = payload
+//        payloadCopy.messages = []
+//        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
+//            throw ClientManagerError.badRequest("Encoding error")
+//        }
+//
+//        let prompt = """
+//        ### Instruction:
+//        Below is an instruction that describes a task. Predict three possible user intents based on the copied text and context, and return them as a tab-separated, unquoted string.
+//
+//        ### Input:
+//        \(jsonPayload)
+//
+//        ## Response:
+//
+//        """
+//
+//        print(prompt)
+//
+//        let result = await model.predict2(prompt)
+//        switch result {
+//        case .success(let data):
+//            if let values = data.text?.split(separator: ",") {
+//                return SuggestIntentsPayload(intents: values.map { String($0) })
+//            } else {
+//                return SuggestIntentsPayload(intents: [])
+//            }
+//        case .failure(let error):
+//            throw error
+//        }
+//    }
 
     func predict(
         payload: RequestPayload,
-        streamHandler: @escaping (Result<String, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
     ) async throws {
         guard let model = model else {
-            throw LlamaManagerError.modelNotLoaded("No model loaded.")
+            throw ClientManagerError.modelNotLoaded("No model loaded.")
         }
 
         var payloadCopy = payload
@@ -277,67 +271,11 @@ class LlamaModelManager: ObservableObject {
 
         do {
             for try await token in model.predict(prompt) {
-                await streamHandler(.success(token))
+                await streamHandler(.success(token), nil)
             }
         } catch {
-            throw LlamaManagerError.modelFailed(error.localizedDescription)
+            throw ClientManagerError.modelFailed(error.localizedDescription)
         }
-    }
-
-    func predict2(
-        payload: RequestPayload,
-        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
-    ) async -> Result<ChunkPayload, Error> {
-        var payloadCopy = payload
-        payloadCopy.messages = []
-
-        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
-            let error = ClientManagerError.badRequest("Encoding error")
-            await streamHandler(.failure(error), nil)
-            return .failure(error)
-        }
-
-        guard let model = self.model else {
-            let error = LlamaManagerError.modelNotFound("Model not found")
-            await streamHandler(.failure(error), nil)
-            return .failure(error)
-        }
-
-        var refinements = ""
-        if let messages = payload.messages {
-            for message in messages {
-                if message.isCurrentUser {
-                    refinements += """
-                    \(message.text)
-
-                    ### Response:
-                    """
-                } else {
-                    refinements += """
-                    \(message.text)
-
-                    ### Input:
-
-                    """
-                }
-            }
-        }
-
-        let prompt = """
-        ### Instruction:
-        Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-        ### Input:
-        \(jsonPayload)
-
-        ### Response:
-        \(refinements)
-
-        """
-
-        print(prompt)
-
-        return await model.predict2(prompt, handler: streamHandler)
     }
 
     private func encodeToJSONString<T: Codable>(from object: T) -> String? {
