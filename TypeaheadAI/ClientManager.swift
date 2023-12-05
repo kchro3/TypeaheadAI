@@ -22,20 +22,25 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v5"
+    private let version: String = "v7"
+    private let validFinishReasons: [String] = [
+        "stop",
+        "function_call",
+        "tool_calls",
+    ]
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
 //    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v3/latest")!
 //    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
     private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-    private let apiLatest = URL(string: "http://localhost:8080/v2/latest")!
+    private let apiLatest = URL(string: "http://localhost:8080/v3/latest")!
     private let apiFeedback = URL(string: "http://localhost:8080/v2/feedback")!
 
     #else
@@ -43,7 +48,7 @@ class ClientManager: ObservableObject {
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v2/latest")!
+    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v3/latest")!
     private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
     #endif
 
@@ -65,7 +70,7 @@ class ClientManager: ObservableObject {
         return self.promptManager?.getActivePrompt()
     }
 
-    func checkUpdates() async -> AppVersion? {
+    func getLatestVersion() async -> AppVersion? {
         do {
             let (data, _) = try await URLSession.shared.data(from: apiLatest)
             return try? JSONDecoder().decode(AppVersion.self, from: data)
@@ -171,56 +176,17 @@ class ClientManager: ObservableObject {
         }
     }
 
-    /// Easier to use this wrapper function.
-    func predict(
-        id: UUID,
-        copiedText: String,
-        incognitoMode: Bool,
-        history: [Message]? = nil,
-        userObjective: String? = nil,
-        timeout: TimeInterval = 30,
-        stream: Bool = false,
-        streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) -> Void
-    ) async throws {
-        self.logger.info("incognito: \(incognitoMode)")
-        // If objective is not specified in the request, fall back on the active prompt.
-        let objective = userObjective ?? self.promptManager?.getActivePrompt()
-
-        guard let appCtxManager = appContextManager else {
-            self.logger.error("Something is wrong with the initialization")
-            completion(.failure(ClientManagerError.appError("Something went wrong.")))
-            return
-        }
-
-        let appContext = try await appCtxManager.getActiveAppInfo()
-        await self.sendStreamRequest(
-            id: id,
-            username: NSUserName(),
-            userFullName: NSFullUserName(),
-            userObjective: objective,
-            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-            userLang: Locale.preferredLanguages.first ?? "",
-            copiedText: copiedText,
-            messages: [],
-            history: history,
-            appContext: appContext,
-            incognitoMode: incognitoMode,
-            streamHandler: streamHandler,
-            completion: completion
-        )
-    }
-
     /// Refine the currently cached request
     func refine(
         messages: [Message],
         incognitoMode: Bool,
         userIntent: String? = nil,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) async -> Void
     ) async throws {
         self.logger.info("incognito: \(incognitoMode)")
+        let appContext = try await appContextManager?.getActiveAppInfo()
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
@@ -243,7 +209,7 @@ class ClientManager: ObservableObject {
                 await self.intentManager?.addIntentEntry(
                     prompt: userIntent,
                     copiedText: payload.copiedText,
-                    appContext: payload.appContext
+                    appContext: appContext
                 )
             }
 
@@ -257,7 +223,7 @@ class ClientManager: ObservableObject {
                 copiedText: payload.copiedText,
                 messages: self.sanitizeMessages(messages),
                 history: history,
-                appContext: payload.appContext,
+                appContext: appContext,
                 incognitoMode: incognitoMode,
                 streamHandler: streamHandler,
                 completion: completion
@@ -274,14 +240,21 @@ class ClientManager: ObservableObject {
                 copiedText: "",
                 messages: self.sanitizeMessages(messages),
                 history: nil,
-                appContext: nil,
+                appContext: appContext,
                 incognitoMode: incognitoMode,
                 streamHandler: streamHandler,
                 completion: completion
             )
         }
 
-        NotificationCenter.default.post(name: .chatComplete, object: nil)
+        // Add in any other relevant metadata
+        NotificationCenter.default.post(
+            name: .chatComplete,
+            object: nil,
+            userInfo: [
+                "messages": messages
+            ]
+        )
     }
 
     /// Sends a request to the server with the given parameters and listens for a stream of data.
@@ -303,8 +276,8 @@ class ClientManager: ObservableObject {
         appContext: AppContext?,
         incognitoMode: Bool,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) async -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -324,7 +297,7 @@ class ClientManager: ObservableObject {
             )
 
             if let output = self?.getCachedResponse(for: payload) {
-                await streamHandler(.success(output))
+                await streamHandler(.success(output), appContext)
                 return
             }
 
@@ -358,7 +331,7 @@ class ClientManager: ObservableObject {
                         payload: payload,
                         timeout: timeout,
                         completion: { result in
-                            await completion(result)
+                            await completion(result, appContext)
 
                             // Cache successful response
                             switch result {
@@ -377,11 +350,11 @@ class ClientManager: ObservableObject {
 
                     for try await text in stream {
                         self?.logger.debug("stream: \(text)")
-                        await streamHandler(.success(text))
+                        await streamHandler(.success(text), appContext)
                     }
                 } catch {
                     self?.cacheResponse(nil, for: payload)
-                    await streamHandler(.failure(error))
+                    await streamHandler(.failure(error), appContext)
                 }
             }
         }
@@ -503,7 +476,6 @@ class ClientManager: ObservableObject {
                           let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
-                        await completion(.failure(error))
                         return
                     }
 
@@ -521,10 +493,9 @@ class ClientManager: ObservableObject {
                             bufferedPayload = response
                         }
                     } else if let finishReason = response.finishReason,
-                              (finishReason != "stop" && finishReason != "function_call") {
+                              !validFinishReasons.contains(finishReason) {
                         let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
                         continuation.finish(throwing: error)
-                        await completion(.failure(error))
                         return
                     }
                 }
@@ -538,7 +509,7 @@ class ClientManager: ObservableObject {
     private func performStreamOfflineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
     ) async -> Result<ChunkPayload, Error> {
         guard let modelManager = self.llamaModelManager else {
             return .failure(ClientManagerError.appError("Model Manager not found"))
@@ -591,6 +562,8 @@ class ClientManager: ObservableObject {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
             messageCopy.messageType = .string
+            messageCopy.appContext?.screenshotPath = nil
+            messageCopy.appContext?.ocrText = nil
             return messageCopy
         }
     }
@@ -681,7 +654,8 @@ public struct ImageResponse: Codable {
 struct AppVersion: Codable, Equatable {
     let major: Int
     let minor: Int
-    let build: Int
+    let patch: Int
+    let url: String?
 }
 
 struct ResponsePayload: Codable {

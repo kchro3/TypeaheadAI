@@ -11,15 +11,18 @@ import KeyboardShortcuts
 import SettingsAccess
 
 struct MenuView: View {
-    @ObservedObject var promptManager: QuickActionManager
+    // Alphabetize
     @ObservedObject var modalManager: ModalManager
+    @ObservedObject var promptManager: QuickActionManager
     @ObservedObject var settingsManager: SettingsManager
     @ObservedObject var supabaseManager: SupabaseManager
+    var versionManager: VersionManager
 
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
 
+    @AppStorage("online") var online: Bool = true
     @AppStorage("settingsTab") var settingsTab: String?
     @AppStorage("selectedModel") private var selectedModelURL: URL?
 
@@ -63,9 +66,16 @@ struct MenuView: View {
             .padding(.trailing, -8)
 
             VStack(spacing: 0) {
+                MenuButtonView(title: "Settings") {
+                    modalManager.closeModal()
+                    settingsManager.showModal()
+                    isMenuVisible = false
+                }
+
                 MenuButtonView(
                     title: "Quick Actions"
                 ) {
+                    modalManager.closeModal()
                     settingsManager.showModal(tab: .quickActions)
                     isMenuVisible = false
                 }
@@ -75,9 +85,11 @@ struct MenuView: View {
                         title: "New chat",
                         shortcut: KeyboardShortcuts.Name.chatNew
                     ) {
-                        modalManager.forceRefresh()
-                        NSApp.activate(ignoringOtherApps: true)
-                        isMenuVisible = false
+                        Task {
+                            try modalManager.forceRefresh()
+                            NSApp.activate(ignoringOtherApps: true)
+                            isMenuVisible = false
+                        }
                     }
                 } else {
                     MenuButtonView(
@@ -94,17 +106,17 @@ struct MenuView: View {
                     .padding(.vertical, verticalPadding)
                     .padding(.horizontal, horizontalPadding)
 
-                MenuButtonView(title: "Settings") {
-                    settingsManager.showModal()
-                    isMenuVisible = false
-                }
-
                 MenuButtonView(
                     title: "Feedback"
                 ) {
+                    modalManager.closeModal()
                     settingsManager.showModal(tab: .feedback)
                     isMenuVisible = false
                 }
+
+                Divider()
+                    .padding(.vertical, verticalPadding)
+                    .padding(.horizontal, horizontalPadding)
 
                 if supabaseManager.uuid != nil {
                     MenuButtonView(title: "Sign out") {
@@ -115,7 +127,17 @@ struct MenuView: View {
                     }
                 } else {
                     MenuButtonView(title: "Sign in") {
+                        modalManager.closeModal()
                         settingsManager.showModal(tab: .account)
+                        isMenuVisible = false
+                    }
+                }
+
+                MenuButtonView(
+                    title: "Check for updates"
+                ) {
+                    Task {
+                        try await versionManager.checkForUpdates(adhoc: true)
                         isMenuVisible = false
                     }
                 }
@@ -154,13 +176,14 @@ struct MenuView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt)
         }
 
-        let modalManager = ModalManager()
+        let modalManager = ModalManager(context: context)
 
         return MenuView(
-            promptManager: promptManager,
             modalManager: modalManager,
+            promptManager: promptManager,
             settingsManager: SettingsManager(context: context),
             supabaseManager: SupabaseManager(),
+            versionManager: VersionManager(),
             isMenuVisible: $isMenuVisible
         )
         .environment(\.managedObjectContext, context)

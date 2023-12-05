@@ -15,4 +15,6 @@ extension Notification.Name {
     static let oAuthCallback = Notification.Name("OAuthCallBack")
 
     static let chatComplete = Notification.Name("chatComplete")
+
+    static let scrollToMessage = Notification.Name("scrollToMessage")
 }

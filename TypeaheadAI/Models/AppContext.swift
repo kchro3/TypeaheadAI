@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AppContext: Codable {
+struct AppContext: Codable, Equatable {
     let appName: String?
     let bundleIdentifier: String?
     var url: URL? = nil

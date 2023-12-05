@@ -22,6 +22,8 @@ struct TypeaheadAIApp: App {
         #endif
 
         let context = persistenceController.container.viewContext
+        context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyStoreTrumpMergePolicyType)
+
         let backgroundContext = persistenceController.container.newBackgroundContext()
         _appState = StateObject(wrappedValue: AppState(context: context, backgroundContext: backgroundContext))
     }
@@ -39,10 +41,11 @@ struct TypeaheadAIApp: App {
 
         MenuBarExtra {
             MenuView(
-                promptManager: appState.promptManager,
                 modalManager: appState.modalManager,
+                promptManager: appState.promptManager,
                 settingsManager: appState.settingsManager,
                 supabaseManager: appState.supabaseManager,
+                versionManager: appState.versionManager,
                 isMenuVisible: $appState.isMenuVisible
             )
         } label: {

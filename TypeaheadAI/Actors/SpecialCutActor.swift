@@ -113,91 +113,47 @@ actor SpecialCutActor {
                     return
                 }
 
-                if false {
-                    self.performOCR(image: cgImage) { recognizedText, _ in
-                        self.logger.info("OCRed text: \(recognizedText)")
-                        Task {
-                            await self.modalManager.forceRefresh()
-                            await self.modalManager.showModal()
-                            await NSApp.activate(ignoringOtherApps: true)
+                self.performOCR(image: cgImage) { recognizedText, _ in
+                    self.logger.info("OCRed text: \(recognizedText)")
 
-                            if let captionPayload = await self.clientManager.captionImage(tiffData: tiffData) {
-                                await self.modalManager.appendUserImage(tiffData, caption: captionPayload.caption, ocrText: recognizedText)
+                    Task {
+                        try await self.modalManager.forceRefresh()
+                        await self.modalManager.showModal()
+                        await NSApp.activate(ignoringOtherApps: true)
 
-                                if let nCuts = self.numSmartCuts {
-                                    self.numSmartCuts = nCuts + 1
-                                } else {
-                                    self.numSmartCuts = 1
-                                }
-
-                                do {
-                                    if let intents = try await self.clientManager.suggestIntents(
-                                        id: UUID(),
-                                        username: NSUserName(),
-                                        userFullName: NSFullUserName(),
-                                        userObjective: self.promptManager.getActivePrompt(),
-                                        userBio: self.bio ?? "",
-                                        userLang: Locale.preferredLanguages.first ?? "",
-                                        copiedText: captionPayload.caption,
-                                        messages: self.modalManager.messages,
-                                        history: [],
-                                        appContext: appContext,
-                                        incognitoMode: !self.modalManager.online
-                                    ), !intents.intents.isEmpty {
-                                        await self.modalManager.setUserIntents(intents: intents.intents)
-                                    } else {
-                                        try await self.modalManager.replyToUserMessage(refresh: false)
-                                    }
-                                } catch {
-                                    self.logger.error("\(error.localizedDescription)")
-                                    await self.modalManager.setError(error.localizedDescription)
-                                }
-                            }
+                        if let activePrompt = self.clientManager.getActivePrompt() {
+                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)", appContext: appContext)
+                        } else {
+                            await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)", appContext: appContext)
                         }
-                    }
-                } else {
-                    self.performOCR(image: cgImage) { recognizedText, _ in
-                        self.logger.info("OCRed text: \(recognizedText)")
 
-                        Task {
-                            await self.modalManager.forceRefresh()
-                            await self.modalManager.showModal()
-                            await NSApp.activate(ignoringOtherApps: true)
+                        if let nCuts = self.numSmartCuts {
+                            self.numSmartCuts = nCuts + 1
+                        } else {
+                            self.numSmartCuts = 1
+                        }
 
-                            if let activePrompt = self.clientManager.getActivePrompt() {
-                                await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)")
+                        do {
+                            if let intents = try await self.clientManager.suggestIntents(
+                                id: UUID(),
+                                username: NSUserName(),
+                                userFullName: NSFullUserName(),
+                                userObjective: self.promptManager.getActivePrompt(),
+                                userBio: self.bio ?? "",
+                                userLang: Locale.preferredLanguages.first ?? "",
+                                copiedText: recognizedText,
+                                messages: self.modalManager.messages,
+                                history: [],
+                                appContext: appContext,
+                                incognitoMode: !self.modalManager.online
+                            ), !intents.intents.isEmpty {
+                                await self.modalManager.setUserIntents(intents: intents.intents)
                             } else {
-                                await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)")
+                                try await self.modalManager.replyToUserMessage(refresh: false)
                             }
-
-                            if let nCuts = self.numSmartCuts {
-                                self.numSmartCuts = nCuts + 1
-                            } else {
-                                self.numSmartCuts = 1
-                            }
-
-                            do {
-                                if let intents = try await self.clientManager.suggestIntents(
-                                    id: UUID(),
-                                    username: NSUserName(),
-                                    userFullName: NSFullUserName(),
-                                    userObjective: self.promptManager.getActivePrompt(),
-                                    userBio: self.bio ?? "",
-                                    userLang: Locale.preferredLanguages.first ?? "",
-                                    copiedText: recognizedText,
-                                    messages: self.modalManager.messages,
-                                    history: [],
-                                    appContext: appContext,
-                                    incognitoMode: !self.modalManager.online
-                                ), !intents.intents.isEmpty {
-                                    await self.modalManager.setUserIntents(intents: intents.intents)
-                                } else {
-                                    try await self.modalManager.replyToUserMessage(refresh: false)
-                                }
-                            } catch {
-                                self.logger.error("\(error.localizedDescription)")
-                                await self.modalManager.setError(error.localizedDescription)
-                            }
+                        } catch {
+                            self.logger.error("\(error.localizedDescription)")
+                            await self.modalManager.setError(error.localizedDescription, appContext: appContext)
                         }
                     }
                 }

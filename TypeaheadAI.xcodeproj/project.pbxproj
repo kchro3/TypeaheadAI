@@ -25,6 +25,10 @@
 		2B11FCE52B0C555000325F38 /* CanFetchAppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */; };
 		2B11FCE72B0C55CD00325F38 /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE62B0C55CD00325F38 /* AppContext.swift */; };
 		2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */; };
+		2B11FCF22B114C3F00325F38 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF12B114C3F00325F38 /* Message.swift */; };
+		2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF32B196E1500325F38 /* VersionManager.swift */; };
+		2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1F20452B1987E400152F13 /* ConversationManager.swift */; };
+		2B1F20482B1BE94000152F13 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */; };
 		2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B7D2AEC5F8500F1BB60 /* Supabase */; };
 		2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
@@ -141,6 +145,10 @@
 		2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanFetchAppContext.swift; sourceTree = "<group>"; };
 		2B11FCE62B0C55CD00325F38 /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
 		2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
+		2B11FCF12B114C3F00325F38 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		2B11FCF32B196E1500325F38 /* VersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionManager.swift; sourceTree = "<group>"; };
+		2B1F20452B1987E400152F13 /* ConversationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationManager.swift; sourceTree = "<group>"; };
+		2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
 		2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateCopy.swift; sourceTree = "<group>"; };
 		2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
@@ -407,6 +415,7 @@
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
 				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
+				2B11FCF32B196E1500325F38 /* VersionManager.swift */,
 				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
 				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
@@ -513,6 +522,7 @@
 				2BAFDB652AF58E0B009C8370 /* ConversationView.swift */,
 				2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */,
 				2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */,
+				2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */,
 			);
 			path = Modal;
 			sourceTree = "<group>";
@@ -531,6 +541,7 @@
 				2BA7F0B42A9ABCD7003D38BA /* QuickActionManager.swift */,
 				2BCF84342A9DD90F00359841 /* HistoryManager.swift */,
 				2B4BDB8A2ACC281E00E55D78 /* IntentManager.swift */,
+				2B1F20452B1987E400152F13 /* ConversationManager.swift */,
 			);
 			path = CrudManagers;
 			sourceTree = "<group>";
@@ -540,6 +551,7 @@
 			children = (
 				2BFBCAA02B048AC0004F8374 /* QuickAction.swift */,
 				2B11FCE62B0C55CD00325F38 /* AppContext.swift */,
+				2B11FCF12B114C3F00325F38 /* Message.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -717,6 +729,7 @@
 				2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */,
 				2BA7F0B52A9ABCD7003D38BA /* QuickActionManager.swift in Sources */,
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
+				2B11FCF22B114C3F00325F38 /* Message.swift in Sources */,
 				2B8CD4BB2B0AAC09003E0589 /* CopyButtonView.swift in Sources */,
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */,
@@ -731,6 +744,7 @@
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */,
 				2B11FCE32B0C47FA00325F38 /* CanSimulateSelectAll.swift in Sources */,
+				2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
@@ -743,6 +757,7 @@
 				2B7D35842B01B14100E85AEF /* IntroOnboardingView.swift in Sources */,
 				2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */,
 				2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */,
+				2B1F20482B1BE94000152F13 /* SearchResultsView.swift in Sources */,
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
@@ -771,6 +786,7 @@
 				2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
 				2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */,
+				2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */,
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
@@ -962,7 +978,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.2;
+				MARKETING_VERSION = 2.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1003,7 +1019,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.2;
+				MARKETING_VERSION = 2.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

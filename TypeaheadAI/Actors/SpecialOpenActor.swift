@@ -39,7 +39,7 @@ actor SpecialOpenActor: CanPerformOCR {
         var appContext = try await self.appContextManager.getActiveAppInfo()
         if forceRefresh {
             self.logger.debug("special new")
-            await self.modalManager.forceRefresh()
+            try await self.modalManager.forceRefresh()
             await self.modalManager.showModal()
             await NSApp.activate(ignoringOtherApps: true)
         } else {

@@ -46,32 +46,50 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
         case "open_url":
             
             guard let url = functionCall.args["url"], let prompt = functionCall.args["prompt"] else {
-                await modalManager.setError("Failed to open url...")
+                await modalManager.setError("Failed to open url...", appContext: appContext)
                 return
             }
 
-            await modalManager.appendText("Opening \(functionCall.args["url"] ?? "url")...")
-            try await openURL(functionCall.args["url"]!)
-            await modalManager.closeModal()
-            try await Task.sleep(for: .seconds(5))
-            try await simulateSelectAll()
-            try await simulateCopy()
-            try await simulateClose()
+            if url == "<current>" {
+                await modalManager.appendText("Scraping current page...", appContext: appContext)
 
-            if let bundleIdentifier = appContext?.bundleIdentifier,
-               let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
+                if let bundleIdentifier = appContext?.bundleIdentifier,
+                   let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
                     // Activate the app, bringing it to the foreground
                     app.activate(options: [.activateIgnoringOtherApps])
+                }
+
+                await modalManager.closeModal()
+                try await Task.sleep(for: .seconds(1))
+                try await simulateSelectAll()
+                try await simulateCopy()
+            } else {
+                await modalManager.appendText("Opening \(functionCall.args["url"] ?? "url"). Will wait for 5 secs to load the page...", appContext: appContext)
+                try await openURL(functionCall.args["url"]!)
+                await modalManager.closeModal()
+                try await Task.sleep(for: .seconds(5))
+                try await simulateSelectAll()
+                try await simulateCopy()
+                try await simulateClose()
+
+                if let bundleIdentifier = appContext?.bundleIdentifier,
+                   let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
+                    // Activate the app, bringing it to the foreground
+                    app.activate(options: [.activateIgnoringOtherApps])
+                }
             }
 
             await modalManager.showModal()
 
             if let copiedText = NSPasteboard.general.string(forType: .string) {
-                await modalManager.setText("Here's what I copied from \(url):\n\(copiedText)", isHidden: true)
+                if url == "<current>" {
+                    await modalManager.setText("Here's what I copied from the current page:\n\(copiedText)\n\nMy next goal: \(prompt)", isHidden: true, appContext: appContext)
+                } else {
+                    await modalManager.setText("Here's what I copied from \(url):\n\(copiedText)\n\nMy next goal: \(prompt)", isHidden: true, appContext: appContext)
+                }
             }
 
-            await modalManager.setUserMessage(prompt, isHidden: true)
-            try await modalManager.replyToUserMessage(refresh: false)
+            try await modalManager.continueReplying()
         default:
             throw FunctionError.notFound("Function \(functionCall.name) not found.")
         }

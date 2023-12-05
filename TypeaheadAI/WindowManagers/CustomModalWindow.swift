@@ -20,6 +20,14 @@ class CustomModalWindow: NSWindow {
     override func close() {
         super.close()
         modalManager?.isVisible = false
+
+        if let modalManager = modalManager, let conversationManager = modalManager.conversationManager {
+            do {
+                try conversationManager.saveConversation(messages: modalManager.messages)
+            } catch {
+                print("\(error.localizedDescription)")
+            }
+        }
     }
 }
 

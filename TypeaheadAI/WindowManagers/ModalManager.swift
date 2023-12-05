@@ -11,38 +11,21 @@ import Foundation
 import MarkdownUI
 import os.log
 
-enum MessageType: Codable, Equatable {
-    case string
-    case html(data: String)
-    case image(data: ImageData)
-    case data(data: Data)
-}
-
-// TODO: Add to persistence
-struct Message: Codable, Identifiable, Equatable {
-    let id: UUID
-    var text: String
-    let isCurrentUser: Bool
-    let isHidden: Bool
-    var responseError: String?
-    var messageType: MessageType = .string
-    var isTruncated: Bool = true
-    var isEdited: Bool = false
-}
-
 extension Notification.Name {
     static let userIntentSent = Notification.Name("userIntentSent")
 }
 
 class ModalManager: ObservableObject {
+    private let context: NSManagedObjectContext
+
     @Published var messages: [Message]
     @Published var userIntents: [String]?
 
     @Published var triggerFocus: Bool
     @Published var isVisible: Bool
-    @Published var online: Bool
     @Published var isPending: Bool
 
+    @AppStorage("online") var online: Bool = true
     @AppStorage("toastX") var toastX: Double?
     @AppStorage("toastY") var toastY: Double?
     @AppStorage("toastWidth") var toastWidth: Double = 400.0
@@ -53,22 +36,25 @@ class ModalManager: ObservableObject {
         category: "ModalManager"
     )
 
+    private let maxIntents = 9
     private let maxMessages = 20
     private let functionManager = FunctionManager()
 
-    init() {
+    init(context: NSManagedObjectContext) {
+        self.context = context
         self.messages = []
         self.userIntents = nil
         self.triggerFocus = false
         self.isVisible = false
-        self.online = true
         self.isPending = false
     }
 
+    // Alphabetize
     // TODO: Inject?
     var clientManager: ClientManager? = nil
-    var promptManager: QuickActionManager? = nil
+    var conversationManager: ConversationManager? = nil
     var intentManager: IntentManager? = nil
+    var promptManager: QuickActionManager? = nil
     var settingsManager: SettingsManager? = nil
 
     var toastWindow: CustomModalWindow?
@@ -88,7 +74,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func forceRefresh() {
+    func forceRefresh() throws {
         self.clientManager?.cancelStreamingTask()
         self.clientManager?.flushCache()
         self.promptManager?.activePromptID = nil
@@ -99,40 +85,126 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func setText(_ text: String, isHidden: Bool = false) {
+    func setText(_ text: String, isHidden: Bool = false, appContext: AppContext?) {
         if !isHidden,
            let idx = messages.indices.last,
            !messages[idx].isCurrentUser {
             messages[idx].text += text
         } else {
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: isHidden))
+            if let lastMessage = messages.last {
+                messages.append(
+                    Message(
+                        id: UUID(),
+                        rootId: lastMessage.rootId,
+                        inReplyToId: lastMessage.id,
+                        createdAt: Date(),
+                        rootCreatedAt: lastMessage.rootCreatedAt,
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext
+                    )
+                )
+            } else {
+                let id = UUID()
+                let date = Date()
+                messages.append(
+                    Message(
+                        id: id,
+                        rootId: id,
+                        inReplyToId: nil,
+                        createdAt: date,
+                        rootCreatedAt: date,
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext
+                    )
+                )
+            }
         }
     }
 
     /// Set an error message.
     @MainActor
-    func setError(_ responseError: String, isHidden: Bool = false) {
+    func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser {
             messages[idx].responseError = responseError
         } else {
-            messages.append(Message(
-                id: UUID(),
-                text: "",
-                isCurrentUser: false,
-                isHidden: isHidden,
-                responseError: responseError)
-            )
+            if let lastMessage = messages.last {
+                messages.append(
+                    Message(
+                        id: UUID(),
+                        rootId: lastMessage.rootId,
+                        inReplyToId: lastMessage.id,
+                        createdAt: Date(),
+                        rootCreatedAt: lastMessage.rootCreatedAt,
+                        text: "",
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext,
+                        responseError: responseError
+                    )
+                )
+            } else {
+                let id = UUID()
+                let date = Date()
+                messages.append(
+                    Message(
+                        id: id,
+                        rootId: id,
+                        inReplyToId: nil,
+                        createdAt: date,
+                        rootCreatedAt: date,
+                        text: "",
+                        isCurrentUser: false,
+                        isHidden: isHidden,
+                        appContext: appContext,
+                        responseError: responseError
+                    )
+                )
+            }
         }
     }
 
     /// Append text to the AI response. Creates a new message if there is nothing to append to.
     @MainActor
-    func appendText(_ text: String) async {
-        guard let idx = messages.indices.last, !messages[idx].isCurrentUser else {
+    func appendText(_ text: String, appContext: AppContext?) async {
+        guard let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden else {
             // If the AI response doesn't exist yet, create one.
-            messages.append(Message(id: UUID(), text: text, isCurrentUser: false, isHidden: false))
+            if let lastMessage = messages.last {
+                messages.append(
+                    Message(
+                        id: UUID(),
+                        rootId: lastMessage.rootId,
+                        inReplyToId: lastMessage.id,
+                        createdAt: Date(),
+                        rootCreatedAt: lastMessage.rootCreatedAt,
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: false,
+                        appContext: appContext
+                    )
+                )
+            } else {
+                let id = UUID()
+                let date = Date()
+                messages.append(
+                    Message(
+                        id: id,
+                        rootId: id,
+                        inReplyToId: nil,
+                        createdAt: date,
+                        rootCreatedAt: date,
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: false,
+                        appContext: appContext
+                    )
+                )
+            }
             userIntents = nil
             isPending = false
             return
@@ -142,7 +214,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func appendImage(_ image: ImageData, prompt: String, caption: String?) {
+    func appendImage(_ image: ImageData, prompt: String, caption: String?, appContext: AppContext?) {
         isPending = false
         userIntents = nil
 
@@ -152,51 +224,157 @@ class ModalManager: ObservableObject {
             placeholder += " - caption generated: \(caption)"
         }
 
-        messages.append(Message(
-            id: UUID(),
-            text: placeholder,
-            isCurrentUser: false,
-            isHidden: false,
-            messageType: .image(data: image)
-        ))
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
+                    text: placeholder,
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    messageType: .image(data: image)
+                )
+            )
+        } else {
+            let id = UUID()
+            let date = Date()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: date,
+                    rootCreatedAt: date,
+                    text: placeholder,
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    messageType: .image(data: image)
+                )
+            )
+        }
     }
 
     @MainActor
-    func appendUserImage(_ data: Data, caption: String, ocrText: String) {
-        messages.append(Message(
-            id: UUID(),
-            text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
-            isCurrentUser: true,
-            isHidden: true,
-            messageType: .data(data: data)
-        ))
+    func appendUserImage(_ data: Data, caption: String, ocrText: String, appContext: AppContext?) {
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
+                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
+                    isCurrentUser: false,
+                    isHidden: true,
+                    appContext: appContext,
+                    messageType: .data(data: data)
+                )
+            )
+        } else {
+            let id = UUID()
+            let date = Date()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: date,
+                    rootCreatedAt: date,
+                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
+                    isCurrentUser: false,
+                    isHidden: true,
+                    appContext: appContext,
+                    messageType: .data(data: data)
+                )
+            )
+        }
     }
 
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
-    func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false) {
+    func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false, appContext: AppContext?) {
         isPending = true
         userIntents = nil
 
-        messages.append(
-            Message(
-                id: UUID(),
-                text: text,
-                isCurrentUser: true,
-                isHidden: isHidden,
-                messageType: messageType
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext,
+                    messageType: messageType
+                )
             )
-        )
+        } else {
+            let id = UUID()
+            let date = Date()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: date,
+                    rootCreatedAt: date,
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext,
+                    messageType: messageType
+                )
+            )
+        }
     }
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     /// 
     /// When implicit is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false) async throws {
+    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false, appContext: AppContext?) async throws {
         self.clientManager?.cancelStreamingTask()
 
-        messages.append(Message(id: UUID(), text: text, isCurrentUser: true, isHidden: isHidden))
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext
+                )
+            )
+        } else {
+            let id = UUID()
+            let date = Date()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: date,
+                    rootCreatedAt: date,
+                    text: text,
+                    isCurrentUser: true,
+                    isHidden: isHidden,
+                    appContext: appContext
+                )
+            )
+        }
 
         if userIntents != nil {
             NotificationCenter.default.post(name: .userIntentSent, object: nil)
@@ -208,25 +386,9 @@ class ModalManager: ObservableObject {
             messages: self.messages,
             incognitoMode: !online,
             userIntent: implicit ? text : nil,
-            streamHandler: { result in
-
-            switch result {
-            case .success(let chunk):
-                Task {
-                    await self.appendText(chunk)
-                }
-            case .failure(let error as ClientManagerError):
-                Task {
-                    self.setError(error.localizedDescription)
-                }
-                self.logger.error("An error occurred: \(error)")
-            case .failure(let error):
-                Task {
-                    self.setError(error.localizedDescription)
-                }
-                self.logger.error("An error occurred: \(error)")
-            }
-        }, completion: defaultCompletionHandler)
+            streamHandler: defaultHandler,
+            completion: defaultCompletionHandler
+        )
     }
 
     @MainActor
@@ -278,14 +440,45 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
+    func continueReplying() async throws {
+        isPending = true
+        userIntents = nil
+
+        try await self.clientManager?.refine(
+            messages: self.messages,
+            incognitoMode: !online,
+            streamHandler: defaultHandler,
+            completion: defaultCompletionHandler
+        )
+    }
+
+    @MainActor
     func setUserIntents(intents: [String]) {
         isPending = false
-        userIntents = intents
+
+        if (userIntents?.count ?? 0) + intents.count > maxIntents {
+            userIntents = Array(intents.prefix(upTo: maxIntents))
+        } else {
+            userIntents = intents
+        }
     }
 
     @MainActor
     func appendUserIntents(intents: [String]) {
-        userIntents?.append(contentsOf: intents)
+        if (userIntents?.count ?? 0) + intents.count > maxIntents {
+            let upTo = maxIntents - (userIntents?.count ?? 0)  // If there are 10 max & 3 intents, we should only add up to 7 new intents
+            userIntents?.append(contentsOf: intents.prefix(upTo: upTo))
+        } else {
+            userIntents?.append(contentsOf: intents)
+        }
+    }
+
+    @MainActor
+    func load(rootId: UUID) throws {
+        if let messages = try conversationManager?.getConversation(rootId: rootId) {
+            try conversationManager?.saveConversation(messages: self.messages)
+            self.messages = messages
+        }
     }
 
     @MainActor
@@ -309,6 +502,7 @@ class ModalManager: ObservableObject {
             showModal: .constant(true),
             modalManager: self
         )
+        .environment(\.managedObjectContext, context)
 
         let hostingView = NSHostingView(rootView: contentView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
@@ -404,7 +598,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func defaultCompletionHandler(result: Result<ChunkPayload, Error>) async {
+    func defaultCompletionHandler(result: Result<ChunkPayload, Error>, appContext: AppContext?) async {
         switch result {
         case .success(let success):
             guard let text = success.text else {
@@ -426,54 +620,54 @@ class ModalManager: ObservableObject {
                         if self.online,
                            let data = Data(base64Encoded: imageData.image) {
                             let captionPayload = await self.clientManager?.captionImage(tiffData: data)
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption, appContext: appContext)
                         } else {
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil, appContext: appContext)
                         }
                     }
                 } catch {
-                    self.setError(error.localizedDescription)
+                    self.setError(error.localizedDescription, appContext: appContext)
                 }
             case .function:
                 do {
                     try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
                 } catch {
-                    self.setError(error.localizedDescription)
+                    self.setError(error.localizedDescription, appContext: appContext)
                 }
             }
         case .failure(let error as ClientManagerError):
             switch error {
             case .badRequest(let message):
-                self.setError(message)
+                self.setError(message, appContext: appContext)
             default:
-                self.setError("Something went wrong. Please try again.")
+                self.setError("Something went wrong. Please try again.", appContext: appContext)
                 self.logger.error("Something went wrong.")
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
-            self.setError(error.localizedDescription)
+            self.setError(error.localizedDescription, appContext: appContext)
         }
     }
 
-    func defaultHandler(result: Result<String, Error>) async {
+    func defaultHandler(result: Result<String, Error>, appContext: AppContext?) async {
         switch result {
         case .success(let chunk):
-            await self.appendText(chunk)
+            await self.appendText(chunk, appContext: appContext)
         case .failure(let error as ClientManagerError):
             self.logger.error("Error: \(error.localizedDescription)")
             switch error {
             case .badRequest(let message):
-                await self.setError(message)
+                await self.setError(message, appContext: appContext)
             case .serverError(let message):
-                await self.setError(message)
+                await self.setError(message, appContext: appContext)
             case .clientError(let message):
-                await self.setError(message)
+                await self.setError(message, appContext: appContext)
             default:
-                await self.setError("Something went wrong. Please try again.")
+                await self.setError("Something went wrong. Please try again.", appContext: appContext)
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
-            await self.setError(error.localizedDescription)
+            await self.setError(error.localizedDescription, appContext: appContext)
         }
     }
 }

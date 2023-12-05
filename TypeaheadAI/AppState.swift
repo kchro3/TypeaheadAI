@@ -24,19 +24,19 @@ final class AppState: ObservableObject {
         category: "AppState"
     )
 
-    // Managers
-    @Published var promptManager: QuickActionManager
-    @Published var llamaModelManager = LlamaModelManager()
-    @Published var modalManager: ModalManager
-    @Published var settingsManager: SettingsManager
-    @Published var onboardingWindowManager: OnboardingWindowManager
+    // Managers (alphabetize)
+    private let appContextManager: AppContextManager = AppContextManager()
     @Published var clientManager: ClientManager
-    @Published var intentManager: IntentManager
-
-    var supabaseManager = SupabaseManager()
-
+    var conversationManager: ConversationManager
     private let historyManager: HistoryManager
-    private let appContextManager: AppContextManager
+    @Published var intentManager: IntentManager
+    @Published var promptManager: QuickActionManager
+    @Published var modalManager: ModalManager
+    @Published var onboardingWindowManager: OnboardingWindowManager
+    @Published var llamaModelManager = LlamaModelManager()
+    @Published var settingsManager: SettingsManager
+    var supabaseManager = SupabaseManager()
+    var versionManager = VersionManager()
 
     // Actors
     private var specialCutActor: SpecialCutActor? = nil
@@ -49,23 +49,17 @@ final class AppState: ObservableObject {
     // NOTE: globalEventMonitor is for debugging
     private var globalEventMonitor: Any?
 
-    private var appVersion: AppVersion? = nil
-    // This represents the latest app version that the user has acknowledged
-    private var latestAppVersion: AppVersion? = nil
-
-    @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
-
     init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
 
-        // Initialize managers
-        self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
-        self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
-        self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
+        // Initialize managers (alphabetize)
         self.clientManager = ClientManager()
-        self.modalManager = ModalManager()
-        self.settingsManager = SettingsManager(context: context)
+        self.conversationManager = ConversationManager(context: context)
+        self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
+        self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
+        self.modalManager = ModalManager(context: context)
+        self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
         self.onboardingWindowManager = OnboardingWindowManager(context: context)
-        self.appContextManager = AppContextManager()
+        self.settingsManager = SettingsManager(context: context)
 
         // Initialize actors
         self.specialCopyActor = SpecialCopyActor(
@@ -107,6 +101,7 @@ final class AppState: ObservableObject {
         self.clientManager.supabaseManager = supabaseManager
 
         self.modalManager.clientManager = clientManager
+        self.modalManager.conversationManager = conversationManager
         self.modalManager.promptManager = promptManager
         self.modalManager.settingsManager = settingsManager
 
@@ -118,6 +113,8 @@ final class AppState: ObservableObject {
         self.onboardingWindowManager.supabaseManager = supabaseManager
         self.onboardingWindowManager.modalManager = modalManager
         self.onboardingWindowManager.intentManager = intentManager
+
+        self.versionManager.clientManager = clientManager
 
         checkAndRequestNotificationPermissions()
 
@@ -199,117 +196,10 @@ final class AppState: ObservableObject {
         }
 
         mouseEventMonitor.startMonitoring()
-
-        appVersion = getAppVersion()
-        startCheckingForUpdates()
     }
 
     deinit {
         mouseEventMonitor.stopMonitoring()
-        Task {
-            await stopCheckingForUpdates()
-        }
-    }
-
-    private func getAppVersion() -> AppVersion? {
-        guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-              let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String else {
-            self.logger.error("Could not access app version")
-            return nil
-        }
-
-        let versionComponents = version.components(separatedBy: ".")
-        guard versionComponents.count == 2,
-              let majorVersion = Int(versionComponents[0]),
-              let minorVersion = Int(versionComponents[1]),
-              let buildVersion = Int(build) else {
-            self.logger.error("Could not parse app version")
-            return nil
-        }
-
-        return AppVersion(major: majorVersion, minor: minorVersion, build: buildVersion)
-    }
-
-    private func startCheckingForUpdates() {
-        // Invalidate the previous timer if it exists
-        updateTimer?.invalidate()
-
-        // Create and schedule a new timer every hour
-        updateTimer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { _ in
-            Task {
-                if await !self.notifyOnUpdate {
-                    return
-                }
-
-                guard let version = await self.clientManager.checkUpdates() else {
-                    return
-                }
-
-                guard let appVersion = await self.appVersion else {
-                    return
-                }
-
-                // NOTE: Check if current app is at least as new as the latest published version
-                if await self.isLatestVersion(a: appVersion, b: version) {
-                    return
-                }
-
-                if let latestVersion = await self.latestAppVersion,
-                   await self.isLatestVersion(a: latestVersion, b: version) {
-                    return
-                }
-
-                // NOTE: This means that it's the first time we have seen this version.
-                self.logger.debug("Detected new app version")
-                DispatchQueue.main.async {
-                    self.latestAppVersion = version
-                    self.sendNotification()
-                }
-            }
-        }
-    }
-
-    private func sendNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "New Version Available"
-        content.body = "A new version of the app is available. Tap to see options."
-        content.sound = UNNotificationSound.default
-
-        // Define the actions
-        let openAction = UNNotificationAction(identifier: "OPEN_TESTFLIGHT", title: "Open TestFlight", options: .foreground)
-        let dismissAction = UNNotificationAction(identifier: "DISMISS_FOREVER", title: "Ignore updates from now on", options: .destructive)
-        let categoryIdentifier = "NEW_VERSION_CATEGORY"
-        let category = UNNotificationCategory(identifier: categoryIdentifier, actions: [openAction, dismissAction], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category])
-        content.categoryIdentifier = categoryIdentifier
-
-        let request = UNNotificationRequest(identifier: "NewVersionNotification", content: content, trigger: nil)
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                self.logger.debug("Failed to send notification: \(error.localizedDescription)")
-            } else {
-                self.logger.debug("Notification sent successfully")
-            }
-        }
-    }
-
-    /// Return true if newer or same version
-    private func isLatestVersion(a: AppVersion, b: AppVersion) -> Bool {
-        if a.major != b.major {
-            return a.major > b.major
-        }
-
-        if a.minor != b.minor {
-            return a.minor > b.minor
-        }
-
-        return a.build >= b.build
-    }
-
-    private func stopCheckingForUpdates() {
-        updateTimer?.invalidate()
-        updateTimer = nil
     }
 
     private func checkAndRequestNotificationPermissions() -> Void {
