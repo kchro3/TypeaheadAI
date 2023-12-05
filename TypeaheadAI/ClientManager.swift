@@ -302,23 +302,34 @@ class ClientManager: ObservableObject {
             }
 
             if incognitoMode {
-                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
-                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
-
-                    await completion(result, appContext)
-
-                    // Cache successful requests
-                    switch result {
-                    case .success(let output):
-                        self?.cacheResponse(output.text, for: payload)
-                        break
-                    case .failure(_):
-                        self?.cacheResponse(nil, for: payload)
-                        break
-                    }
-                } else {
-                    await completion(.failure(ClientManagerError.appError("Something went wrong...")), appContext)
+                guard let llamaModelManager = self?.llamaModelManager else {
+                    return
                 }
+
+                do {
+                    try await llamaModelManager.predict(payload: payload, streamHandler: streamHandler)
+                } catch {
+                    self?.cacheResponse(nil, for: payload)
+                    await streamHandler(.failure(error), appContext)
+                }
+//
+//                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
+//                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
+//
+//                    await completion(result)
+//
+//                    // Cache successful requests
+//                    switch result {
+//                    case .success(let output):
+//                        self?.cacheResponse(output.text, for: payload)
+//                        break
+//                    case .failure(_):
+//                        self?.cacheResponse(nil, for: payload)
+//                        break
+//                    }
+//                } else {
+//                    await completion(.failure(ClientManagerError.appError("Something went wrong...")))
+//                }
             } else {
                 do {
                     let stream = try self?.performStreamOnlineTask(
@@ -500,18 +511,6 @@ class ClientManager: ObservableObject {
         }
     }
 
-    private func performStreamOfflineTask(
-        payload: RequestPayload,
-        timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
-    ) async -> Result<ChunkPayload, Error> {
-        guard let modelManager = self.llamaModelManager else {
-            return .failure(ClientManagerError.appError("Model Manager not found"))
-        }
-
-        return await modelManager.predict(payload: payload, streamHandler: streamHandler)
-    }
-
     @MainActor
     func cancelStreamingTask() {
         currentStreamingTask?.cancel()
@@ -680,6 +679,12 @@ enum ClientManagerError: LocalizedError {
     case corruptedDataError(_ message: String)
     case signInRequired(_ message: String)
 
+    // LLaMA errors
+    case modelNotFound(_ message: String)
+    case modelNotLoaded(_ message: String)
+    case modelDirectoryNotAuthorized(_ message: String)
+    case modelFailed(_ message: String)
+
     var errorDescription: String {
         switch self {
         case .badRequest(let message): return message
@@ -690,6 +695,12 @@ enum ClientManagerError: LocalizedError {
         case .networkError(let message): return message
         case .corruptedDataError(let message): return message
         case .signInRequired(let message): return message
+
+        // LLaMA model errors
+        case .modelNotFound(let message): return message
+        case .modelNotLoaded(let message): return message
+        case .modelDirectoryNotAuthorized(let message): return message
+        case .modelFailed(let message): return message
         }
     }
 }

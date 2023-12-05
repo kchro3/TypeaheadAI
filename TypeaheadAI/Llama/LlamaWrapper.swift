@@ -14,7 +14,6 @@ typealias TokenCallback = @convention(c) (UnsafePointer<CChar>?) -> Void
 
 func globalHandler(_ token: UnsafePointer<CChar>?) {
     if let token = token {
-        print("offline stream: \(token)")
         Task {
             await LlamaWrapper.handler?(.success(String(cString: token)), nil)
         }
@@ -23,6 +22,7 @@ func globalHandler(_ token: UnsafePointer<CChar>?) {
 
 enum LlamaWrapperError: Error {
     case serverError(_ message: String)
+    case inferenceError
 }
 
 class LlamaWrapper {
@@ -42,7 +42,6 @@ class LlamaWrapper {
         llama_backend_init(true)
         cparams = llama_context_default_params()
         mparams = llama_model_default_params()
-        mparams.n_gpu_layers = 32
         model = llama_load_model_from_file(modelPath.path(), mparams)
     }
 
@@ -50,29 +49,28 @@ class LlamaWrapper {
         return model != nil
     }
 
-    func predict(
-        _ prompt: String,
-        handler: ((Result<String, Error>, AppContext?) async -> Void)? = nil
-    ) async -> Result<ChunkPayload, Error> {
-        if let handler = handler {
-            LlamaWrapper.handler = handler
-        } else {
-            LlamaWrapper.handler = { _, _ in }
-        }
-
-        ctx = llama_new_context_with_model(model, cparams)  // NOTE: We could expose context params in the predict API?
-        guard let cstr = simple_predict(ctx, prompt, 1, globalHandler) else {
-            return .failure(LlamaWrapperError.serverError("Failed to run simple_predict"))
-        }
-
-        let token = String(cString: cstr)
-        free(UnsafeMutableRawPointer(mutating: cstr)) // Needs to be manually freed
-        return .success(ChunkPayload(text: token, mode: .text, finishReason: nil))
-    }
-
     deinit {
         llama_free(ctx)
         llama_free_model(model)
         llama_backend_free()
+    }
+}
+
+extension LlamaWrapper {
+    func predict(_ prompt: String) -> AsyncThrowingStream<String, Error> {
+        return AsyncThrowingStream { continuation in
+            LlamaWrapper.handler = { result, _ in
+                switch result {
+                case .success(let token): continuation.yield(token)
+                case .failure: continuation.finish(throwing: LlamaWrapperError.inferenceError)
+                }
+            }
+
+            Task {
+                ctx = llama_new_context_with_model(model, cparams)  // NOTE: We could expose context params in the predict API?
+                main_predict(ctx, prompt, 1, globalHandler)
+                continuation.finish()
+            }
+        }
     }
 }

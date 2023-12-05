@@ -662,6 +662,10 @@ class ModalManager: ObservableObject {
                 await self.setError(message, appContext: appContext)
             case .clientError(let message):
                 await self.setError(message, appContext: appContext)
+            case .modelNotFound(let message):
+                await self.setError(message, appContext: appContext)
+            case .modelNotLoaded(let message):
+                await self.setError(message, appContext: appContext)
             default:
                 await self.setError("Something went wrong. Please try again.", appContext: appContext)
             }
