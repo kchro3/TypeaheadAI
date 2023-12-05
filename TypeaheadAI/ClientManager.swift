@@ -22,7 +22,12 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v6"
+    private let version: String = "v7"
+    private let validFinishReasons: [String] = [
+        "stop",
+        "function_call",
+        "tool_calls",
+    ]
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
@@ -465,7 +470,6 @@ class ClientManager: ObservableObject {
                           let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
-                        await completion(.failure(error))
                         return
                     }
 
@@ -483,10 +487,9 @@ class ClientManager: ObservableObject {
                             bufferedPayload = response
                         }
                     } else if let finishReason = response.finishReason,
-                              (finishReason != "stop" && finishReason != "function_call") {
+                              !validFinishReasons.contains(finishReason) {
                         let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
                         continuation.finish(throwing: error)
-                        await completion(.failure(error))
                         return
                     }
                 }
