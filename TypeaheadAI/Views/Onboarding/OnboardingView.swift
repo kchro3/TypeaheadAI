@@ -55,7 +55,9 @@ struct OnboardingView: View {
 
     @ViewBuilder
     var panel: some View {
-        if step == 1 {
+        if step == 0 {
+            AnyView(LoggedInOnboardingView(supabaseManager: supabaseManager))
+        } else if step == 1 {
             AnyView(IntroOnboardingView())
         } else if step == 2 {
             AnyView(PermissionsOnboardingView())
