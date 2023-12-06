@@ -75,7 +75,7 @@ class VersionManager {
     private func sendNotification(latest: AppVersion) async throws {
         let content = UNMutableNotificationContent()
         content.title = "New Version Available"
-        content.body = "A new version of the app is available. Tap to see options."
+        content.body = "A new version of the app is available. Please select \"Replace\" when reinstalling."
         content.sound = UNNotificationSound.default
 
         // Define the actions
@@ -122,7 +122,7 @@ extension VersionManager {
         return current.patch >= latest.patch
     }
 
-    private static func getCurrentVersion() -> AppVersion? {
+    static func getCurrentVersion() -> AppVersion? {
         guard let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
             return nil
         }
