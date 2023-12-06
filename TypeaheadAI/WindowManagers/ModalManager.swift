@@ -125,6 +125,43 @@ class ModalManager: ObservableObject {
         }
     }
 
+    @MainActor
+    func appendTool(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
+                    text: text,
+                    isCurrentUser: false,
+                    isHidden: true,
+                    appContext: appContext,
+                    messageType: .tool_call(data: functionCall)
+                )
+            )
+        } else {
+            let id = UUID()
+            let date = Date()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: date,
+                    rootCreatedAt: date,
+                    text: text,
+                    isCurrentUser: false,
+                    isHidden: true,
+                    appContext: appContext,
+                    messageType: .tool_call(data: functionCall)
+                )
+            )
+        }
+    }
+
     /// Set an error message.
     @MainActor
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
@@ -211,6 +248,46 @@ class ModalManager: ObservableObject {
         }
 
         messages[idx].text += text
+    }
+
+    @MainActor
+    func appendFunction(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
+                    text: text,
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    messageType: .function_call(data: functionCall)
+                )
+            )
+        } else {
+            let id = UUID()
+            let date = Date()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: date,
+                    rootCreatedAt: date,
+                    text: text,
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    messageType: .function_call(data: functionCall)
+                )
+            )
+        }
+
+        userIntents = nil
+        isPending = false
     }
 
     @MainActor

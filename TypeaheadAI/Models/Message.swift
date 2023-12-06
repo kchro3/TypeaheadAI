@@ -13,6 +13,8 @@ enum MessageType: Codable, Equatable {
     case html(data: String)
     case image(data: ImageData)
     case data(data: Data)
+    case function_call(data: FunctionCall)
+    case tool_call(data: FunctionCall)
 }
 
 struct Message: Codable, Identifiable, Equatable {

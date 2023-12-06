@@ -20,7 +20,8 @@ enum FunctionError: LocalizedError {
     }
 }
 
-struct FunctionCall: Codable {
+struct FunctionCall: Codable, Equatable {
+    let id: String?
     let name: String
     let args: [String: String]
 }
@@ -51,7 +52,11 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             }
 
             if url == "<current>" {
-                await modalManager.appendText("Scraping current page...", appContext: appContext)
+                await modalManager.appendFunction(
+                    "Scraping current page...",
+                    functionCall: functionCall,
+                    appContext: appContext
+                )
 
                 if let bundleIdentifier = appContext?.bundleIdentifier,
                    let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
@@ -64,7 +69,12 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
                 try await simulateSelectAll()
                 try await simulateCopy()
             } else {
-                await modalManager.appendText("Opening \(functionCall.args["url"] ?? "url"). Will wait for 5 secs to load the page...", appContext: appContext)
+                await modalManager.appendFunction(
+                    "Opening \(functionCall.args["url"] ?? "url"). Will wait for 5 secs to load the page...",
+                    functionCall: functionCall,
+                    appContext: appContext
+                )
+
                 try await openURL(functionCall.args["url"]!)
                 await modalManager.closeModal()
                 try await Task.sleep(for: .seconds(5))
@@ -83,9 +93,15 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
 
             if let copiedText = NSPasteboard.general.string(forType: .string) {
                 if url == "<current>" {
-                    await modalManager.setText("Here's what I copied from the current page:\n\(copiedText)\n\nMy next goal: \(prompt)", isHidden: true, appContext: appContext)
+                    await modalManager.appendTool(
+                        "Here's what I copied from the current page:\n\(copiedText)\n\nMy next goal: \(prompt)",
+                        functionCall: functionCall,
+                        appContext: appContext)
                 } else {
-                    await modalManager.setText("Here's what I copied from \(url):\n\(copiedText)\n\nMy next goal: \(prompt)", isHidden: true, appContext: appContext)
+                    await modalManager.appendTool(
+                        "Here's what I copied from \(url):\n\(copiedText)\n\nMy next goal: \(prompt)",
+                        functionCall: functionCall,
+                        appContext: appContext)
                 }
             }
 
