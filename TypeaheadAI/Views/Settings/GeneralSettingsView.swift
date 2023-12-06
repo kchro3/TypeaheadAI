@@ -97,9 +97,27 @@ struct GeneralSettingsView: View {
                     Spacer()
                 }
             }
+
+            Spacer()
+
+            Divider()
+
+            version
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
+    }
+
+    @ViewBuilder
+    private var version: some View {
+        if let versionString = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            HStack {
+                Spacer()
+                Text("v\(versionString)")
+            }
+        } else {
+            EmptyView()
+        }
     }
 
     private func clearUserDefaults() {
