@@ -82,7 +82,7 @@ struct MessageView: View {
             } : nil
         ) {
             switch message.messageType {
-            case .string:
+            case .string, .function_call, .tool_call:
                 if isEditing {
                     CustomTextField(
                         text: $localContent,
@@ -173,7 +173,7 @@ struct MessageView: View {
                 } : nil,
                 onRefresh: onRefresh) {
                 switch message.messageType {
-                case .string:
+                case .string, .function_call, .tool_call:
                     if isEditing {
                         CustomTextField(
                             text: $localContent,

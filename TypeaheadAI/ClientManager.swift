@@ -29,6 +29,8 @@ class ClientManager: ObservableObject {
         "tool_calls",
     ]
 
+    @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
+
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
 //    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
@@ -293,7 +295,8 @@ class ClientManager: ObservableObject {
                 messages: self?.sanitizeMessages(messages),
                 history: history,
                 appContext: appContext,
-                version: self?.version
+                version: self?.version,
+                isWebSearchEnabled: self?.isWebSearchEnabled
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -554,7 +557,6 @@ class ClientManager: ObservableObject {
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
-            messageCopy.messageType = .string
             messageCopy.appContext?.screenshotPath = nil
             messageCopy.appContext?.ocrText = nil
             return messageCopy
@@ -578,6 +580,7 @@ struct RequestPayload: Codable {
     var history: [Message]?
     var appContext: AppContext?
     var version: String?
+    var isWebSearchEnabled: Bool?
 }
 
 /// https://replicate.com/stability-ai/sdxl
