@@ -37,6 +37,7 @@ struct LoggedInOnboardingView: View {
             Task {
                 try await supabaseManager.openStripeCheckout()
             }
+        }
     }
 }
 
