@@ -16,7 +16,7 @@ struct PermissionsOnboardingView: View, CanScreenshot {
 
             Text(
             """
-            Before we can get started, Typeahead will need some permissions in order to use your clipboard and to see what's on your screen, but it will only use your clipboard and your screen when you activate it.
+            Typeahead needs your permission to use your clipboard and to see what's on your screen, but it will only use your clipboard and your screen when you activate it.
 
             In **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.
 
@@ -28,20 +28,26 @@ struct PermissionsOnboardingView: View, CanScreenshot {
 
             Spacer()
 
-            RoundedButton("Check Accessibility Permissions", isAccent: true) {
-                // Simulate a key press to trigger permission request
-                let source = CGEventSource(stateID: .hidSystemState)!
-                let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)!
-                cmdCDown.post(tap: .cghidEventTap)
-            }
+            HStack {
+                Spacer()
 
-            Spacer()
-
-            RoundedButton("Check Screen Recording Permissions", isAccent: true) {
-                // Take a screenshot to trigger permission request
-                Task {
-                    _ = try await screenshot()
+                RoundedButton("Check Accessibility Permissions", isAccent: true) {
+                    // Simulate a key press to trigger permission request
+                    let source = CGEventSource(stateID: .hidSystemState)!
+                    let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)!
+                    cmdCDown.post(tap: .cghidEventTap)
                 }
+
+                Spacer()
+
+                RoundedButton("Check Screen Recording Permissions", isAccent: true) {
+                    // Take a screenshot to trigger permission request
+                    Task {
+                        _ = try await screenshot()
+                    }
+                }
+
+                Spacer()
             }
 
             Spacer()

@@ -22,7 +22,8 @@ class SupabaseManager: ObservableObject {
         category: "SupabaseManager"
     )
 
-    @Published var uuid: String?
+    @Published var uuid: String?  // Deprecate?
+    @Published var user: TypeaheadUser?
 
     init() {
         Task {
@@ -35,6 +36,7 @@ class SupabaseManager: ObservableObject {
         do {
             let session = try await client.auth.session
             self.uuid = session.user.id.uuidString
+            self.user = TypeaheadUser(uuid: session.user.id, productId: 0)
         } catch {
             logger.info("Not signed-in")
         }
@@ -46,7 +48,8 @@ class SupabaseManager: ObservableObject {
         let session = try await client.auth.session
 
         let user = session.user
-        uuid = user.id.uuidString
+        self.uuid = user.id.uuidString
+        self.user = TypeaheadUser(uuid: user.id, productId: 0)
     }
 
     @MainActor
@@ -54,6 +57,7 @@ class SupabaseManager: ObservableObject {
         let response = try await client.auth.signIn(email: email, password: password)
         let user = response.user
         uuid = user.id.uuidString
+        self.user = TypeaheadUser(uuid: user.id, productId: 0)
         let _ = try await client.auth.session
     }
 
@@ -70,6 +74,7 @@ class SupabaseManager: ObservableObject {
     @MainActor
     func signout() async throws {
         uuid = nil
+        user = nil
         try await client.auth.signOut()
     }
 
@@ -78,5 +83,28 @@ class SupabaseManager: ObservableObject {
         let session = try await client.auth.session(from: from)
         let user = session.user
         self.uuid = user.id.uuidString
+        self.user = TypeaheadUser(uuid: user.id, productId: 0)
     }
+
+    @MainActor
+    func getUser() async throws -> TypeaheadUser? {
+        guard let uuidString = uuid, let id = UUID(uuidString: uuidString) else {
+            return nil
+        }
+
+        return TypeaheadUser(uuid: id, productId: 0)
+    }
+
+    /// TODO: Need a proper mapping of product -> payment links. Maybe we can provide this from the backend?
+    func openStripeCheckout() async throws {
+        if user?.productId == 0, let uuidString = user?.uuid.uuidString {
+            let url = URL(string: "https://stripe.com?client-reference-id=\(uuidString)")!
+            NSWorkspace.shared.open(url)
+        }
+    }
+}
+
+struct TypeaheadUser {
+    let uuid: UUID
+    let productId: Int
 }
