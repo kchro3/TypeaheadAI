@@ -30,6 +30,9 @@
         <attribute name="summary" optional="YES" attributeType="String"/>
     </entity>
     <entity name="MessageEntry" representedClassName="MessageEntry" syncable="YES" codeGenerationType="class">
+        <attribute name="activeUrl" optional="YES" attributeType="String"/>
+        <attribute name="appName" optional="YES" attributeType="String"/>
+        <attribute name="bundleIdentifier" optional="YES" attributeType="String"/>
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="inReplyToId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>

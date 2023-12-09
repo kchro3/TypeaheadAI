@@ -81,6 +81,11 @@ extension Message {
            let data = try? JSONEncoder().encode(appContext),
            let serialized = String(data: data, encoding: .utf8) {
             entry.serializedAppContext = serialized
+
+            // Indexable fields
+            entry.appName = appContext.appName
+            entry.bundleIdentifier = appContext.bundleIdentifier
+            entry.activeUrl = appContext.url?.host
         }
 
         return entry
