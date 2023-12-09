@@ -11,6 +11,7 @@ import Foundation
 enum MessageType: Codable, Equatable {
     case string
     case html(data: String)
+    case markdown(data: String)
     case image(data: ImageData)
     case data(data: Data)
     case function_call(data: FunctionCall)

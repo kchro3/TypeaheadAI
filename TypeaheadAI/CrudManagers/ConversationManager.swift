@@ -76,15 +76,15 @@ class ConversationManager: CanFetchAppContext {
             let appContext = try await fetchAppContext()
 
             if let url = appContext?.url?.host {
-                predicates.append(NSPredicate(format: "activeUrl == %@ || activeUrl == nil", url))
+                predicates.append(NSPredicate(format: "activeUrl == %@", url))
             }
 
             if let appName = appContext?.appName {
-                predicates.append(NSPredicate(format: "appName == %@ || appName == nil", appName))
+                predicates.append(NSPredicate(format: "appName == %@", appName))
             }
 
             if let bundleIdentifier = appContext?.bundleIdentifier {
-                predicates.append(NSPredicate(format: "bundleIdentifier == %@ || bundleIdentifier == nil", bundleIdentifier))
+                predicates.append(NSPredicate(format: "bundleIdentifier == %@", bundleIdentifier))
             }
         }
 

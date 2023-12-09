@@ -91,7 +91,24 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
 
             await modalManager.showModal()
 
-            if let copiedText = NSPasteboard.general.string(forType: .string) {
+            if let htmlString = NSPasteboard.general.string(forType: .html),
+               let sanitizedHTML = try? htmlString.sanitizeHTML() {
+
+                let markdownString = sanitizedHTML.renderXMLToMarkdown(.init(throwUnkownElement: .ignore))
+                
+                if url == "<current>" {
+                    await modalManager.appendTool(
+                        "Here's what I copied from the current page:\n\(markdownString)\n\nMy next goal: \(prompt)",
+                        functionCall: functionCall,
+                        appContext: appContext)
+                } else {
+                    await modalManager.appendTool(
+                        "Here's what I copied from \(url):\n\(markdownString)\n\nMy next goal: \(prompt)",
+                        functionCall: functionCall,
+                        appContext: appContext)
+                }
+
+            } else if let copiedText = NSPasteboard.general.string(forType: .string) {
                 if url == "<current>" {
                     await modalManager.appendTool(
                         "Here's what I copied from the current page:\n\(copiedText)\n\nMy next goal: \(prompt)",

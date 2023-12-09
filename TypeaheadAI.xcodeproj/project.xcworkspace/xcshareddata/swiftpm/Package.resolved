@@ -190,6 +190,24 @@
       }
     },
     {
+      "identity" : "swifthtmlmarkdown",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kchro3/SwiftHtmlMarkdown",
+      "state" : {
+        "branch" : "kchro3/ignore-meta",
+        "revision" : "4fbffc74cc91a00582077ff57ced5314640af366"
+      }
+    },
+    {
+      "identity" : "swiftsoup",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scinfu/SwiftSoup.git",
+      "state" : {
+        "revision" : "8b6cf29eead8841a1fa7822481cb3af4ddaadba6",
+        "version" : "2.6.1"
+      }
+    },
+    {
       "identity" : "urlqueryencoder",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kean/URLQueryEncoder",
