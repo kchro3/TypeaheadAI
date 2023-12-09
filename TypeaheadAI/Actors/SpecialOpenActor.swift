@@ -54,6 +54,10 @@ actor SpecialOpenActor: CanPerformOCR {
             }
         }
 
+        if let focusedWindow = AXUIElementCreateSystemWide().copyFocusedWindow() {
+
+        }
+
         if self.modalManager.messages.isEmpty && (self.modalManager.userIntents?.isEmpty ?? true) {
             // Try to predict the user intent
             let contextualIntents = self.intentManager.fetchContextualIntents(limit: 3, appContext: appContext)
@@ -86,5 +90,32 @@ actor SpecialOpenActor: CanPerformOCR {
                 }
             }
         }
+    }
+}
+
+extension AXUIElement {
+    
+    func copyFocusedWindow() -> AXUIElement? {
+        let systemWideElement = AXUIElementCreateSystemWide()
+        var focusedElement: AnyObject?
+        let result = AXUIElementCopyAttributeValue(
+            systemWideElement,
+            kAXFocusedUIElementAttribute as CFString,
+            &focusedElement
+        )
+
+        if result == .success, let focusedElement = focusedElement {
+            print(focusedElement)
+        } else {
+            // Handle error
+        }
+
+        return nil
+    }
+
+    var title: String? {
+        var title: CFTypeRef?
+        AXUIElementCopyAttributeValue(self, kAXTitleAttribute as CFString, &title)
+        return title as? String // This downcast is necessary
     }
 }
