@@ -10,15 +10,6 @@ import Carbon.HIToolbox
 import Foundation
 import HtmlMarkdown
 
-let whitelistedApps = [
-    "Numbers"
-]
-
-let whitelistedUrls = [
-    "https://docs.google.com/spreadsheets",
-    "https://twitter.com",
-]
-
 enum CanSimulateCopyError: Error {
     case noChangesDetected
 }

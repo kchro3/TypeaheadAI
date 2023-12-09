@@ -13,11 +13,16 @@ extension String {
     func sanitizeHTML() throws -> String {
         let doc: SwiftSoup.Document = try SwiftSoup.parse(self)
         let elements: SwiftSoup.Elements = try doc.getAllElements()
+        let whitelistAttributes = [
+            "href"
+        ]
 
         for element in elements {
             if let attributes = element.getAttributes() {
                 for attribute in attributes {
-                    try element.removeAttr(attribute.getKey())
+                    if !whitelistAttributes.contains(attribute.getKey()) {
+                        try element.removeAttr(attribute.getKey())
+                    }
                 }
             }
         }

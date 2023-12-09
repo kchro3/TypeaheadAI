@@ -82,7 +82,7 @@ struct MessageView: View {
             } : nil
         ) {
             switch message.messageType {
-            case .string, .markdown, .function_call, .tool_call:
+            case .string, .function_call, .tool_call:
                 if isEditing {
                     CustomTextField(
                         text: $localContent,
@@ -109,6 +109,61 @@ struct MessageView: View {
                             Text(message.text.prefix(maxMessageLength))
                         } else {
                             Text(message.text)
+                        }
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                onTruncate?()
+                            }, label: {
+                                if message.isTruncated {
+                                    Text("See more").bold()
+                                } else {
+                                    Text("See less").bold()
+                                }
+                            })
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.white)
+                    .background(Color.accentColor.opacity(0.8))
+                    .textSelection(.enabled)
+                } else {
+                    Text(message.text)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 15)
+                        .foregroundColor(.white)
+                        .background(Color.accentColor.opacity(0.8))
+                        .textSelection(.enabled)
+                }
+            case .markdown(let data):
+                if isEditing {
+                    CustomTextField(
+                        text: $localContent,
+                        placeholderText: "",
+                        autoCompleteSuggestions: [],
+                        onEnter: { newContent in
+                            isEditing = false
+                            if !localContent.isEmpty {
+                                onEdit?(localContent)
+                            }
+                        }
+                    )
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.primary)
+                    .background(Color.accentColor.opacity(0.2))
+                    .onAppear(perform: {
+                        localContent = message.text
+                    })
+                } else if message.text.count > maxMessageLength {
+                    // Truncatable string
+                    VStack {
+                        if message.isTruncated {
+                            Text(message.text.prefix(maxMessageLength))
+                        } else {
+                            Markdown(data)
                         }
                         HStack {
                             Spacer()
