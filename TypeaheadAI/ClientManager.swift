@@ -315,24 +315,6 @@ class ClientManager: ObservableObject {
                     self?.cacheResponse(nil, for: payload)
                     await streamHandler(.failure(error), appContext)
                 }
-//
-//                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
-//                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
-//
-//                    await completion(result)
-//
-//                    // Cache successful requests
-//                    switch result {
-//                    case .success(let output):
-//                        self?.cacheResponse(output.text, for: payload)
-//                        break
-//                    case .failure(_):
-//                        self?.cacheResponse(nil, for: payload)
-//                        break
-//                    }
-//                } else {
-//                    await completion(.failure(ClientManagerError.appError("Something went wrong...")))
-//                }
             } else {
                 do {
                     let stream = try self?.performStreamOnlineTask(
