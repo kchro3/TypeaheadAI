@@ -14,6 +14,8 @@ enum MessageType: Codable, Equatable {
     case markdown(data: String)
     case image(data: ImageData)
     case data(data: Data)
+    case function_call(data: FunctionCall)
+    case tool_call(data: FunctionCall)
 }
 
 struct Message: Codable, Identifiable, Equatable {
@@ -80,6 +82,11 @@ extension Message {
            let data = try? JSONEncoder().encode(appContext),
            let serialized = String(data: data, encoding: .utf8) {
             entry.serializedAppContext = serialized
+
+            // Indexable fields
+            entry.appName = appContext.appName
+            entry.bundleIdentifier = appContext.bundleIdentifier
+            entry.activeUrl = appContext.url?.host
         }
 
         return entry

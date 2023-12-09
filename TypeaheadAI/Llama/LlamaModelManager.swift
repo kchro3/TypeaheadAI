@@ -10,12 +10,6 @@ import SwiftUI
 import Foundation
 import os.log
 
-enum LlamaManagerError: Error {
-    case modelNotFound(_ message: String)
-    case modelNotLoaded(_ message: String)
-    case modelDirectoryNotAuthorized(_ message: String)
-}
-
 class LlamaModelManager: ObservableObject {
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -32,6 +26,7 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
+    @AppStorage("online") private var isOnline: Bool = true
     @AppStorage("modelDirectoryBookmark") private var modelDirectoryBookmark: Data?
     @AppStorage("selectedModel") private var selectedModelURL: URL?
     @AppStorage("modelDirectory") private var directoryURL: URL? {
@@ -64,6 +59,14 @@ class LlamaModelManager: ObservableObject {
 
         if let urlString = selectedModelURL {
             try await self.loadModel(from: urlString)
+        }
+    }
+
+    init() {
+        if !isOnline {
+            Task {
+                try await self.load()
+            }
         }
     }
 
@@ -170,7 +173,7 @@ class LlamaModelManager: ObservableObject {
         self.model = LlamaWrapper(url)
 
         guard let _ = self.model?.isLoaded() else {
-            throw LlamaManagerError.modelNotLoaded("Model could not be loaded")
+            throw ClientManagerError.modelNotLoaded("Model could not be loaded")
         }
 
         self.logger.info("model loaded successfully: \(url.lastPathComponent)")
@@ -184,62 +187,61 @@ class LlamaModelManager: ObservableObject {
         }
     }
 
+    /// Disable suggest intents for offline mode
     func suggestIntents(
         payload: RequestPayload
     ) async throws -> SuggestIntentsPayload {
-        guard let model = self.model else {
-            throw LlamaManagerError.modelNotFound("Model not found")
-        }
-
-        var payloadCopy = payload
-        payloadCopy.messages = []
-        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
-            throw ClientManagerError.badRequest("Encoding error")
-        }
-
-        let prompt = """
-        ### Instruction:
-        Below is an instruction that describes a task. Predict three possible user intents based on the copied text and context, and return them as a tab-separated, unquoted string.
-
-        ### Input:
-        \(jsonPayload)
-
-        ## Response:
-
-        """
-
-        print(prompt)
-
-        let result = await model.predict(prompt)
-        switch result {
-        case .success(let data):
-            if let values = data.text?.split(separator: ",") {
-                return SuggestIntentsPayload(intents: values.map { String($0) })
-            } else {
-                return SuggestIntentsPayload(intents: [])
-            }
-        case .failure(let error):
-            throw error
-        }
+        return SuggestIntentsPayload(intents: [])
     }
+//        guard let model = self.model else {
+//            throw ClientManagerError.modelNotFound("Model not found")
+//        }
+//
+//        var payloadCopy = payload
+//        payloadCopy.messages = []
+//        guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
+//            throw ClientManagerError.badRequest("Encoding error")
+//        }
+//
+//        let prompt = """
+//        ### Instruction:
+//        Below is an instruction that describes a task. Predict three possible user intents based on the copied text and context, and return them as a tab-separated, unquoted string.
+//
+//        ### Input:
+//        \(jsonPayload)
+//
+//        ## Response:
+//
+//        """
+//
+//        print(prompt)
+//
+//        let result = await model.predict2(prompt)
+//        switch result {
+//        case .success(let data):
+//            if let values = data.text?.split(separator: ",") {
+//                return SuggestIntentsPayload(intents: values.map { String($0) })
+//            } else {
+//                return SuggestIntentsPayload(intents: [])
+//            }
+//        case .failure(let error):
+//            throw error
+//        }
+//    }
 
     func predict(
         payload: RequestPayload,
         streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
-    ) async -> Result<ChunkPayload, Error> {
+    ) async throws {
+        guard let model = model else {
+            throw ClientManagerError.modelNotLoaded("Open Settings > Offline Mode to select a model for offline mode.")
+        }
+
         var payloadCopy = payload
         payloadCopy.messages = []
 
         guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
-            let error = ClientManagerError.badRequest("Encoding error")
-            await streamHandler(.failure(error), nil)
-            return .failure(error)
-        }
-
-        guard let model = self.model else {
-            let error = LlamaManagerError.modelNotFound("Model not found")
-            await streamHandler(.failure(error), nil)
-            return .failure(error)
+            throw ClientManagerError.badRequest("Encoding error")
         }
 
         var refinements = ""
@@ -276,7 +278,13 @@ class LlamaModelManager: ObservableObject {
 
         print(prompt)
 
-        return await model.predict(prompt, handler: streamHandler)
+        do {
+            for try await token in model.predict(prompt) {
+                await streamHandler(.success(token), nil)
+            }
+        } catch {
+            throw ClientManagerError.modelFailed(error.localizedDescription)
+        }
     }
 
     private func encodeToJSONString<T: Codable>(from object: T) -> String? {

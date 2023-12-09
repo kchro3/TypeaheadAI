@@ -53,6 +53,7 @@
 		2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4BDB8A2ACC281E00E55D78 /* IntentManager.swift */; };
 		2B520D812AC7FD4800310426 /* AuxiliaryMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */; };
 		2B520D852AC82EA100310426 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D842AC82EA100310426 /* AccountView.swift */; };
+		2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */; };
 		2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */; };
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
 		2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */; };
@@ -172,6 +173,7 @@
 		2B4BDB8A2ACC281E00E55D78 /* IntentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentManager.swift; sourceTree = "<group>"; };
 		2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuxiliaryMenuView.swift; sourceTree = "<group>"; };
 		2B520D842AC82EA100310426 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentConversationsView.swift; sourceTree = "<group>"; };
 		2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDetails.swift; sourceTree = "<group>"; };
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
 		2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutOnboardingView.swift; sourceTree = "<group>"; };
@@ -530,6 +532,7 @@
 				2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */,
 				2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */,
 				2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */,
+				2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */,
 			);
 			path = Modal;
 			sourceTree = "<group>";
@@ -762,6 +765,7 @@
 				2B520D852AC82EA100310426 /* AccountView.swift in Sources */,
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
 				2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */,
+				2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */,
 				2B7D357E2B00C1D100E85AEF /* SafariView.swift in Sources */,
 				2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */,
 				2B7D35842B01B14100E85AEF /* IntroOnboardingView.swift in Sources */,
@@ -989,7 +993,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.6;
+				MARKETING_VERSION = 2.1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1030,7 +1034,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.6;
+				MARKETING_VERSION = 2.1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

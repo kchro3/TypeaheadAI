@@ -74,7 +74,11 @@ struct ModalView: View {
                     }
                 }
             } else {
-                ConversationView(modalManager: modalManager)
+                if modalManager.messages.isEmpty {
+                    RecentConversationsView(modalManager: modalManager)
+                } else {
+                    ConversationView(modalManager: modalManager)
+                }
 
                 ModalFooterView(
                     modalManager: modalManager,

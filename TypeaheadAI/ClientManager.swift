@@ -22,7 +22,14 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v6"
+    private let version: String = "v7"
+    private let validFinishReasons: [String] = [
+        "stop",
+        "function_call",
+        "tool_calls",
+    ]
+
+    @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
@@ -288,7 +295,8 @@ class ClientManager: ObservableObject {
                 messages: self?.sanitizeMessages(messages),
                 history: history,
                 appContext: appContext,
-                version: self?.version
+                version: self?.version,
+                isWebSearchEnabled: self?.isWebSearchEnabled
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -297,22 +305,15 @@ class ClientManager: ObservableObject {
             }
 
             if incognitoMode {
-                if let result: Result<ChunkPayload, Error> = await self?.performStreamOfflineTask(
-                    payload: payload, timeout: timeout, streamHandler: streamHandler) {
+                guard let llamaModelManager = self?.llamaModelManager else {
+                    return
+                }
 
-                    await completion(result, appContext)
-
-                    // Cache successful requests
-                    switch result {
-                    case .success(let output):
-                        self?.cacheResponse(output.text, for: payload)
-                        break
-                    case .failure(_):
-                        self?.cacheResponse(nil, for: payload)
-                        break
-                    }
-                } else {
-                    await completion(.failure(ClientManagerError.appError("Something went wrong...")), appContext)
+                do {
+                    try await llamaModelManager.predict(payload: payload, streamHandler: streamHandler)
+                } catch {
+                    self?.cacheResponse(nil, for: payload)
+                    await streamHandler(.failure(error), appContext)
                 }
             } else {
                 do {
@@ -465,7 +466,6 @@ class ClientManager: ObservableObject {
                           let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
-                        await completion(.failure(error))
                         return
                     }
 
@@ -483,10 +483,9 @@ class ClientManager: ObservableObject {
                             bufferedPayload = response
                         }
                     } else if let finishReason = response.finishReason,
-                              (finishReason != "stop" && finishReason != "function_call") {
+                              !validFinishReasons.contains(finishReason) {
                         let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
                         continuation.finish(throwing: error)
-                        await completion(.failure(error))
                         return
                     }
                 }
@@ -495,18 +494,6 @@ class ClientManager: ObservableObject {
                 continuation.finish()
             }
         }
-    }
-
-    private func performStreamOfflineTask(
-        payload: RequestPayload,
-        timeout: TimeInterval,
-        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
-    ) async -> Result<ChunkPayload, Error> {
-        guard let modelManager = self.llamaModelManager else {
-            return .failure(ClientManagerError.appError("Model Manager not found"))
-        }
-
-        return await modelManager.predict(payload: payload, streamHandler: streamHandler)
     }
 
     @MainActor
@@ -552,13 +539,6 @@ class ClientManager: ObservableObject {
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
-
-            switch messageCopy.messageType {
-            case .data, .html, .image:
-                messageCopy.messageType = .string
-            default:
-                messageCopy.messageType = messageCopy.messageType  // NO-OP
-            }
             messageCopy.appContext?.screenshotPath = nil
             messageCopy.appContext?.ocrText = nil
             return messageCopy
@@ -582,6 +562,7 @@ struct RequestPayload: Codable {
     var history: [Message]?
     var appContext: AppContext?
     var version: String?
+    var isWebSearchEnabled: Bool?
 }
 
 /// https://replicate.com/stability-ai/sdxl
@@ -683,6 +664,12 @@ enum ClientManagerError: LocalizedError {
     case corruptedDataError(_ message: String)
     case signInRequired(_ message: String)
 
+    // LLaMA errors
+    case modelNotFound(_ message: String)
+    case modelNotLoaded(_ message: String)
+    case modelDirectoryNotAuthorized(_ message: String)
+    case modelFailed(_ message: String)
+
     var errorDescription: String {
         switch self {
         case .badRequest(let message): return message
@@ -693,6 +680,12 @@ enum ClientManagerError: LocalizedError {
         case .networkError(let message): return message
         case .corruptedDataError(let message): return message
         case .signInRequired(let message): return message
+
+        // LLaMA model errors
+        case .modelNotFound(let message): return message
+        case .modelNotLoaded(let message): return message
+        case .modelDirectoryNotAuthorized(let message): return message
+        case .modelFailed(let message): return message
         }
     }
 }

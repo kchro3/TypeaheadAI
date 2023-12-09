@@ -15,6 +15,7 @@ struct GeneralSettingsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
     @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
+    @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -90,11 +91,33 @@ struct GeneralSettingsView: View {
                         Text("Notify on new version")
                     }
                     Spacer()
+                    Toggle(isOn: $isWebSearchEnabled) {
+                        Text("Enable web search")
+                    }
+                    Spacer()
                 }
             }
+
+            Spacer()
+
+            Divider()
+
+            version
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
+    }
+
+    @ViewBuilder
+    private var version: some View {
+        if let versionString = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            HStack {
+                Spacer()
+                Text("v\(versionString)")
+            }
+        } else {
+            EmptyView()
+        }
     }
 
     private func clearUserDefaults() {

@@ -28,8 +28,8 @@ struct ActivateOnboardingView: View {
 
             HStack {
                 HStack {
-                    Text("Control")
-                    Image(systemName: "control")
+                    Text("Option")
+                    Image(systemName: "option")
                 }
                 .padding(5)
                 .cornerRadius(5)
@@ -50,7 +50,7 @@ struct ActivateOnboardingView: View {
                 )
 
                 HStack {
-                    Text("A")
+                    Text("Space")
                 }
                 .padding(5)
                 .cornerRadius(5)
