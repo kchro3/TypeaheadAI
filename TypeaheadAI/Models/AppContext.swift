@@ -13,4 +13,6 @@ struct AppContext: Codable, Equatable {
     var url: URL? = nil
     var screenshotPath: String? = nil
     var ocrText: String? = nil
+    var pid: pid_t? = nil
+    var serializedUIElement: String? = nil
 }

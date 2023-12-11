@@ -18,11 +18,10 @@ extension CanFetchAppContext {
             return nil
         }
 
-        let appName = activeApp.localizedName
-        let bundleIdentifier = activeApp.bundleIdentifier
         return AppContext(
-            appName: appName,
-            bundleIdentifier: bundleIdentifier
+            appName: activeApp.localizedName,
+            bundleIdentifier: activeApp.bundleIdentifier,
+            pid: activeApp.processIdentifier
         )
     }
 }

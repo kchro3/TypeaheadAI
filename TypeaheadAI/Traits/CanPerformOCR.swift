@@ -122,7 +122,6 @@ extension CanPerformOCR {
         let result = groupedBoxesAndTexts.map { (group: (box: CGRect, texts: [(box: CGRect, text: String)])) -> (box: CGRect, text: String) in
             // Merge all the texts within each group
             let text = group.texts.map({ $0.text }).joined(separator: " ")
-            print(text)
             return (box: group.box, text: text)
         }
 

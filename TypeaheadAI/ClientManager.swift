@@ -22,7 +22,7 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v7"
+    private let version: String = "v8"
     private let validFinishReasons: [String] = [
         "stop",
         "function_call",
@@ -184,14 +184,15 @@ class ClientManager: ObservableObject {
         incognitoMode: Bool,
         userIntent: String? = nil,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async throws {
         self.logger.info("incognito: \(incognitoMode)")
-        let appContext = try await appContextManager?.getActiveAppInfo()
+        let appInfo = try await appContextManager?.getActiveAppInfo()
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
-           let payload = try? JSONDecoder().decode(RequestPayload.self, from: data) {
+           let payload = try? JSONDecoder().decode(RequestPayload.self, from: data),
+           let appContext = appInfo?.appContext {
             var history: [Message]? = nil
             var quickAction: QuickAction? = nil
             if let userIntent = userIntent {
@@ -225,7 +226,7 @@ class ClientManager: ObservableObject {
                 copiedText: payload.copiedText,
                 messages: self.sanitizeMessages(messages),
                 history: history,
-                appContext: appContext,
+                appInfo: appInfo,
                 incognitoMode: incognitoMode,
                 streamHandler: streamHandler,
                 completion: completion
@@ -242,7 +243,7 @@ class ClientManager: ObservableObject {
                 copiedText: "",
                 messages: self.sanitizeMessages(messages),
                 history: nil,
-                appContext: appContext,
+                appInfo: appInfo,
                 incognitoMode: incognitoMode,
                 streamHandler: streamHandler,
                 completion: completion
@@ -275,11 +276,11 @@ class ClientManager: ObservableObject {
         copiedText: String,
         messages: [Message],
         history: [Message]?,
-        appContext: AppContext?,
+        appInfo: AppInfo?,
         incognitoMode: Bool,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>, AppContext?) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
+        completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async {
         cancelStreamingTask()
         currentStreamingTask = Task.detached { [weak self] in
@@ -294,13 +295,13 @@ class ClientManager: ObservableObject {
                 copiedText: copiedText,
                 messages: self?.sanitizeMessages(messages),
                 history: history,
-                appContext: appContext,
+                appContext: appInfo?.appContext,
                 version: self?.version,
                 isWebSearchEnabled: self?.isWebSearchEnabled
             )
 
             if let output = self?.getCachedResponse(for: payload) {
-                await streamHandler(.success(output), appContext)
+                await streamHandler(.success(output), appInfo)
                 return
             }
 
@@ -313,7 +314,7 @@ class ClientManager: ObservableObject {
                     try await llamaModelManager.predict(payload: payload, streamHandler: streamHandler)
                 } catch {
                     self?.cacheResponse(nil, for: payload)
-                    await streamHandler(.failure(error), appContext)
+                    await streamHandler(.failure(error), appInfo)
                 }
             } else {
                 do {
@@ -321,7 +322,7 @@ class ClientManager: ObservableObject {
                         payload: payload,
                         timeout: timeout,
                         completion: { result in
-                            await completion(result, appContext)
+                            await completion(result, appInfo)
 
                             // Cache successful response
                             switch result {
@@ -340,11 +341,11 @@ class ClientManager: ObservableObject {
 
                     for try await text in stream {
                         self?.logger.debug("stream: \(text)")
-                        await streamHandler(.success(text), appContext)
+                        await streamHandler(.success(text), appInfo)
                     }
                 } catch {
                     self?.cacheResponse(nil, for: payload)
-                    await streamHandler(.failure(error), appContext)
+                    await streamHandler(.failure(error), appInfo)
                 }
             }
         }

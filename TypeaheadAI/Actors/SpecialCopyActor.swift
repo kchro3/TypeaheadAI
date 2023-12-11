@@ -41,7 +41,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
     }
     
     func specialCopy() async throws {
-        var appContext = try await self.appContextManager.getActiveAppInfo()
+        var appInfo = try await self.appContextManager.getActiveAppInfo()
         try await self.simulateCopy()
 
         // Clear the current state
@@ -65,16 +65,16 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         }
 
         // Set the copied text as a new message
-        await self.modalManager.setUserMessage(copiedText, messageType: messageType, appContext: appContext)
+        await self.modalManager.setUserMessage(copiedText, messageType: messageType, appContext: appInfo.appContext)
 
         // Set the OCR'ed text
-        if let screenshot = appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
+        if let screenshot = appInfo.appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
             let (ocrText, _) = try await performOCR(image: screenshot)
-            appContext?.ocrText = ocrText
+            appInfo.appContext?.ocrText = ocrText
         }
 
         // Try to predict the user intent
-        let contextualIntents = self.intentManager.fetchContextualIntents(limit: 10, appContext: appContext)
+        let contextualIntents = self.intentManager.fetchContextualIntents(limit: 10, appContext: appInfo.appContext)
         await self.modalManager.setUserIntents(intents: contextualIntents)
 
         await NSApp.activate(ignoringOtherApps: true)
@@ -91,7 +91,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
                 copiedText: copiedText,
                 messages: self.modalManager.messages,
                 history: [],
-                appContext: appContext,
+                appContext: appInfo.appContext,
                 incognitoMode: !self.modalManager.online
             ), !intents.intents.isEmpty {
                 await self.modalManager.appendUserIntents(intents: intents.intents)

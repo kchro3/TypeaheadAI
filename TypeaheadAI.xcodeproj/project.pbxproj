@@ -107,6 +107,9 @@
 		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
 		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
+		2BE7BB882B258B4C00164F88 /* CanGetUIElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */; };
+		2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */; };
+		2BE7BB8F2B258C7900164F88 /* UIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB8E2B258C7900164F88 /* UIElement.swift */; };
 		2BF4A7E32AF1A52600AA2512 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF4A7E22AF1A52600AA2512 /* GoogleSignIn */; };
 		2BF4A7E52AF1A52600AA2512 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */; };
 		2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF929842AB13FEC00FC105B /* Highlighter */; };
@@ -229,6 +232,9 @@
 		2BE0EC212AA0956C00E47C52 /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
 		2BE0EC242AA17DB600E47C52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseClickMonitor.swift; sourceTree = "<group>"; };
+		2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanGetUIElements.swift; sourceTree = "<group>"; };
+		2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AXUIElement+Extension.swift"; sourceTree = "<group>"; };
+		2BE7BB8E2B258C7900164F88 /* UIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElement.swift; sourceTree = "<group>"; };
 		2BFBCAA02B048AC0004F8374 /* QuickAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -365,6 +371,7 @@
 				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
 				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 				2B11FCE22B0C47FA00325F38 /* CanSimulateSelectAll.swift */,
+				2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */,
 			);
 			path = Traits;
 			sourceTree = "<group>";
@@ -402,6 +409,7 @@
 		2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */ = {
 			isa = PBXGroup;
 			children = (
+				2BE7BB892B258C2400164F88 /* Extensions */,
 				2B33D8812AAC4E0F001193A2 /* Actors */,
 				2BF929772AB04D0800FC105B /* CrudManagers */,
 				2B8CD4972B06DD1D003E0589 /* Functions */,
@@ -545,6 +553,14 @@
 			path = Monitors;
 			sourceTree = "<group>";
 		};
+		2BE7BB892B258C2400164F88 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		2BF929772AB04D0800FC105B /* CrudManagers */ = {
 			isa = PBXGroup;
 			children = (
@@ -562,6 +578,7 @@
 				2BFBCAA02B048AC0004F8374 /* QuickAction.swift */,
 				2B11FCE62B0C55CD00325F38 /* AppContext.swift */,
 				2B11FCF12B114C3F00325F38 /* Message.swift */,
+				2BE7BB8E2B258C7900164F88 /* UIElement.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -775,14 +792,17 @@
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
+				2BE7BB8F2B258C7900164F88 /* UIElement.swift in Sources */,
 				2B0116ED2AF878D1000C78E1 /* AppDelegate.swift in Sources */,
 				2BA7F0852A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld in Sources */,
+				2BE7BB882B258B4C00164F88 /* CanGetUIElements.swift in Sources */,
 				2BAC14762AF61DD000B33E13 /* WebView.swift in Sources */,
 				2B2EF1522AC40CB500EF2BD4 /* MessagePendingView.swift in Sources */,
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
 				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
 				2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */,
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
+				2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
