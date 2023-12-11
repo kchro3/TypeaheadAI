@@ -50,7 +50,7 @@ actor SpecialPasteActor: CanSimulatePaste {
     }
 
     func specialPaste() async throws {
-        let appContext = try await self.appContextManager.getActiveAppInfo()
+        let appInfo = try await self.appContextManager.getActiveAppInfo()
         guard let lastMessage = self.modalManager.messages.last, !lastMessage.isCurrentUser else {
             return
         }
@@ -105,20 +105,20 @@ actor SpecialPasteActor: CanSimulatePaste {
             copiedText: firstMessage.text,
             pastedResponse: lastMessage.text,
             quickActionId: self.promptManager.activePromptID,
-            activeUrl: appContext?.url?.host,
-            activeAppName: appContext?.appName,
-            activeAppBundleIdentifier: appContext?.bundleIdentifier,
+            activeUrl: appInfo.appContext?.url?.host,
+            activeAppName: appInfo.appContext?.appName,
+            activeAppBundleIdentifier: appInfo.appContext?.bundleIdentifier,
             numMessages: self.modalManager.messages.count
         )
 
         if isTable {
-            if let url = appContext?.url,
+            if let url = appInfo.appContext?.url,
                let _ = self.shiftPasteUrls.first(where: { w in url.absoluteString.starts(with: w) }) {
                 try await self.simulatePaste(flags: [.maskShift, .maskCommand])
-            } else if let appName = appContext?.appName,
+            } else if let appName = appInfo.appContext?.appName,
                       self.optionShiftCommandPasteApps.contains(appName) {
                 try await self.simulatePaste(flags: [.maskAlternate, .maskShift, .maskCommand])
-            } else if let appName = appContext?.appName,
+            } else if let appName = appInfo.appContext?.appName,
                       self.optionCommandPasteApps.contains(appName) {
                 try await self.simulatePaste(flags: [.maskAlternate, .maskCommand])
             } else {

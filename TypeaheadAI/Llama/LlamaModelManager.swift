@@ -231,7 +231,7 @@ class LlamaModelManager: ObservableObject {
 
     func predict(
         payload: RequestPayload,
-        streamHandler: @escaping (Result<String, Error>, AppContext?) async -> Void
+        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void
     ) async throws {
         guard let model = model else {
             throw ClientManagerError.modelNotLoaded("Open Settings > Offline Mode to select a model for offline mode.")

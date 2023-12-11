@@ -9,7 +9,7 @@ import AppKit
 import Foundation
 import os.log
 
-actor SpecialOpenActor: CanPerformOCR {
+actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
     private let intentManager: IntentManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
@@ -36,7 +36,8 @@ actor SpecialOpenActor: CanPerformOCR {
     }
 
     func specialOpen(forceRefresh: Bool = false) async throws {
-        var appContext = try await self.appContextManager.getActiveAppInfo()
+        var appInfo = try await self.appContextManager.getActiveAppInfo()
+
         if forceRefresh {
             self.logger.debug("special new")
             try await self.modalManager.forceRefresh()
@@ -56,17 +57,17 @@ actor SpecialOpenActor: CanPerformOCR {
 
         if self.modalManager.messages.isEmpty && (self.modalManager.userIntents?.isEmpty ?? true) {
             // Try to predict the user intent
-            let contextualIntents = self.intentManager.fetchContextualIntents(limit: 3, appContext: appContext)
+            let contextualIntents = self.intentManager.fetchContextualIntents(limit: 3, appContext: appInfo.appContext)
             await self.modalManager.setUserIntents(intents: contextualIntents)
 
             // Kick off async
             Task {
                 // Set the OCR'ed text
-                if let screenshot = appContext?.screenshotPath.flatMap({
+                if let screenshot = appInfo.appContext?.screenshotPath.flatMap({
                     NSImage(contentsOfFile: $0)?.toCGImage()
                 }) {
                     let (ocrText, _) = try await performOCR(image: screenshot)
-                    appContext?.ocrText = ocrText
+                    appInfo.appContext?.ocrText = ocrText
                 }
 
                 if let intents = try await self.clientManager.suggestIntents(
@@ -79,7 +80,7 @@ actor SpecialOpenActor: CanPerformOCR {
                     copiedText: "",
                     messages: self.modalManager.messages,
                     history: [],
-                    appContext: appContext,
+                    appContext: appInfo.appContext,
                     incognitoMode: !self.modalManager.online
                 ), !intents.intents.isEmpty {
                     await self.modalManager.appendUserIntents(intents: intents.intents)

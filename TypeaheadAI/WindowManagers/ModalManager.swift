@@ -162,6 +162,45 @@ class ModalManager: ObservableObject {
         }
     }
 
+    @MainActor
+    func appendToolError(_ responseError: String, functionCall: FunctionCall, appContext: AppContext?) {
+        if let lastMessage = messages.last {
+            messages.append(
+                Message(
+                    id: UUID(),
+                    rootId: lastMessage.rootId,
+                    inReplyToId: lastMessage.id,
+                    createdAt: Date(),
+                    rootCreatedAt: lastMessage.rootCreatedAt,
+                    text: "",
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    responseError: responseError,
+                    messageType: .tool_call(data: functionCall)
+                )
+            )
+        } else {
+            let id = UUID()
+            let date = Date()
+            messages.append(
+                Message(
+                    id: id,
+                    rootId: id,
+                    inReplyToId: nil,
+                    createdAt: date,
+                    rootCreatedAt: date,
+                    text: "",
+                    isCurrentUser: false,
+                    isHidden: false,
+                    appContext: appContext,
+                    responseError: responseError,
+                    messageType: .tool_call(data: functionCall)
+                )
+            )
+        }
+    }
+
     /// Set an error message.
     @MainActor
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
@@ -675,7 +714,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func defaultCompletionHandler(result: Result<ChunkPayload, Error>, appContext: AppContext?) async {
+    func defaultCompletionHandler(result: Result<ChunkPayload, Error>, appInfo: AppInfo?) async {
         switch result {
         case .success(let success):
             guard let text = success.text else {
@@ -697,58 +736,58 @@ class ModalManager: ObservableObject {
                         if self.online,
                            let data = Data(base64Encoded: imageData.image) {
                             let captionPayload = await self.clientManager?.captionImage(tiffData: data)
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption, appContext: appContext)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption, appContext: appInfo?.appContext)
                         } else {
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil, appContext: appContext)
+                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil, appContext: appInfo?.appContext)
                         }
                     }
                 } catch {
-                    self.setError(error.localizedDescription, appContext: appContext)
+                    self.setError(error.localizedDescription, appContext: appInfo?.appContext)
                 }
             case .function:
                 do {
-                    try await functionManager.parseAndCallFunction(jsonString: text, modalManager: self)
+                    try await functionManager.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
                 } catch {
-                    self.setError(error.localizedDescription, appContext: appContext)
+                    self.setError(error.localizedDescription, appContext: appInfo?.appContext)
                 }
             }
         case .failure(let error as ClientManagerError):
             switch error {
             case .badRequest(let message):
-                self.setError(message, appContext: appContext)
+                self.setError(message, appContext: appInfo?.appContext)
             default:
-                self.setError("Something went wrong. Please try again.", appContext: appContext)
+                self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
                 self.logger.error("Something went wrong.")
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
-            self.setError(error.localizedDescription, appContext: appContext)
+            self.setError(error.localizedDescription, appContext: appInfo?.appContext)
         }
     }
 
-    func defaultHandler(result: Result<String, Error>, appContext: AppContext?) async {
+    func defaultHandler(result: Result<String, Error>, appInfo: AppInfo?) async {
         switch result {
         case .success(let chunk):
-            await self.appendText(chunk, appContext: appContext)
+            await self.appendText(chunk, appContext: appInfo?.appContext)
         case .failure(let error as ClientManagerError):
             self.logger.error("Error: \(error.localizedDescription)")
             switch error {
             case .badRequest(let message):
-                await self.setError(message, appContext: appContext)
+                await self.setError(message, appContext: appInfo?.appContext)
             case .serverError(let message):
-                await self.setError(message, appContext: appContext)
+                await self.setError(message, appContext: appInfo?.appContext)
             case .clientError(let message):
-                await self.setError(message, appContext: appContext)
+                await self.setError(message, appContext: appInfo?.appContext)
             case .modelNotFound(let message):
-                await self.setError(message, appContext: appContext)
+                await self.setError(message, appContext: appInfo?.appContext)
             case .modelNotLoaded(let message):
-                await self.setError(message, appContext: appContext)
+                await self.setError(message, appContext: appInfo?.appContext)
             default:
-                await self.setError("Something went wrong. Please try again.", appContext: appContext)
+                await self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
             }
         case .failure(let error):
             self.logger.error("Error: \(error.localizedDescription)")
-            await self.setError(error.localizedDescription, appContext: appContext)
+            await self.setError(error.localizedDescription, appContext: appInfo?.appContext)
         }
     }
 }

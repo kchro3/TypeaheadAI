@@ -101,7 +101,7 @@ actor SpecialCutActor {
     }
 
     func specialCut() async throws {
-        let appContext = try await self.appContextManager.getActiveAppInfo()
+        let appInfo = try await self.appContextManager.getActiveAppInfo()
 
         do {
             self.clipboardMonitor.stopMonitoring()
@@ -122,9 +122,9 @@ actor SpecialCutActor {
                         await NSApp.activate(ignoringOtherApps: true)
 
                         if let activePrompt = self.clientManager.getActivePrompt() {
-                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)", appContext: appContext)
+                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)", appContext: appInfo.appContext)
                         } else {
-                            await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)", appContext: appContext)
+                            await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)", appContext: appInfo.appContext)
                         }
 
                         if let nCuts = self.numSmartCuts {
@@ -144,7 +144,7 @@ actor SpecialCutActor {
                                 copiedText: recognizedText,
                                 messages: self.modalManager.messages,
                                 history: [],
-                                appContext: appContext,
+                                appContext: appInfo.appContext,
                                 incognitoMode: !self.modalManager.online
                             ), !intents.intents.isEmpty {
                                 await self.modalManager.setUserIntents(intents: intents.intents)
@@ -153,7 +153,7 @@ actor SpecialCutActor {
                             }
                         } catch {
                             self.logger.error("\(error.localizedDescription)")
-                            await self.modalManager.setError(error.localizedDescription, appContext: appContext)
+                            await self.modalManager.setError(error.localizedDescription, appContext: appInfo.appContext)
                         }
                     }
                 }
