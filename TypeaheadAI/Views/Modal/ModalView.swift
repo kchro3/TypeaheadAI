@@ -96,42 +96,39 @@ struct ModalView: View {
         HStack(spacing: 0) {
             Spacer()
 
-            ZStack {
-                if isSearchBarVisible {
-                    searchBar
-                        .frame(maxWidth: 200)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
-                        .overlay(alignment: .trailing) {
-                            Button {
-                                withAnimation(.spring()) {
-                                    isSearchBarVisible.toggle()
-                                }
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.title3)
-                                    .foregroundColor(.secondary)
-                                    .padding(.vertical, 5)
-                                    .padding(.horizontal, 5)
-                                    .contentShape(Rectangle())
+            if isSearchBarVisible {
+                searchBar
+                    .frame(maxWidth: 200)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    .overlay(alignment: .trailing) {
+                        Button {
+                            withAnimation(.spring()) {
+                                isSearchBarVisible.toggle()
                             }
-                            .buttonStyle(.plain)
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.secondary)
+                                .padding(.vertical, 5)
+                                .padding(.horizontal, 5)
+                                .contentShape(Rectangle())
                         }
-                } else {
-                    Button {
-                        withAnimation(.spring()) {
-                            isSearchBarVisible.toggle()
-                        }
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 5)
-                            .contentShape(Rectangle())
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
-                    .zIndex(1) // Ensure button stays on top when searchBar is not visible
+            } else {
+                Button {
+                    withAnimation(.spring()) {
+                        isSearchBarVisible.toggle()
+                    }
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 5)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             }
 
             Button {

@@ -16,7 +16,7 @@ extension AXUIElement {
     }
 
     func stringValue(forAttribute attribute: String) -> String? {
-        guard let value = self.value(forAttribute: kAXPositionAttribute) else {
+        guard let value = self.value(forAttribute: attribute) else {
             return nil
         }
 
@@ -24,7 +24,7 @@ extension AXUIElement {
     }
 
     func pointValue(forAttribute attribute: String) -> CGPoint? {
-        guard let value = self.value(forAttribute: kAXPositionAttribute) else {
+        guard let value = self.value(forAttribute: attribute) else {
             return nil
         }
 
@@ -39,7 +39,7 @@ extension AXUIElement {
     }
 
     func sizeValue(forAttribute attribute: String) -> CGSize? {
-        guard let value = self.value(forAttribute: kAXSizeAttribute) else {
+        guard let value = self.value(forAttribute: attribute) else {
             return nil
         }
 

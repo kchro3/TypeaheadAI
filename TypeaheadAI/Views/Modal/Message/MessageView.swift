@@ -22,7 +22,7 @@ struct MessageView: View {
     @State private var isEditing = false
     @State private var localContent: String = ""
 
-    private let maxMessageLength = 280
+    private let maxMessageLength: Int
     private let isMarkdown: Bool
 
     init(
@@ -30,13 +30,15 @@ struct MessageView: View {
         onEdit: ((String) -> Void)? = nil,
         onEditAppear: (() -> Void)? = nil,
         onRefresh: (() -> Void)? = nil,
-        onTruncate: (() -> Void)? = nil
+        onTruncate: (() -> Void)? = nil,
+        maxMessageLength: Int = 280
     ) {
         self.message = message
         self.onEdit = onEdit
         self.onEditAppear = onEditAppear
         self.onRefresh = onRefresh
         self.onTruncate = onTruncate
+        self.maxMessageLength = maxMessageLength
 
         if !message.isCurrentUser {
             // Just a heuristic

@@ -35,7 +35,7 @@ struct SearchResultsView: View {
                     }
 
                     HStack {
-                        MessageView(message: messages[index])
+                        MessageView(message: messages[index], maxMessageLength: 100)
                             .padding(5)
 
                         Button {
