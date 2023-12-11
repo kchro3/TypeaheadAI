@@ -30,6 +30,7 @@ class ClientManager: ObservableObject {
     ]
 
     @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
+    @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
     #if DEBUG
 //    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
@@ -297,7 +298,8 @@ class ClientManager: ObservableObject {
                 history: history,
                 appContext: appInfo?.appContext,
                 version: self?.version,
-                isWebSearchEnabled: self?.isWebSearchEnabled
+                isWebSearchEnabled: self?.isWebSearchEnabled,
+                isAutopilotEnabled: self?.isAutopilotEnabled
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -564,6 +566,7 @@ struct RequestPayload: Codable {
     var appContext: AppContext?
     var version: String?
     var isWebSearchEnabled: Bool?
+    var isAutopilotEnabled: Bool?
 }
 
 /// https://replicate.com/stability-ai/sdxl

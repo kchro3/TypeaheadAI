@@ -572,7 +572,7 @@ class ModalManager: ObservableObject {
     func setUserIntents(intents: [String]) {
         isPending = false
 
-        if (userIntents?.count ?? 0) + intents.count > maxIntents {
+        if intents.count > maxIntents {
             userIntents = Array(intents.prefix(upTo: maxIntents))
         } else {
             userIntents = intents

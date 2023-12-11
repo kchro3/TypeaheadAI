@@ -82,6 +82,12 @@ struct ConversationView: View {
             }
             .onAppear {
                 userHasScrolled = false
+                // Scroll to bottom if there is no saved scroll position
+                DispatchQueue.main.async {
+                    withAnimation {
+                        proxy.scrollTo(bottomID, anchor: .bottom)
+                    }
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: NSScrollView.willStartLiveScrollNotification)) { _ in
                 userHasScrolled = true

@@ -16,6 +16,7 @@ struct GeneralSettingsView: View {
     @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
     @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
     @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
+    @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -93,6 +94,10 @@ struct GeneralSettingsView: View {
                     Spacer()
                     Toggle(isOn: $isWebSearchEnabled) {
                         Text("Enable web search")
+                    }
+                    Spacer()
+                    Toggle(isOn: $isAutopilotEnabled) {
+                        Text("Enable Autopilot")
                     }
                     Spacer()
                 }

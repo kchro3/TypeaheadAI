@@ -63,28 +63,8 @@ struct OnboardingView: View {
             AnyView(ActivateOnboardingView())
         } else if step == 4 {
             AnyView(SmartCopyOnboardingView()
-                .onAppear(perform: {
-                    /// NOTE: Seed the user intents
-                    let appContext = AppContext(
-                        appName: "TypeaheadAI",
-                        bundleIdentifier: "ai.typeahead.TypeaheadAI",
-                        url: nil
-                    )
-                    if self.intentManager.fetchContextualIntents(
-                        limit: 1, appContext: appContext
-                    ).isEmpty {
-                        self.intentManager.addIntentEntry(
-                            prompt: "reply to this email",
-                            copiedText: "placeholder",
-                            appContext: AppContext(
-                                appName: "TypeaheadAI",
-                                bundleIdentifier: "ai.typeahead.TypeaheadAI",
-                                url: nil
-                            )
-                        )
-                    }
-                })
                 .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
+                    self.modalManager.setUserIntents(intents: ["reply to this email"])
                     // Add a delay so that there is time to copy the text
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         step += 1
@@ -94,6 +74,9 @@ struct OnboardingView: View {
         } else if step == 5 {
             AnyView(
                 IntentsOnboardingView()
+                    .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
+                        self.modalManager.setUserIntents(intents: ["reply to this email"])
+                    }
                     .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             step += 1
@@ -101,7 +84,12 @@ struct OnboardingView: View {
                     }
             )
         } else if step == 6 {
-            AnyView(RefineOnboardingView())
+            AnyView(
+                RefineOnboardingView()
+                    .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
+                        self.modalManager.setUserIntents(intents: ["reply to this email"])
+                    }
+            )
         } else if step == 7 {
             AnyView(SmartPasteOnboardingView())
         } else if step == 8 {
@@ -142,7 +130,7 @@ struct OnboardingView: View {
 
                 if step < totalSteps {
                     RoundedButton("Continue", isAccent: true) {
-                        if step != 5 {
+                        if step != 5 && step != 6 {
                             modalManager.closeModal()
                         }
                         step += 1
