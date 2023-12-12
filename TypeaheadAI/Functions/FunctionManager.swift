@@ -87,6 +87,7 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
 
                         try await simulatePaste()
                     } else if result == .success {
+
                     } else {
                         // TERMINATE on failure
                         await modalManager.showModal()
@@ -185,25 +186,27 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             }
 
             await modalManager.showModal()
+            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
+                await modalManager.appendToolError("Failed to copy anything", functionCall: functionCall, appContext: appContext)
+                return
+            }
 
             if let htmlString = NSPasteboard.general.string(forType: .html),
-               let sanitizedHTML = try? htmlString.sanitizeHTML() {
-
-                let markdownString = sanitizedHTML.renderXMLToMarkdown()
+               let links = try? htmlString.extractAttributes("href") {
 
                 if url == "<current>" {
                     await modalManager.appendTool(
-                        "Here's what I copied from the current page:\n\(markdownString)\n\nMy next goal: \(prompt)",
+                        "Here's what I copied from the current page:\n\(copiedText)\n\nLinks extracted: \(links)\n\nMy next goal: \(prompt)",
                         functionCall: functionCall,
                         appContext: appContext)
                 } else {
                     await modalManager.appendTool(
-                        "Here's what I copied from \(url):\n\(markdownString)\n\nMy next goal: \(prompt)",
+                        "Here's what I copied from \(url):\n\(copiedText)\n\nLinks extracted: \(links)\n\nMy next goal: \(prompt)",
                         functionCall: functionCall,
                         appContext: appContext)
                 }
 
-            } else if let copiedText = NSPasteboard.general.string(forType: .string) {
+            } else {
                 if url == "<current>" {
                     await modalManager.appendTool(
                         "Here's what I copied from the current page:\n\(copiedText)\n\nMy next goal: \(prompt)",
@@ -215,11 +218,6 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
                         functionCall: functionCall,
                         appContext: appContext)
                 }
-            } else {
-                await modalManager.appendToolError(
-                    "Failed to scrape the page...",
-                    functionCall: functionCall,
-                    appContext: appContext)
             }
 
             try await modalManager.continueReplying()
