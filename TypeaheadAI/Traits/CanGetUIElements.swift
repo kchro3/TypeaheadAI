@@ -9,16 +9,25 @@ import AppKit
 import Foundation
 
 protocol CanGetUIElements {
-    func getUIElements(appContext: AppContext?) -> UIElement?
+    func getUIElements(appContext: AppContext?) -> (UIElement?, ElementMap)
 }
 
 extension CanGetUIElements {
-    func getUIElements(appContext: AppContext?) -> UIElement? {
-        var element = AXUIElementCreateSystemWide()
+    func getUIElements(appContext: AppContext?) -> (UIElement?, ElementMap) {
+        var element: AXUIElement? = nil
         if let appContext = appContext, let pid = appContext.pid {
             element = AXUIElementCreateApplication(pid)
+        } else {
+            element = AXUIElementCreateSystemWide()
         }
-        
-        return UIElement(from: element)
+
+        var elementMap = ElementMap()
+        if let element = element, let uiElement = UIElement(from: element, callback: { uuid, element in
+            elementMap[uuid] = element
+        }) {
+            return (uiElement, elementMap)
+        } else {
+            return (nil, ElementMap())
+        }
     }
 }

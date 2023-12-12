@@ -105,6 +105,11 @@
 		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BDDB9892B27DDE100D52BF0 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 2BDDB9882B27DDE100D52BF0 /* SwiftSoup */; };
 		2BDDB98B2B27DDFF00D52BF0 /* String+XMLMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */; };
+		2BDDB98D2B282AFF00D52BF0 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB98C2B282AFF00D52BF0 /* AppManager.swift */; };
+		2BDDB98F2B282B3000D52BF0 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB98E2B282B3000D52BF0 /* Application.swift */; };
+		2BDDB9932B28341C00D52BF0 /* FunctionManager+OpenApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB9922B28341C00D52BF0 /* FunctionManager+OpenApplication.swift */; };
+		2BDDB9952B2834B100D52BF0 /* FunctionManager+OpenURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB9942B2834B100D52BF0 /* FunctionManager+OpenURL.swift */; };
+		2BDDB9972B28352800D52BF0 /* FunctionManager+PerformUIAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
 		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
 		2BE7BB882B258B4C00164F88 /* CanGetUIElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */; };
@@ -230,6 +235,11 @@
 		2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		2BDA45C22ABEE840006128BC /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+XMLMarkdown.swift"; sourceTree = "<group>"; };
+		2BDDB98C2B282AFF00D52BF0 /* AppManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
+		2BDDB98E2B282B3000D52BF0 /* Application.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application.swift; sourceTree = "<group>"; };
+		2BDDB9922B28341C00D52BF0 /* FunctionManager+OpenApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+OpenApplication.swift"; sourceTree = "<group>"; };
+		2BDDB9942B2834B100D52BF0 /* FunctionManager+OpenURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+OpenURL.swift"; sourceTree = "<group>"; };
+		2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+PerformUIAction.swift"; sourceTree = "<group>"; };
 		2BE0EC212AA0956C00E47C52 /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
 		2BE0EC242AA17DB600E47C52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseClickMonitor.swift; sourceTree = "<group>"; };
@@ -357,6 +367,9 @@
 			isa = PBXGroup;
 			children = (
 				2B8CD4982B06DD36003E0589 /* FunctionManager.swift */,
+				2BDDB9922B28341C00D52BF0 /* FunctionManager+OpenApplication.swift */,
+				2BDDB9942B2834B100D52BF0 /* FunctionManager+OpenURL.swift */,
+				2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */,
 			);
 			path = Functions;
 			sourceTree = "<group>";
@@ -569,6 +582,7 @@
 				2BCF84342A9DD90F00359841 /* HistoryManager.swift */,
 				2B4BDB8A2ACC281E00E55D78 /* IntentManager.swift */,
 				2B1F20452B1987E400152F13 /* ConversationManager.swift */,
+				2BDDB98C2B282AFF00D52BF0 /* AppManager.swift */,
 			);
 			path = CrudManagers;
 			sourceTree = "<group>";
@@ -580,6 +594,7 @@
 				2B11FCE62B0C55CD00325F38 /* AppContext.swift */,
 				2B11FCF12B114C3F00325F38 /* Message.swift */,
 				2BE7BB8E2B258C7900164F88 /* UIElement.swift */,
+				2BDDB98E2B282B3000D52BF0 /* Application.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -771,6 +786,7 @@
 				2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */,
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
 				2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */,
+				2BDDB98D2B282AFF00D52BF0 /* AppManager.swift in Sources */,
 				2B11FCE52B0C555000325F38 /* CanFetchAppContext.swift in Sources */,
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */,
@@ -787,6 +803,7 @@
 				2B7D357E2B00C1D100E85AEF /* SafariView.swift in Sources */,
 				2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */,
 				2B7D35842B01B14100E85AEF /* IntroOnboardingView.swift in Sources */,
+				2BDDB98F2B282B3000D52BF0 /* Application.swift in Sources */,
 				2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */,
 				2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */,
 				2B1F20482B1BE94000152F13 /* SearchResultsView.swift in Sources */,
@@ -805,9 +822,12 @@
 				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
 				2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
+				2BDDB9972B28352800D52BF0 /* FunctionManager+PerformUIAction.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
+				2BDDB9952B2834B100D52BF0 /* FunctionManager+OpenURL.swift in Sources */,
 				2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */,
+				2BDDB9932B28341C00D52BF0 /* FunctionManager+OpenApplication.swift in Sources */,
 				2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */,
 				2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */,
 				2B0116F52AF98EBD000C78E1 /* AccountOptionButton.swift in Sources */,

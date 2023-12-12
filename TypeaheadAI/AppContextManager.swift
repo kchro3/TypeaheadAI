@@ -17,12 +17,14 @@ typealias ElementMap = [String: AXUIElement]
 struct AppInfo {
     var appContext: AppContext?
     var elementMap: ElementMap
+    var apps: [String: Application]
 }
 
-class AppContextManager: CanFetchAppContext, CanScreenshot {
+class AppContextManager: CanFetchAppContext, CanScreenshot, CanGetUIElements {
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
     private let scriptManager = ScriptManager()
+    private let appManager = AppManager()
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -31,7 +33,7 @@ class AppContextManager: CanFetchAppContext, CanScreenshot {
 
     func getActiveAppInfo() async throws -> AppInfo {
         guard var appContext = try await fetchAppContext() else {
-            return AppInfo(appContext: nil, elementMap: ElementMap())
+            return AppInfo(appContext: nil, elementMap: ElementMap(), apps: appManager.getApps())
         }
 
         self.logger.info("active app: \(appContext.bundleIdentifier ?? "<unk>")")
@@ -40,29 +42,15 @@ class AppContextManager: CanFetchAppContext, CanScreenshot {
         appContext.screenshotPath = try await screenshot()
         appContext.url = await getUrl(bundleIdentifier: appContext.bundleIdentifier)
         if isAutopilotEnabled {
-            let (serializedUIElement, elementMap) = getUIElement(appContext: appContext)
-            appContext.serializedUIElement = serializedUIElement
-            return AppInfo(appContext: appContext, elementMap: elementMap)
-        } else {
-            return AppInfo(appContext: appContext, elementMap: ElementMap())
-        }
-    }
+            let (uiElement, elementMap) = getUIElements(appContext: appContext)
+            if let serializedUIElement = uiElement?.serialize() {
+//                print(serializedUIElement)
+                appContext.serializedUIElement = serializedUIElement
+            }
 
-    private func getUIElement(appContext: AppContext?) -> (String?, ElementMap) {
-        var element: AXUIElement? = nil
-        if let appContext = appContext, let pid = appContext.pid {
-            element = AXUIElementCreateApplication(pid)
+            return AppInfo(appContext: appContext, elementMap: elementMap, apps: appManager.getApps())
         } else {
-            element = AXUIElementCreateSystemWide()
-        }
-
-        var elementMap = ElementMap()
-        if let element = element, let uiElement = UIElement(from: element, callback: { uuid, element in
-            elementMap[uuid] = element
-        }) {
-            return (uiElement.serialize(), elementMap)
-        } else {
-            return (nil, ElementMap())
+            return AppInfo(appContext: appContext, elementMap: ElementMap(), apps: appManager.getApps())
         }
     }
 
