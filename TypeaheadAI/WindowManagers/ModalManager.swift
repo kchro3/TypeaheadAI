@@ -498,13 +498,15 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        try await self.clientManager?.refine(
-            messages: self.messages,
-            incognitoMode: !online,
-            userIntent: implicit ? text : nil,
-            streamHandler: defaultHandler,
-            completion: defaultCompletionHandler
-        )
+        Task {
+            try await self.clientManager?.refine(
+                messages: self.messages,
+                incognitoMode: !online,
+                userIntent: implicit ? text : nil,
+                streamHandler: defaultHandler,
+                completion: defaultCompletionHandler
+            )
+        }
     }
 
     @MainActor
@@ -521,12 +523,14 @@ class ModalManager: ObservableObject {
             isPending = true
             userIntents = nil
 
-            try await self.clientManager?.refine(
-                messages: self.messages,
-                incognitoMode: !online,
-                streamHandler: defaultHandler,
-                completion: defaultCompletionHandler
-            )
+            Task {
+                try await self.clientManager?.refine(
+                    messages: self.messages,
+                    incognitoMode: !online,
+                    streamHandler: defaultHandler,
+                    completion: defaultCompletionHandler
+                )
+            }
         }
     }
 
@@ -547,12 +551,14 @@ class ModalManager: ObservableObject {
             }
         }
 
-        try await self.clientManager?.refine(
-            messages: self.messages,
-            incognitoMode: !online,
-            streamHandler: defaultHandler,
-            completion: defaultCompletionHandler
-        )
+        Task {
+            try await self.clientManager?.refine(
+                messages: self.messages,
+                incognitoMode: !online,
+                streamHandler: defaultHandler,
+                completion: defaultCompletionHandler
+            )
+        }
     }
 
     @MainActor
@@ -560,12 +566,14 @@ class ModalManager: ObservableObject {
         isPending = true
         userIntents = nil
 
-        try await self.clientManager?.refine(
-            messages: self.messages,
-            incognitoMode: !online,
-            streamHandler: defaultHandler,
-            completion: defaultCompletionHandler
-        )
+        Task {
+            try await self.clientManager?.refine(
+                messages: self.messages,
+                incognitoMode: !online,
+                streamHandler: defaultHandler,
+                completion: defaultCompletionHandler
+            )
+        }
     }
 
     @MainActor
@@ -745,11 +753,7 @@ class ModalManager: ObservableObject {
                     self.setError(error.localizedDescription, appContext: appInfo?.appContext)
                 }
             case .function:
-                do {
-                    try await functionManager.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
-                } catch {
-                    self.setError(error.localizedDescription, appContext: appInfo?.appContext)
-                }
+                await functionManager.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
             }
         case .failure(let error as ClientManagerError):
             switch error {

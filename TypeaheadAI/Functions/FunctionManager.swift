@@ -32,7 +32,7 @@ struct Action: Codable {
     let textToPaste: String?
 }
 
-class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {
+class FunctionManager: CanFetchAppContext, CanGetUIElements, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {
     func openURL(_ url: String) async throws {
         guard let url = URL(string: url) else {
             throw FunctionError.openURL("URL not found")
@@ -41,7 +41,7 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
         NSWorkspace.shared.open(url)
     }
 
-    func parseAndCallFunction(jsonString: String, appInfo: AppInfo?, modalManager: ModalManager) async throws {
+    func parseAndCallFunction(jsonString: String, appInfo: AppInfo?, modalManager: ModalManager) async {
         let appContext = appInfo?.appContext
         guard let jsonData = jsonString.data(using: .utf8),
               let functionCall = try? JSONDecoder().decode(FunctionCall.self, from: jsonData) else {
@@ -50,179 +50,36 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
         }
 
         switch functionCall.name {
-        case "perform_ui_action":
-
-            guard let serializedActions = functionCall.args["actions"],
-                  let jsonData = serializedActions.data(using: .utf8),
-                  let actions = try? JSONDecoder().decode([Action].self, from: jsonData),
-                  let elementMap = appInfo?.elementMap else {
-                await modalManager.setError("Failed to perform UI action", appContext: appContext)
-                return
+        case "open_application":
+            do {
+                try await openApplication(functionCall, appInfo: appInfo, modalManager: modalManager)
+            } catch {
+                await modalManager.setError("Failed when opening application...", appContext: appContext)
             }
-
-            await modalManager.appendFunction(
-                "Performing actions: \(actions)...",
-                functionCall: functionCall,
-                appContext: appInfo?.appContext
-            )
-
-            if let bundleIdentifier = appContext?.bundleIdentifier,
-               let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
-                // Activate the app, bringing it to the foreground
-                app.activate(options: [.activateIgnoringOtherApps])
-            }
-
-            await modalManager.closeModal()
-
-            for action in actions {
-                try await Task.sleep(for: .seconds(1))
-
-                if let axElement = elementMap[action.id] {
-                    let result = AXUIElementPerformAction(axElement, action.action as CFString)
-
-                    if result == .success, let textToPaste = action.textToPaste {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString(textToPaste, forType: .string)
-                        try await Task.sleep(for: .seconds(1))
-
-                        try await simulatePaste()
-                    } else if result == .success {
-
-                    } else {
-                        // TERMINATE on failure
-                        await modalManager.showModal()
-
-                        if result == .actionUnsupported {
-                            await modalManager.appendToolError("No such action \(action)", functionCall: functionCall, appContext: appContext)
-                        } else {
-                            await modalManager.appendToolError("Action could not be performed", functionCall: functionCall, appContext: appContext)
-                        }
-
-                        return
-                    }
-                } else {
-                    // TERMINATE on invalid action
-                    await modalManager.showModal()
-                    await modalManager.appendToolError("No such element \(action.id)", functionCall: functionCall, appContext: appContext)
-                    return
-                }
-            }
-
-            await modalManager.appendTool(
-                "Performed actions successfully.",
-                functionCall: functionCall,
-                appContext: appInfo?.appContext
-            )
-
-            await modalManager.showModal()
 
         case "open_url":
-
-            guard let url = functionCall.args["url"], let prompt = functionCall.args["prompt"] else {
-                await modalManager.setError("Failed to open url...", appContext: appContext)
-                return
+            do {
+                try await openURL(functionCall, appInfo: appInfo, modalManager: modalManager)
+            } catch {
+                await modalManager.setError("Failed when opening url...", appContext: appContext)
             }
 
-            // Deal with <noop> case
-            guard prompt != "<noop>" else {
-                guard url != "<current>" else {
-                    await modalManager.appendToolError("Should not call <noop> on <current>", functionCall: functionCall, appContext: appContext)
-                    try await modalManager.continueReplying()
-                    return
-                }
-
-                await modalManager.appendFunction(
-                    "Opening \(url) ...",
-                    functionCall: functionCall,
-                    appContext: appInfo?.appContext
-                )
-
-                try await openURL(url)
-                await modalManager.appendTool(
-                    "Opened \(url) successfully",
-                    functionCall: functionCall,
-                    appContext: appContext)
-
-                try await modalManager.continueReplying()
-                return
+        case "perform_ui_action":
+            do {
+                try await performUIAction(functionCall, appInfo: appInfo, modalManager: modalManager)
+            } catch {
+                await modalManager.setError("Failed when interacting with UI...", appContext: appContext)
             }
 
-            if url == "<current>" {
-                await modalManager.appendFunction(
-                    "Scraping current page...",
-                    functionCall: functionCall,
-                    appContext: appInfo?.appContext
-                )
-
-                if let bundleIdentifier = appContext?.bundleIdentifier,
-                   let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
-                    // Activate the app, bringing it to the foreground
-                    app.activate(options: [.activateIgnoringOtherApps])
-                }
-
-                await modalManager.closeModal()
-                try await Task.sleep(for: .seconds(1))
-                try await simulateSelectAll()
-                try await simulateCopy()
-            } else {
-                await modalManager.appendFunction(
-                    "Opening \(functionCall.args["url"] ?? "url"). Will wait for 5 secs to load the page...",
-                    functionCall: functionCall,
-                    appContext: appContext
-                )
-
-                try await openURL(functionCall.args["url"]!)
-                await modalManager.closeModal()
-                try await Task.sleep(for: .seconds(5))
-                try await simulateSelectAll()
-                try await simulateCopy()
-                try await simulateClose()
-
-                if let bundleIdentifier = appContext?.bundleIdentifier,
-                   let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
-                    // Activate the app, bringing it to the foreground
-                    app.activate(options: [.activateIgnoringOtherApps])
-                }
+        case "open_and_scrape_url":
+            do {
+                try await openAndScrapeURL(functionCall, appInfo: appInfo, modalManager: modalManager)
+            } catch {
+                await modalManager.setError("Failed when scraping URL...", appContext: appContext)
             }
 
-            await modalManager.showModal()
-            guard let copiedText = NSPasteboard.general.string(forType: .string) else {
-                await modalManager.appendToolError("Failed to copy anything", functionCall: functionCall, appContext: appContext)
-                return
-            }
-
-            if let htmlString = NSPasteboard.general.string(forType: .html),
-               let links = try? htmlString.extractAttributes("href") {
-
-                if url == "<current>" {
-                    await modalManager.appendTool(
-                        "Here's what I copied from the current page:\n\(copiedText)\n\nLinks extracted: \(links)\n\nMy next goal: \(prompt)",
-                        functionCall: functionCall,
-                        appContext: appContext)
-                } else {
-                    await modalManager.appendTool(
-                        "Here's what I copied from \(url):\n\(copiedText)\n\nLinks extracted: \(links)\n\nMy next goal: \(prompt)",
-                        functionCall: functionCall,
-                        appContext: appContext)
-                }
-
-            } else {
-                if url == "<current>" {
-                    await modalManager.appendTool(
-                        "Here's what I copied from the current page:\n\(copiedText)\n\nMy next goal: \(prompt)",
-                        functionCall: functionCall,
-                        appContext: appContext)
-                } else {
-                    await modalManager.appendTool(
-                        "Here's what I copied from \(url):\n\(copiedText)\n\nMy next goal: \(prompt)",
-                        functionCall: functionCall,
-                        appContext: appContext)
-                }
-            }
-
-            try await modalManager.continueReplying()
         default:
-            throw FunctionError.notFound("Function \(functionCall.name) not found.")
+            await modalManager.setError("Function \(functionCall.name) not supported", appContext: appContext)
         }
     }
 }

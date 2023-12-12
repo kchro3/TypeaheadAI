@@ -22,7 +22,7 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v8"
+    private let version: String = "v9"
     private let validFinishReasons: [String] = [
         "stop",
         "function_call",
@@ -184,7 +184,7 @@ class ClientManager: ObservableObject {
         messages: [Message],
         incognitoMode: Bool,
         userIntent: String? = nil,
-        timeout: TimeInterval = 30,
+        timeout: TimeInterval = 60,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async throws {
@@ -299,7 +299,8 @@ class ClientManager: ObservableObject {
                 appContext: appInfo?.appContext,
                 version: self?.version,
                 isWebSearchEnabled: self?.isWebSearchEnabled,
-                isAutopilotEnabled: self?.isAutopilotEnabled
+                isAutopilotEnabled: self?.isAutopilotEnabled,
+                apps: appInfo?.apps.values.map { $0.bundleIdentifier }
             )
 
             if let output = self?.getCachedResponse(for: payload) {
@@ -567,6 +568,7 @@ struct RequestPayload: Codable {
     var version: String?
     var isWebSearchEnabled: Bool?
     var isAutopilotEnabled: Bool?
+    var apps: [String]?
 }
 
 /// https://replicate.com/stability-ai/sdxl

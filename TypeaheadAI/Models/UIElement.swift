@@ -30,7 +30,7 @@ struct UIElement: Identifiable, Codable, Equatable {
 
 extension UIElement {
     init?(from element: AXUIElement, callback: ((String, AXUIElement) -> Void)? = nil) {
-        guard let role = element.value(forAttribute: kAXRoleAttribute) as? String else {
+        guard let role = element.stringValue(forAttribute: kAXRoleAttribute) else {
             return nil
         }
 
@@ -77,14 +77,30 @@ extension UIElement {
 
     /// Convert to string representation
     /// isVisible: Only print visible UIElements
+    /// isIndexed: Don't print indices
     func serialize(
         indent: Int = 0,
-        isVisible: Bool = true
+        isVisible: Bool = true,
+        isIndexed: Bool = true,
+        showActions: Bool = true
     ) -> String? {
-        if isVisible {
-            if let width = self.size?.width, let height = self.size?.height, width * height <= 1.0 {
-                return nil
+        guard self.role != "AXGroup" else {
+            var line = ""
+            for child in self.children {
+                if let childLine = child.serialize(
+                    indent: indent,
+                    isVisible: isVisible,
+                    isIndexed: isIndexed,
+                    showActions: showActions
+                ), !childLine.isEmpty {
+                    if line.isEmpty {
+                        line = childLine
+                    } else {
+                        line += "\n\(childLine)"
+                    }
+                }
             }
+            return line
         }
 
         let indentation = String(repeating: "  ", count: indent)
@@ -116,13 +132,36 @@ extension UIElement {
             }
         }
 
-        var line = "\(indentation)\(self.shortId): \(text)"
-        if !self.actions.isEmpty {
+        if isVisible {
+            if let width = self.size?.width,
+                let height = self.size?.height,
+               width + height <= 1.0 {
+                return nil
+            }
+        } else {
+            if let width = self.size?.width,
+               let height = self.size?.height {
+                text += ", size: (\(width), \(height))"
+            }
+        }
+
+        var line = ""
+        if isIndexed {
+            line += "\(indentation)\(self.shortId): \(text)"
+        } else {
+            line += "\(indentation)\(self.role): \(text)"
+        }
+        if showActions, !self.actions.isEmpty {
             line += ", actions: \(self.actions)"
         }
 
         for child in self.children {
-            if let childLine = child.serialize(indent: indent + 1, isVisible: isVisible) {
+            if let childLine = child.serialize(
+                indent: indent + 1,
+                isVisible: isVisible,
+                isIndexed: isIndexed,
+                showActions: showActions
+            ), !childLine.isEmpty {
                 line += "\n\(childLine)"
             }
         }

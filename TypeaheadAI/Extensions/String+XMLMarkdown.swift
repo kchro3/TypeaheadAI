@@ -31,7 +31,7 @@ public struct HtmlMarkdownConfig {
 
 public extension String {
 
-    func renderXMLToMarkdown(_ config: HtmlMarkdownConfig = .defaultConfig) -> String {
+    func renderXMLToMarkdown(_ config: HtmlMarkdownConfig = HtmlMarkdownConfig.defaultConfig) -> String {
         do {
             let doc: SwiftSoup.Document = try SwiftSoup.parse(self)
             var markdown = ""
@@ -56,7 +56,7 @@ public extension String {
         }
         var r = ""
         for n in node.getChildNodes() {
-            r = r + (try self.renderChildNode(n, .defaultConfig))
+            r = r + (try self.renderChildNode(n, HtmlMarkdownConfig.defaultConfig))
         }
         let desiredLength = columnWidths[index]
         while r.count < desiredLength {
