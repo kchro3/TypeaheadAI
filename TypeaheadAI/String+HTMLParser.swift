@@ -29,4 +29,23 @@ extension String {
 
         return try doc.html()
     }
+
+    func extractAttributes(_ attributeToExtract: String) throws -> [String] {
+        let doc: SwiftSoup.Document = try SwiftSoup.parse(self)
+        let elements: SwiftSoup.Elements = try doc.getAllElements()
+
+        var values: [String] = []
+        for element in elements {
+            if let attributes = element.getAttributes() {
+                for attribute in attributes {
+                    if attributeToExtract == attribute.getKey(),
+                       let value = try? element.attr(attribute.getKey()) {
+                        values.append(value)
+                    }
+                }
+            }
+        }
+
+        return values
+    }
 }
