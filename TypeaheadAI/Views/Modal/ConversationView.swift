@@ -39,7 +39,8 @@ struct ConversationView: View {
                             },
                             onRefresh: {
                                 Task {
-                                    try await modalManager.replyToUserMessage(refresh: true)
+                                    try await modalManager.rewindTo(index: index)
+                                    try await modalManager.replyToUserMessage()
                                 }
                             },
                             onTruncate: {

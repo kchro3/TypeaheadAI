@@ -12,7 +12,7 @@ extension FunctionManager {
     func openURL(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
         let appContext = appInfo?.appContext
 
-        guard let url = functionCall.args["url"] else {
+        guard let url = functionCall.stringArg("url") else {
             await modalManager.setError("Failed to open url...", appContext: appContext)
             return
         }
@@ -37,7 +37,7 @@ extension FunctionManager {
     func openAndScrapeURL(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
         let appContext = appInfo?.appContext
 
-        guard let url = functionCall.args["url"], let prompt = functionCall.args["prompt"] else {
+        guard let url = functionCall.stringArg("url"), let prompt = functionCall.stringArg("prompt") else {
             await modalManager.setError("Failed to open url...", appContext: appContext)
             return
         }
@@ -61,12 +61,12 @@ extension FunctionManager {
             try await simulateCopy()
         } else {
             await modalManager.appendFunction(
-                "Opening \(functionCall.args["url"] ?? "url"). Will wait for 5 secs to load the page...",
+                "Opening \(url). Will wait for 5 secs to load the page...",
                 functionCall: functionCall,
                 appContext: appContext
             )
 
-            try await openURL(functionCall.args["url"]!)
+            try await openURL(url)
             await modalManager.closeModal()
             try await Task.sleep(for: .seconds(5))
             try await simulateSelectAll()

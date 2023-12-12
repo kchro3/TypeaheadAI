@@ -149,7 +149,7 @@ actor SpecialCutActor {
                             ), !intents.intents.isEmpty {
                                 await self.modalManager.setUserIntents(intents: intents.intents)
                             } else {
-                                try await self.modalManager.replyToUserMessage(refresh: false)
+                                try await self.modalManager.replyToUserMessage()
                             }
                         } catch {
                             self.logger.error("\(error.localizedDescription)")

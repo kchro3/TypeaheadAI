@@ -12,7 +12,7 @@ extension FunctionManager {
     func openApplication(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
         let appContext = appInfo?.appContext
 
-        guard let bundleIdentifier = functionCall.args["bundleIdentifier"] else {
+        guard let bundleIdentifier = functionCall.stringArg("bundleIdentifier") else {
             await modalManager.setError("Failed to open application", appContext: appContext)
             return
         }

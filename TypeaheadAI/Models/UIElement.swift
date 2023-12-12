@@ -24,7 +24,7 @@ struct UIElement: Identifiable, Codable, Equatable {
 
     var shortId: String {
         let id = String(id.uuidString.split(separator: "-")[0])
-        return "\(self.role)#\(id)"
+        return "\(self.role)_\(id)"
     }
 }
 
@@ -82,16 +82,20 @@ extension UIElement {
         indent: Int = 0,
         isVisible: Bool = true,
         isIndexed: Bool = true,
-        showActions: Bool = true
+        showActions: Bool = true,
+        excludedActions: [String]? = nil,
+        showGroups: Bool = false
     ) -> String? {
-        guard self.role != "AXGroup" else {
+        guard showGroups || self.role != "AXGroup" else {
             var line = ""
             for child in self.children {
                 if let childLine = child.serialize(
                     indent: indent,
                     isVisible: isVisible,
                     isIndexed: isIndexed,
-                    showActions: showActions
+                    showActions: showActions,
+                    excludedActions: excludedActions,
+                    showGroups: showGroups
                 ), !childLine.isEmpty {
                     if line.isEmpty {
                         line = childLine
@@ -151,8 +155,15 @@ extension UIElement {
         } else {
             line += "\(indentation)\(self.role): \(text)"
         }
-        if showActions, !self.actions.isEmpty {
-            line += ", actions: \(self.actions)"
+        if showActions {
+            if let excludedActions = excludedActions {
+                let actions = self.actions.filter { !excludedActions.contains($0) }
+                if !actions.isEmpty {
+                    line += ", actions: \(self.actions)"
+                }
+            } else {
+                line += ", actions: \(self.actions)"
+            }
         }
 
         for child in self.children {
@@ -160,7 +171,9 @@ extension UIElement {
                 indent: indent + 1,
                 isVisible: isVisible,
                 isIndexed: isIndexed,
-                showActions: showActions
+                showActions: showActions,
+                excludedActions: excludedActions,
+                showGroups: showGroups
             ), !childLine.isEmpty {
                 line += "\n\(childLine)"
             }
