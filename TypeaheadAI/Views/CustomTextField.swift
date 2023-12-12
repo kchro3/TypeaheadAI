@@ -190,7 +190,7 @@ struct CustomTextField: View {
         })
         .onChange(of: selectedIndex ?? -1, perform: { value in
             // Populate inlineSuggestion
-            if showAutoComplete {
+            if showAutoComplete, 0 <= value, value < filteredSuggestions.count {
                 inlineSuggestion = String(filteredSuggestions[value].dropFirst(text.count))
             } else {
                 inlineSuggestion = ""
