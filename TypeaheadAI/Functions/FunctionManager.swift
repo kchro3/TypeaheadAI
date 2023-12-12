@@ -20,16 +20,87 @@ enum FunctionError: LocalizedError {
     }
 }
 
+// Custom type to handle various JSON value types
+enum JSONAny: Codable, Equatable {
+    case string(String)
+    case double(Double)
+    case integer(Int)
+    case boolean(Bool)
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let intVal = try? container.decode(Int.self) {
+            self = .integer(intVal)
+        } else if let doubleVal = try? container.decode(Double.self) {
+            self = .double(doubleVal)
+        } else if let stringVal = try? container.decode(String.self) {
+            self = .string(stringVal)
+        } else if let boolVal = try? container.decode(Bool.self) {
+            self = .boolean(boolVal)
+        } else {
+            throw DecodingError.typeMismatch(JSONAny.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Value is not JSON compatible"))
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .string(let str):
+            try container.encode(str)
+        case .double(let num):
+            try container.encode(num)
+        case .integer(let int):
+            try container.encode(int)
+        case .boolean(let bool):
+            try container.encode(bool)
+        }
+    }
+}
+
 struct FunctionCall: Codable, Equatable {
     let id: String?
     let name: String
-    let args: [String: String]
-}
+    let args: [String: JSONAny]
 
-struct Action: Codable {
-    let id: String
-    let action: String
-    let textToPaste: String?
+    func stringArg(_ arg: String) -> String? {
+        guard let value = args[arg] else { return nil }
+
+        switch value {
+        case .string(let stringValue):
+            return stringValue
+        default: return nil
+        }
+    }
+
+    func doubleArg(_ arg: String) -> Double? {
+        guard let value = args[arg] else { return nil }
+
+        switch value {
+        case .double(let doubleValue):
+            return doubleValue
+        default: return nil
+        }
+    }
+
+    func intArg(_ arg: String) -> Int? {
+        guard let value = args[arg] else { return nil }
+
+        switch value {
+        case .integer(let intValue):
+            return intValue
+        default: return nil
+        }
+    }
+
+    func boolArg(_ arg: String) -> Bool? {
+        guard let value = args[arg] else { return nil }
+
+        switch value {
+        case .boolean(let boolValue):
+            return boolValue
+        default: return nil
+        }
+    }
 }
 
 class FunctionManager: CanFetchAppContext, CanGetUIElements, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {

@@ -53,6 +53,14 @@ extension AXUIElement {
         return size
     }
 
+    func parent() -> AXUIElement? {
+        guard let value = self.value(forAttribute: kAXParentAttribute) else {
+            return nil
+        }
+
+        return (value as! AXUIElement)
+    }
+
     func children() -> [AXUIElement] {
         if let children = self.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
             return children

@@ -229,6 +229,7 @@ class ClientManager: ObservableObject {
                 history: history,
                 appInfo: appInfo,
                 incognitoMode: incognitoMode,
+                timeout: timeout,
                 streamHandler: streamHandler,
                 completion: completion
             )
@@ -246,6 +247,7 @@ class ClientManager: ObservableObject {
                 history: nil,
                 appInfo: appInfo,
                 incognitoMode: incognitoMode,
+                timeout: timeout,
                 streamHandler: streamHandler,
                 completion: completion
             )
@@ -284,7 +286,7 @@ class ClientManager: ObservableObject {
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async {
         cancelStreamingTask()
-        currentStreamingTask = Task.detached { [weak self] in
+        currentStreamingTask = Task.init { [weak self] in
             let uuid = try? await self?.supabaseManager?.client.auth.session.user.id
             let payload = RequestPayload(
                 uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
@@ -343,7 +345,6 @@ class ClientManager: ObservableObject {
                     }
 
                     for try await text in stream {
-                        self?.logger.debug("stream: \(text)")
                         await streamHandler(.success(text), appInfo)
                     }
                 } catch {
@@ -351,10 +352,11 @@ class ClientManager: ObservableObject {
                     await streamHandler(.failure(error), appInfo)
                 }
             }
-        }
 
-        try? await currentStreamingTask?.value
-        currentStreamingTask = nil
+            DispatchQueue.main.async {
+                self?.currentStreamingTask = nil
+            }
+        }
     }
 
     func generateImage(

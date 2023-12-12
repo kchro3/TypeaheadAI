@@ -8,12 +8,18 @@
 import AppKit
 import Foundation
 
+struct Action: Codable {
+    let id: String
+    let action: String
+    let inputText: String?
+}
+
 extension FunctionManager {
 
     func performUIAction(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
         let appContext = appInfo?.appContext
 
-        guard let serializedActions = functionCall.args["actions"],
+        guard let serializedActions = functionCall.stringArg("actions"),
               let jsonData = serializedActions.data(using: .utf8),
               let actions = try? JSONDecoder().decode([Action].self, from: jsonData),
               let elementMap = appInfo?.elementMap else {
@@ -35,7 +41,6 @@ extension FunctionManager {
 
         await modalManager.closeModal()
 
-        var isMutated = false
         for action in actions {
             print(action)
             guard let axElement = elementMap[action.id] else {
@@ -45,7 +50,10 @@ extension FunctionManager {
                 return
             }
 
+            _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
+            try await Task.sleep(for: .milliseconds(100))
             let result = AXUIElementPerformAction(axElement, action.action as CFString)
+            try await Task.sleep(for: .seconds(1))
 
             guard result == .success else {
                 // TERMINATE on failure
@@ -60,14 +68,30 @@ extension FunctionManager {
                 return
             }
 
-            if let textToPaste = action.textToPaste {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(textToPaste, forType: .string)
-                try await Task.sleep(for: .seconds(1))
+            if let inputText = action.inputText, let role = axElement.stringValue(forAttribute: kAXRoleAttribute) {
+                if role == "AXTextField" {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(inputText, forType: .string)
+                    try await Task.sleep(for: .seconds(1))
 
-                try await simulateSelectAll()
-                try await simulatePaste()
-                isMutated = true
+                    try await simulateSelectAll()
+                    try await simulatePaste()
+                } else if role == "AXComboBox" {
+                    if let parent = axElement.parent(),
+                       let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
+                       let serializedList = UIElement(from: axList)?.serialize(isIndexed: false),
+                       let pickResult = pickFromList(axElement: axList, value: inputText) {
+                        if pickResult != .success {
+                            await modalManager.appendToolError("Could not find \(inputText) in \(serializedList)", functionCall: functionCall, appContext: appContext)
+                        }
+                    } else {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(inputText, forType: .string)
+                        try await Task.sleep(for: .seconds(1))
+
+                        try await simulatePaste()
+                    }
+                }
             }
 
             try await Task.sleep(for: .seconds(1))
@@ -104,5 +128,21 @@ extension FunctionManager {
 
         await modalManager.showModal()
         try await modalManager.continueReplying()
+    }
+
+    /// Recursively traverse an AXList to select an option that matches the expected value.
+    /// This is probably pretty brittle. We should try this out on a few use-cases
+    private func pickFromList(axElement: AXUIElement, value: String) -> AXError? {
+        guard axElement.stringValue(forAttribute: kAXValueAttribute) != value else {
+            return AXUIElementPerformAction(axElement, "AXPress" as CFString)
+        }
+
+        for child in axElement.children() {
+            if let result = pickFromList(axElement: child, value: value) {
+                return result
+            }
+        }
+
+        return nil
     }
 }

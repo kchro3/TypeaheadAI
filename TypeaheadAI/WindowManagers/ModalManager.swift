@@ -534,22 +534,23 @@ class ModalManager: ObservableObject {
         }
     }
 
+    /// Rewind to a certain message index
+    @MainActor
+    func rewindTo(index: Int) async throws {
+        guard index >= 0, index < messages.count else {
+            self.logger.error("Not a valid index \(index) out of \(self.messages.count)")
+            return
+        }
+
+        self.messages = Array(self.messages.prefix(index))
+    }
+
     /// Reply to the user
     /// If refresh, then pop the previous message before responding.
     @MainActor
-    func replyToUserMessage(refresh: Bool) async throws {
+    func replyToUserMessage() async throws {
         isPending = true
         userIntents = nil
-
-        if refresh, let lastMessage = self.messages.last {
-            if let _ = lastMessage.responseError {
-                _ = self.messages.popLast()
-            } else if case .string = lastMessage.messageType {
-                _ = self.messages.popLast()
-            } else if case .html = lastMessage.messageType {
-                _ = self.messages.popLast()
-            }
-        }
 
         Task {
             try await self.clientManager?.refine(

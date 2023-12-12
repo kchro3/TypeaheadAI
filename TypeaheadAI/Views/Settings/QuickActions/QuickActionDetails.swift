@@ -64,15 +64,17 @@ struct QuickActionDetails: View {
                         isEditing = false
                         onDelete?()
                     }, label: {
-                        Image(systemName: "trash.fill")
-                            .foregroundStyle(.white)
-                        Text("Delete")
-                            .foregroundStyle(.white)
+                        HStack {
+                            Image(systemName: "trash.fill")
+                                .foregroundStyle(.white)
+                            Text("Delete")
+                                .foregroundStyle(.white)
+                        }
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(.red))
                     })
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(.red))
                     .buttonStyle(.plain)
 
                     Spacer()
@@ -81,12 +83,12 @@ struct QuickActionDetails: View {
                         isEditing = false
                     }, label: {
                         Text("Cancel")
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .background(RoundedRectangle(cornerRadius: 15)
+                                .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                            )
                     })
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                    )
                     .buttonStyle(.plain)
 
                     Button(action: {
@@ -98,11 +100,11 @@ struct QuickActionDetails: View {
                     }, label: {
                         Text("Save")
                             .foregroundStyle(.white)
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .background(RoundedRectangle(cornerRadius: 15)
+                                .fill(Color.accentColor))
                     })
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background(RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.accentColor))
                     .buttonStyle(.plain)
                 }
                 .frame(maxWidth: .infinity)
