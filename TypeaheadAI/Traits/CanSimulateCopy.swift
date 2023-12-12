@@ -8,7 +8,6 @@
 import AppKit
 import Carbon.HIToolbox
 import Foundation
-import HtmlMarkdown
 
 enum CanSimulateCopyError: Error {
     case noChangesDetected
@@ -40,7 +39,7 @@ extension CanSimulateCopy {
     func getMarkdownFromPasteboard() throws -> String? {
         if let htmlString = NSPasteboard.general.string(forType: .html),
            let sanitizedHTML = try? htmlString.sanitizeHTML() {
-            return sanitizedHTML.renderXMLToMarkdown(.init(throwUnkownElement: .ignore))
+            return sanitizedHTML.renderXMLToMarkdown()
         } else {
             return nil
         }

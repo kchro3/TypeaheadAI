@@ -7,6 +7,7 @@
 
 import AppKit
 import Foundation
+import SwiftUI
 import Vision
 import os.log
 
@@ -19,6 +20,8 @@ struct AppInfo {
 }
 
 class AppContextManager: CanFetchAppContext, CanScreenshot {
+    @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
+
     private let scriptManager = ScriptManager()
 
     private let logger = Logger(
@@ -36,9 +39,13 @@ class AppContextManager: CanFetchAppContext, CanScreenshot {
         // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
         appContext.screenshotPath = try await screenshot()
         appContext.url = await getUrl(bundleIdentifier: appContext.bundleIdentifier)
-        let (serializedUIElement, elementMap) = getUIElement(appContext: appContext)
-        appContext.serializedUIElement = serializedUIElement
-        return AppInfo(appContext: appContext, elementMap: elementMap)
+        if isAutopilotEnabled {
+            let (serializedUIElement, elementMap) = getUIElement(appContext: appContext)
+            appContext.serializedUIElement = serializedUIElement
+            return AppInfo(appContext: appContext, elementMap: elementMap)
+        } else {
+            return AppInfo(appContext: appContext, elementMap: ElementMap())
+        }
     }
 
     private func getUIElement(appContext: AppContext?) -> (String?, ElementMap) {

@@ -189,8 +189,8 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
             if let htmlString = NSPasteboard.general.string(forType: .html),
                let sanitizedHTML = try? htmlString.sanitizeHTML() {
 
-                let markdownString = sanitizedHTML.renderXMLToMarkdown(.init(throwUnkownElement: .ignore))
-                
+                let markdownString = sanitizedHTML.renderXMLToMarkdown()
+
                 if url == "<current>" {
                     await modalManager.appendTool(
                         "Here's what I copied from the current page:\n\(markdownString)\n\nMy next goal: \(prompt)",
@@ -215,6 +215,11 @@ class FunctionManager: CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy
                         functionCall: functionCall,
                         appContext: appContext)
                 }
+            } else {
+                await modalManager.appendToolError(
+                    "Failed to scrape the page...",
+                    functionCall: functionCall,
+                    appContext: appContext)
             }
 
             try await modalManager.continueReplying()
