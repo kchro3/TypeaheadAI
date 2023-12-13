@@ -455,10 +455,16 @@ class ModalManager: ObservableObject {
 
     /// When a user responds, flush the current text to the messages array and add the system and user prompts
     /// 
-    /// When implicit is true, that means that the new text is implicitly a user objective.
+    /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
-    func addUserMessage(_ text: String, implicit: Bool = false, isHidden: Bool = false, appContext: AppContext?) async throws {
+    func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
         self.clientManager?.cancelStreamingTask()
+
+        var quickAction: QuickAction? = nil
+        if isQuickAction {
+            // Look up the quick action by its label or create a new one
+            quickAction = await self.promptManager?.getOrCreateByLabel(text)
+        }
 
         if let lastMessage = messages.last {
             messages.append(
@@ -471,6 +477,7 @@ class ModalManager: ObservableObject {
                     text: text,
                     isCurrentUser: true,
                     isHidden: isHidden,
+                    quickActionId: quickAction?.id,
                     appContext: appContext
                 )
             )
@@ -487,6 +494,7 @@ class ModalManager: ObservableObject {
                     text: text,
                     isCurrentUser: true,
                     isHidden: isHidden,
+                    quickActionId: quickAction?.id,
                     appContext: appContext
                 )
             )
@@ -502,7 +510,7 @@ class ModalManager: ObservableObject {
             try await self.clientManager?.refine(
                 messages: self.messages,
                 incognitoMode: !online,
-                userIntent: implicit ? text : nil,
+                quickAction: quickAction,
                 streamHandler: defaultHandler,
                 completion: defaultCompletionHandler
             )
@@ -510,7 +518,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func updateMessage(index: Int, newContent: String) async throws {
+    func updateMessage(index: Int, newContent: String) throws {
         self.messages[index].text = newContent
 
         if self.messages[index].isCurrentUser {

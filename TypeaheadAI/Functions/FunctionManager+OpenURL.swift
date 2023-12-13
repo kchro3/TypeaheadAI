@@ -38,7 +38,7 @@ extension FunctionManager {
         let appContext = appInfo?.appContext
 
         guard let url = functionCall.stringArg("url"), let prompt = functionCall.stringArg("prompt") else {
-            await modalManager.setError("Failed to open url...", appContext: appContext)
+            await modalManager.setError("Failed to open and scrape url...", appContext: appContext)
             return
         }
 

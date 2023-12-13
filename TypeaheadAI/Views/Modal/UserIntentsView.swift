@@ -12,7 +12,7 @@ struct UserIntentView: View {
     let userIntent: String
     let rank: Int
     let onButtonClick: ((String) -> Void)?
-    let maxWidth: CGFloat = 200
+    let maxWidth: CGFloat = 250
 
     var body: some View {
         Button(action: {
@@ -45,7 +45,6 @@ struct UserIntentView: View {
 struct UserIntentsView: View {
     let userIntents: [String]
     let onButtonClick: ((String) -> Void)?
-    let maxWidth: CGFloat = 200
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {

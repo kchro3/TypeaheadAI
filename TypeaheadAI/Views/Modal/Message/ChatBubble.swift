@@ -12,14 +12,19 @@ import SwiftUI
 struct ChatBubble<Content>: View where Content: View {
     let direction: ChatBubbleShape.Direction
     let content: () -> Content
+    let onConfigure: (() -> Void)?
     let onEdit: (() -> Void)?
     let onRefresh: (() -> Void)?
 
-    init(direction: ChatBubbleShape.Direction,
-         onEdit: (() -> Void)? = nil,
-         onRefresh: (() -> Void)? = nil,
-         @ViewBuilder content: @escaping () -> Content) {
+    init(
+        direction: ChatBubbleShape.Direction,
+        onConfigure: (() -> Void)? = nil,
+        onEdit: (() -> Void)? = nil,
+        onRefresh: (() -> Void)? = nil,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
         self.content = content
+        self.onConfigure = onConfigure
         self.onEdit = onEdit
         self.onRefresh = onRefresh
         self.direction = direction
@@ -35,10 +40,11 @@ struct ChatBubble<Content>: View where Content: View {
 
     @ViewBuilder
     var userMessage: some View {
-        HStack {
+        HStack(alignment: .bottom) {
             Spacer()
 
-            buttons
+            userButtons
+                .padding(.leading, 10)
 
             content()
                 .clipShape(ChatBubbleShape(direction: direction))
@@ -47,43 +53,63 @@ struct ChatBubble<Content>: View where Content: View {
 
     @ViewBuilder
     var aiMessage: some View {
-        HStack {
+        HStack(alignment: .bottom) {
             content()
                 .clipShape(ChatBubbleShape(direction: direction))
 
-            buttons
+            aiButtons
+                .padding(.trailing, 10)
 
             Spacer()
         }
     }
 
     @ViewBuilder
-    var buttons: some View {
-        VStack {
-            // Make sure that the buttons are at the bottom of a multiline message.
-            Spacer()
+    var aiButtons: some View {
+        HStack(spacing: 5) {
+            if let onEdit = onEdit {
+                Button(action: {
+                    onEdit()
+                }, label: {
+                    Image(systemName: "square.and.pencil")
+                        .padding(.bottom, 10)
+                })
+                .buttonStyle(.plain)
+            }
 
-            HStack {
-                if let onEdit = onEdit {
-                    Button(action: {
-                        onEdit()
-                    }, label: {
-                        Image(systemName: "square.and.pencil")
-                    })
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 10)
-                }
+            if let onButtonDown = onRefresh {
+                Button(action: {
+                    onButtonDown()
+                }, label: {
+                    Image(systemName: "arrow.counterclockwise")
+                        .padding(.bottom, 8)
+                })
+                .buttonStyle(.plain)
+            }
+        }
+    }
 
-                if let onButtonDown = onRefresh {
-                    Button(action: {
-                        onButtonDown()
-                    }, label: {
-                        Image(systemName: "arrow.counterclockwise")
-                    })
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 10)
-                    .padding(.trailing, 25)
+    @ViewBuilder
+    var userButtons: some View {
+        HStack(spacing: 5) {
+            if let onEdit = onEdit {
+                Button(action: {
+                    onEdit()
+                }, label: {
+                    Image(systemName: "square.and.pencil")
+                })
+                .padding(.bottom, 10)
+                .buttonStyle(.plain)
+            }
+
+            if let onConfigure = onConfigure {
+                Button {
+                    onConfigure()
+                } label: {
+                    Image(systemName: "wrench.adjustable")
                 }
+                .buttonStyle(.plain)
+                .padding(.bottom, 7)
             }
         }
     }
@@ -165,5 +191,55 @@ struct ChatBubbleShape: Shape {
 
         }
         return path
+    }
+}
+
+#Preview {
+    let markdownString = """
+Dear Cynthia,
+
+Thanks for trying out the app, really appreciate your candidness in the interviews.
+
+Jeff
+"""
+
+    return ChatBubble(direction: .right) {
+
+    } onEdit: {
+
+    } onRefresh: {
+
+    } content: {
+        Text(markdownString)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 15)
+            .foregroundColor(.white)
+            .background(Color.accentColor.opacity(0.8))
+            .textSelection(.enabled)
+    }
+}
+
+#Preview {
+    let markdownString = """
+Dear Cynthia,
+
+Thanks for trying out the app, really appreciate your candidness in the interviews.
+
+Jeff
+"""
+
+    return ChatBubble(direction: .left) {
+
+    } onEdit: {
+
+    } onRefresh: {
+
+    } content: {
+        Text(markdownString)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 15)
+            .foregroundColor(.white)
+            .background(Color.accentColor.opacity(0.8))
+            .textSelection(.enabled)
     }
 }

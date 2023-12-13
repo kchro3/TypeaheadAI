@@ -28,6 +28,7 @@ struct Message: Codable, Identifiable, Equatable {
     var text: String
     let isCurrentUser: Bool
     let isHidden: Bool
+    let quickActionId: UUID?
 
     // Mutable because we need to scrub data when making network requests
     var appContext: AppContext?
@@ -37,6 +38,38 @@ struct Message: Codable, Identifiable, Equatable {
     var messageType: MessageType = .string
     var isTruncated: Bool = true
     var isEdited: Bool = false
+
+    init(
+        id: UUID,
+        rootId: UUID,
+        inReplyToId: UUID?,
+        createdAt: Date,
+        rootCreatedAt: Date,
+        text: String,
+        isCurrentUser: Bool,
+        isHidden: Bool,
+        quickActionId: UUID? = nil,
+        appContext: AppContext? = nil,
+        responseError: String? = nil,
+        messageType: MessageType = .string,
+        isTruncated: Bool = true,
+        isEdited: Bool = false
+    ) {
+        self.id = id
+        self.rootId = rootId
+        self.inReplyToId = inReplyToId
+        self.createdAt = createdAt
+        self.rootCreatedAt = rootCreatedAt
+        self.text = text
+        self.isCurrentUser = isCurrentUser
+        self.isHidden = isHidden
+        self.appContext = appContext
+        self.responseError = responseError
+        self.messageType = messageType
+        self.isTruncated = isTruncated
+        self.isEdited = isEdited
+        self.quickActionId = quickActionId
+    }
 }
 
 extension Message {
@@ -58,7 +91,8 @@ extension Message {
         self.text = text
         self.isCurrentUser = entry.isCurrentUser
         self.isHidden = entry.isHidden
-        
+        self.quickActionId = entry.quickActionId
+
         if let serializedAppContext = entry.serializedAppContext?.data(using: .utf8),
            let appContext = try? JSONDecoder().decode(AppContext.self, from: serializedAppContext) {
             self.appContext = appContext
@@ -77,6 +111,7 @@ extension Message {
         entry.text = self.text
         entry.isCurrentUser = self.isCurrentUser
         entry.isHidden = self.isHidden
+        entry.quickActionId = self.quickActionId
 
         if let appContext = self.appContext,
            let data = try? JSONEncoder().encode(appContext),

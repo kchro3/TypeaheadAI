@@ -8,10 +8,23 @@
 import AppKit
 import Foundation
 
-struct Action: Codable {
+struct Action: Identifiable, Codable {
     let id: String
     let action: String
+    let narration: String
     let inputText: String?
+}
+
+extension FunctionCall {
+    func getActions() -> [Action] {
+        guard let serializedActions = self.stringArg("actions"),
+              let jsonData = serializedActions.data(using: .utf8),
+              let actions = try? JSONDecoder().decode([Action].self, from: jsonData) else {
+            return []
+        }
+
+        return actions
+    }
 }
 
 extension FunctionManager {
@@ -42,7 +55,6 @@ extension FunctionManager {
         await modalManager.closeModal()
 
         for action in actions {
-            print(action)
             guard let axElement = elementMap[action.id] else {
                 // TERMINATE on invalid action
                 await modalManager.showModal()
@@ -52,7 +64,26 @@ extension FunctionManager {
 
             _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
             try await Task.sleep(for: .milliseconds(100))
-            let result = AXUIElementPerformAction(axElement, action.action as CFString)
+
+            var result: AXError? = nil
+            if action.action == "<click>" {
+                if axElement.actions().contains("AXPress") {
+                    result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
+                } else if let size = axElement.sizeValue(forAttribute: kAXSizeAttribute),
+                          let point = axElement.pointValue(forAttribute: kAXPositionAttribute),
+                          size.width * size.height > 1.0 {
+                    // Simulate a mouse click event
+                    let centerPoint = CGPoint(x: point.x + size.width / 2, y: point.y + size.height / 2)
+                    print("click on \(centerPoint)")
+                    simulateMouseClick(at: centerPoint)
+                    result = .success
+                } else {
+                    result = .actionUnsupported
+                }
+            } else {
+                result = AXUIElementPerformAction(axElement, action.action as CFString)
+            }
+
             try await Task.sleep(for: .seconds(1))
 
             guard result == .success else {
@@ -69,14 +100,7 @@ extension FunctionManager {
             }
 
             if let inputText = action.inputText, let role = axElement.stringValue(forAttribute: kAXRoleAttribute) {
-                if role == "AXTextField" {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(inputText, forType: .string)
-                    try await Task.sleep(for: .seconds(1))
-
-                    try await simulateSelectAll()
-                    try await simulatePaste()
-                } else if role == "AXComboBox" {
+                if role == "AXComboBox" {
                     if let parent = axElement.parent(),
                        let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
                        let serializedList = UIElement(from: axList)?.serialize(isIndexed: false),
@@ -91,6 +115,13 @@ extension FunctionManager {
 
                         try await simulatePaste()
                     }
+                } else {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(inputText, forType: .string)
+                    try await Task.sleep(for: .seconds(1))
+
+                    try await simulateSelectAll()
+                    try await simulatePaste()
                 }
             }
 
@@ -144,5 +175,24 @@ extension FunctionManager {
         }
 
         return nil
+    }
+
+    /// Super janky, but I need to click on a point & return the mouse back to its original position
+    func simulateMouseClick(at point: CGPoint) {
+        // Store the original mouse position
+        let originalPosition = NSEvent.mouseLocation
+
+        // Create a mouse down event
+        if let mouseDown = CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: point, mouseButton: .left) {
+            mouseDown.post(tap: .cghidEventTap)
+        }
+
+        // Create a mouse up event
+        if let mouseUp = CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: point, mouseButton: .left) {
+            mouseUp.post(tap: .cghidEventTap)
+        }
+
+        // Move the mouse back to the original position
+        CGDisplayMoveCursorToPoint(CGMainDisplayID(), originalPosition)
     }
 }

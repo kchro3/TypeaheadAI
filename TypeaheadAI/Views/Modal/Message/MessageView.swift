@@ -11,6 +11,7 @@ import UniformTypeIdentifiers
 
 struct MessageView: View {
     var message: Message
+    var onConfigure: (() -> Void)?
     var onEdit: ((String) -> Void)?
     var onEditAppear: (() -> Void)?
     var onRefresh: (() -> Void)?
@@ -26,7 +27,8 @@ struct MessageView: View {
     private let isMarkdown: Bool
 
     init(
-        message: Message,
+        message: Message,        
+        onConfigure: (() -> Void)? = nil,
         onEdit: ((String) -> Void)? = nil,
         onEditAppear: (() -> Void)? = nil,
         onRefresh: (() -> Void)? = nil,
@@ -34,6 +36,7 @@ struct MessageView: View {
         maxMessageLength: Int = 280
     ) {
         self.message = message
+        self.onConfigure = onConfigure
         self.onEdit = onEdit
         self.onEditAppear = onEditAppear
         self.onRefresh = onRefresh
@@ -76,6 +79,7 @@ struct MessageView: View {
     var userMessage: some View {
         ChatBubble(
             direction: .right,
+            onConfigure: onConfigure,
             onEdit: (onEditAppear != nil) ? {
                 isEditing.toggle()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
@@ -230,7 +234,7 @@ struct MessageView: View {
                 } : nil,
                 onRefresh: onRefresh) {
                 switch message.messageType {
-                case .string, .markdown, .function_call, .tool_call:
+                case .string, .markdown, .tool_call:
                     if isEditing {
                         CustomTextField(
                             text: $localContent,
@@ -258,6 +262,33 @@ struct MessageView: View {
                             .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                             .textSelection(.enabled)
                     } else {
+                        Text(message.text)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 15)
+                            .foregroundColor(.primary)
+                            .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                            .textSelection(.enabled)
+                    }
+                case .function_call(let functionCall):
+                    switch functionCall.name {
+                    case "perform_ui_action":
+                        Markdown {
+                            Paragraph {
+                                Strong("Autopilot Plan")
+                            }
+                            NumberedList(of: functionCall.getActions()) { action in
+                                ListItem {
+                                    action.narration
+                                }
+                            }
+                        }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 15)
+                        .foregroundColor(.primary)
+                        .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                        .textSelection(.enabled)
+
+                    default:
                         Text(message.text)
                             .padding(.vertical, 10)
                             .padding(.horizontal, 15)
@@ -339,6 +370,27 @@ struct MessageView: View {
 
 #Preview {
     MessageView(message: Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello bot", isCurrentUser: true, isHidden: false, appContext: nil))
+}
+
+#Preview {
+    MessageView(message: Message(
+        id: UUID(),
+        rootId: UUID(),
+        inReplyToId: nil,
+        createdAt: Date(),
+        rootCreatedAt: Date(),
+        text: "hello bot",
+        isCurrentUser: false,
+        isHidden: false,
+        messageType: .function_call(data: FunctionCall(
+            id: "toolcall_123",
+            name: "perform_ui_action",
+            args: [
+                "actions": JSONAny.string("""
+    [{"id":"AXTextField_DF3814C3","action":"AXPress","narration":"Add subject line","inputText":"Follow-Up on Typeahead Licensing Discussion"},{"id":"AXLink_638547DF","action":"AXPress","narration":"Click on this link"},{"id":"AXTextArea_B4B9E7B7","action":"AXPress","narration":"Add email body", "inputText":"Dear Kenichiro,\\n\\nI hope this message finds you well.\\n\\nI wanted to extend my gratitude for taking the time to meet with me on December 12, 2023, to discuss the potential licensing of Typeahead software for the Test.ai sales team. Your willingness to commit to a one-year license agreement for $20K is greatly appreciated and marks the beginning of what I am confident will be a fruitful collaboration.\\n\\nAs we discussed, there are some risks given that this is a new software, and we are aware of the potential for bugs. To mitigate this, I will be assigning a dedicated support engineer to ensure that your sales team is fully supported and can ramp up on the new changes efficiently.\\n\\nPlease feel free to reach out if you have any questions or need further information in the meantime.\\n\\nLooking forward to our next meeting scheduled for December 25, 2023, where we will review the progress on the action items and update on sales metrics.\\n\\nBest regards,\\n\\nJeff Hara"}]
+    """)
+            ]
+        ))))
 }
 
 #Preview {

@@ -111,6 +111,14 @@ class QuickActionManager: ObservableObject {
         return nil
     }
 
+    func getOrCreateByLabel(_ label: String) async -> QuickAction? {
+        if let quickAction = getByLabel(label) {
+            return quickAction
+        } else {
+            return await addPrompt(label)
+        }
+    }
+
     @MainActor
     func updatePrompt(with id: UUID, newLabel: String? = nil, newDetails: String? = nil) {
         let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()

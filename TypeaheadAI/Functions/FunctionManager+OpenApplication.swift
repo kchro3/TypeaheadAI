@@ -25,11 +25,10 @@ extension FunctionManager {
         }
 
         await modalManager.closeModal()
-        try await Task.sleep(for: .milliseconds(100))
 
-        if let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
+        if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) {
             // Activate the app, bringing it to the foreground
-            app.activate(options: [.activateIgnoringOtherApps])
+            NSWorkspace.shared.open(url)
             await modalManager.appendTool("Opened", functionCall: functionCall, appContext: appContext)
             try await Task.sleep(for: .seconds(1))
             await modalManager.showModal()

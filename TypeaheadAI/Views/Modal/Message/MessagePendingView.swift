@@ -34,6 +34,7 @@ struct MessagePendingView: View {
                         activeDotIndex = (activeDotIndex + 1) % 3
                     }
                 }
+                .padding(3)
             } else {
                 EmptyView()
             }

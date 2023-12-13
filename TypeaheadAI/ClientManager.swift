@@ -183,7 +183,7 @@ class ClientManager: ObservableObject {
     func refine(
         messages: [Message],
         incognitoMode: Bool,
-        userIntent: String? = nil,
+        quickAction: QuickAction? = nil,
         timeout: TimeInterval = 60,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
@@ -195,23 +195,14 @@ class ClientManager: ObservableObject {
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data),
            let appContext = appInfo?.appContext {
             var history: [Message]? = nil
-            var quickAction: QuickAction? = nil
-            if let userIntent = userIntent {
-                // NOTE: Check if the user intent is also a Quick Action
-                quickAction = self.promptManager?.getByLabel(userIntent)
-                if let quickActionID = quickAction?.id {
-                    // NOTE: This is probably a stupid way of managing the state
-                    await self.promptManager?.setActivePrompt(id: quickActionID)
-
-                    // Create a few-shot prompt from smart-copy-paste history
-                    history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickActionID)
-                } else {
-                    quickAction = await self.promptManager?.addPrompt(userIntent)
-                }
+            if let quickAction = quickAction {
+                // NOTE: This is a stupid way of managing state. We should get the active prompt from the messages array.
+                await self.promptManager?.setActivePrompt(id: quickAction.id)
+                history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickAction.id)
 
                 // NOTE: We cached the copiedText earlier
                 await self.intentManager?.addIntentEntry(
-                    prompt: userIntent,
+                    prompt: quickAction.prompt,
                     copiedText: payload.copiedText,
                     appContext: appContext
                 )
@@ -219,11 +210,11 @@ class ClientManager: ObservableObject {
 
             await self.sendStreamRequest(
                 id: UUID(),
-                username: payload.username,
-                userFullName: payload.userFullName,
+                username: NSUserName(),
+                userFullName: NSFullUserName(),
                 userObjective: quickAction?.details ?? payload.userObjective,
-                userBio: payload.userBio,
-                userLang: payload.userLang,
+                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+                userLang: Locale.preferredLanguages.first ?? "",
                 copiedText: payload.copiedText,
                 messages: self.sanitizeMessages(messages),
                 history: history,

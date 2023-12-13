@@ -8,13 +8,22 @@
 import MarkdownUI
 import SwiftUI
 
-struct ConversationView: View {    
+struct ConversationView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
 
     @StateObject var modalManager: ModalManager
 
     @State private var userHasScrolled: Bool = false
     @State private var previousMessageCount: Int = 0
+
+    // State vars for configuring a QuickAction
+    @State private var isEditing: Bool = false
+    @State private var mutableLabel: String = ""
+    @State private var mutableDetails: String = ""
+    @State private var isSheetPresented: Bool = false
+    @State private var quickAction: PromptEntry? = nil
 
     @Namespace var bottomID
 
@@ -22,20 +31,24 @@ struct ConversationView: View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 ForEach(modalManager.messages.indices, id: \.self) { index in
-                    if !modalManager.messages[index].isHidden {
+                    var message = modalManager.messages[index]
+                    if !message.isHidden {
                         MessageView(
-                            message: modalManager.messages[index],
+                            message: message,
+                            onConfigure: (message.quickActionId == nil) ? nil : {
+                                quickActions.nsPredicate = NSPredicate(format: "id == %@", message.quickActionId! as CVarArg)
+                                quickAction = quickActions.first
+                                isSheetPresented.toggle()
+                            },
                             onEdit: { newContent in
-                                if newContent != modalManager.messages[index].text {
-                                    Task {
-                                        try await modalManager.updateMessage(index: index, newContent: newContent)
-                                    }
+                                if newContent != message.text {
+                                    try? modalManager.updateMessage(index: index, newContent: newContent)
                                 } else {
-                                    modalManager.messages[index].isEdited.toggle()
+                                    message.isEdited.toggle()
                                 }
                             },
                             onEditAppear: {
-                                modalManager.messages[index].isEdited.toggle()
+                                message.isEdited.toggle()
                             },
                             onRefresh: {
                                 Task {
@@ -44,11 +57,11 @@ struct ConversationView: View {
                                 }
                             },
                             onTruncate: {
-                                modalManager.messages[index].isTruncated.toggle()
+                                message.isTruncated.toggle()
                             }
                         )
-                        .id(modalManager.messages[index].id.uuidString)
-                        .padding(5)
+                        .id(message.id.uuidString)
+                        .padding(3)
                     }
                 }
                 .markdownTheme(.custom)
@@ -57,7 +70,6 @@ struct ConversationView: View {
                 ))
 
                 MessagePendingView(isPending: modalManager.isPending)
-                    .padding(5)
 
                 // HACK: This is a way to make sure that the chat stays scrolled to the bottom.
                 Text("").font(.system(size: 1.0)).opacity(0)
@@ -103,6 +115,24 @@ struct ConversationView: View {
                     }
                 }
             }
+            .sheet(isPresented: $isSheetPresented, content: {
+                if let quickAction = quickAction {
+                    QuickActionDetails(
+                        quickAction: quickAction,
+                        isEditing: $isEditing,
+                        mutableLabel: $mutableLabel,
+                        mutableDetails: $mutableDetails
+                    )
+                } else {
+                    // This shouldn't happen though...
+                    NewQuickActionForm(onSubmit: { label, details in
+                        modalManager.promptManager?.addPrompt(label, details: details)
+                        isSheetPresented = false
+                    }, onCancel: {
+                        isSheetPresented = false
+                    })
+                }
+            })
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

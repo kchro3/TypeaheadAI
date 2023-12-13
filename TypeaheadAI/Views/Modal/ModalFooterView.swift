@@ -19,9 +19,7 @@ struct ModalFooterView: View {
                userIntents.count > 0 {
                 UserIntentsView(userIntents: userIntents) { userIntent in
                     Task {
-                        // On button click, set the new message & reset the user intents
-                        try await modalManager.addUserMessage(userIntent, implicit: true, appContext: nil)
-                        modalManager.userIntents = nil
+                        await modalManager.addUserMessage(userIntent, isQuickAction: true, appContext: nil)
                     }
                 }
             } else if clientManager.currentStreamingTask != nil {
@@ -58,12 +56,10 @@ struct ModalFooterView: View {
                 ) { text in
                     if !text.isEmpty {
                         Task {
-                            if let _ = modalManager.userIntents {
-                                // If userIntents is non-nil, reset it.
-                                try await modalManager.addUserMessage(text, implicit: true, appContext: nil)
-                                modalManager.userIntents = nil
+                            if modalManager.userIntents != nil {
+                                await modalManager.addUserMessage(text, isQuickAction: true, appContext: nil)
                             } else {
-                                try await modalManager.addUserMessage(text, appContext: nil)
+                                await modalManager.addUserMessage(text, appContext: nil)
                             }
                         }
                     }
