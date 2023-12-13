@@ -69,10 +69,6 @@ class ClientManager: ObservableObject {
         self.session = session
     }
 
-    func getActivePrompt() -> String? {
-        return self.promptManager?.getActivePrompt()
-    }
-
     func getLatestVersion() async -> AppVersion? {
         do {
             let (data, _) = try await URLSession.shared.data(from: apiLatest)
@@ -196,8 +192,6 @@ class ClientManager: ObservableObject {
            let appContext = appInfo?.appContext {
             var history: [Message]? = nil
             if let quickAction = quickAction {
-                // NOTE: This is a stupid way of managing state. We should get the active prompt from the messages array.
-                await self.promptManager?.setActivePrompt(id: quickAction.id)
                 history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickAction.id)
 
                 // NOTE: We cached the copiedText earlier

@@ -45,7 +45,6 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         try await self.simulateCopy()
 
         // Clear the current state
-        await promptManager.setActivePrompt(id: nil)
         try await self.modalManager.forceRefresh()
         await self.modalManager.showModal()
 
@@ -85,7 +84,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
                 id: UUID(),
                 username: NSUserName(),
                 userFullName: NSFullUserName(),
-                userObjective: self.promptManager.getActivePrompt(),
+                userObjective: self.modalManager.getQuickAction()?.prompt,
                 userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                 userLang: Locale.preferredLanguages.first ?? "",
                 copiedText: copiedText,

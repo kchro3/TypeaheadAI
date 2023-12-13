@@ -77,7 +77,7 @@ actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
                     id: UUID(),
                     username: NSUserName(),
                     userFullName: NSFullUserName(),
-                    userObjective: self.promptManager.getActivePrompt(),
+                    userObjective: self.modalManager.getQuickAction()?.prompt,
                     userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
                     userLang: Locale.preferredLanguages.first ?? "",
                     copiedText: "",

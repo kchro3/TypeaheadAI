@@ -77,11 +77,17 @@ class ModalManager: ObservableObject {
     func forceRefresh() throws {
         self.clientManager?.cancelStreamingTask()
         self.clientManager?.flushCache()
-        self.promptManager?.activePromptID = nil
 
         messages = []
         isPending = false
         userIntents = nil
+    }
+
+    func getQuickAction() -> QuickAction? {
+        return messages
+            .first(where: { msg in msg.quickActionId != nil })?
+            .quickActionId
+            .flatMap { promptManager?.getById($0) }
     }
 
     @MainActor

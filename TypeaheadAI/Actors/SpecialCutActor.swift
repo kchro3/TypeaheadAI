@@ -121,8 +121,10 @@ actor SpecialCutActor {
                         await self.modalManager.showModal()
                         await NSApp.activate(ignoringOtherApps: true)
 
-                        if let activePrompt = self.clientManager.getActivePrompt() {
-                            await self.modalManager.setUserMessage("\(activePrompt)\n:\(recognizedText)", appContext: appInfo.appContext)
+                        let quickAction = self.modalManager.getQuickAction()
+
+                        if let prompt = quickAction?.prompt {
+                            await self.modalManager.setUserMessage("\(prompt)\n:\(recognizedText)", appContext: appInfo.appContext)
                         } else {
                             await self.modalManager.setUserMessage("OCR'ed text:\n\(recognizedText)", appContext: appInfo.appContext)
                         }
@@ -138,7 +140,7 @@ actor SpecialCutActor {
                                 id: UUID(),
                                 username: NSUserName(),
                                 userFullName: NSFullUserName(),
-                                userObjective: self.promptManager.getActivePrompt(),
+                                userObjective: quickAction?.prompt,
                                 userBio: self.bio ?? "",
                                 userLang: Locale.preferredLanguages.first ?? "",
                                 copiedText: recognizedText,

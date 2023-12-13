@@ -13,7 +13,6 @@ import os.log
 /// We originally called them PromptEntry, but we unmarshal them into QuickAction structs.
 /// The renaming is unfortunate, but the domain model is required for thread-safety.
 class QuickActionManager: ObservableObject {
-    var activePromptID: UUID?
     private let context: NSManagedObjectContext
     private let backgroundContext: NSManagedObjectContext
 
@@ -25,7 +24,6 @@ class QuickActionManager: ObservableObject {
     init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
         self.context = context
         self.backgroundContext = backgroundContext
-        self.activePromptID = nil
     }
 
     /// Fetch prompts from Core Data
@@ -39,30 +37,6 @@ class QuickActionManager: ObservableObject {
             logger.error("Failed to fetch prompts: \(error)")
             return []
         }
-    }
-
-    @MainActor
-    func setActivePrompt(id: UUID?) {
-        self.activePromptID = id
-    }
-
-    func getActivePrompt() -> String? {
-        if let activeID = activePromptID {
-            let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %@",
-                                                 activeID as CVarArg)
-            do {
-                let fetchedObjects = try context.fetch(fetchRequest)
-                if let promptEntry = fetchedObjects.first {
-                    return promptEntry.prompt
-                }
-            } catch {
-                // Handle the error appropriately
-                logger.error("Error fetching entry: \(error.localizedDescription)")
-            }
-        }
-
-        return nil
     }
 
     @discardableResult
@@ -82,12 +56,32 @@ class QuickActionManager: ObservableObject {
 
         do {
             try context.save()
-            self.activePromptID = newPrompt.id
             return QuickAction(from: newPrompt)
         } catch {
             logger.error("Failed to save prompt: \(error)")
             return nil
         }
+    }
+
+    func getById(_ id: UUID) -> QuickAction? {
+        let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@",
+                                             id as CVarArg)
+        do {
+            return try backgroundContext.performAndWait {
+                let fetchedObjects = try backgroundContext.fetch(fetchRequest)
+                if let promptEntry = fetchedObjects.first {
+                    return QuickAction(from: promptEntry)
+                } else {
+                    return nil
+                }
+            }
+        } catch {
+            // Handle the error appropriately
+            logger.error("Error fetching entry: \(error.localizedDescription)")
+        }
+
+        return nil
     }
 
     func getByLabel(_ label: String) -> QuickAction? {
@@ -137,7 +131,6 @@ class QuickActionManager: ObservableObject {
                 promptEntry.updatedAt = Date()
 
                 try context.save()
-                self.activePromptID = id
             }
         } catch {
             // Handle the error appropriately
@@ -147,10 +140,6 @@ class QuickActionManager: ObservableObject {
 
     @MainActor
     func removePrompt(with id: UUID) {
-        if activePromptID == id {
-            activePromptID = nil
-        }
-
         let fetchRequest: NSFetchRequest<PromptEntry> = PromptEntry.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@",
                                              id as CVarArg)

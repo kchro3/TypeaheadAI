@@ -101,15 +101,17 @@ actor SpecialPasteActor: CanSimulatePaste {
             return
         }
 
-        await self.historyManager.addHistoryEntry(
-            copiedText: firstMessage.text,
-            pastedResponse: lastMessage.text,
-            quickActionId: self.promptManager.activePromptID,
-            activeUrl: appInfo.appContext?.url?.host,
-            activeAppName: appInfo.appContext?.appName,
-            activeAppBundleIdentifier: appInfo.appContext?.bundleIdentifier,
-            numMessages: self.modalManager.messages.count
-        )
+        if let quickAction = modalManager.getQuickAction() {
+            await self.historyManager.addHistoryEntry(
+                copiedText: firstMessage.text,
+                pastedResponse: lastMessage.text,
+                quickActionId: quickAction.id,
+                activeUrl: appInfo.appContext?.url?.host,
+                activeAppName: appInfo.appContext?.appName,
+                activeAppBundleIdentifier: appInfo.appContext?.bundleIdentifier,
+                numMessages: self.modalManager.messages.count
+            )
+        }
 
         if isTable {
             if let url = appInfo.appContext?.url,
