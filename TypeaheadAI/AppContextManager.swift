@@ -42,7 +42,6 @@ class AppContextManager: CanFetchAppContext, CanScreenshot, CanGetUIElements {
         if isAutopilotEnabled {
             let (uiElement, elementMap) = getUIElements(appContext: appContext)
             if let serializedUIElement = uiElement?.serialize(excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]) {
-//                print(serializedUIElement)
                 appContext.serializedUIElement = serializedUIElement
             }
 
