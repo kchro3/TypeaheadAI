@@ -103,7 +103,24 @@ struct FunctionCall: Codable, Equatable {
     }
 }
 
-class FunctionManager: CanFetchAppContext, CanGetUIElements, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {
+class FunctionManager: ObservableObject, CanFetchAppContext, CanGetUIElements, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {
+
+    @Published var isExecuting: Bool = false
+    private var currentTask: Task<Void, Error>? = nil
+
+    init() {
+        startMonitoring()
+    }
+
+    private func startMonitoring() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.cancelTaskWrapper(_:)),
+            name: .chatCanceled,
+            object: nil
+        )
+    }
+
     func openURL(_ url: String) async throws {
         guard let url = URL(string: url) else {
             throw FunctionError.openURL("URL not found")
@@ -112,45 +129,90 @@ class FunctionManager: CanFetchAppContext, CanGetUIElements, CanSimulateSelectAl
         NSWorkspace.shared.open(url)
     }
 
+    @MainActor
     func parseAndCallFunction(jsonString: String, appInfo: AppInfo?, modalManager: ModalManager) async {
+        currentTask?.cancel()
+        currentTask = nil
+        isExecuting = false
+
         let appContext = appInfo?.appContext
         guard let jsonData = jsonString.data(using: .utf8),
               let functionCall = try? JSONDecoder().decode(FunctionCall.self, from: jsonData) else {
-            await modalManager.setError("Failed to parse function", appContext: appContext)
+            modalManager.setError("Failed to parse function", appContext: appContext)
             return
         }
 
-        switch functionCall.name {
-        case "open_application":
-            do {
-                try await openApplication(functionCall, appInfo: appInfo, modalManager: modalManager)
-            } catch {
-                await modalManager.setError("Failed when opening application...", appContext: appContext)
+        isExecuting = true
+        currentTask = Task.init { [weak self] in
+            switch functionCall.name {
+            case "open_application":
+                do {
+                    try await self?.openApplication(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch {
+                    modalManager.setError("Failed when opening application...", appContext: appContext)
+                }
+
+            case "open_url":
+                do {
+                    try await self?.openURL(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch {
+                    modalManager.setError("Failed when opening url...", appContext: appContext)
+                }
+
+            case "perform_ui_action":
+                do {
+                    try await self?.performUIAction(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch {
+                    modalManager.setError("Failed when interacting with UI...", appContext: appContext)
+                }
+
+            case "open_and_scrape_url":
+                do {
+                    try await self?.openAndScrapeURL(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch {
+                    modalManager.setError("Failed when scraping URL...", appContext: appContext)
+                }
+
+            default:
+                modalManager.setError("Function \(functionCall.name) not supported", appContext: appContext)
             }
 
-        case "open_url":
-            do {
-                try await openURL(functionCall, appInfo: appInfo, modalManager: modalManager)
-            } catch {
-                await modalManager.setError("Failed when opening url...", appContext: appContext)
+            DispatchQueue.main.async {
+                self?.currentTask = nil
+                self?.isExecuting = false
             }
+        }
+    }
 
-        case "perform_ui_action":
-            do {
-                try await performUIAction(functionCall, appInfo: appInfo, modalManager: modalManager)
-            } catch {
-                await modalManager.setError("Failed when interacting with UI...", appContext: appContext)
+    @objc func cancelTaskWrapper(_ notification: NSNotification) {
+        guard let modalManager = notification.userInfo?["modalManager"] as? ModalManager else { return }
+
+        self.currentTask?.cancel()
+        self.currentTask = nil
+        self.isExecuting = false
+
+        var toolCallId: String? = nil
+        var fnCall: FunctionCall? = nil
+        var appContext: AppContext? = nil
+
+        // The next API call will fail if there is a function call but no corresponding tool call.
+        for message in modalManager.messages {
+            if case .function_call(let functionCall) = message.messageType {
+                fnCall = functionCall
+                toolCallId = functionCall.id
+                appContext = message.appContext
+            } else if case .tool_call(let functionCall) = message.messageType, functionCall.id == toolCallId {
+                // Marking as finished
+                fnCall = nil
+                toolCallId = nil
+                appContext = nil
             }
+        }
 
-        case "open_and_scrape_url":
-            do {
-                try await openAndScrapeURL(functionCall, appInfo: appInfo, modalManager: modalManager)
-            } catch {
-                await modalManager.setError("Failed when scraping URL...", appContext: appContext)
+        if let fnCall = fnCall {
+            DispatchQueue.main.async {
+                modalManager.appendToolError("Function was canceled", functionCall: fnCall, appContext: appContext)
             }
-
-        default:
-            await modalManager.setError("Function \(functionCall.name) not supported", appContext: appContext)
         }
     }
 }

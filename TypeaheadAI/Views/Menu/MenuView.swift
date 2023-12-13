@@ -80,13 +80,19 @@ struct MenuView: View {
                     isMenuVisible = false
                 }
 
+                if (
+                    (modalManager.clientManager?.isExecuting ?? false) ||
+                    modalManager.functionManager.isExecuting
+                ) {
+                    MenuButtonView(title: "Cancel task") {
+                        modalManager.cancelTasks()
+                    }
+                }
+
                 if modalManager.isVisible {
-                    MenuButtonView(
-                        title: "New chat",
-                        shortcut: KeyboardShortcuts.Name.chatNew
-                    ) {
+                    MenuButtonView(title: "New chat", shortcut: .chatNew) {
                         Task {
-                            try modalManager.forceRefresh()
+                            modalManager.forceRefresh()
                             NSApp.activate(ignoringOtherApps: true)
                             isMenuVisible = false
                         }

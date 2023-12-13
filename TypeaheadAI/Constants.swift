@@ -23,6 +23,6 @@ extension KeyboardShortcuts.Name: CaseIterable {
         .specialPaste,
         .specialCut,
         .chatNew,
-        .chatOpen,
+        .chatOpen
     ]
 }

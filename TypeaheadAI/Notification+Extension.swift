@@ -16,5 +16,7 @@ extension Notification.Name {
 
     static let chatComplete = Notification.Name("chatComplete")
 
+    static let chatCanceled = Notification.Name("chatCanceled")
+
     static let scrollToMessage = Notification.Name("scrollToMessage")
 }

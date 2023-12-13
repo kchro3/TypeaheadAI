@@ -39,6 +39,9 @@ struct ConversationView: View {
                                 quickActions.nsPredicate = NSPredicate(format: "id == %@", message.quickActionId! as CVarArg)
                                 quickAction = quickActions.first
                                 isSheetPresented.toggle()
+                                mutableLabel = quickAction?.prompt ?? ""
+                                mutableDetails = quickAction?.details ?? ""
+                                isEditing = false
                             },
                             onEdit: { newContent in
                                 if newContent != message.text {
@@ -121,7 +124,22 @@ struct ConversationView: View {
                         quickAction: quickAction,
                         isEditing: $isEditing,
                         mutableLabel: $mutableLabel,
-                        mutableDetails: $mutableDetails
+                        mutableDetails: $mutableDetails,
+                        onDelete: {
+                            if let quickActionId = quickAction.id {
+                                self.quickAction = nil
+                                modalManager.promptManager?.removePrompt(with: quickActionId)
+                            }
+                        },
+                        onSubmit: { newLabel, newDetails in
+                            if let quickActionId = quickAction.id {
+                                modalManager.promptManager?.updatePrompt(
+                                    with: quickActionId,
+                                    newLabel: newLabel,
+                                    newDetails: newDetails
+                                )
+                            }
+                        }
                     )
                 } else {
                     // This shouldn't happen though...

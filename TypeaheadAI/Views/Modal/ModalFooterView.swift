@@ -22,22 +22,6 @@ struct ModalFooterView: View {
                         await modalManager.addUserMessage(userIntent, isQuickAction: true, appContext: nil)
                     }
                 }
-            } else if clientManager.currentStreamingTask != nil {
-                HStack {
-                    Spacer()
-                    Button {
-                        clientManager.cancelStreamingTask()
-                    } label: {
-                        HStack(spacing: 5) {
-                            Image(systemName: "stop.circle")
-                                .font(.title2)
-                            Text("Cancel")
-                        }
-                        .padding(5)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.trailing, 10)
-                }
             }
 
             HStack {
@@ -78,6 +62,21 @@ struct ModalFooterView: View {
                         }
                         return event
                     }
+                }
+
+                if clientManager.isExecuting || modalManager.functionManager.isExecuting {
+                    Button {
+                        modalManager.cancelTasks()
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "stop.circle")
+                                .font(.title2)
+                            Text("Cancel")
+                        }
+                        .padding(5)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.slide.animation(.spring))
                 }
             }
         }

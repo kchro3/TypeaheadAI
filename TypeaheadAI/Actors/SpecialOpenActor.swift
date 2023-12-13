@@ -39,7 +39,7 @@ actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
     func specialOpen(forceRefresh: Bool = false) async throws {
         var appInfo = try await self.appContextManager.getActiveAppInfo()
 
-        hack()
+//        hack()
 
         if forceRefresh {
             self.logger.debug("special new")

@@ -61,7 +61,8 @@ class ClientManager: ObservableObject {
     )
 
     // Add a Task property to manage the streaming task
-    @Published var currentStreamingTask: Task<Void, Error>? = nil
+    @Published var isExecuting: Bool = false
+    var currentStreamingTask: Task<Void, Error>? = nil
 
     private var cached: (String, String?)? = nil
 
@@ -271,6 +272,7 @@ class ClientManager: ObservableObject {
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async {
         cancelStreamingTask()
+        isExecuting = true
         currentStreamingTask = Task.init { [weak self] in
             let uuid = try? await self?.supabaseManager?.client.auth.session.user.id
             let payload = RequestPayload(
@@ -340,6 +342,7 @@ class ClientManager: ObservableObject {
 
             DispatchQueue.main.async {
                 self?.currentStreamingTask = nil
+                self?.isExecuting = false
             }
         }
     }
@@ -491,6 +494,7 @@ class ClientManager: ObservableObject {
     func cancelStreamingTask() {
         currentStreamingTask?.cancel()
         currentStreamingTask = nil
+        isExecuting = false
     }
 
     private func generateCacheKey(from payload: RequestPayload) -> String? {

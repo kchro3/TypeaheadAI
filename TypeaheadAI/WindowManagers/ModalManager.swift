@@ -38,7 +38,6 @@ class ModalManager: ObservableObject {
 
     private let maxIntents = 9
     private let maxMessages = 20
-    private let functionManager = FunctionManager()
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -53,6 +52,7 @@ class ModalManager: ObservableObject {
     // TODO: Inject?
     var clientManager: ClientManager? = nil
     var conversationManager: ConversationManager? = nil
+    let functionManager = FunctionManager()
     var intentManager: IntentManager? = nil
     var promptManager: QuickActionManager? = nil
     var settingsManager: SettingsManager? = nil
@@ -74,8 +74,21 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func forceRefresh() throws {
+    func cancelTasks() {
         self.clientManager?.cancelStreamingTask()
+
+        NotificationCenter.default.post(
+            name: .chatCanceled,
+            object: nil,
+            userInfo: [
+                "modalManager": self
+            ]
+        )
+    }
+
+    @MainActor
+    func forceRefresh() {
+        self.cancelTasks()
         self.clientManager?.flushCache()
 
         messages = []
@@ -464,7 +477,7 @@ class ModalManager: ObservableObject {
     /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
     func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
-        self.clientManager?.cancelStreamingTask()
+        self.cancelTasks()
 
         var quickAction: QuickAction? = nil
         if isQuickAction {

@@ -46,15 +46,18 @@ extension FunctionManager {
             appContext: appInfo?.appContext
         )
 
+        try await Task.sleep(for: .seconds(3))
+
+        await modalManager.closeModal()
+
         if let bundleIdentifier = appContext?.bundleIdentifier,
            let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
             // Activate the app, bringing it to the foreground
             app.activate(options: [.activateIgnoringOtherApps])
         }
 
-        await modalManager.closeModal()
-
-        for action in actions {
+        for (index, action) in actions.enumerated() {
+            print(index, action)
             guard let axElement = elementMap[action.id] else {
                 // TERMINATE on invalid action
                 await modalManager.showModal()
@@ -91,9 +94,9 @@ extension FunctionManager {
                 await modalManager.showModal()
 
                 if result == .actionUnsupported {
-                    await modalManager.appendToolError("No such action \(action)", functionCall: functionCall, appContext: appContext)
+                    await modalManager.appendToolError("Step \(index+1) failed because the action was invalid.", functionCall: functionCall, appContext: appContext)
                 } else {
-                    await modalManager.appendToolError("Action could not be performed", functionCall: functionCall, appContext: appContext)
+                    await modalManager.appendToolError("Step \(index+1) failed... (code: \(result?.rawValue ?? -1))", functionCall: functionCall, appContext: appContext)
                 }
 
                 return
@@ -106,7 +109,13 @@ extension FunctionManager {
                        let serializedList = UIElement(from: axList)?.serialize(isIndexed: false),
                        let pickResult = pickFromList(axElement: axList, value: inputText) {
                         if pickResult != .success {
-                            await modalManager.appendToolError("Could not find \(inputText) in \(serializedList)", functionCall: functionCall, appContext: appContext)
+                            print(serializedList)
+                            // TERMINATE on failure
+                            await modalManager.showModal()
+
+                            await modalManager.appendToolError("Step \(index+1) failed... Could not find \(inputText) in dropdown menu", functionCall: functionCall, appContext: appContext)
+
+                            return
                         }
                     } else {
                         NSPasteboard.general.clearContents()
