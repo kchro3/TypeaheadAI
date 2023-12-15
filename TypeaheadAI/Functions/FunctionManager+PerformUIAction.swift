@@ -13,6 +13,7 @@ struct Action: Identifiable, Codable {
     let action: String
     let narration: String
     let inputText: String?
+    let pressEnter: Bool?
 }
 
 extension FunctionCall {
@@ -27,7 +28,7 @@ extension FunctionCall {
     }
 }
 
-extension FunctionManager {
+extension FunctionManager: CanSimulateEnter {
 
     func performUIAction(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
         let appContext = appInfo?.appContext
@@ -47,6 +48,7 @@ extension FunctionManager {
         )
 
         try await Task.sleep(for: .seconds(3))
+        try Task.checkCancellation()
 
         await modalManager.closeModal()
 
@@ -58,6 +60,8 @@ extension FunctionManager {
 
         for (index, action) in actions.enumerated() {
             print(index, action)
+            try Task.checkCancellation()
+
             guard let axElement = elementMap[action.id] else {
                 // TERMINATE on invalid action
                 await modalManager.showModal()
@@ -67,6 +71,7 @@ extension FunctionManager {
 
             _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
             try await Task.sleep(for: .milliseconds(100))
+            try Task.checkCancellation()
 
             var result: AXError? = nil
             if action.action == "<click>" {
@@ -87,7 +92,8 @@ extension FunctionManager {
                 result = AXUIElementPerformAction(axElement, action.action as CFString)
             }
 
-            try await Task.sleep(for: .seconds(1))
+            try await Task.sleep(for: .milliseconds(100))
+            try Task.checkCancellation()
 
             guard result == .success else {
                 // TERMINATE on failure
@@ -120,21 +126,29 @@ extension FunctionManager {
                     } else {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(inputText, forType: .string)
-                        try await Task.sleep(for: .seconds(1))
+                        try await Task.sleep(for: .milliseconds(100))
+                        try Task.checkCancellation()
 
                         try await simulatePaste()
+
+                        if action.pressEnter ?? false {
+                            try await simulateEnter()
+                        }
                     }
                 } else {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(inputText, forType: .string)
-                    try await Task.sleep(for: .seconds(1))
+                    try await Task.sleep(for: .milliseconds(100))
+                    try Task.checkCancellation()
 
                     try await simulateSelectAll()
                     try await simulatePaste()
+
+                    if action.pressEnter ?? false {
+                        try await simulateEnter()
+                    }
                 }
             }
-
-            try await Task.sleep(for: .seconds(1))
         }
 
         // NOTE: Probably a good idea, but it doesn't work well in practice...
