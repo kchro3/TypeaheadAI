@@ -22,7 +22,7 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v9"
+    private let version: String = "v10"
     private let validFinishReasons: [String] = [
         "stop",
         "function_call",

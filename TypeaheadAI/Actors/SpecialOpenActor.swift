@@ -10,7 +10,7 @@ import CoreServices
 import Foundation
 import os.log
 
-actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
+actor SpecialOpenActor: CanGetUIElements {
     private let intentManager: IntentManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
@@ -39,11 +39,9 @@ actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
     func specialOpen(forceRefresh: Bool = false) async throws {
         var appInfo = try await self.appContextManager.getActiveAppInfo()
 
-//        hack()
-
         if forceRefresh {
             self.logger.debug("special new")
-            try await self.modalManager.forceRefresh()
+            await self.modalManager.forceRefresh()
             await self.modalManager.showModal()
             await NSApp.activate(ignoringOtherApps: true)
         } else {
@@ -65,14 +63,6 @@ actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
 
             // Kick off async
             Task {
-                // Set the OCR'ed text
-                if let screenshot = appInfo.appContext?.screenshotPath.flatMap({
-                    NSImage(contentsOfFile: $0)?.toCGImage()
-                }) {
-                    let (ocrText, _) = try await performOCR(image: screenshot)
-                    appInfo.appContext?.ocrText = ocrText
-                }
-
                 if let intents = try await self.clientManager.suggestIntents(
                     id: UUID(),
                     username: NSUserName(),
