@@ -23,6 +23,14 @@ extension AXUIElement {
         return value as? String
     }
 
+    func stringArrayValue(forAttribute attribute: String) -> [String]? {
+        guard let value = self.value(forAttribute: attribute) else {
+            return nil
+        }
+
+        return value as? [String]
+    }
+
     func pointValue(forAttribute attribute: String) -> CGPoint? {
         guard let value = self.value(forAttribute: attribute) else {
             return nil

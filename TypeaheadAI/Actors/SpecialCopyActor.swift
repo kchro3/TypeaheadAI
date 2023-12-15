@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR, CanGetUIElements {
+actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
     private let intentManager: IntentManager
     private let historyManager: HistoryManager
     private let clientManager: ClientManager
@@ -66,12 +66,6 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR, CanGetUIElements {
 
         // Set the copied text as a new message
         await self.modalManager.setUserMessage(copiedText, messageType: messageType, appContext: appInfo.appContext)
-
-        // Set the OCR'ed text
-        if let screenshot = appInfo.appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
-            let (ocrText, _) = try await performOCR(image: screenshot)
-            appInfo.appContext?.ocrText = ocrText
-        }
 
         // Serialize the UIElement
         if isAutopilotEnabled {

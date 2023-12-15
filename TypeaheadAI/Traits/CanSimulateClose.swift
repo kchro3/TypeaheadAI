@@ -16,14 +16,14 @@ extension CanSimulateClose {
     func simulateClose() async throws {
         // Post a Command-W keystroke
         let source = CGEventSource(stateID: .hidSystemState)!
-        let cmdWDown = CGEvent(keyboardEventSource: source, virtualKey: 0x0D, keyDown: true)! // w key
-        let cmdWUp = CGEvent(keyboardEventSource: source, virtualKey: 0x0D, keyDown: false)! // w key
-        cmdWDown.flags = [.maskCommand]
-        cmdWUp.flags = [.maskCommand]
+        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_W), keyDown: true)!
+        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_W), keyDown: false)!
+        keyDown.flags = [.maskCommand]
+        keyUp.flags = [.maskCommand]
 
-        cmdWDown.post(tap: .cghidEventTap)
+        keyDown.post(tap: .cghidEventTap)
         try await Task.sleep(for: .milliseconds(20))
-        cmdWUp.post(tap: .cghidEventTap)
+        keyUp.post(tap: .cghidEventTap)
         try await Task.sleep(for: .milliseconds(200))
     }
 }

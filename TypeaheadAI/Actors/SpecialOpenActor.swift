@@ -11,7 +11,7 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
+actor SpecialOpenActor: CanGetUIElements {
     private let intentManager: IntentManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
@@ -64,14 +64,6 @@ actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
 
             // Kick off async
             Task {
-                // Set the OCR'ed text
-                if let screenshot = appInfo.appContext?.screenshotPath.flatMap({
-                    NSImage(contentsOfFile: $0)?.toCGImage()
-                }) {
-                    let (ocrText, _) = try await performOCR(image: screenshot)
-                    appInfo.appContext?.ocrText = ocrText
-                }
-
                 if let intents = try await self.clientManager.suggestIntents(
                     id: UUID(),
                     username: NSUserName(),

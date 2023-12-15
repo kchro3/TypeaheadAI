@@ -16,20 +16,20 @@ extension CanSimulatePaste {
     func simulatePaste(flags: CGEventFlags? = nil) async throws {
         // Post a Command-V keystroke
         let source = CGEventSource(stateID: .hidSystemState)!
-        let cmdVDown = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true)! // v key
-        let cmdVUp = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false)! // v key
+        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: true)!
+        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: false)!
 
         if let flags = flags {
-            cmdVDown.flags = flags
-            cmdVUp.flags = flags
+            keyDown.flags = flags
+            keyUp.flags = flags
         } else {
-            cmdVDown.flags = [.maskCommand]
-            cmdVUp.flags = [.maskCommand]
+            keyDown.flags = [.maskCommand]
+            keyUp.flags = [.maskCommand]
         }
 
-        cmdVDown.post(tap: .cghidEventTap)
+        keyDown.post(tap: .cghidEventTap)
         try await Task.sleep(for: .milliseconds(20))
-        cmdVUp.post(tap: .cghidEventTap)
+        keyUp.post(tap: .cghidEventTap)
         try await Task.sleep(for: .milliseconds(200))
     }
 }
