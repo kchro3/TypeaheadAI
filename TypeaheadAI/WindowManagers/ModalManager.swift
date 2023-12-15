@@ -75,6 +75,7 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func cancelTasks() {
+        isPending = false
         self.clientManager?.cancelStreamingTask()
 
         NotificationCenter.default.post(

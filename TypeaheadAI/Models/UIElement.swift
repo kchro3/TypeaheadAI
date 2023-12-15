@@ -18,9 +18,13 @@ struct UIElement: Identifiable, Codable, Equatable {
     let link: URL?
     let point: CGPoint?
     let size: CGSize?
+    let domId: String?
+    let domClasses: [String]?
 
     let actions: [String]
+    let parentRole: String?
     let children: [UIElement]
+    let attributes: [String]
 
     var shortId: String {
         let id = String(id.uuidString.split(separator: "-")[0])
@@ -63,13 +67,29 @@ extension UIElement {
             self.label = nil
         }
 
+        if let domAttr = element.stringValue(forAttribute: "AXDOMIdentifier"), !domAttr.isEmpty {
+            self.domId = domAttr
+        } else {
+            self.domId = nil
+        }
+
+        if let domClassesAttr = element.stringArrayValue(forAttribute: "AXDOMClassList"), !domClassesAttr.isEmpty {
+            self.domClasses = domClassesAttr
+        } else {
+            self.domClasses = nil
+        }
+
         self.link = element.value(forAttribute: kAXURLAttribute) as? URL
         self.actions = element.actions()
+
+        self.parentRole = element.parent()?.stringValue(forAttribute: kAXRoleAttribute)
         if let children = element.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
             self.children = children.compactMap { UIElement(from: $0, callback: callback) }
         } else {
             self.children = []
         }
+
+        self.attributes = element.attributes()
 
         // NOTE: The caller can maintain state
         callback?(self.shortId, element)
@@ -83,10 +103,12 @@ extension UIElement {
         isVisible: Bool = true,
         isIndexed: Bool = true,
         showActions: Bool = true,
-        excludedActions: [String]? = nil,
-        showGroups: Bool = false
+        excludedRoles: [String]? = nil,
+        excludedActions: [String]? = nil
     ) -> String? {
-        guard showGroups || self.role != "AXGroup" else {
+        if (self.role == "AXGroup" && self.parentRole == "AXGroup") 
+            || (excludedRoles ?? []).contains(self.role) {
+            // Collapse nested AXGroups OR Ignore excluded roles
             var line = ""
             for child in self.children {
                 if let childLine = child.serialize(
@@ -94,8 +116,8 @@ extension UIElement {
                     isVisible: isVisible,
                     isIndexed: isIndexed,
                     showActions: showActions,
-                    excludedActions: excludedActions,
-                    showGroups: showGroups
+                    excludedRoles: excludedRoles,
+                    excludedActions: excludedActions
                 ), !childLine.isEmpty {
                     if line.isEmpty {
                         line = childLine
@@ -134,6 +156,12 @@ extension UIElement {
             if let value = self.value {
                 text += ", value: \(value)"
             }
+            if let domId = self.domId {
+                text += ", domId: \(domId)"
+            }
+            if let domClasses = self.domClasses {
+                text += ", domClasses: \(domClasses)"
+            }
         }
 
         if isVisible {
@@ -159,23 +187,43 @@ extension UIElement {
             if let excludedActions = excludedActions {
                 let actions = self.actions.filter { !excludedActions.contains($0) }
                 if !actions.isEmpty {
-                    line += ", actions: \(self.actions)"
+                    line += ", actions: \(actions)"
                 }
             } else {
                 line += ", actions: \(self.actions)"
             }
         }
 
-        for child in self.children {
-            if let childLine = child.serialize(
-                indent: indent + 1,
-                isVisible: isVisible,
-                isIndexed: isIndexed,
-                showActions: showActions,
-                excludedActions: excludedActions,
-                showGroups: showGroups
-            ), !childLine.isEmpty {
-                line += "\n\(childLine)"
+//        line += ", attributes: \(self.attributes)"
+
+        if self.role == "AXCell" {
+            for (index, child) in self.children.enumerated() {
+                if index > 0, self.children[index-1].role == "AXStaticText", self.children[index].role == "AXStaticText" {
+                    // If there are consecutive children with the role AXStaticText, just keep appending to the line
+                    line += child.renderAXStaticText()
+                } else if let childLine = child.serialize(
+                    indent: indent + 1,
+                    isVisible: isVisible,
+                    isIndexed: isIndexed,
+                    showActions: showActions,
+                    excludedRoles: excludedRoles,
+                    excludedActions: excludedActions
+                ), !childLine.isEmpty {
+                    line += "\n\(childLine)"
+                }
+            }
+        } else {
+            for child in self.children {
+                if let childLine = child.serialize(
+                    indent: indent + 1,
+                    isVisible: isVisible,
+                    isIndexed: isIndexed,
+                    showActions: showActions,
+                    excludedRoles: excludedRoles,
+                    excludedActions: excludedActions
+                ), !childLine.isEmpty {
+                    line += "\n\(childLine)"
+                }
             }
         }
 
@@ -183,6 +231,6 @@ extension UIElement {
     }
 
     private func renderAXStaticText() -> String {
-        return "\"\(self.value ?? "")\""
+        return self.value ?? ""
     }
 }

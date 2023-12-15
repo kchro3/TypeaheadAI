@@ -102,6 +102,7 @@
 		2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */; };
 		2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84342A9DD90F00359841 /* HistoryManager.swift */; };
 		2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */; };
+		2BD3821E2B2C4B2E00F96C19 /* CanSimulateEnter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD3821D2B2C4B2E00F96C19 /* CanSimulateEnter.swift */; };
 		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BDDB9892B27DDE100D52BF0 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 2BDDB9882B27DDE100D52BF0 /* SwiftSoup */; };
 		2BDDB98B2B27DDFF00D52BF0 /* String+XMLMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */; };
@@ -233,6 +234,7 @@
 		2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestStatus.swift; sourceTree = "<group>"; };
 		2BCF84342A9DD90F00359841 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
 		2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		2BD3821D2B2C4B2E00F96C19 /* CanSimulateEnter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateEnter.swift; sourceTree = "<group>"; };
 		2BDA45C22ABEE840006128BC /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+XMLMarkdown.swift"; sourceTree = "<group>"; };
 		2BDDB98C2B282AFF00D52BF0 /* AppManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
@@ -381,6 +383,7 @@
 				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
 				2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */,
 				2B11FCE02B0C468100325F38 /* CanSimulateClose.swift */,
+				2BD3821D2B2C4B2E00F96C19 /* CanSimulateEnter.swift */,
 				2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */,
 				2B3792302AB83739008D812F /* CanSimulatePaste.swift */,
 				2B11FCE22B0C47FA00325F38 /* CanSimulateSelectAll.swift */,
@@ -791,6 +794,7 @@
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */,
 				2B11FCE32B0C47FA00325F38 /* CanSimulateSelectAll.swift in Sources */,
+				2BD3821E2B2C4B2E00F96C19 /* CanSimulateEnter.swift in Sources */,
 				2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
