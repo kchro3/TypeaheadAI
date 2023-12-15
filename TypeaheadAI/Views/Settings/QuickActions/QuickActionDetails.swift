@@ -56,100 +56,76 @@ struct QuickActionDetails: View {
 
     @ViewBuilder
     var readWriteView: some View {
-        ScrollView {
-            VStack {
-                // Read-Write Header
-                HStack {
-                    Button(action: {
-                        isEditing = false
-                        onDelete?()
-                    }, label: {
-                        HStack {
-                            Image(systemName: "trash.fill")
-                                .foregroundStyle(.white)
-                            Text("Delete")
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .background(RoundedRectangle(cornerRadius: 15)
-                            .fill(.red))
-                    })
-                    .buttonStyle(.plain)
-
-                    Spacer()
-
-                    Button(action: {
-                        isEditing = false
-                    }, label: {
-                        Text("Cancel")
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(RoundedRectangle(cornerRadius: 15)
-                                .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                            )
-                    })
-                    .buttonStyle(.plain)
-
-                    Button(action: {
-                        isEditing = false
-                        onSubmit?(
-                            mutableLabel,
-                            mutableDetails
-                        )
-                    }, label: {
-                        Text("Save")
-                            .foregroundStyle(.white)
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.accentColor))
-                    })
-                    .buttonStyle(.plain)
-                }
-                .frame(maxWidth: .infinity)
-
+        VStack(spacing: 10) {
+            ScrollView {
                 // Body
                 VStack(alignment: .leading) {
+                    Text("Name")
+                        .font(.title3)
+                        .foregroundStyle(Color.accentColor)
 
-                    // Title
-                    HStack {
-                        Text("Name")
-                            .frame(width: descWidth, alignment: .trailing)
-
-                        CustomTextField(
-                            text: $mutableLabel,
-                            placeholderText: quickAction.prompt ?? "Name of command",
-                            autoCompleteSuggestions: [],
-                            onEnter: { _ in },
-                            flushOnEnter: false
-                        )
+                    // Detailed Plan
+                    TextEditor(text: $mutableLabel)
+                        .font(.system(.body))
+                        .scrollContentBackground(.hidden)
                         .lineLimit(1)
                         .padding(.vertical, 5)
                         .padding(.horizontal, 10)
-                        .background(RoundedRectangle(cornerRadius: 15)
+                        .background(RoundedRectangle(cornerRadius: 10)
                             .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                         )
-                    }
+                        .overlay(
+                            Group {
+                                if mutableDetails.isEmpty {
+                                    Text(
+                                """
+                                Describe what this quick action should do.
 
-                    // Details
-                    HStack {
-                        Text("Prompt")
-                            .frame(width: descWidth, alignment: .trailing)
+                                The more descriptive, the better.
+                                """
+                                    )
+                                    .foregroundColor(.secondary.opacity(0.4))
+                                    .padding(.top, 5)
+                                    .padding(.horizontal, 15)
+                                    .transition(.opacity)
+                                }
+                            }.allowsHitTesting(false),
+                            alignment: .topLeading
+                        )
 
-                        TextEditor(text: $mutableDetails)
-                            .font(.system(.body))
-                            .scrollContentBackground(.hidden)
-                            .lineLimit(nil)
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(RoundedRectangle(cornerRadius: 10)
-                                .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                            )
-                            .frame(minHeight: 50)
-                    }
+                    Text("Detailed Plan")
+                        .font(.title3)
+                        .foregroundStyle(Color.accentColor)
 
-                    Divider()
+                    // Detailed Plan
+                    TextEditor(text: $mutableDetails)
+                        .font(.system(.body))
+                        .scrollContentBackground(.hidden)
+                        .lineLimit(nil)
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 10)
+                            .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                        )
+                        .frame(minHeight: 120)
+                        .overlay(
+                            Group {
+                                if mutableDetails.isEmpty {
+                                    Text(
+                                """
+                                Describe what this quick action should do.
+
+                                The more descriptive, the better.
+                                """
+                                    )
+                                    .foregroundColor(.secondary.opacity(0.4))
+                                    .padding(.top, 5)
+                                    .padding(.horizontal, 15)
+                                    .transition(.opacity)
+                                }
+                            }.allowsHitTesting(false),
+                            alignment: .topLeading
+                        )
 
                     Text("Examples")
                         .font(.title3)
@@ -222,53 +198,83 @@ struct QuickActionDetails: View {
                     }
                     .frame(maxWidth: .infinity, minHeight: 150, maxHeight: .infinity, alignment: .leading)
                 }
-                .padding(10)
                 .frame(
                     maxWidth: .infinity,
                     maxHeight: .infinity,
                     alignment: .leading
                 )
             }
-            .padding(15)
+
+            readWriteFooter
         }
+        .padding(15)
+    }
+
+    @ViewBuilder
+    var readWriteFooter: some View {
+        // Read-Write Footer
+        HStack {
+            Button(action: {
+                isEditing = false
+                onDelete?()
+            }, label: {
+                HStack {
+                    Image(systemName: "trash.fill")
+                        .foregroundStyle(.white)
+                    Text("Delete")
+                        .foregroundStyle(.white)
+                }
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(.red))
+            })
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            Button(action: {
+                isEditing = false
+            }, label: {
+                Text("Cancel")
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                    )
+            })
+            .buttonStyle(.plain)
+
+            Button(action: {
+                isEditing = false
+                onSubmit?(
+                    mutableLabel,
+                    mutableDetails
+                )
+            }, label: {
+                Text("Save")
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.accentColor))
+            })
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
     var readOnlyView: some View {
         ScrollView {
             VStack {
-                // Read-only Header
-                HStack {
-                    // Title
-                    Text(quickAction.prompt ?? "<none>")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(10)
-
-                    Spacer()
-
-                    Button(action: {
-                        isEditing = true
-                    }, label: {
-                        HStack {
-                            Image(systemName: "pencil")
-                            Text("Edit")
-                        }
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .background(RoundedRectangle(cornerRadius: 15)
-                            .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                        )
-                    })
-                    .buttonStyle(.plain)
-                }
-                .frame(maxWidth: .infinity)
+                readOnlyHeader
 
                 // Body
                 VStack(alignment: .leading) {
                     // Details
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("Prompt")
+                        Text("Plan")
                             .foregroundStyle(Color.accentColor)
                         Text(quickAction.details ?? "<none>")
                     }
@@ -298,7 +304,6 @@ struct QuickActionDetails: View {
                         .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                     )
                 }
-                .padding(10)
                 .frame(
                     maxWidth: .infinity,
                     maxHeight: .infinity,
@@ -307,6 +312,35 @@ struct QuickActionDetails: View {
             }
             .padding(15)
         }
+    }
+
+    @ViewBuilder
+    var readOnlyHeader: some View {
+        // Read-only Header
+        HStack {
+            // Title
+            Text(quickAction.prompt ?? "<none>")
+                .font(.title2)
+                .fontWeight(.bold)
+
+            Spacer()
+
+            Button(action: {
+                isEditing = true
+            }, label: {
+                HStack {
+                    Image(systemName: "pencil")
+                    Text("Edit")
+                }
+                .padding(.vertical, 5)
+                .padding(.horizontal, 10)
+                .background(RoundedRectangle(cornerRadius: 15)
+                    .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                )
+            })
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func fetchHistoryEntry(uuid: UUID) -> HistoryEntry? {

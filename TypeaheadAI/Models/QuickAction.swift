@@ -13,6 +13,9 @@ struct QuickAction {
     let prompt: String
     let details: String?
     let createdAt: Date
+
+    var isWebEnabled: Bool
+    var isAutopilotEnabled: Bool
 }
 
 extension QuickAction {
@@ -27,5 +30,7 @@ extension QuickAction {
         self.prompt = prompt
         self.details = promptEntry.details
         self.createdAt = createdAt
+        self.isWebEnabled = promptEntry.isWebEnabled
+        self.isAutopilotEnabled = promptEntry.isAutopilotEnabled
     }
 }
