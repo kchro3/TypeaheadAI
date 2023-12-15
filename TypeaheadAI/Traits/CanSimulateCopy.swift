@@ -21,9 +21,9 @@ extension CanSimulateCopy {
     func simulateCopy() async throws {
         // Post a Command-C keystroke
         let source = CGEventSource(stateID: .hidSystemState)!
-        let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)! // c key
+        let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_C), keyDown: true)!
         cmdCDown.flags = [.maskCommand]
-        let cmdCUp = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: false)! // c key
+        let cmdCUp = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_C), keyDown: false)!
         cmdCUp.flags = [.maskCommand]
 
         let changeCount = NSPasteboard.general.changeCount

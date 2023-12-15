@@ -18,8 +18,10 @@ struct UIElement: Identifiable, Codable, Equatable {
     let link: URL?
     let point: CGPoint?
     let size: CGSize?
+    let isFocused: Bool
 
     let actions: [String]
+    let parentRole: String?
     let children: [UIElement]
 
     var shortId: String {
@@ -38,6 +40,7 @@ extension UIElement {
         self.role = role
         self.point = element.pointValue(forAttribute: kAXPositionAttribute)
         self.size = element.sizeValue(forAttribute: kAXSizeAttribute)
+        self.isFocused = element.isFocused()
 
         if let titleAttr = element.stringValue(forAttribute: kAXTitleAttribute), !titleAttr.isEmpty {
             self.title = titleAttr
@@ -65,6 +68,8 @@ extension UIElement {
 
         self.link = element.value(forAttribute: kAXURLAttribute) as? URL
         self.actions = element.actions()
+
+        self.parentRole = element.parent()?.stringValue(forAttribute: kAXRoleAttribute)
         if let children = element.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
             self.children = children.compactMap { UIElement(from: $0, callback: callback) }
         } else {
@@ -83,10 +88,11 @@ extension UIElement {
         isVisible: Bool = true,
         isIndexed: Bool = true,
         showActions: Bool = true,
-        excludedActions: [String]? = nil,
-        showGroups: Bool = false
+        excludedRoles: [String]? = nil,
+        excludedActions: [String]? = nil
     ) -> String? {
-        guard showGroups || self.role != "AXGroup" else {
+        if self.role == "AXGroup", self.parentRole == "AXGroup" {
+            // Collapse nested AXGroups
             var line = ""
             for child in self.children {
                 if let childLine = child.serialize(
@@ -94,8 +100,29 @@ extension UIElement {
                     isVisible: isVisible,
                     isIndexed: isIndexed,
                     showActions: showActions,
-                    excludedActions: excludedActions,
-                    showGroups: showGroups
+                    excludedRoles: excludedRoles,
+                    excludedActions: excludedActions
+                ), !childLine.isEmpty {
+                    if line.isEmpty {
+                        line = childLine
+                    } else {
+                        line += "\n\(childLine)"
+                    }
+                }
+            }
+            return line
+        }
+
+        guard !(excludedRoles ?? []).contains(self.role) else {
+            var line = ""
+            for child in self.children {
+                if let childLine = child.serialize(
+                    indent: indent,
+                    isVisible: isVisible,
+                    isIndexed: isIndexed,
+                    showActions: showActions,
+                    excludedRoles: excludedRoles,
+                    excludedActions: excludedActions
                 ), !childLine.isEmpty {
                     if line.isEmpty {
                         line = childLine
@@ -149,6 +176,10 @@ extension UIElement {
             }
         }
 
+        if self.isFocused {
+            text += ", (in focus)"
+        }
+
         var line = ""
         if isIndexed {
             line += "\(indentation)\(self.shortId): \(text)"
@@ -159,7 +190,7 @@ extension UIElement {
             if let excludedActions = excludedActions {
                 let actions = self.actions.filter { !excludedActions.contains($0) }
                 if !actions.isEmpty {
-                    line += ", actions: \(self.actions)"
+                    line += ", actions: \(actions)"
                 }
             } else {
                 line += ", actions: \(self.actions)"
@@ -172,8 +203,8 @@ extension UIElement {
                 isVisible: isVisible,
                 isIndexed: isIndexed,
                 showActions: showActions,
-                excludedActions: excludedActions,
-                showGroups: showGroups
+                excludedRoles: excludedRoles,
+                excludedActions: excludedActions
             ), !childLine.isEmpty {
                 line += "\n\(childLine)"
             }

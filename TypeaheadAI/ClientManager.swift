@@ -12,7 +12,7 @@ import os.log
 import SwiftUI
 import Supabase
 
-class ClientManager: ObservableObject {
+class ClientManager: ObservableObject, CanGetUIElements {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
@@ -22,7 +22,7 @@ class ClientManager: ObservableObject {
 
     private let session: URLSession
 
-    private let version: String = "v9"
+    private let version: String = "v10"
     private let validFinishReasons: [String] = [
         "stop",
         "function_call",
@@ -180,18 +180,34 @@ class ClientManager: ObservableObject {
     func refine(
         messages: [Message],
         incognitoMode: Bool,
-        quickAction: QuickAction? = nil,
-        timeout: TimeInterval = 60,
+        quickActionId: UUID? = nil,
+        timeout: TimeInterval = 120,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async throws {
         self.logger.info("incognito: \(incognitoMode)")
-        let appInfo = try await appContextManager?.getActiveAppInfo()
+        var appInfo = try await appContextManager?.getActiveAppInfo()
+
+        // Serialize the UIElement
+        if isAutopilotEnabled {
+            let (uiElement, elementMap) = getUIElements(appContext: appInfo?.appContext)
+            if let serializedUIElement = uiElement?.serialize(
+                excludedRoles: ["AXImage"],
+                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
+            ) {
+                appInfo?.appContext?.serializedUIElement = serializedUIElement
+                appInfo?.elementMap = elementMap
+            }
+        }
+
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data),
            let appContext = appInfo?.appContext {
             var history: [Message]? = nil
+
+            // NOTE: Need to fetch again in case the Quick Action has been edited
+            let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
             if let quickAction = quickAction {
                 history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickAction.id)
 
@@ -536,6 +552,7 @@ class ClientManager: ObservableObject {
             var messageCopy = originalMessage
             messageCopy.appContext?.screenshotPath = nil
             messageCopy.appContext?.ocrText = nil
+            messageCopy.appContext?.serializedUIElement = nil
             return messageCopy
         }
     }

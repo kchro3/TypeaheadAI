@@ -75,6 +75,7 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func cancelTasks() {
+        self.isPending = false
         self.clientManager?.cancelStreamingTask()
 
         NotificationCenter.default.post(
@@ -529,7 +530,7 @@ class ModalManager: ObservableObject {
             try await self.clientManager?.refine(
                 messages: self.messages,
                 incognitoMode: !online,
-                quickAction: quickAction,
+                quickActionId: quickAction?.id,
                 streamHandler: defaultHandler,
                 completion: defaultCompletionHandler
             )

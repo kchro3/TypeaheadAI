@@ -8,6 +8,7 @@
 import AppKit
 import CoreServices
 import Foundation
+import SwiftUI
 import os.log
 
 actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
@@ -39,11 +40,9 @@ actor SpecialOpenActor: CanPerformOCR, CanGetUIElements {
     func specialOpen(forceRefresh: Bool = false) async throws {
         var appInfo = try await self.appContextManager.getActiveAppInfo()
 
-//        hack()
-
         if forceRefresh {
             self.logger.debug("special new")
-            try await self.modalManager.forceRefresh()
+            await self.modalManager.forceRefresh()
             await self.modalManager.showModal()
             await NSApp.activate(ignoringOtherApps: true)
         } else {

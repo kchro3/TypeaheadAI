@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
+actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR, CanGetUIElements {
     private let intentManager: IntentManager
     private let historyManager: HistoryManager
     private let clientManager: ClientManager
@@ -18,6 +18,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
     private let appContextManager: AppContextManager
 
     @AppStorage("numSmartCopies") var numSmartCopies: Int?
+    @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -45,7 +46,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         try await self.simulateCopy()
 
         // Clear the current state
-        try await self.modalManager.forceRefresh()
+        await self.modalManager.forceRefresh()
         await self.modalManager.showModal()
 
         var messageType: MessageType = .string
@@ -70,6 +71,19 @@ actor SpecialCopyActor: CanSimulateCopy, CanPerformOCR {
         if let screenshot = appInfo.appContext?.screenshotPath.flatMap({ NSImage(contentsOfFile: $0)?.toCGImage() }) {
             let (ocrText, _) = try await performOCR(image: screenshot)
             appInfo.appContext?.ocrText = ocrText
+        }
+
+        // Serialize the UIElement
+        if isAutopilotEnabled {
+            let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
+            if let serializedUIElement = uiElement?.serialize(
+                excludedRoles: ["AXImage"],
+                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
+            ) {
+                print(serializedUIElement)
+                appInfo.appContext?.serializedUIElement = serializedUIElement
+                appInfo.elementMap = elementMap
+            }
         }
 
         // Try to predict the user intent
