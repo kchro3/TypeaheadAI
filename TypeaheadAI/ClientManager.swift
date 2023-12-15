@@ -12,7 +12,7 @@ import os.log
 import SwiftUI
 import Supabase
 
-class ClientManager: ObservableObject {
+class ClientManager: ObservableObject, CanGetUIElements {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
@@ -181,12 +181,25 @@ class ClientManager: ObservableObject {
         messages: [Message],
         incognitoMode: Bool,
         quickActionId: UUID? = nil,
-        timeout: TimeInterval = 60,
+        timeout: TimeInterval = 120,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async throws {
-        self.logger.info("incognito: \(incognitoMode)")
-        let appInfo = try await appContextManager?.getActiveAppInfo()
+        var appInfo = try await appContextManager?.getActiveAppInfo()
+
+        // Serialize the UIElement
+        if isAutopilotEnabled {
+            let (uiElement, elementMap) = getUIElements(appContext: appInfo?.appContext)
+            if let serializedUIElement = uiElement?.serialize(
+                excludedRoles: ["AXImage"],
+                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
+            ) {
+                appInfo?.appContext?.serializedUIElement = serializedUIElement
+                appInfo?.elementMap = elementMap
+            }
+        }
+
+        try Task.checkCancellation()
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data),
@@ -335,6 +348,7 @@ class ClientManager: ObservableObject {
                     }
 
                     for try await text in stream {
+                        try Task.checkCancellation()
                         await streamHandler(.success(text), appInfo)
                     }
                 } catch {

@@ -151,29 +151,6 @@ extension FunctionManager: CanSimulateEnter {
             }
         }
 
-        // NOTE: Probably a good idea, but it doesn't work well in practice...
-//        if isMutated {
-//            print("Getting current state")
-//            let (newUIElement, _) = getUIElements(appContext: appInfo?.appContext)
-//            if let serializedUIElement = newUIElement?.serialize(isIndexed: false) {
-//                await modalManager.appendTool(
-//                    "Updated state: \(serializedUIElement)",
-//                    functionCall: functionCall,
-//                    appContext: appInfo?.appContext
-//                )
-//
-//                await modalManager.showModal()
-//                try await modalManager.continueReplying()
-//            } else {
-//                await modalManager.appendToolError(
-//                    "Could not fetch new UI state...",
-//                    functionCall: functionCall,
-//                    appContext: appInfo?.appContext
-//                )
-//
-//                await modalManager.showModal()
-//            }
-//        } else {
         await modalManager.appendTool(
             "Completed actions successfully",
             functionCall: functionCall,
@@ -181,6 +158,7 @@ extension FunctionManager: CanSimulateEnter {
         )
 
         await modalManager.showModal()
+        try Task.checkCancellation()
         try await modalManager.continueReplying()
     }
 
