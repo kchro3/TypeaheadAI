@@ -180,7 +180,7 @@ class ClientManager: ObservableObject {
     func refine(
         messages: [Message],
         incognitoMode: Bool,
-        quickAction: QuickAction? = nil,
+        quickActionId: UUID? = nil,
         timeout: TimeInterval = 60,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
@@ -192,6 +192,9 @@ class ClientManager: ObservableObject {
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data),
            let appContext = appInfo?.appContext {
             var history: [Message]? = nil
+
+            // NOTE: Need to fetch again in case the Quick Action has been edited
+            let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
             if let quickAction = quickAction {
                 history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickAction.id)
 
@@ -536,6 +539,7 @@ class ClientManager: ObservableObject {
             var messageCopy = originalMessage
             messageCopy.appContext?.screenshotPath = nil
             messageCopy.appContext?.ocrText = nil
+            messageCopy.appContext?.serializedUIElement = nil
             return messageCopy
         }
     }
