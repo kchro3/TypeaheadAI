@@ -37,7 +37,7 @@ actor SpecialOpenActor: CanGetUIElements {
     }
 
     func specialOpen(forceRefresh: Bool = false) async throws {
-        var appInfo = try await self.appContextManager.getActiveAppInfo()
+        let appInfo = try await self.appContextManager.getActiveAppInfo()
 
         if forceRefresh {
             self.logger.debug("special new")

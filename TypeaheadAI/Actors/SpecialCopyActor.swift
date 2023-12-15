@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialCopyActor: CanSimulateCopy {
+actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
     private let intentManager: IntentManager
     private let historyManager: HistoryManager
     private let clientManager: ClientManager
@@ -18,6 +18,7 @@ actor SpecialCopyActor: CanSimulateCopy {
     private let appContextManager: AppContextManager
 
     @AppStorage("numSmartCopies") var numSmartCopies: Int?
+    @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -65,6 +66,19 @@ actor SpecialCopyActor: CanSimulateCopy {
 
         // Set the copied text as a new message
         await self.modalManager.setUserMessage(copiedText, messageType: messageType, appContext: appInfo.appContext)
+
+        // Serialize the UIElement
+        if isAutopilotEnabled {
+            let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
+            if let serializedUIElement = uiElement?.serialize(
+                excludedRoles: ["AXImage"],
+                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
+            ) {
+                print(serializedUIElement)
+                appInfo.appContext?.serializedUIElement = serializedUIElement
+                appInfo.elementMap = elementMap
+            }
+        }
 
         // Try to predict the user intent
         let contextualIntents = self.intentManager.fetchContextualIntents(limit: 10, appContext: appInfo.appContext)
