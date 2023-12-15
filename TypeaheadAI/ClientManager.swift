@@ -185,7 +185,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async throws {
-        self.logger.info("incognito: \(incognitoMode)")
         var appInfo = try await appContextManager?.getActiveAppInfo()
 
         // Serialize the UIElement
@@ -200,6 +199,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             }
         }
 
+        try Task.checkCancellation()
         if let (key, _) = cached,
            let data = key.data(using: .utf8),
            let payload = try? JSONDecoder().decode(RequestPayload.self, from: data),
@@ -348,6 +348,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                     }
 
                     for try await text in stream {
+                        try Task.checkCancellation()
                         await streamHandler(.success(text), appInfo)
                     }
                 } catch {

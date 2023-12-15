@@ -29,7 +29,7 @@ struct UIElement: Identifiable, Codable, Equatable {
 
     var shortId: String {
         let id = String(id.uuidString.split(separator: "-")[0])
-        return "\(self.role)_\(id)"
+        return "\(self.role)\(id)"
     }
 }
 
