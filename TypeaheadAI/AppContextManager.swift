@@ -8,6 +8,7 @@
 import AppKit
 import Foundation
 import SwiftUI
+import UserNotifications
 import Vision
 import os.log
 

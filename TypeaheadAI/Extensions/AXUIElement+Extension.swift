@@ -97,4 +97,11 @@ extension AXUIElement {
 
         return actions
     }
+
+    func isFocused() -> Bool {
+        guard let value = self.value(forAttribute: kAXFocusedAttribute) as? Bool else {
+            return false
+        }
+        return value
+    }
 }

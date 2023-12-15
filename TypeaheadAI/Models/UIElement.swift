@@ -18,6 +18,7 @@ struct UIElement: Identifiable, Codable, Equatable {
     let link: URL?
     let point: CGPoint?
     let size: CGSize?
+    let isFocused: Bool
     let domId: String?
     let domClasses: [String]?
 
@@ -42,6 +43,7 @@ extension UIElement {
         self.role = role
         self.point = element.pointValue(forAttribute: kAXPositionAttribute)
         self.size = element.sizeValue(forAttribute: kAXSizeAttribute)
+        self.isFocused = element.isFocused()
 
         if let titleAttr = element.stringValue(forAttribute: kAXTitleAttribute), !titleAttr.isEmpty {
             self.title = titleAttr
@@ -175,6 +177,10 @@ extension UIElement {
                let height = self.size?.height {
                 text += ", size: (\(width), \(height))"
             }
+        }
+
+        if self.isFocused {
+            text += ", (in focus)"
         }
 
         var line = ""

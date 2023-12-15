@@ -41,10 +41,7 @@ struct ChatBubble<Content>: View where Content: View {
     @ViewBuilder
     var userMessage: some View {
         HStack(alignment: .bottom) {
-            Spacer()
-
             userButtons
-                .padding(.leading, 10)
 
             content()
                 .clipShape(ChatBubbleShape(direction: direction))

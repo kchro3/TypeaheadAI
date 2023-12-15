@@ -56,181 +56,154 @@ struct QuickActionDetails: View {
 
     @ViewBuilder
     var readWriteView: some View {
-        ScrollView {
-            VStack {
-                // Read-Write Header
-                HStack {
-                    Button(action: {
-                        isEditing = false
-                        onDelete?()
-                    }, label: {
-                        HStack {
-                            Image(systemName: "trash.fill")
-                                .foregroundStyle(.white)
-                            Text("Delete")
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 10)
-                        .background(RoundedRectangle(cornerRadius: 15)
-                            .fill(.red))
-                    })
-                    .buttonStyle(.plain)
-
-                    Spacer()
-
-                    Button(action: {
-                        isEditing = false
-                    }, label: {
-                        Text("Cancel")
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(RoundedRectangle(cornerRadius: 15)
-                                .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                            )
-                    })
-                    .buttonStyle(.plain)
-
-                    Button(action: {
-                        isEditing = false
-                        onSubmit?(
-                            mutableLabel,
-                            mutableDetails
-                        )
-                    }, label: {
-                        Text("Save")
-                            .foregroundStyle(.white)
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.accentColor))
-                    })
-                    .buttonStyle(.plain)
-                }
-                .frame(maxWidth: .infinity)
-
+        VStack {
+            ScrollView {
                 // Body
                 VStack(alignment: .leading) {
+                    // Details
+                    Text("Plan")
+                        .font(.title3)
+                        .foregroundStyle(Color.accentColor)
 
-                    // Title
-                    HStack {
-                        Text("Name")
-                            .frame(width: descWidth, alignment: .trailing)
-
-                        CustomTextField(
-                            text: $mutableLabel,
-                            placeholderText: quickAction.prompt ?? "Name of command",
-                            autoCompleteSuggestions: [],
-                            onEnter: { _ in },
-                            flushOnEnter: false
-                        )
-                        .lineLimit(1)
+                    TextEditor(text: $mutableDetails)
+                        .font(.system(.body))
+                        .scrollContentBackground(.hidden)
+                        .lineLimit(10)
                         .padding(.vertical, 5)
                         .padding(.horizontal, 10)
-                        .background(RoundedRectangle(cornerRadius: 15)
+                        .background(RoundedRectangle(cornerRadius: 10)
                             .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                         )
-                    }
-
-                    // Details
-                    HStack {
-                        Text("Prompt")
-                            .frame(width: descWidth, alignment: .trailing)
-
-                        TextEditor(text: $mutableDetails)
-                            .font(.system(.body))
-                            .scrollContentBackground(.hidden)
-                            .lineLimit(nil)
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(RoundedRectangle(cornerRadius: 10)
-                                .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                            )
-                            .frame(minHeight: 50)
-                    }
-
-                    Divider()
+                        .frame(minHeight: 60)
 
                     Text("Examples")
                         .font(.title3)
                         .foregroundStyle(Color.accentColor)
 
                     // Examples
-                    VStack {
-                        Table(history, selection: $selectedRow) {
-                            TableColumn("Copied Text") { entry in
-                                Text(entry.copiedText ?? "none")
-                            }
-                            TableColumn("Pasted Text") { entry in
-                                Text(entry.pastedResponse ?? "none")
-                            }
+                    Table(history, selection: $selectedRow) {
+                        TableColumn("Copied Text") { entry in
+                            Text(entry.copiedText ?? "none")
                         }
-                        .contextMenu(menuItems: {
+                        TableColumn("Pasted Text") { entry in
+                            Text(entry.pastedResponse ?? "none")
+                        }
+                    }
+                    .contextMenu(menuItems: {
+                        Button {
+                            selectedRow = nil
+                            isSheetPresented = true
+                        } label: {
+                            Text("Add New Example")
+                        }
+
+                        if let selectedRow = selectedRow, let _ = selectedRow {
                             Button {
-                                selectedRow = nil
                                 isSheetPresented = true
                             } label: {
-                                Text("Add New Example")
+                                Text("Edit")
                             }
 
-                            if let selectedRow = selectedRow, let _ = selectedRow {
-                                Button {
-                                    isSheetPresented = true
-                                } label: {
-                                    Text("Edit")
-                                }
-
-                                Button {
-                                    confirmDelete = true
-                                } label: {
-                                    Text("Delete")
-                                }
+                            Button {
+                                confirmDelete = true
+                            } label: {
+                                Text("Delete")
                             }
-                        })
-                        .sheet(isPresented: $isSheetPresented, onDismiss: {
-                            isSheetPresented = false
-                        }) {
-                            QuickActionExampleForm(
-                                selectedRow: selectedRow,
-                                onFetch: self.fetchHistoryEntry,
-                                onSubmit: { (copiedText, pastedText) in
-                                    self.upsertExample(
-                                        copiedText: copiedText,
-                                        pastedText: pastedText
-                                    )
-                                    isSheetPresented = false
-                                },
-                                onCancel: {
-                                    isSheetPresented = false
-                                }
-                            )
                         }
-                        .onDeleteCommand(perform: {
-                            confirmDelete = true
-                        })
-                        .alert(isPresented: $confirmDelete) {
-                            Alert(
-                                title: Text("Are you sure you want to delete this example?"),
-                                message: Text("If you delete this, TypeaheadAI will forget about this example, and this action cannot be undone."),
-                                primaryButton: .destructive(Text("Delete")) {
-                                    deleteSelectedRow()
-                                },
-                                secondaryButton: .cancel()
-                            )
-                        }
-                        .cornerRadius(10)
+                    })
+                    .sheet(isPresented: $isSheetPresented, onDismiss: {
+                        isSheetPresented = false
+                    }) {
+                        QuickActionExampleForm(
+                            selectedRow: selectedRow,
+                            onFetch: self.fetchHistoryEntry,
+                            onSubmit: { (copiedText, pastedText) in
+                                self.upsertExample(
+                                    copiedText: copiedText,
+                                    pastedText: pastedText
+                                )
+                                isSheetPresented = false
+                            },
+                            onCancel: {
+                                isSheetPresented = false
+                            }
+                        )
                     }
+                    .onDeleteCommand(perform: {
+                        confirmDelete = true
+                    })
+                    .alert(isPresented: $confirmDelete) {
+                        Alert(
+                            title: Text("Are you sure you want to delete this example?"),
+                            message: Text("If you delete this, TypeaheadAI will forget about this example, and this action cannot be undone."),
+                            primaryButton: .destructive(Text("Delete")) {
+                                deleteSelectedRow()
+                            },
+                            secondaryButton: .cancel()
+                        )
+                    }
+                    .cornerRadius(10)
                     .frame(maxWidth: .infinity, minHeight: 150, maxHeight: .infinity, alignment: .leading)
                 }
-                .padding(10)
                 .frame(
                     maxWidth: .infinity,
                     maxHeight: .infinity,
                     alignment: .leading
                 )
             }
-            .padding(15)
+
+            // Read-Write Footer
+            HStack {
+                Button(action: {
+                    isEditing = false
+                    onDelete?()
+                }, label: {
+                    HStack {
+                        Image(systemName: "trash.fill")
+                            .foregroundStyle(.white)
+                        Text("Delete")
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(.red))
+                })
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                Button(action: {
+                    isEditing = false
+                }, label: {
+                    Text("Cancel")
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                        )
+                })
+                .buttonStyle(.plain)
+
+                Button(action: {
+                    isEditing = false
+                    onSubmit?(
+                        mutableLabel,
+                        mutableDetails
+                    )
+                }, label: {
+                    Text("Save")
+                        .foregroundStyle(.white)
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.accentColor))
+                })
+                .buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity)
         }
+        .padding(15)
     }
 
     @ViewBuilder
@@ -268,7 +241,7 @@ struct QuickActionDetails: View {
                 VStack(alignment: .leading) {
                     // Details
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("Prompt")
+                        Text("Plan")
                             .foregroundStyle(Color.accentColor)
                         Text(quickAction.details ?? "<none>")
                     }
@@ -298,15 +271,14 @@ struct QuickActionDetails: View {
                         .fill(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                     )
                 }
-                .padding(10)
                 .frame(
                     maxWidth: .infinity,
                     maxHeight: .infinity,
                     alignment: .leading
                 )
             }
-            .padding(15)
-        }
+        }            
+        .padding(15)
     }
 
     private func fetchHistoryEntry(uuid: UUID) -> HistoryEntry? {

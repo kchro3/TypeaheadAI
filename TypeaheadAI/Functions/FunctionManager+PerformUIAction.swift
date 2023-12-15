@@ -148,6 +148,8 @@ extension FunctionManager: CanSimulateEnter {
                         try await simulateEnter()
                     }
                 }
+            } else {
+                try await Task.sleep(for: .milliseconds(100))
             }
         }
 
