@@ -73,11 +73,11 @@ extension UIElement {
             self.domId = nil
         }
 
-        if let domClassesAttr = element.stringArrayValue(forAttribute: "AXDOMClassList"), !domClassesAttr.isEmpty {
-            self.domClasses = domClassesAttr
-        } else {
-            self.domClasses = nil
-        }
+//        if let domClassesAttr = element.stringArrayValue(forAttribute: "AXDOMClassList"), !domClassesAttr.isEmpty {
+//            self.domClasses = domClassesAttr
+//        } else {
+        self.domClasses = nil
+//        }
 
         self.link = element.value(forAttribute: kAXURLAttribute) as? URL
         self.actions = element.actions()
