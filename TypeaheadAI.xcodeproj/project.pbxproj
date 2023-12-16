@@ -446,7 +446,6 @@
 				2B0116EA2AF86E88000C78E1 /* AppState.swift */,
 				2BA7F0A82A9ABBE2003D38BA /* ClientManager.swift */,
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
-				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
 				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
@@ -575,6 +574,7 @@
 		2BE7BB892B258C2400164F88 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
 				2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */,
 				2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */,
 			);

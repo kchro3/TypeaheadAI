@@ -33,16 +33,6 @@ class MouseEventMonitor {
                     self?.initialClickPos = mousePos
                     self?.mouseClicked = true
                     self?.onLeftMouseDown?()
-
-                    let systemWideElement = AXUIElementCreateSystemWide()
-                    var element: AXUIElement?
-
-                    let point = CGPoint(x: mousePos.x, y: NSHeight(NSScreen.screens[0].frame) - mousePos.y)
-                    let result = AXUIElementCopyElementAtPosition(systemWideElement, Float(point.x), Float(point.y), &element)
-                    if result == .success, let element = element, let uiElement = UIElement(from: element), let serialized = uiElement.serialize() {
-                        print(serialized)
-                    }
-
                 case .leftMouseUp:
                     if let initialClickPos = self?.initialClickPos {
                         if initialClickPos != NSEvent.mouseLocation {

@@ -30,6 +30,24 @@ struct UIElement: Identifiable, Codable, Equatable {
         let id = String(id.uuidString.split(separator: "-")[0])
         return "\(self.role)\(id)"
     }
+
+    /// NOTE: This is not a true == because it ignores the ID & value
+    /// We ignore the value so that two text areas can match, even if their values are different
+    func equals(_ other: UIElement) -> Bool {
+        return (
+            self.role == other.role
+            && self.title == other.title
+            && self.description == other.description
+            && self.label == other.label
+            && self.link == other.link
+            && self.point == other.point
+            && self.size == other.size
+            && self.domId == other.domId
+            && self.domClasses == other.domClasses
+            && self.parentRole == other.parentRole
+            && self.attributes == other.attributes
+        )
+    }
 }
 
 extension UIElement {

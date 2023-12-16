@@ -37,22 +37,9 @@ class AppContextManager: CanFetchAppContext, CanScreenshot, CanGetUIElements {
         }
 
         // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
-        appContext.screenshotPath = try await screenshot()
-        appContext.url = await getUrl(bundleIdentifier: appContext.bundleIdentifier)
-        if isAutopilotEnabled {
-            let (uiElement, elementMap) = getUIElements(appContext: appContext)
-            if let serializedUIElement = uiElement?.serialize(
-                excludedRoles: ["AXImage"],
-                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-            ) {
-                print(serializedUIElement)
-                appContext.serializedUIElement = serializedUIElement
-            }
-
-            return AppInfo(appContext: appContext, elementMap: elementMap, apps: appManager.getApps())
-        } else {
-            return AppInfo(appContext: appContext, elementMap: ElementMap(), apps: appManager.getApps())
-        }
+//        appContext.screenshotPath = try await screenshot()
+//        appContext.url = await getUrl(bundleIdentifier: appContext.bundleIdentifier)
+        return AppInfo(appContext: appContext, elementMap: ElementMap(), apps: appManager.getApps())
     }
 
     private func getUrl(bundleIdentifier: String?) async -> URL? {
