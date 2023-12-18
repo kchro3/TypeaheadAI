@@ -52,7 +52,7 @@ class ModalManager: ObservableObject {
     // TODO: Inject?
     var clientManager: ClientManager? = nil
     var conversationManager: ConversationManager? = nil
-    let functionManager = FunctionManager()
+    var functionManager: FunctionManager? = nil
     var intentManager: IntentManager? = nil
     var promptManager: QuickActionManager? = nil
     var settingsManager: SettingsManager? = nil
@@ -77,14 +77,7 @@ class ModalManager: ObservableObject {
     func cancelTasks() {
         isPending = false
         self.clientManager?.cancelStreamingTask()
-
-        NotificationCenter.default.post(
-            name: .chatCanceled,
-            object: nil,
-            userInfo: [
-                "modalManager": self
-            ]
-        )
+        self.functionManager?.cancelTask(modalManager: self)
     }
 
     @MainActor
@@ -782,7 +775,7 @@ class ModalManager: ObservableObject {
                     self.setError(error.localizedDescription, appContext: appInfo?.appContext)
                 }
             case .function:
-                await functionManager.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
+                await functionManager?.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
             }
         case .failure(let error as ClientManagerError):
             switch error {
