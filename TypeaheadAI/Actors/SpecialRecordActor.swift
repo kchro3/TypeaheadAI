@@ -56,34 +56,31 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
     func specialRecord() async throws {
         if isRecording {
             stopEventMonitoring()
-
-            for event in self.recordedEvents {
-                if let element = event.element {
-                    if let serialized = element.serialize(isIndexed: false, excludedActions: ["AXShowMenu", "AXScrollToVisible"]) {
-                        print("\(event.eventType) | \(serialized)")
-                    } else {
-                        print("\(event.eventType) | \(element)")
-                    }
-                } else {
-                    print("\(event.eventType)")
-                }
-            }
-
-            print()
+            let appContext = try await fetchAppContext()
 
             let events = preprocessEvents()
+            guard !events.isEmpty else {
+                return
+            }
+
+            var message = "Here is a log of the recorded events:"
             for event in events {
                 if let element = event.element {
-                    if let serialized = element.serialize(isIndexed: false, excludedActions: ["AXShowMenu", "AXScrollToVisible"]) {
-                        print("\(event.eventType) | \(serialized)")
-                    } else {
-                        print("\(event.eventType) | \(element)")
+                    if let serialized = element.serialize(isIndexed: false, showActions: false, maxDepth: 1) {
+                        message += "\n - \(event.eventType) on \(serialized)"
                     }
-                } else {
-                    print("\(event.eventType)")
                 }
             }
+            message += "\nNarrate what I did at a high-level in a bulleted list of imperatives (e.g. \"click on '...' button\", \"type '...' into text field\")"
+            message += "\nIgnore potential mistakes or misclicks."
+
+            await self.modalManager.showModal()
+            await self.modalManager.setUserMessage(message, isHidden: true, appContext: appContext)
+            Task {
+                try await self.modalManager.replyToUserMessage()
+            }
         } else {
+            await self.modalManager.forceRefresh()
             self.recordedEvents = []
 
             // Start observing mouse and keyboard events
@@ -91,7 +88,8 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
                 matching: [
                     .leftMouseDown,
                     .mouseMoved,
-                    .keyDown
+                    .keyDown,
+                    .keyUp
                 ],
                 handler: { event in
                     // Record the event
@@ -99,7 +97,8 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
                         let appContext = try await self.fetchAppContext()
                         switch event.type {
                         case .leftMouseDown:
-                            self.recordMouse(eventType: .mouseClicked, appContext: appContext)
+                            let mousePos = NSEvent.mouseLocation
+                            self.recordMouse(mousePos, eventType: .mouseClicked, appContext: appContext)
                         case .mouseMoved:
                             // Throttle mouse-moved events
                             let currentMousePosition = NSEvent.mouseLocation
@@ -110,13 +109,13 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
 
                                 if distance > self.mouseMoveThreshold {
                                     self.lastMousePosition = currentMousePosition
-                                    self.recordMouse(eventType: .mouseMoved, appContext: appContext)
+                                    self.recordMouse(currentMousePosition, eventType: .mouseMoved, appContext: appContext)
                                 }
                             } else {
                                 self.lastMousePosition = currentMousePosition
-                                self.recordMouse(eventType: .mouseMoved, appContext: appContext)
+                                self.recordMouse(currentMousePosition, eventType: .mouseMoved, appContext: appContext)
                             }
-                        case .keyDown:
+                        case .keyDown, .keyUp:
                             self.recordKey(eventType: .keyPressed, appContext: appContext)
                         default: throw NSError()
                         }
@@ -154,16 +153,28 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
                           let currElement = event.element,
                           let lastElement = lastEvent.element,
                           currElement.equals(lastElement) {
-                    // Overwrite the last event with the latest state of the element
-                    processedEvents.append(event)
+                    // Overwrite the last state of the keyPressed
+                    // NOTE: This is kind of hacky, but I think it will generally work?
+                    processedEvents[processedEvents.count - 1] = RawEvent(
+                        timestamp: event.timestamp,
+                        eventType: lastEvent.eventType,
+                        appContext: event.appContext,
+                        element: event.element
+                    )
                 } else {
                     processedEvents.append(event)
                 }
             case .mouseClicked:
-                if let lastEvent = processedEvents.last, 
+                guard let actions = event.element?.actions, actions.contains("AXPress") else {
+                    print("nothing to click on, skipping...")
+                    continue
+                }
+
+                if let lastEvent = processedEvents.last,
                    case .mouseMoved = lastEvent.eventType,
                    let currElement = event.element,
                    let lastElement = lastEvent.element {
+
                     if currElement.equals(lastElement) {
                         // Overwrite the last event with the latest mouse clicked event
                         processedEvents[processedEvents.count - 1] = event
@@ -199,7 +210,7 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
             }
         }
 
-        return processedEvents
+        return processedEvents.filter { $0.eventType != .mouseMoved }
     }
 
     private func handleAppChange(appContext: AppContext?) {
@@ -229,8 +240,7 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
         }
     }
 
-    private func recordMouse(eventType: EventType, appContext: AppContext?) {
-        let mousePos = NSEvent.mouseLocation
+    private func recordMouse(_ mousePos: NSPoint, eventType: EventType, appContext: AppContext?) {
         if let element = systemWideElement.getMouseOverElement(mousePos)?.toUIElement() {
             self.recordedEvents.append(
                 RawEvent(

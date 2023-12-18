@@ -51,6 +51,8 @@ struct UIElement: Identifiable, Codable, Equatable {
 }
 
 extension UIElement {
+    private static let maxCharacterCount = 4000
+
     init?(from element: AXUIElement, callback: ((String, AXUIElement) -> Void)? = nil) {
         guard let role = element.stringValue(forAttribute: kAXRoleAttribute) else {
             return nil
@@ -122,9 +124,16 @@ extension UIElement {
         isIndexed: Bool = true,
         showActions: Bool = true,
         excludedRoles: [String]? = nil,
-        excludedActions: [String]? = nil
+        excludedActions: [String]? = nil,
+        maxDepth: Int? = nil
     ) -> String? {
-        if (self.role == "AXGroup" && self.parentRole == "AXGroup") 
+        if let maxDepth = maxDepth, maxDepth == indent {
+            // If the indent reaches the maxDepth, terminate.
+            // If maxDepth is nil, then it recurses exhaustively.
+            return nil
+        }
+
+        if (self.role == "AXGroup" && self.parentRole == "AXGroup")
             || (excludedRoles ?? []).contains(self.role) {
             // Collapse nested AXGroups OR Ignore excluded roles
             var line = ""
@@ -135,7 +144,8 @@ extension UIElement {
                     isIndexed: isIndexed,
                     showActions: showActions,
                     excludedRoles: excludedRoles,
-                    excludedActions: excludedActions
+                    excludedActions: excludedActions,
+                    maxDepth: maxDepth
                 ), !childLine.isEmpty {
                     if line.isEmpty {
                         line = childLine
@@ -225,7 +235,8 @@ extension UIElement {
                     isIndexed: isIndexed,
                     showActions: showActions,
                     excludedRoles: excludedRoles,
-                    excludedActions: excludedActions
+                    excludedActions: excludedActions,
+                    maxDepth: maxDepth
                 ), !childLine.isEmpty {
                     line += "\n\(childLine)"
                 }
@@ -238,7 +249,8 @@ extension UIElement {
                     isIndexed: isIndexed,
                     showActions: showActions,
                     excludedRoles: excludedRoles,
-                    excludedActions: excludedActions
+                    excludedActions: excludedActions,
+                    maxDepth: maxDepth
                 ), !childLine.isEmpty {
                     line += "\n\(childLine)"
                 }
@@ -249,6 +261,15 @@ extension UIElement {
     }
 
     private func renderAXStaticText() -> String {
-        return self.value ?? ""
+        if let text = self.value {
+            if text.count > UIElement.maxCharacterCount {
+                let truncated = String(text.prefix(UIElement.maxCharacterCount))
+                return "\(truncated)..."
+            } else {
+                return text
+            }
+        } else {
+            return ""
+        }
     }
 }

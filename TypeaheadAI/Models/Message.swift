@@ -93,8 +93,13 @@ extension Message {
         self.isHidden = entry.isHidden
         self.quickActionId = entry.quickActionId
 
-        if let serializedAppContext = entry.serializedAppContext?.data(using: .utf8),
-           let appContext = try? JSONDecoder().decode(AppContext.self, from: serializedAppContext) {
+        if let serialized = entry.serializedMessageType?.data(using: .utf8),
+           let messageType = try? JSONDecoder().decode(MessageType.self, from: serialized) {
+            self.messageType = messageType
+        }
+
+        if let serialized = entry.serializedAppContext?.data(using: .utf8),
+           let appContext = try? JSONDecoder().decode(AppContext.self, from: serialized) {
             self.appContext = appContext
         }
 
@@ -112,6 +117,11 @@ extension Message {
         entry.isCurrentUser = self.isCurrentUser
         entry.isHidden = self.isHidden
         entry.quickActionId = self.quickActionId
+
+        if let data = try? JSONEncoder().encode(self.messageType),
+           let serialized = String(data: data, encoding: .utf8) {
+            entry.serializedMessageType = serialized
+        }
 
         if let appContext = self.appContext,
            let data = try? JSONEncoder().encode(appContext),
