@@ -65,8 +65,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
     @Published var isExecuting: Bool = false
     var currentStreamingTask: Task<Void, Error>? = nil
 
-    private var cached: (String, String?)? = nil
-
     init(session: URLSession = .shared) {
         self.session = session
     }
@@ -142,9 +140,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
             version: version
         )
 
-        // NOTE: Cache the payload so we know what text was copied
-        self.cacheResponse(nil, for: payload)
-
         if !online {
             // Incognito mode doesn't support this yet
             return nil
@@ -199,58 +194,48 @@ class ClientManager: ObservableObject, CanGetUIElements {
         }
 
         try Task.checkCancellation()
-        if let (key, _) = cached,
-           let data = key.data(using: .utf8),
-           let payload = try? JSONDecoder().decode(RequestPayload.self, from: data),
-           let appContext = appInfo?.appContext {
-            var history: [Message]? = nil
 
-            // NOTE: Need to fetch again in case the Quick Action has been edited
-            let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
-            if let quickAction = quickAction {
-                history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: appContext, quickActionID: quickAction.id)
+        // The first message is copiedText if it isn't associated with a Quick Action.
+        // NOTE: The logic for determining if something is associated with a Quick Action
+        // is janky - we check if there are "user intents" set. This is because we
+        // set user intents when the user opens a new chat window or after the user
+        // smart-copies something. Therefore, if the first message does not have a
+        // Quick Action, it must be a copied text.
+        var copiedText: String? = nil
+        if let firstMessage = messages.first, firstMessage.quickActionId == nil {
+            copiedText = firstMessage.text
+        }
 
-                // NOTE: We cached the copiedText earlier
-                await self.intentManager?.addIntentEntry(
-                    prompt: quickAction.prompt,
-                    copiedText: payload.copiedText,
-                    appContext: appContext
-                )
-            }
+        var history: [Message]? = nil
+        // NOTE: Need to fetch again in case the Quick Action has been edited
+        let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
+        if let quickAction = quickAction,
+           let appContext = appInfo?.appContext,
+           let copiedText = copiedText {
+            history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: appContext, quickActionID: quickAction.id)
 
-            await self.sendStreamRequest(
-                id: UUID(),
-                username: NSUserName(),
-                userFullName: NSFullUserName(),
-                userObjective: quickAction?.details ?? payload.userObjective,
-                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                userLang: Locale.preferredLanguages.first ?? "",
-                copiedText: payload.copiedText,
-                messages: self.sanitizeMessages(messages),
-                history: history,
-                appInfo: appInfo,
-                timeout: timeout,
-                streamHandler: streamHandler,
-                completion: completion
-            )
-        } else {
-            logger.error("No cached request to refine")
-            await self.sendStreamRequest(
-                id: UUID(),
-                username: NSUserName(),
-                userFullName: NSFullUserName(),
-                userObjective: "",
-                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                userLang: Locale.preferredLanguages.first ?? "",
-                copiedText: "",
-                messages: self.sanitizeMessages(messages),
-                history: nil,
-                appInfo: appInfo,
-                timeout: timeout,
-                streamHandler: streamHandler,
-                completion: completion
+            await self.intentManager?.addIntentEntry(
+                prompt: quickAction.prompt,
+                copiedText: copiedText,
+                appContext: appContext
             )
         }
+
+        await self.sendStreamRequest(
+            id: UUID(),
+            username: NSUserName(),
+            userFullName: NSFullUserName(),
+            userObjective: quickAction?.details ?? "",
+            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
+            userLang: Locale.preferredLanguages.first ?? "",
+            copiedText: copiedText ?? "",
+            messages: self.sanitizeMessages(messages),
+            history: history,
+            appInfo: appInfo,
+            timeout: timeout,
+            streamHandler: streamHandler,
+            completion: completion
+        )
 
         // Add in any other relevant metadata
         NotificationCenter.default.post(
@@ -304,11 +289,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 apps: appInfo?.apps.values.map { $0.bundleIdentifier }
             )
 
-            if let output = self?.getCachedResponse(for: payload) {
-                await streamHandler(.success(output), appInfo)
-                return
-            }
-
             if !(self?.online ?? true) {
                 guard let llamaModelManager = self?.llamaModelManager else {
                     return
@@ -317,7 +297,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 do {
                     try await llamaModelManager.predict(payload: payload, streamHandler: streamHandler)
                 } catch {
-                    self?.cacheResponse(nil, for: payload)
                     await streamHandler(.failure(error), appInfo)
                 }
             } else {
@@ -325,17 +304,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
                     let stream = try self?.performStreamOnlineTask(
                         payload: payload,
                         timeout: timeout,
-                        completion: { result in
-                            await completion(result, appInfo)
-
-                            // Cache successful response
-                            switch result {
-                            case .success(let output):
-                                self?.cacheResponse(output.text, for: payload)
-                            case .failure(let error):
-                                self?.logger.error("\(error.localizedDescription)")
-                            }
-                        }
+                        appInfo: appInfo,
+                        completion: completion
                     )
 
                     guard let stream = stream else {
@@ -348,7 +318,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                         await streamHandler(.success(text), appInfo)
                     }
                 } catch {
-                    self?.cacheResponse(nil, for: payload)
                     await streamHandler(.failure(error), appInfo)
                 }
             }
@@ -396,7 +365,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,
-        completion: @escaping (Result<ChunkPayload, Error>) async -> Void
+        appInfo: AppInfo?,
+        completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) throws -> AsyncThrowingStream<String, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
@@ -472,7 +442,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                     }
                 }
 
-                await completion(.success(bufferedPayload))
+                await completion(.success(bufferedPayload), appInfo)
                 continuation.finish()
             }
         }
@@ -485,50 +455,12 @@ class ClientManager: ObservableObject, CanGetUIElements {
         isExecuting = false
     }
 
-    private func generateCacheKey(from payload: RequestPayload) -> String? {
-        let encoder = JSONEncoder()
-
-        do {
-            let jsonData = try encoder.encode(payload)
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                return jsonString
-            }
-        } catch {
-            self.logger.error("Encoding failed: \(error.localizedDescription)")
-        }
-
-        return nil
-    }
-
-    private func getCachedResponse(for requestPayload: RequestPayload) -> String? {
-        guard let cacheKey = generateCacheKey(from: requestPayload) else {
-            return nil
-        }
-
-        if let (key, val) = cached {
-            return (key == cacheKey) ? val : nil
-        } else {
-            return nil
-        }
-    }
-
-    private func cacheResponse(_ response: String?, for requestPayload: RequestPayload) {
-        if let cacheKey = generateCacheKey(from: requestPayload) {
-            self.logger.debug("Overwrite cached request")
-            cached = (cacheKey, response)
-        }
-    }
-
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
             messageCopy.appContext?.serializedUIElement = nil
             return messageCopy
         }
-    }
-
-    func flushCache() {
-        cached = nil
     }
 }
 
