@@ -17,6 +17,13 @@ extension CanGetUIElements {
         var element: AXUIElement? = nil
         if let appContext = appContext, let pid = appContext.pid {
             element = AXUIElementCreateApplication(pid)
+
+            // Narrow down to the first (top-most) window
+            if let windowElement = element?.children().first(where: {
+                $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow"
+            }) {
+                element = windowElement
+            }
         } else {
             element = AXUIElementCreateSystemWide()
         }
