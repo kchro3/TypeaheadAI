@@ -47,7 +47,7 @@ struct Message: Codable, Identifiable, Equatable {
         rootCreatedAt: Date,
         text: String,
         isCurrentUser: Bool,
-        isHidden: Bool,
+        isHidden: Bool = false,
         quickActionId: UUID? = nil,
         appContext: AppContext? = nil,
         responseError: String? = nil,
@@ -93,7 +93,7 @@ extension Message {
         self.isHidden = entry.isHidden
         self.quickActionId = entry.quickActionId
 
-        if let serialized = entry.serializedAppContext?.data(using: .utf8),
+        if let serialized = entry.serializedMessageType?.data(using: .utf8),
            let messageType = try? JSONDecoder().decode(MessageType.self, from: serialized) {
             self.messageType = messageType
         }
