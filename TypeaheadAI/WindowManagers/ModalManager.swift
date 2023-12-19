@@ -105,7 +105,6 @@ class ModalManager: ObservableObject {
     @MainActor
     func forceRefresh() {
         self.cancelTasks()
-        self.clientManager?.flushCache()
 
         messages = []
         isPending = false
@@ -545,7 +544,7 @@ class ModalManager: ObservableObject {
             try await self.clientManager?.refine(
                 messages: self.messages,
                 quickActionId: quickAction?.id,
-                streamHandler: defaultHandler,
+                streamHandler: defaultStreamHandler,
                 completion: defaultCompletionHandler
             )
         }
@@ -568,7 +567,7 @@ class ModalManager: ObservableObject {
             Task {
                 try await self.clientManager?.refine(
                     messages: self.messages,
-                    streamHandler: defaultHandler,
+                    streamHandler: defaultStreamHandler,
                     completion: defaultCompletionHandler
                 )
             }
@@ -596,7 +595,7 @@ class ModalManager: ObservableObject {
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
-                streamHandler: defaultHandler,
+                streamHandler: defaultStreamHandler,
                 completion: defaultCompletionHandler
             )
         }
@@ -610,7 +609,7 @@ class ModalManager: ObservableObject {
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
-                streamHandler: defaultHandler,
+                streamHandler: defaultStreamHandler,
                 completion: defaultCompletionHandler
             )
         }
@@ -789,7 +788,7 @@ class ModalManager: ObservableObject {
         }
     }
 
-    func defaultHandler(result: Result<String, Error>, appInfo: AppInfo?) async {
+    func defaultStreamHandler(result: Result<String, Error>, appInfo: AppInfo?) async {
         switch result {
         case .success(let chunk):
             await self.appendText(chunk, appContext: appInfo?.appContext)

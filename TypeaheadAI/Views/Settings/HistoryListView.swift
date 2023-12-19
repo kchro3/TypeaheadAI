@@ -173,6 +173,9 @@ struct HistoryListView: View {
                 TableColumn("Date") { entry in
                     Text(entry.timestamp?.formatted() ?? "unknown")
                 }
+                TableColumn("Quick Action ID") { entry in
+                    Text(entry.quickActionId?.uuidString ?? "none")
+                }
                 TableColumn("Quick Action") { entry in
                     let quickAction = quickActions.first(where: {
                         $0.id == entry.quickActionId
