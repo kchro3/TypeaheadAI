@@ -29,16 +29,6 @@ struct TypeaheadAIApp: App {
     }
 
     var body: some Scene {
-        Settings {
-            SettingsView(
-                clientManager: appState.clientManager,
-                promptManager: appState.promptManager,
-                llamaModelManager: appState.llamaModelManager,
-                supabaseManager: appState.supabaseManager
-            )
-        }
-        .windowStyle(.hiddenTitleBar)
-
         MenuBarExtra {
             MenuView(
                 modalManager: appState.modalManager,
