@@ -65,8 +65,6 @@ struct ActivateOnboardingView: View {
 
             Text(
             """
-            When you activate Typeahead, it will take a **screenshot** and try to get context on what you're doing.
-
             You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.
 
             NOTE: All hotkeys can be reconfigured in your Settings.
