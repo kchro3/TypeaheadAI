@@ -84,7 +84,10 @@ struct MenuView: View {
                     (modalManager.clientManager?.isExecuting ?? false) ||
                     (modalManager.functionManager?.isExecuting ?? false)
                 ) {
-                    MenuButtonView(title: "Cancel task") {
+                    MenuButtonView(
+                        title: "Cancel task",
+                        shortcut: .cancelTasks
+                    ) {
                         modalManager.cancelTasks()
                     }
                 }

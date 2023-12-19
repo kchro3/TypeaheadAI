@@ -37,7 +37,12 @@ struct GeneralSettingsView: View {
                     }
                     HStack {
                         KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
-                        Text("Pastes the most recent TypeaheadAI response.")
+                        Text("Pastes the most recent Typeahead response.")
+                            .frame(width: 325, alignment: .leading)
+                    }
+                    HStack {
+                        KeyboardShortcuts.Recorder("Cancel Tasks:", name: .cancelTasks)
+                        Text("Aborts any streaming results or autopilot tasks.")
                             .frame(width: 325, alignment: .leading)
                     }
                 }
