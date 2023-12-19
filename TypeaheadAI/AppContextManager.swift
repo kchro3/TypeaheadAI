@@ -20,9 +20,7 @@ struct AppInfo {
     var apps: [String: Application]
 }
 
-class AppContextManager: CanFetchAppContext, CanScreenshot, CanGetUIElements {
-    @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
-
+class AppContextManager: CanFetchAppContext, CanGetUIElements {
     private let scriptManager = ScriptManager()
     private let appManager = AppManager()
 
@@ -36,23 +34,8 @@ class AppContextManager: CanFetchAppContext, CanScreenshot, CanGetUIElements {
             return AppInfo(appContext: nil, elementMap: ElementMap(), apps: appManager.getApps())
         }
 
-        // NOTE: Take screenshot and store reference. We can apply the OCR when we make the network request.
-        appContext.screenshotPath = try await screenshot()
         appContext.url = await getUrl(bundleIdentifier: appContext.bundleIdentifier)
-        if isAutopilotEnabled {
-            let (uiElement, elementMap) = getUIElements(appContext: appContext)
-            if let serializedUIElement = uiElement?.serialize(
-                excludedRoles: ["AXImage"],
-                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-            ) {
-                print(serializedUIElement)
-                appContext.serializedUIElement = serializedUIElement
-            }
-
-            return AppInfo(appContext: appContext, elementMap: elementMap, apps: appManager.getApps())
-        } else {
-            return AppInfo(appContext: appContext, elementMap: ElementMap(), apps: appManager.getApps())
-        }
+        return AppInfo(appContext: appContext, elementMap: ElementMap(), apps: appManager.getApps())
     }
 
     private func getUrl(bundleIdentifier: String?) async -> URL? {

@@ -551,8 +551,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
-            messageCopy.appContext?.screenshotPath = nil
-            messageCopy.appContext?.ocrText = nil
             messageCopy.appContext?.serializedUIElement = nil
             return messageCopy
         }

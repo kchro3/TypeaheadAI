@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PermissionsOnboardingView: View, CanScreenshot {
+struct PermissionsOnboardingView: View {
     var body: some View {
         VStack {
             Text("Getting Started")
@@ -16,13 +16,11 @@ struct PermissionsOnboardingView: View, CanScreenshot {
 
             Text(
             """
-            Before we can get started, Typeahead will need some permissions in order to use your clipboard and to see what's on your screen, but it will only use your clipboard and your screen when you activate it.
+            Before we can get started, Typeahead will need some Accessibility permissions to use your clipboard and to use Autopilot mode.
 
             In **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.
 
-            Then please navigate to the **Screen Recording** option and add Typeahead to your allowed apps. This will require you to restart the app.
-
-            You may also press the buttons below to request these permissions. If you have already granted permissions, the buttons will not do anything.
+            You may also press the button below to request these permissions. If you have already granted permissions, the button will not do anything.
             """
             )
 
@@ -33,15 +31,6 @@ struct PermissionsOnboardingView: View, CanScreenshot {
                 let source = CGEventSource(stateID: .hidSystemState)!
                 let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)!
                 cmdCDown.post(tap: .cghidEventTap)
-            }
-
-            Spacer()
-
-            RoundedButton("Check Screen Recording Permissions", isAccent: true) {
-                // Take a screenshot to trigger permission request
-                Task {
-                    _ = try await screenshot()
-                }
             }
 
             Spacer()
