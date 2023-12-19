@@ -66,12 +66,6 @@ struct MenuView: View {
             .padding(.trailing, -8)
 
             VStack(spacing: 0) {
-                MenuButtonView(title: "Settings") {
-                    modalManager.closeModal()
-                    settingsManager.showModal()
-                    isMenuVisible = false
-                }
-
                 MenuButtonView(
                     title: "Quick Actions"
                 ) {
@@ -127,6 +121,21 @@ struct MenuView: View {
                     .padding(.vertical, verticalPadding)
                     .padding(.horizontal, horizontalPadding)
 
+                MenuButtonView(title: "Settings") {
+                    modalManager.closeModal()
+                    settingsManager.showModal()
+                    isMenuVisible = false
+                }
+
+                MenuButtonView(
+                    title: "Check for updates"
+                ) {
+                    Task {
+                        try await versionManager.checkForUpdates(adhoc: true)
+                        isMenuVisible = false
+                    }
+                }
+
                 if supabaseManager.uuid != nil {
                     MenuButtonView(title: "Sign out") {
                         Task {
@@ -138,15 +147,6 @@ struct MenuView: View {
                     MenuButtonView(title: "Sign in") {
                         modalManager.closeModal()
                         settingsManager.showModal(tab: .account)
-                        isMenuVisible = false
-                    }
-                }
-
-                MenuButtonView(
-                    title: "Check for updates"
-                ) {
-                    Task {
-                        try await versionManager.checkForUpdates(adhoc: true)
                         isMenuVisible = false
                     }
                 }
