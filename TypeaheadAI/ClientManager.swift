@@ -393,31 +393,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
         return response.data[0]
     }
 
-    func captionImage(
-        tiffData: Data,
-        timeout: TimeInterval = 30.0
-    ) async -> ImageCaptionPayload? {
-        let bitmap = NSBitmapImageRep(data: tiffData)
-        let jpegData = bitmap?.representation(using: .jpeg, properties: [:])
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-        var urlRequest = URLRequest(url: apiImageCaptions)
-        urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        urlRequest.httpBody = jpegData
-        do {
-            let (data, _) = try await URLSession.shared.data(for: urlRequest)
-            let payload = try decoder.decode(ImageCaptionPayload.self, from: data)
-            return payload
-        } catch {
-            self.logger.error("\(error.localizedDescription)")
-            return nil
-        }
-    }
-
     private func performStreamOnlineTask(
         payload: RequestPayload,
         timeout: TimeInterval,

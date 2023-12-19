@@ -11,7 +11,6 @@ import KeyboardShortcuts
 extension KeyboardShortcuts.Name {
     static let specialCopy = KeyboardShortcuts.Name("specialCopy", default: Shortcut(.c, modifiers: [.command, .option]))
     static let specialPaste = KeyboardShortcuts.Name("specialPaste", default: Shortcut(.v, modifiers: [.command, .option]))
-    static let specialCut = KeyboardShortcuts.Name("specialCut", default: Shortcut(.x, modifiers: [.command, .option]))
     static let specialRecord = KeyboardShortcuts.Name("specialRecord", default: Shortcut(.r, modifiers: [.command, .option]))
 
     static let chatNew = KeyboardShortcuts.Name("chatNew", default: Shortcut(.n, modifiers: [.command, .option]))
@@ -22,7 +21,6 @@ extension KeyboardShortcuts.Name: CaseIterable {
     public static let allCases: [Self] = [
         .specialCopy,
         .specialPaste,
-        .specialCut,
         .specialRecord,
         .chatNew,
         .chatOpen

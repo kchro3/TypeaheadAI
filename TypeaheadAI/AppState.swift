@@ -40,14 +40,10 @@ final class AppState: ObservableObject {
     var versionManager = VersionManager()
 
     // Actors
-    private var specialCutActor: SpecialCutActor? = nil
     private var specialPasteActor: SpecialPasteActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
     var specialRecordActor: SpecialRecordActor? = nil
-
-    // Monitors
-    private let mouseEventMonitor = MouseEventMonitor()
 
     init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
 
@@ -73,13 +69,6 @@ final class AppState: ObservableObject {
         self.specialPasteActor = SpecialPasteActor(
             historyManager: historyManager,
             promptManager: promptManager,
-            modalManager: modalManager,
-            appContextManager: appContextManager
-        )
-        self.specialCutActor = SpecialCutActor(
-            mouseEventMonitor: mouseEventMonitor,
-            promptManager: promptManager,
-            clientManager: clientManager,
             modalManager: modalManager,
             appContextManager: appContextManager
         )
@@ -150,17 +139,6 @@ final class AppState: ObservableObject {
             }
         }
 
-        KeyboardShortcuts.onKeyUp(for: .specialCut) { [self] in
-            Task {
-                do {
-                    try await self.specialCutActor?.specialCut()
-                } catch {
-                    self.logger.error("\(error.localizedDescription)")
-                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
-                }
-            }
-        }
-
         KeyboardShortcuts.onKeyUp(for: .specialRecord) { [self] in
             Task {
                 do {
@@ -193,17 +171,6 @@ final class AppState: ObservableObject {
                 }
             }
         }
-
-        // Configure mouse-click handler
-        mouseEventMonitor.onLeftMouseDown = { [weak self] in
-            self?.mouseEventMonitor.mouseClicked = true
-        }
-
-        mouseEventMonitor.startMonitoring()
-    }
-
-    deinit {
-        mouseEventMonitor.stopMonitoring()
     }
 
     private func checkAndRequestNotificationPermissions() -> Void {

@@ -38,7 +38,6 @@
 		2B2EF1502AC40C8F00EF2BD4 /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2EF14F2AC40C8F00EF2BD4 /* ChatBubble.swift */; };
 		2B2EF1522AC40CB500EF2BD4 /* MessagePendingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */; };
 		2B33D87D2AAC3330001193A2 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D87C2AAC3330001193A2 /* ProfileView.swift */; };
-		2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */; };
 		2B3435032B1EA33500423EE8 /* String+HTMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */; };
 		2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */; };
 		2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3792302AB83739008D812F /* CanSimulatePaste.swift */; };
@@ -114,7 +113,6 @@
 		2BDDB9952B2834B100D52BF0 /* FunctionManager+OpenURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB9942B2834B100D52BF0 /* FunctionManager+OpenURL.swift */; };
 		2BDDB9972B28352800D52BF0 /* FunctionManager+PerformUIAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
-		2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */; };
 		2BE7BB882B258B4C00164F88 /* CanGetUIElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */; };
 		2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */; };
 		2BE7BB8F2B258C7900164F88 /* UIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB8E2B258C7900164F88 /* UIElement.swift */; };
@@ -171,7 +169,6 @@
 		2B2EF14F2AC40C8F00EF2BD4 /* ChatBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubble.swift; sourceTree = "<group>"; };
 		2B2EF1512AC40CB500EF2BD4 /* MessagePendingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagePendingView.swift; sourceTree = "<group>"; };
 		2B33D87C2AAC3330001193A2 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCutActor.swift; sourceTree = "<group>"; };
 		2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+HTMLParser.swift"; sourceTree = "<group>"; };
 		2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialPasteActor.swift; sourceTree = "<group>"; };
 		2B3792302AB83739008D812F /* CanSimulatePaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulatePaste.swift; sourceTree = "<group>"; };
@@ -248,7 +245,6 @@
 		2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+PerformUIAction.swift"; sourceTree = "<group>"; };
 		2BE0EC212AA0956C00E47C52 /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
 		2BE0EC242AA17DB600E47C52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseClickMonitor.swift; sourceTree = "<group>"; };
 		2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanGetUIElements.swift; sourceTree = "<group>"; };
 		2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AXUIElement+Extension.swift"; sourceTree = "<group>"; };
 		2BE7BB8E2B258C7900164F88 /* UIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElement.swift; sourceTree = "<group>"; };
@@ -313,7 +309,6 @@
 		2B33D8812AAC4E0F001193A2 /* Actors */ = {
 			isa = PBXGroup;
 			children = (
-				2B33D8822AAC4E1B001193A2 /* SpecialCutActor.swift */,
 				2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */,
 				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
@@ -437,7 +432,6 @@
 				2B8CD4972B06DD1D003E0589 /* Functions */,
 				2B3FAC1D2AAAF20F00B2D405 /* Llama */,
 				2BFBCA9F2B048AB1004F8374 /* Models */,
-				2BE0EC252AA17F8400E47C52 /* Monitors */,
 				2BA7F07E2A9ABBA8003D38BA /* Preview Content */,
 				2B0116EE2AF88042000C78E1 /* Supabase */,
 				2B8CD4B22B0A9A04003E0589 /* Theme */,
@@ -564,14 +558,6 @@
 				2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */,
 			);
 			path = Modal;
-			sourceTree = "<group>";
-		};
-		2BE0EC252AA17F8400E47C52 /* Monitors */ = {
-			isa = PBXGroup;
-			children = (
-				2BE0EC262AA17F9100E47C52 /* MouseClickMonitor.swift */,
-			);
-			path = Monitors;
 			sourceTree = "<group>";
 		};
 		2BE7BB892B258C2400164F88 /* Extensions */ = {
@@ -831,7 +817,6 @@
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
 				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
 				2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */,
-				2BE0EC272AA17F9100E47C52 /* MouseClickMonitor.swift in Sources */,
 				2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2BDDB9972B28352800D52BF0 /* FunctionManager+PerformUIAction.swift in Sources */,
@@ -840,7 +825,6 @@
 				2BDDB9952B2834B100D52BF0 /* FunctionManager+OpenURL.swift in Sources */,
 				2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */,
 				2BDDB9932B28341C00D52BF0 /* FunctionManager+OpenApplication.swift in Sources */,
-				2B33D8832AAC4E1B001193A2 /* SpecialCutActor.swift in Sources */,
 				2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */,
 				2B0116F52AF98EBD000C78E1 /* AccountOptionButton.swift in Sources */,
 				2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */,

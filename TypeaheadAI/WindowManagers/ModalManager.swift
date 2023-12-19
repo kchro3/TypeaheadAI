@@ -748,28 +748,8 @@ class ModalManager: ObservableObject {
             }
 
             switch success.mode ?? .text {
-            case .text:
+            case .text, .image:
                 return // no-op
-            case .image:
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    self.isPending = true
-                }
-
-                do {
-                    if let data = text.data(using: .utf8),
-                       let imageRequest = try? JSONDecoder().decode(ImageRequestPayload.self, from: data),
-                       let imageData = try await self.clientManager?.generateImage(payload: imageRequest) {
-                        if self.online,
-                           let data = Data(base64Encoded: imageData.image) {
-                            let captionPayload = await self.clientManager?.captionImage(tiffData: data)
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: captionPayload?.caption, appContext: appInfo?.appContext)
-                        } else {
-                            self.appendImage(imageData, prompt: imageRequest.prompt, caption: nil, appContext: appInfo?.appContext)
-                        }
-                    }
-                } catch {
-                    self.setError(error.localizedDescription, appContext: appInfo?.appContext)
-                }
             case .function:
                 await functionManager?.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
             }
