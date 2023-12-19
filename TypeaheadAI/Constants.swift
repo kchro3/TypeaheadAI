@@ -15,6 +15,8 @@ extension KeyboardShortcuts.Name {
 
     static let chatNew = KeyboardShortcuts.Name("chatNew", default: Shortcut(.n, modifiers: [.command, .option]))
     static let chatOpen = KeyboardShortcuts.Name("chatOpen", default: Shortcut(.space, modifiers: [.command, .option]))
+
+    static let cancelTasks = KeyboardShortcuts.Name("cancelTasks", default: Shortcut(.escape, modifiers: [.command, .option]))
 }
 
 extension KeyboardShortcuts.Name: CaseIterable {
@@ -23,6 +25,7 @@ extension KeyboardShortcuts.Name: CaseIterable {
         .specialPaste,
         .specialRecord,
         .chatNew,
-        .chatOpen
+        .chatOpen,
+        .cancelTasks
     ]
 }

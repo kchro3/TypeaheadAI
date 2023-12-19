@@ -30,7 +30,7 @@ class HistoryManager {
     func addHistoryEntry(
         copiedText: String,
         pastedResponse: String,
-        quickActionId: UUID?,
+        quickActionId: UUID,
         activeUrl: String?,
         activeAppName: String?,
         activeAppBundleIdentifier: String?,

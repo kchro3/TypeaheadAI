@@ -171,6 +171,10 @@ final class AppState: ObservableObject {
                 }
             }
         }
+
+        KeyboardShortcuts.onKeyUp(for: .cancelTasks) { [self] in
+            self.modalManager.cancelTasks()
+        }
     }
 
     private func checkAndRequestNotificationPermissions() -> Void {
