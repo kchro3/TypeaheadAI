@@ -40,11 +40,6 @@ struct GeneralSettingsView: View {
                         Text("Pastes the most recent TypeaheadAI response.")
                             .frame(width: 325, alignment: .leading)
                     }
-                    HStack {
-                        KeyboardShortcuts.Recorder("Smart Cut:", name: .specialCut)
-                        Text("Responds to what you've screen-captured.")
-                            .frame(width: 325, alignment: .leading)
-                    }
                 }
             }
             .padding(.horizontal, 10)
