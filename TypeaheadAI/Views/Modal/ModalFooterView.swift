@@ -10,6 +10,7 @@ import SwiftUI
 struct ModalFooterView: View {
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var clientManager: ClientManager
+    @ObservedObject var functionManager: FunctionManager
 
     @State private var text: String = ""
 
@@ -64,7 +65,7 @@ struct ModalFooterView: View {
                     }
                 }
 
-                if clientManager.isExecuting || modalManager.functionManager.isExecuting {
+                if clientManager.isExecuting || functionManager.isExecuting {
                     Button {
                         modalManager.cancelTasks()
                     } label: {
@@ -89,6 +90,7 @@ struct ModalFooterView: View {
     let context = PersistenceController.preview.container.viewContext
     return ModalFooterView(
         modalManager: ModalManager(context: context),
-        clientManager: ClientManager()
+        clientManager: ClientManager(),
+        functionManager: FunctionManager()
     )
 }
