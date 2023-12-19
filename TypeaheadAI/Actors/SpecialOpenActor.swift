@@ -73,8 +73,7 @@ actor SpecialOpenActor: CanGetUIElements {
                     copiedText: "",
                     messages: self.modalManager.messages,
                     history: [],
-                    appContext: appInfo.appContext,
-                    incognitoMode: !self.modalManager.online
+                    appContext: appInfo.appContext
                 ), !intents.intents.isEmpty {
                     await self.modalManager.appendUserIntents(intents: intents.intents)
                 }

@@ -117,7 +117,7 @@ actor SpecialCutActor {
                     self.logger.info("OCRed text: \(recognizedText)")
 
                     Task {
-                        try await self.modalManager.forceRefresh()
+                        await self.modalManager.forceRefresh()
                         await self.modalManager.showModal()
                         await NSApp.activate(ignoringOtherApps: true)
 
@@ -146,8 +146,7 @@ actor SpecialCutActor {
                                 copiedText: recognizedText,
                                 messages: self.modalManager.messages,
                                 history: [],
-                                appContext: appInfo.appContext,
-                                incognitoMode: !self.modalManager.online
+                                appContext: appInfo.appContext
                             ), !intents.intents.isEmpty {
                                 await self.modalManager.setUserIntents(intents: intents.intents)
                             } else {
