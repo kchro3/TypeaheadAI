@@ -36,6 +36,7 @@ struct ConversationView: View {
                         MessageView(
                             message: message,
                             onConfigure: (message.quickActionId == nil) ? nil : {
+                                modalManager.cancelTasks()
                                 quickActions.nsPredicate = NSPredicate(format: "id == %@", message.quickActionId! as CVarArg)
                                 quickAction = quickActions.first
                                 isSheetPresented.toggle()
@@ -51,10 +52,12 @@ struct ConversationView: View {
                                 }
                             },
                             onEditAppear: {
+                                modalManager.cancelTasks()
                                 message.isEdited.toggle()
                             },
                             onRefresh: {
                                 Task {
+                                    modalManager.cancelTasks()
                                     try await modalManager.rewindTo(index: index)
                                     try await modalManager.replyToUserMessage()
                                 }
