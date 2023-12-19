@@ -57,9 +57,8 @@
         <attribute name="details" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="implicit" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="isAutopilotEnabled" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="isWebEnabled" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="prompt" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
 </model>

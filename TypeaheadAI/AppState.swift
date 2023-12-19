@@ -44,12 +44,10 @@ final class AppState: ObservableObject {
     private var specialPasteActor: SpecialPasteActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
-    private var specialRecordActor: SpecialRecordActor? = nil
+    var specialRecordActor: SpecialRecordActor? = nil
 
     // Monitors
     private let mouseEventMonitor = MouseEventMonitor()
-    // NOTE: globalEventMonitor is for debugging
-    private var globalEventMonitor: Any?
 
     init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
 
@@ -94,7 +92,7 @@ final class AppState: ObservableObject {
         )
         self.specialRecordActor = SpecialRecordActor(
             appContextManager: appContextManager,
-            modalManager: modalManager
+            clientManager: clientManager
         )
 
         // Set lazy params
@@ -116,6 +114,7 @@ final class AppState: ObservableObject {
         self.settingsManager.llamaModelManager = llamaModelManager
         self.settingsManager.promptManager = promptManager
         self.settingsManager.supabaseManager = supabaseManager
+        self.settingsManager.specialRecordActor = specialRecordActor
 
         self.onboardingWindowManager.supabaseManager = supabaseManager
         self.onboardingWindowManager.modalManager = modalManager

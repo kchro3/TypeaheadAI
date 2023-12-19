@@ -522,7 +522,6 @@ class ModalManager: ObservableObject {
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
-                incognitoMode: !online,
                 quickActionId: quickAction?.id,
                 streamHandler: defaultHandler,
                 completion: defaultCompletionHandler
@@ -547,7 +546,6 @@ class ModalManager: ObservableObject {
             Task {
                 try await self.clientManager?.refine(
                     messages: self.messages,
-                    incognitoMode: !online,
                     streamHandler: defaultHandler,
                     completion: defaultCompletionHandler
                 )
@@ -576,7 +574,6 @@ class ModalManager: ObservableObject {
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
-                incognitoMode: !online,
                 streamHandler: defaultHandler,
                 completion: defaultCompletionHandler
             )
@@ -591,7 +588,6 @@ class ModalManager: ObservableObject {
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
-                incognitoMode: !online,
                 streamHandler: defaultHandler,
                 completion: defaultCompletionHandler
             )

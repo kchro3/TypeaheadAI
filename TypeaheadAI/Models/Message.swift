@@ -47,7 +47,7 @@ struct Message: Codable, Identifiable, Equatable {
         rootCreatedAt: Date,
         text: String,
         isCurrentUser: Bool,
-        isHidden: Bool,
+        isHidden: Bool = false,
         quickActionId: UUID? = nil,
         appContext: AppContext? = nil,
         responseError: String? = nil,

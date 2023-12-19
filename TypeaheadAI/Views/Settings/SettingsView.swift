@@ -20,9 +20,13 @@ enum Tab: String, CaseIterable, Identifiable {
 }
 
 struct SettingsView: View {
+    @Binding var humanReadablePlan: String
+
     var clientManager: ClientManager
     var promptManager: QuickActionManager
     var llamaModelManager: LlamaModelManager
+    var settingsManager: SettingsManager
+    var specialRecordActor: SpecialRecordActor
     @ObservedObject var supabaseManager: SupabaseManager
 
     @Environment(\.colorScheme) var colorScheme
@@ -61,7 +65,12 @@ struct SettingsView: View {
         case .general:
             return AnyView(GeneralSettingsView(promptManager: promptManager))
         case .quickActions:
-            return AnyView(QuickActionsView(promptManager: promptManager))
+            return AnyView(QuickActionsView(
+                humanReadablePlan: $humanReadablePlan,
+                clientManager: clientManager,
+                settingsManager: settingsManager,
+                specialRecordActor: specialRecordActor,
+                quickActionManager: promptManager))
         case .history:
             return AnyView(HistoryListView())
         case .incognito:
@@ -106,47 +115,43 @@ struct ItemRow: View {
     }
 }
 
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Create an in-memory Core Data store
-        let container = NSPersistentContainer(name: "TypeaheadAI")
-        container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
-        container.loadPersistentStores { _, error in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-        }
-
-        let context = container.viewContext
-        let promptManager = QuickActionManager(context: context, backgroundContext: context)
-
-        // Create some sample prompts
-        let samplePrompts = ["this is a sample prompt", "this is an active prompt"]
-        for prompt in samplePrompts {
-            let newPrompt = PromptEntry(context: context)
-            newPrompt.prompt = prompt
-            promptManager.addPrompt(prompt)
-        }
-
-        let llamaModelManager = LlamaModelManager()
-        let supabaseManager = SupabaseManager()
-
-        return Group {
-            SettingsView(
-                clientManager: ClientManager(),
-                promptManager: promptManager,
-                llamaModelManager: llamaModelManager,
-                supabaseManager: supabaseManager
-            )
-            .environment(\.managedObjectContext, context)
-
-            SettingsView(
-                clientManager: ClientManager(),
-                promptManager: promptManager,
-                llamaModelManager: llamaModelManager,
-                supabaseManager: supabaseManager
-            )
-            .environment(\.managedObjectContext, context)
+#Preview {
+    // Create an in-memory Core Data store
+    let container = NSPersistentContainer(name: "TypeaheadAI")
+    container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+    container.loadPersistentStores { _, error in
+        if let error = error as NSError? {
+            fatalError("Unresolved error \(error), \(error.userInfo)")
         }
     }
+
+    let context = container.viewContext
+    let promptManager = QuickActionManager(context: context, backgroundContext: context)
+
+    // Create some sample prompts
+    let samplePrompts = ["this is a sample prompt", "this is an active prompt"]
+    for prompt in samplePrompts {
+        let newPrompt = PromptEntry(context: context)
+        newPrompt.prompt = prompt
+        promptManager.addPrompt(prompt)
+    }
+
+    let llamaModelManager = LlamaModelManager()
+    let supabaseManager = SupabaseManager()
+    let specialRecordActor = SpecialRecordActor(
+        appContextManager: AppContextManager(),
+        clientManager: ClientManager(),
+        humanReadablePlan: .constant("")
+    )
+
+    return SettingsView(
+        humanReadablePlan: .constant(""),
+        clientManager: ClientManager(),
+        promptManager: promptManager,
+        llamaModelManager: llamaModelManager,
+        settingsManager: SettingsManager(context: context),
+        specialRecordActor: specialRecordActor,
+        supabaseManager: supabaseManager
+    )
+    .environment(\.managedObjectContext, context)
 }

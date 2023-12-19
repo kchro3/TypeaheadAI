@@ -12,9 +12,14 @@ import os.log
 
 class SettingsManager: ObservableObject {
     var toastWindow: ModalWindow?
+
+    @Binding var humanReadablePlan: String
+
+    // Alphabetize
     var clientManager: ClientManager? = nil
-    var promptManager: QuickActionManager? = nil
     var llamaModelManager: LlamaModelManager? = nil
+    var promptManager: QuickActionManager? = nil
+    var specialRecordActor: SpecialRecordActor? = nil
     var supabaseManager: SupabaseManager? = nil
 
     private let context: NSManagedObjectContext
@@ -27,8 +32,9 @@ class SettingsManager: ObservableObject {
     @AppStorage("settingsTab") var settingsTab: String?
     @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
 
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext, humanReadablePlan: Binding<String>) {
         self.context = context
+        self._humanReadablePlan = humanReadablePlan
 
         startMonitoring()
     }
@@ -57,9 +63,12 @@ class SettingsManager: ObservableObject {
         visualEffect.material = .hudWindow
 
         let contentView = SettingsView(
+            humanReadablePlan: $humanReadablePlan,
             clientManager: clientManager!,
             promptManager: promptManager!,
             llamaModelManager: llamaModelManager!,
+            settingsManager: self,
+            specialRecordActor: specialRecordActor!,
             supabaseManager: supabaseManager!
         )
         .environment(\.managedObjectContext, context)
@@ -112,6 +121,11 @@ class SettingsManager: ObservableObject {
         toastWindow?.isReleasedWhenClosed = false
         toastWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    @MainActor
+    func closeModal() {
+        toastWindow?.close()
     }
 
     @objc func loginAndOpenWindow(_ notification: NSNotification) {

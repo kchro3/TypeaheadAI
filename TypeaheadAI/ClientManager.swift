@@ -29,6 +29,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
         "tool_calls",
     ]
 
+    @AppStorage("online") var online: Bool = true
     @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
@@ -179,7 +180,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
     /// Refine the currently cached request
     func refine(
         messages: [Message],
-        incognitoMode: Bool,
         quickActionId: UUID? = nil,
         timeout: TimeInterval = 120,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
@@ -209,7 +209,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             // NOTE: Need to fetch again in case the Quick Action has been edited
             let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
             if let quickAction = quickAction {
-                history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickAction.id)
+                history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: appContext, quickActionID: quickAction.id)
 
                 // NOTE: We cached the copiedText earlier
                 await self.intentManager?.addIntentEntry(
@@ -230,7 +230,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 messages: self.sanitizeMessages(messages),
                 history: history,
                 appInfo: appInfo,
-                incognitoMode: incognitoMode,
+                incognitoMode: !online,
                 timeout: timeout,
                 streamHandler: streamHandler,
                 completion: completion
@@ -248,7 +248,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 messages: self.sanitizeMessages(messages),
                 history: nil,
                 appInfo: appInfo,
-                incognitoMode: incognitoMode,
+                incognitoMode: !online,
                 timeout: timeout,
                 streamHandler: streamHandler,
                 completion: completion

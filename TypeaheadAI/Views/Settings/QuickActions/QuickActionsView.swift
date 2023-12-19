@@ -39,7 +39,10 @@ struct QuickActionsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(entity: PromptEntry.entity(), sortDescriptors: []) var quickActions: FetchedResults<PromptEntry>
 
-    @ObservedObject var promptManager: QuickActionManager
+    var clientManager: ClientManager
+    var settingsManager: SettingsManager
+    var specialRecordActor: SpecialRecordActor
+    @ObservedObject var quickActionManager: QuickActionManager
 
     @State var activeQuickAction: PromptEntry? = nil
     @State private var isEditing: Bool = false
@@ -84,12 +87,28 @@ struct QuickActionsView: View {
                 )
                 .buttonStyle(.plain)
                 .sheet(isPresented: $isSheetPresented) {
-                    NewQuickActionForm(onSubmit: { label, details in
-                        promptManager.addPrompt(label, details: details)
-                        isSheetPresented = false
-                    }, onCancel: {
-                        isSheetPresented = false
-                    })
+                    CreateQuickActionView(
+                        humanReadablePlan: specialRecordActor.humanReadablePlan,
+                        onSubmit: { label, type, details, input, output in
+                            if type == .autopilot {
+                                print("Nothing was saved")
+                            } else {
+                                // TODO: Add examples
+                                quickActionManager.addPrompt(label, details: details)
+                            }
+
+                            isSheetPresented = false
+                        }, onRecordStart: {
+                            Task {
+                                // Close settings and start recording...
+                                settingsManager.closeModal()
+                                try await specialRecordActor.specialRecord()
+                            }
+                        }, onCancel: {
+                            isSheetPresented = false
+                        }
+                    )
+                    .frame(maxWidth: 500, maxHeight: 500)
                 }
             }
             .padding()
@@ -126,10 +145,10 @@ struct QuickActionsView: View {
                         mutableDetails: $mutableDetails,
                         onDelete: {
                             self.activeQuickAction = nil
-                            promptManager.removePrompt(with: activeQuickAction.id!)
+                            quickActionManager.removePrompt(with: activeQuickAction.id!)
                         },
                         onSubmit: { newLabel, newDetails in
-                            promptManager.updatePrompt(
+                            quickActionManager.updatePrompt(
                                 with: activeQuickAction.id!,
                                 newLabel: newLabel,
                                 newDetails: newDetails
@@ -183,7 +202,7 @@ struct QuickActionsView: View {
     }
 
     let context = container.viewContext
-    let promptManager = QuickActionManager(context: context, backgroundContext: context)
+    let quickActionManager = QuickActionManager(context: context, backgroundContext: context)
 
     // Create some sample prompts
     let samplePrompts = [
@@ -197,6 +216,18 @@ struct QuickActionsView: View {
         newPrompt.prompt = prompt
     }
 
-    return QuickActionsView(promptManager: promptManager)
-        .environment(\.managedObjectContext, context)
+    let humanReadablePlan = Binding.constant("")
+    let clientManager = ClientManager()
+    return QuickActionsView(
+        humanReadablePlan: humanReadablePlan,
+        clientManager: clientManager,
+        settingsManager: SettingsManager(context: context),
+        specialRecordActor: SpecialRecordActor(
+            appContextManager: AppContextManager(),
+            clientManager: clientManager,
+            humanReadablePlan: humanReadablePlan
+        ),
+        quickActionManager: quickActionManager
+    )
+    .environment(\.managedObjectContext, context)
 }
