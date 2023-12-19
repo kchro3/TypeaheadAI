@@ -29,7 +29,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
         "tool_calls",
     ]
 
-    @AppStorage("online") var online: Bool = true
+    @AppStorage("online") private var online: Bool = true
     @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
@@ -125,7 +125,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
         messages: [Message],
         history: [Message]?,
         appContext: AppContext?,
-        incognitoMode: Bool,
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
         let uuid: UUID? = try? await supabaseManager?.client.auth.session.user.id
@@ -146,7 +145,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
         // NOTE: Cache the payload so we know what text was copied
         self.cacheResponse(nil, for: payload)
 
-        if incognitoMode {
+        if !online {
             // Incognito mode doesn't support this yet
             return nil
         } else {
@@ -230,7 +229,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 messages: self.sanitizeMessages(messages),
                 history: history,
                 appInfo: appInfo,
-                incognitoMode: !online,
                 timeout: timeout,
                 streamHandler: streamHandler,
                 completion: completion
@@ -248,7 +246,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 messages: self.sanitizeMessages(messages),
                 history: nil,
                 appInfo: appInfo,
-                incognitoMode: !online,
                 timeout: timeout,
                 streamHandler: streamHandler,
                 completion: completion
@@ -282,7 +279,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
         messages: [Message],
         history: [Message]?,
         appInfo: AppInfo?,
-        incognitoMode: Bool,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
@@ -313,7 +309,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 return
             }
 
-            if incognitoMode {
+            if !(self?.online ?? true) {
                 guard let llamaModelManager = self?.llamaModelManager else {
                     return
                 }
@@ -551,8 +547,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {
         return messages.map { originalMessage in
             var messageCopy = originalMessage
-            messageCopy.appContext?.screenshotPath = nil
-            messageCopy.appContext?.ocrText = nil
             messageCopy.appContext?.serializedUIElement = nil
             return messageCopy
         }

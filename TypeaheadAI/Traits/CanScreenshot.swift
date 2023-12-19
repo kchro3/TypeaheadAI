@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// NOTE: This is deprecated.
 protocol CanScreenshot {
     func screenshot() async throws -> String?
 }
