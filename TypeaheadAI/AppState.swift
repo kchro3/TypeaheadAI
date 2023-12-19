@@ -28,6 +28,7 @@ final class AppState: ObservableObject {
     private let appContextManager: AppContextManager = AppContextManager()
     @Published var clientManager: ClientManager
     var conversationManager: ConversationManager
+    @Published var functionManager = FunctionManager()
     private let historyManager: HistoryManager
     @Published var intentManager: IntentManager
     @Published var promptManager: QuickActionManager
@@ -89,6 +90,7 @@ final class AppState: ObservableObject {
 
         self.modalManager.clientManager = clientManager
         self.modalManager.conversationManager = conversationManager
+        self.modalManager.functionManager = functionManager
         self.modalManager.promptManager = promptManager
         self.modalManager.settingsManager = settingsManager
 

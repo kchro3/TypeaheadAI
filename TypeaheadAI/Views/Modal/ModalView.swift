@@ -82,7 +82,8 @@ struct ModalView: View {
 
                 ModalFooterView(
                     modalManager: modalManager,
-                    clientManager: modalManager.clientManager!
+                    clientManager: modalManager.clientManager!,
+                    functionManager: modalManager.functionManager!
                 )
             }
         }

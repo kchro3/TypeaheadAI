@@ -208,7 +208,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             // NOTE: Need to fetch again in case the Quick Action has been edited
             let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
             if let quickAction = quickAction {
-                history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickAction.id)
+                history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: appContext, quickActionID: quickAction.id)
 
                 // NOTE: We cached the copiedText earlier
                 await self.intentManager?.addIntentEntry(

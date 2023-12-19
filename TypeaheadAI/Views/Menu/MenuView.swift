@@ -82,7 +82,7 @@ struct MenuView: View {
 
                 if (
                     (modalManager.clientManager?.isExecuting ?? false) ||
-                    modalManager.functionManager.isExecuting
+                    (modalManager.functionManager?.isExecuting ?? false)
                 ) {
                     MenuButtonView(title: "Cancel task") {
                         modalManager.cancelTasks()
