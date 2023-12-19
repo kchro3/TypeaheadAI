@@ -108,37 +108,6 @@ class FunctionManager: ObservableObject, CanFetchAppContext, CanGetUIElements, C
     @Published var isExecuting: Bool = false
     private var currentTask: Task<Void, Error>? = nil
 
-    @MainActor
-    func cancelTask(modalManager: ModalManager) {
-        currentTask?.cancel()
-        currentTask = nil
-        isExecuting = false
-
-        var toolCallId: String? = nil
-        var fnCall: FunctionCall? = nil
-        var appContext: AppContext? = nil
-
-        // The next API call will fail if there is a function call but no corresponding tool call.
-        for message in modalManager.messages {
-            if case .function_call(let functionCall) = message.messageType {
-                fnCall = functionCall
-                toolCallId = functionCall.id
-                appContext = message.appContext
-            } else if case .tool_call(let functionCall) = message.messageType, functionCall.id == toolCallId {
-                // Marking as finished
-                fnCall = nil
-                toolCallId = nil
-                appContext = nil
-            }
-        }
-
-        if let fnCall = fnCall {
-            DispatchQueue.main.async {
-                modalManager.appendToolError("Function was canceled", functionCall: fnCall, appContext: appContext)
-            }
-        }
-    }
-
     func openURL(_ url: String) async throws {
         guard let url = URL(string: url) else {
             throw FunctionError.openURL("URL not found")
@@ -200,5 +169,12 @@ class FunctionManager: ObservableObject, CanFetchAppContext, CanGetUIElements, C
                 self?.isExecuting = false
             }
         }
+    }
+
+    @MainActor
+    func cancelTask() {
+        currentTask?.cancel()
+        currentTask = nil
+        isExecuting = false
     }
 }

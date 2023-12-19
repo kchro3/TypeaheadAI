@@ -77,7 +77,29 @@ class ModalManager: ObservableObject {
     func cancelTasks() {
         isPending = false
         self.clientManager?.cancelStreamingTask()
-        self.functionManager?.cancelTask(modalManager: self)
+        self.functionManager?.cancelTask()
+
+        var toolCallId: String? = nil
+        var fnCall: FunctionCall? = nil
+        var appContext: AppContext? = nil
+
+        // The next API call will fail if there is a function call but no corresponding tool call.
+        for message in messages {
+            if case .function_call(let functionCall) = message.messageType {
+                fnCall = functionCall
+                toolCallId = functionCall.id
+                appContext = message.appContext
+            } else if case .tool_call(let functionCall) = message.messageType, functionCall.id == toolCallId {
+                // Marking as finished
+                fnCall = nil
+                toolCallId = nil
+                appContext = nil
+            }
+        }
+
+        if let fnCall = fnCall {
+            appendToolError("Function was canceled", functionCall: fnCall, appContext: appContext)
+        }
     }
 
     @MainActor
