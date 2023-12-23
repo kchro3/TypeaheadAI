@@ -196,7 +196,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
 
         try Task.checkCancellation()
 
-<<<<<<< HEAD
         // The first message is copiedText if it isn't associated with a Quick Action.
         // NOTE: The logic for determining if something is associated with a Quick Action
         // is janky - we check if there are "user intents" set. This is because we
@@ -207,12 +206,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
         if let firstMessage = messages.first, firstMessage.quickActionId == nil {
             copiedText = firstMessage.text
         }
-=======
-            // NOTE: Need to fetch again in case the Quick Action has been edited
-            let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
-            if let quickAction = quickAction {
-                history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: payload.appContext, quickActionID: quickAction.id)
->>>>>>> parent of f7df0ab (this is getting out of hand)
 
         var history: [Message]? = nil
         // NOTE: Need to fetch again in case the Quick Action has been edited
@@ -222,46 +215,10 @@ class ClientManager: ObservableObject, CanGetUIElements {
            let copiedText = copiedText {
             history = self.historyManager?.fetchHistoryEntriesAsMessages(limit: 10, appContext: appContext, quickActionID: quickAction.id)
 
-<<<<<<< HEAD
             await self.intentManager?.addIntentEntry(
                 prompt: quickAction.prompt,
                 copiedText: copiedText,
                 appContext: appContext
-=======
-            await self.sendStreamRequest(
-                id: UUID(),
-                username: NSUserName(),
-                userFullName: NSFullUserName(),
-                userObjective: quickAction?.details ?? payload.userObjective,
-                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                userLang: Locale.preferredLanguages.first ?? "",
-                copiedText: payload.copiedText,
-                messages: self.sanitizeMessages(messages),
-                history: history,
-                appInfo: appInfo,
-                incognitoMode: incognitoMode,
-                timeout: timeout,
-                streamHandler: streamHandler,
-                completion: completion
-            )
-        } else {
-            logger.error("No cached request to refine")
-            await self.sendStreamRequest(
-                id: UUID(),
-                username: NSUserName(),
-                userFullName: NSFullUserName(),
-                userObjective: "",
-                userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                userLang: Locale.preferredLanguages.first ?? "",
-                copiedText: "",
-                messages: self.sanitizeMessages(messages),
-                history: nil,
-                appInfo: appInfo,
-                incognitoMode: incognitoMode,
-                timeout: timeout,
-                streamHandler: streamHandler,
-                completion: completion
->>>>>>> parent of f7df0ab (this is getting out of hand)
             )
         }
 
