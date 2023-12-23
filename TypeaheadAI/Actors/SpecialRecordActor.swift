@@ -8,7 +8,6 @@
 import AudioToolbox
 import Cocoa
 import Foundation
-import SwiftUI
 import os.log
 
 enum EventType {
@@ -26,16 +25,15 @@ struct RawEvent {
 }
 
 /// Recorder actor that can listen for events and app changes and replay them
-actor SpecialRecordActor: ObservableObject, CanFetchAppContext, CanGetUIElements {
+actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
     private let appContextManager: AppContextManager
-    private let clientManager: ClientManager
+    private let modalManager: ModalManager
 
     private var isRecording = false
     private var eventMonitor: Any?
     private var appChangeObserver: Any?
 
     private var recordedEvents: [RawEvent] = []
-    @State var humanReadablePlan: String = ""
 
     private var currentPlaybackTask: Task<Void, Error>? = nil
     private let systemWideElement = AXUIElementCreateSystemWide()
@@ -49,18 +47,41 @@ actor SpecialRecordActor: ObservableObject, CanFetchAppContext, CanGetUIElements
 
     init(
         appContextManager: AppContextManager,
-        clientManager: ClientManager
+        modalManager: ModalManager
     ) {
         self.appContextManager = appContextManager
-        self.clientManager = clientManager
+        self.modalManager = modalManager
     }
 
     func specialRecord() async throws {
         if isRecording {
-            try await stopRecord()
+            stopEventMonitoring()
+            let appContext = try await fetchAppContext()
+
+            let events = preprocessEvents()
+            guard !events.isEmpty else {
+                return
+            }
+
+            var message = "Here is a log of the recorded events:"
+            for event in events {
+                if let element = event.element {
+                    if let serialized = element.serialize(isIndexed: false, showActions: false, maxDepth: 1) {
+                        message += "\n - \(event.eventType) on \(serialized)"
+                    }
+                }
+            }
+            message += "\nNarrate what I did at a high-level in a bulleted list of imperatives (e.g. \"click on '...' button\", \"type '...' into text field\")"
+            message += "\nIgnore potential mistakes or misclicks."
+
+            await self.modalManager.showModal()
+            await self.modalManager.setUserMessage(message, isHidden: true, appContext: appContext)
+            Task {
+                try await self.modalManager.replyToUserMessage()
+            }
         } else {
+            await self.modalManager.forceRefresh()
             self.recordedEvents = []
-            self.humanReadablePlan = ""
 
             // Start observing mouse and keyboard events
             self.eventMonitor = NSEvent.addGlobalMonitorForEvents(
@@ -117,53 +138,6 @@ actor SpecialRecordActor: ObservableObject, CanFetchAppContext, CanGetUIElements
             AudioServicesPlaySystemSoundWithCompletion(1113, {})
             self.isRecording = true
         }
-    }
-
-    func stopRecord() async throws {
-        stopEventMonitoring()
-        let appContext = try await fetchAppContext()
-
-        let events = preprocessEvents()
-        guard !events.isEmpty else {
-            return
-        }
-
-        var message = "Here is a log of the recorded events:"
-        for event in events {
-            if let element = event.element {
-                if let serialized = element.serialize(isIndexed: false, showActions: false, maxDepth: 1) {
-                    message += "\n - \(event.eventType) on \(serialized)"
-                }
-            }
-        }
-        message += "\nNarrate what I did at a high-level as a bulleted list of imperatives (e.g. \"click on '...' button\", \"type '...' into text field\")"
-        message += "\nIgnore mistakes and inadvertent clicks."
-
-        let id = UUID()
-        let date = Date()
-        let messages = [
-            Message(
-                id: id,
-                rootId: id,
-                inReplyToId: nil,
-                createdAt: date,
-                rootCreatedAt: date,
-                text: message,
-                isCurrentUser: true,
-                appContext: appContext
-            )
-        ]
-
-        // Append to the humanReadablePlan
-        try await self.clientManager.refine(
-            messages: messages,
-            streamHandler: { result, _ in
-                if case .success(let token) = result {
-                    self.humanReadablePlan += token
-                }
-            },
-            completion: { _, _ in }
-        )
     }
 
     private func preprocessEvents() -> [RawEvent] {
