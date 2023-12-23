@@ -10,7 +10,6 @@ import Foundation
 
 struct Action: Identifiable, Codable {
     let id: String
-    let action: String
     let narration: String
     let inputText: String?
     let pressEnter: Bool?
@@ -74,22 +73,18 @@ extension FunctionManager: CanSimulateEnter {
             try Task.checkCancellation()
 
             var result: AXError? = nil
-            if action.action == "<click>" {
-                if axElement.actions().contains("AXPress") {
-                    result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
-                } else if let size = axElement.sizeValue(forAttribute: kAXSizeAttribute),
-                          let point = axElement.pointValue(forAttribute: kAXPositionAttribute),
-                          size.width * size.height > 1.0 {
-                    // Simulate a mouse click event
-                    let centerPoint = CGPoint(x: point.x + size.width / 2, y: point.y + size.height / 2)
-                    print("click on \(centerPoint)")
-                    simulateMouseClick(at: centerPoint)
-                    result = .success
-                } else {
-                    result = .actionUnsupported
-                }
+            if axElement.actions().contains("AXPress") {
+                result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
+            } else if let size = axElement.sizeValue(forAttribute: kAXSizeAttribute),
+                      let point = axElement.pointValue(forAttribute: kAXPositionAttribute),
+                      size.width * size.height > 1.0 {
+                // Simulate a mouse click event
+                let centerPoint = CGPoint(x: point.x + size.width / 2, y: point.y + size.height / 2)
+                print("click on \(centerPoint)")
+                simulateMouseClick(at: centerPoint)
+                result = .success
             } else {
-                result = AXUIElementPerformAction(axElement, action.action as CFString)
+                result = .actionUnsupported
             }
 
             try await Task.sleep(for: .milliseconds(100))
@@ -112,7 +107,10 @@ extension FunctionManager: CanSimulateEnter {
                 if role == "AXComboBox" {
                     if let parent = axElement.parent(),
                        let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
-                       let serializedList = UIElement(from: axList)?.serialize(isIndexed: false),
+                       let serializedList = UIElement(from: axList)?.serialize(
+                            isIndexed: false,
+                            excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
+                       ),
                        let pickResult = pickFromList(axElement: axList, value: inputText) {
                         if pickResult != .success {
                             print(serializedList)

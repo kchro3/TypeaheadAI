@@ -122,7 +122,7 @@ extension UIElement {
         indent: Int = 0,
         isVisible: Bool = true,
         isIndexed: Bool = true,
-        showActions: Bool = true,
+        showActions: Bool = false,
         excludedRoles: [String]? = nil,
         excludedActions: [String]? = nil,
         maxDepth: Int? = nil
@@ -211,14 +211,19 @@ extension UIElement {
         } else {
             line += "\(indentation)\(self.role): \(text)"
         }
+
+        var actions: [String] = self.actions
+        if let excludedActions = excludedActions {
+            actions = self.actions.filter { !excludedActions.contains($0) }
+        }
+
         if showActions {
-            if let excludedActions = excludedActions {
-                let actions = self.actions.filter { !excludedActions.contains($0) }
-                if !actions.isEmpty {
-                    line += ", actions: \(actions)"
-                }
-            } else {
-                line += ", actions: \(self.actions)"
+            if !actions.isEmpty {
+                line += ", actions: \(actions)"
+            }
+        } else {
+            if !actions.isEmpty {
+                line += ", actionable: true"
             }
         }
 

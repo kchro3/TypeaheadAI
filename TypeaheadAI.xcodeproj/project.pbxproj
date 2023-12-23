@@ -452,7 +452,6 @@
 				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
 				2BE0EC242AA17DB600E47C52 /* Info.plist */,
 				2BA7F0862A9ABBA8003D38BA /* TypeaheadAI.entitlements */,
-				2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */,
 			);
 			path = TypeaheadAI;
 			sourceTree = "<group>";
@@ -564,6 +563,7 @@
 			isa = PBXGroup;
 			children = (
 				2BAA97922B03693A00EC6A63 /* Notification+Extension.swift */,
+				2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */,
 				2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */,
 				2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */,
 			);
