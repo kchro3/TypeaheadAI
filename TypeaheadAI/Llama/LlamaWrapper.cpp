@@ -73,135 +73,24 @@ void llama_batch_add(
     batch.n_tokens++;
 }
 
-const char * simple_predict(struct llama_context * ctx,
-                            const char * prompt_c,
-                            const int n_threads,
-                            TokenCallback callback) {
-    // total length of the sequence including the prompt
-    const int n_len = 128;  // TODO: change this?
-
-    const struct llama_model * model = llama_get_model(ctx);
-
-    // tokenize the prompt
-    std::vector<llama_token> tokens_list;
-    tokens_list = ::llama_tokenize(model, prompt_c, true, false);
-
-    const int n_ctx    = llama_n_ctx(ctx);
-    const int n_kv_req = (int) (tokens_list.size() + (n_len - tokens_list.size()));
-
-    // make sure the KV cache is big enough to hold all the prompt and generated tokens
-    if (n_kv_req > n_ctx) {
-        return nullptr;
-    }
-
-    // print the prompt token-by-token
-    for (auto id : tokens_list) {
-        printf("%s", llama_token_to_piece(ctx, id).c_str());
-    }
-
-    // create a llama_batch with size 512
-    // we use this object to submit token data for decoding
-
-    llama_batch batch = llama_batch_init(512, 0, 1);
-
-    // evaluate the initial prompt
-    for (size_t i = 0; i < tokens_list.size(); i++) {
-        llama_batch_add(batch, tokens_list[i], (int) i, { 0 }, false);
-    }
-
-    // llama_decode will output logits only for the last token of the prompt
-    batch.logits[batch.n_tokens - 1] = true;
-
-    if (llama_decode(ctx, batch) != 0) {
-        return nullptr;
-    }
-
-    // main loop
-
-    int n_cur    = batch.n_tokens;
-    int n_decode = 0;
-
-    std::string generated_text;
-
-    while (n_cur <= n_len) {
-        // sample the next token
-        {
-            auto   n_vocab = llama_n_vocab(model);
-            auto * logits  = llama_get_logits_ith(ctx, batch.n_tokens - 1);
-
-            std::vector<llama_token_data> candidates;
-            candidates.reserve(n_vocab);
-
-            for (llama_token token_id = 0; token_id < n_vocab; token_id++) {
-                candidates.emplace_back(llama_token_data{ token_id, logits[token_id], 0.0f });
-            }
-
-            llama_token_data_array candidates_p = { candidates.data(), candidates.size(), false };
-
-            // sample the most likely token
-            const llama_token new_token_id = llama_sample_token_greedy(ctx, &candidates_p);
-
-            // is it an end of stream?
-            if (new_token_id == llama_token_eos(model) || n_cur == n_len) {
-                break;
-            }
-
-            fflush(stdout);
-
-            // prepare the next batch
-            llama_batch_clear(batch);
-
-            // callback function for the new token :
-            auto piece = llama_token_to_piece(ctx, new_token_id);
-            if (callback) {
-                callback(piece.c_str());
-            }
-
-            generated_text += piece;
-
-            // push this new token for next evaluation
-            llama_batch_add(batch, new_token_id, n_cur, { 0 }, true);
-
-            n_decode += 1;
-        }
-
-        n_cur += 1;
-
-        // evaluate the current batch with the transformer model
-        if (llama_decode(ctx, batch)) {
-            fprintf(stderr, "%s : failed to eval, return code %d\n", __func__, 1);
-            return nullptr;
-        }
-    }
-
-    llama_print_timings(ctx);
-
-    fprintf(stderr, "\n");
-
-    llama_batch_free(batch);
-
-    char* result = new char[generated_text.length() + 1];
-    std::strcpy(result, generated_text.c_str());
-    return result;
-}
-
 typedef struct llama_sampling_params {
-    int32_t n_prev            = 64;    // number of previous tokens to remember
-    int32_t n_probs           = 0;     // if greater than 0, output the probabilities of top n_probs tokens.
-    int32_t top_k             = 40;    // <= 0 to use vocab size
-    float   top_p             = 0.95f; // 1.0 = disabled
-    float   min_p             = 0.05f; // 0.0 = disabled
-    float   tfs_z             = 1.00f; // 1.0 = disabled
-    float   typical_p         = 1.00f; // 1.0 = disabled
-    float   temp              = 0.80f; // 1.0 = disabled
-    int32_t penalty_last_n    = 64;    // last n tokens to penalize (0 = disable penalty, -1 = context size)
-    float   penalty_repeat    = 1.10f; // 1.0 = disabled
-    float   penalty_freq      = 0.00f; // 0.0 = disabled
-    float   penalty_present   = 0.00f; // 0.0 = disabled
-    int32_t mirostat          = 0;     // 0 = disabled, 1 = mirostat, 2 = mirostat 2.0
-    float   mirostat_tau      = 5.00f; // target entropy
-    float   mirostat_eta      = 0.10f; // learning rate
-    bool    penalize_nl       = true;  // consider newlines as a repeatable token
+    int32_t     n_prev                = 64;       // number of previous tokens to remember
+    int32_t     n_probs               = 0;        // if greater than 0, output the probabilities of top n_probs tokens.
+    int32_t     top_k                 = 40;       // <= 0 to use vocab size
+    float       top_p                 = 0.95f;    // 1.0 = disabled
+    float       min_p                 = 0.05f;    // 0.0 = disabled
+    float       tfs_z                 = 1.00f;    // 1.0 = disabled
+    float       typical_p             = 1.00f;    // 1.0 = disabled
+    float       temp                  = 0.80f;    // 1.0 = disabled
+    int32_t     penalty_last_n        = 64;       // last n tokens to penalize (0 = disable penalty, -1 = context size)
+    float       penalty_repeat        = 1.10f;    // 1.0 = disabled
+    float       penalty_freq          = 0.00f;    // 0.0 = disabled
+    float       penalty_present       = 0.00f;    // 0.0 = disabled
+    int32_t     mirostat              = 0;        // 0 = disabled, 1 = mirostat, 2 = mirostat 2.0
+    float       mirostat_tau          = 5.00f;    // target entropy
+    float       mirostat_eta          = 0.10f;    // learning rate
+    bool        penalize_nl           = true;     // consider newlines as a repeatable token
+    std::string samplers_sequence     = "kfypmt"; // top_k, tail_free, typical_p, top_p, min_p, temp
 
     std::string grammar;  // optional BNF-like grammar to constrain sampling
 
@@ -211,6 +100,9 @@ typedef struct llama_sampling_params {
     float       cfg_scale     = 1.f; // how strong is guidance
 
     std::unordered_map<llama_token, float> logit_bias; // logit bias for specific tokens
+
+    std::vector<llama_token> penalty_prompt_tokens;
+    bool                     use_penalty_prompt_tokens = false;
 } llama_sampling_params;
 
 // general sampler context
@@ -253,7 +145,7 @@ struct gpt_params {
     int32_t n_ctx                           = 512;   // context size
     int32_t n_batch                         = 512;   // batch size for prompt processing (must be >=32 to use BLAS)
     int32_t n_keep                          = 0;     // number of tokens to keep from initial prompt
-    int32_t n_draft                         = 16;    // number of tokens to draft during speculative decoding
+    int32_t n_draft                         = 8;     // number of tokens to draft during speculative decoding
     int32_t n_chunks                        = -1;    // max number of chunks to process (-1 = unlimited)
     int32_t n_parallel                      = 1;     // number of parallel sequences to decode
     int32_t n_sequences                     = 1;     // number of sequences to decode
@@ -288,6 +180,8 @@ struct gpt_params {
     std::vector<std::string> antiprompt; // string upon seeing which more user input is prompted
     std::string logdir            = "";  // directory in which to save YAML log files
 
+    std::vector<llama_model_kv_override> kv_overrides;
+
     // TODO: avoid tuple, use struct
     std::vector<std::tuple<std::string, float>> lora_adapter; // lora adapter path with user defined scale
     std::string lora_base  = "";                              // base model path for the lora adapter
@@ -300,10 +194,10 @@ struct gpt_params {
     size_t hellaswag_tasks = 400;   // number of tasks to use when computing the HellaSwag score
 
     bool mul_mat_q         = true;  // if true, use mul_mat_q kernels instead of cuBLAS
-    bool memory_f16        = true;  // use f16 instead of f32 for memory kv
     bool random_prompt     = false; // do not randomize prompt if none provided
     bool use_color         = false; // use color to distinguish generations and inputs
     bool interactive       = false; // interactive mode
+    bool chatml            = false; // chatml mode (used for models trained on chatml syntax)
     bool prompt_cache_all  = false; // save user input and generations to prompt cache
     bool prompt_cache_ro   = false; // open the prompt cache read-only and do not update it
 
@@ -323,10 +217,15 @@ struct gpt_params {
     bool numa              = false; // attempt optimizations that help on some NUMA systems
     bool verbose_prompt    = false; // print prompt tokens before generation
     bool infill            = false; // use infill mode
+    bool dump_kv_cache     = false; // dump the KV cache contents for debugging purposes
+    bool no_kv_offload     = false; // disable KV offloading
+
+    std::string cache_type_k = "f16"; // KV cache data type for the K
+    std::string cache_type_v = "f16"; // KV cache data type for the V
 
     // multimodal models (see examples/llava)
     std::string mmproj = ""; // path to multimodal projector
-    std::string image = ""; // path to an image file
+    std::string image  = ""; // path to an image file
 };
 
 static llama_context           ** g_ctx;
@@ -335,155 +234,6 @@ static std::vector<llama_token> * g_input_tokens;
 static std::ostringstream       * g_output_ss;
 static std::vector<llama_token> * g_output_tokens;
 static bool is_interacting = false;
-
-void process_escapes(std::string& input) {
-    std::size_t input_len = input.length();
-    std::size_t output_idx = 0;
-
-    for (std::size_t input_idx = 0; input_idx < input_len; ++input_idx) {
-        if (input[input_idx] == '\\' && input_idx + 1 < input_len) {
-            switch (input[++input_idx]) {
-                case 'n':  input[output_idx++] = '\n'; break;
-                case 'r':  input[output_idx++] = '\r'; break;
-                case 't':  input[output_idx++] = '\t'; break;
-                case '\'': input[output_idx++] = '\''; break;
-                case '\"': input[output_idx++] = '\"'; break;
-                case '\\': input[output_idx++] = '\\'; break;
-                case 'x':
-                    // Handle \x12, etc
-                    if (input_idx + 2 < input_len) {
-                        const char x[3] = { input[input_idx + 1], input[input_idx + 2], 0 };
-                        char *err_p = nullptr;
-                        const long val = std::strtol(x, &err_p, 16);
-                        if (err_p == x + 2) {
-                            input_idx += 2;
-                            input[output_idx++] = char(val);
-                            break;
-                        }
-                    }
-                    // fall through
-                default:   input[output_idx++] = '\\';
-                    input[output_idx++] = input[input_idx]; break;
-            }
-        } else {
-            input[output_idx++] = input[input_idx];
-        }
-    }
-
-    input.resize(output_idx);
-}
-
-void gpt_print_usage(int /*argc*/, char ** argv, const gpt_params & params) {
-    const llama_sampling_params & sparams = params.sparams;
-
-    printf("\n");
-    printf("usage: %s [options]\n", argv[0]);
-    printf("\n");
-    printf("options:\n");
-    printf("  -h, --help            show this help message and exit\n");
-    printf("  -i, --interactive     run in interactive mode\n");
-    printf("  --interactive-first   run in interactive mode and wait for input right away\n");
-    printf("  -ins, --instruct      run in instruction mode (use with Alpaca models)\n");
-    printf("  --multiline-input     allows you to write or paste multiple lines without ending each in '\\'\n");
-    printf("  -r PROMPT, --reverse-prompt PROMPT\n");
-    printf("                        halt generation at PROMPT, return control in interactive mode\n");
-    printf("                        (can be specified more than once for multiple prompts).\n");
-    printf("  --color               colorise output to distinguish prompt and user input from generations\n");
-    printf("  -s SEED, --seed SEED  RNG seed (default: -1, use random seed for < 0)\n");
-    printf("  -t N, --threads N     number of threads to use during generation (default: %d)\n", params.n_threads);
-    printf("  -tb N, --threads-batch N\n");
-    printf("                        number of threads to use during batch and prompt processing (default: same as --threads)\n");
-    printf("  -p PROMPT, --prompt PROMPT\n");
-    printf("                        prompt to start generation with (default: empty)\n");
-    printf("  -e, --escape          process prompt escapes sequences (\\n, \\r, \\t, \\', \\\", \\\\)\n");
-    printf("  --prompt-cache FNAME  file to cache prompt state for faster startup (default: none)\n");
-    printf("  --prompt-cache-all    if specified, saves user input and generations to cache as well.\n");
-    printf("                        not supported with --interactive or other interactive options\n");
-    printf("  --prompt-cache-ro     if specified, uses the prompt cache but does not update it.\n");
-    printf("  --random-prompt       start with a randomized prompt.\n");
-    printf("  --in-prefix-bos       prefix BOS to user inputs, preceding the `--in-prefix` string\n");
-    printf("  --in-prefix STRING    string to prefix user inputs with (default: empty)\n");
-    printf("  --in-suffix STRING    string to suffix after user inputs with (default: empty)\n");
-    printf("  -f FNAME, --file FNAME\n");
-    printf("                        prompt file to start generation.\n");
-    printf("  -n N, --n-predict N   number of tokens to predict (default: %d, -1 = infinity, -2 = until context filled)\n", params.n_predict);
-    printf("  -c N, --ctx-size N    size of the prompt context (default: %d, 0 = loaded from model)\n", params.n_ctx);
-    printf("  -b N, --batch-size N  batch size for prompt processing (default: %d)\n", params.n_batch);
-    printf("  --top-k N             top-k sampling (default: %d, 0 = disabled)\n", sparams.top_k);
-    printf("  --top-p N             top-p sampling (default: %.1f, 1.0 = disabled)\n", (double)sparams.top_p);
-    printf("  --min-p N             min-p sampling (default: %.1f, 0.0 = disabled)\n", (double)sparams.min_p);
-    printf("  --tfs N               tail free sampling, parameter z (default: %.1f, 1.0 = disabled)\n", (double)sparams.tfs_z);
-    printf("  --typical N           locally typical sampling, parameter p (default: %.1f, 1.0 = disabled)\n", (double)sparams.typical_p);
-    printf("  --repeat-last-n N     last n tokens to consider for penalize (default: %d, 0 = disabled, -1 = ctx_size)\n", sparams.penalty_last_n);
-    printf("  --repeat-penalty N    penalize repeat sequence of tokens (default: %.1f, 1.0 = disabled)\n", (double)sparams.penalty_repeat);
-    printf("  --presence-penalty N  repeat alpha presence penalty (default: %.1f, 0.0 = disabled)\n", (double)sparams.penalty_present);
-    printf("  --frequency-penalty N repeat alpha frequency penalty (default: %.1f, 0.0 = disabled)\n", (double)sparams.penalty_freq);
-    printf("  --mirostat N          use Mirostat sampling.\n");
-    printf("                        Top K, Nucleus, Tail Free and Locally Typical samplers are ignored if used.\n");
-    printf("                        (default: %d, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0)\n", sparams.mirostat);
-    printf("  --mirostat-lr N       Mirostat learning rate, parameter eta (default: %.1f)\n", (double)sparams.mirostat_eta);
-    printf("  --mirostat-ent N      Mirostat target entropy, parameter tau (default: %.1f)\n", (double)sparams.mirostat_tau);
-    printf("  -l TOKEN_ID(+/-)BIAS, --logit-bias TOKEN_ID(+/-)BIAS\n");
-    printf("                        modifies the likelihood of token appearing in the completion,\n");
-    printf("                        i.e. `--logit-bias 15043+1` to increase likelihood of token ' Hello',\n");
-    printf("                        or `--logit-bias 15043-1` to decrease likelihood of token ' Hello'\n");
-    printf("  --grammar GRAMMAR     BNF-like grammar to constrain generations (see samples in grammars/ dir)\n");
-    printf("  --grammar-file FNAME  file to read grammar from\n");
-    printf("  --cfg-negative-prompt PROMPT\n");
-    printf("                        negative prompt to use for guidance. (default: empty)\n");
-    printf("  --cfg-negative-prompt-file FNAME\n");
-    printf("                        negative prompt file to use for guidance. (default: empty)\n");
-    printf("  --cfg-scale N         strength of guidance (default: %f, 1.0 = disable)\n", sparams.cfg_scale);
-    printf("  --rope-scaling {none,linear,yarn}\n");
-    printf("                        RoPE frequency scaling method, defaults to linear unless specified by the model\n");
-    printf("  --rope-scale N        RoPE context scaling factor, expands context by a factor of N\n");
-    printf("  --rope-freq-base N    RoPE base frequency, used by NTK-aware scaling (default: loaded from model)\n");
-    printf("  --rope-freq-scale N   RoPE frequency scaling factor, expands context by a factor of 1/N\n");
-    printf("  --yarn-orig-ctx N     YaRN: original context size of model (default: 0 = model training context size)\n");
-    printf("  --yarn-ext-factor N   YaRN: extrapolation mix factor (default: 1.0, 0.0 = full interpolation)\n");
-    printf("  --yarn-attn-factor N  YaRN: scale sqrt(t) or attention magnitude (default: 1.0)\n");
-    printf("  --yarn-beta-slow N    YaRN: high correction dim or alpha (default: %.1f)\n", params.yarn_beta_slow);
-    printf("  --yarn-beta-fast N    YaRN: low correction dim or beta (default: %.1f)\n", params.yarn_beta_fast);
-    printf("  --ignore-eos          ignore end of stream token and continue generating (implies --logit-bias 2-inf)\n");
-    printf("  --no-penalize-nl      do not penalize newline token\n");
-    printf("  --memory-f32          use f32 instead of f16 for memory key+value (default: disabled)\n");
-    printf("                        not recommended: doubles context memory required and no measurable increase in quality\n");
-    printf("  --temp N              temperature (default: %.1f)\n", (double)sparams.temp);
-    printf("  --logits-all          return logits for all tokens in the batch (default: disabled)\n");
-    printf("  --hellaswag           compute HellaSwag score over random tasks from datafile supplied with -f\n");
-    printf("  --hellaswag-tasks N   number of tasks to use when computing the HellaSwag score (default: %zu)\n", params.hellaswag_tasks);
-    printf("  --keep N              number of tokens to keep from the initial prompt (default: %d, -1 = all)\n", params.n_keep);
-    printf("  --draft N             number of tokens to draft for speculative decoding (default: %d)\n", params.n_draft);
-    printf("  --chunks N            max number of chunks to process (default: %d, -1 = all)\n", params.n_chunks);
-    printf("  -np N, --parallel N   number of parallel sequences to decode (default: %d)\n", params.n_parallel);
-    printf("  -ns N, --sequences N  number of sequences to decode (default: %d)\n", params.n_sequences);
-    printf("  -pa N, --p-accept N   speculative decoding accept probability (default: %.1f)\n", (double)params.p_accept);
-    printf("  -ps N, --p-split N    speculative decoding split probability (default: %.1f)\n", (double)params.p_split);
-    printf("  -cb, --cont-batching  enable continuous batching (a.k.a dynamic batching) (default: disabled)\n");
-    printf("  --mmproj MMPROJ_FILE  path to a multimodal projector file for LLaVA. see examples/llava/README.md\n");
-    printf("  --image IMAGE_FILE    path to an image file. use with multimodal models\n");
-    if (llama_mlock_supported()) {
-        printf("  --mlock               force system to keep model in RAM rather than swapping or compressing\n");
-    }
-    if (llama_mmap_supported()) {
-        printf("  --no-mmap             do not memory-map model (slower load but may reduce pageouts if not using mlock)\n");
-    }
-    printf("  --numa                attempt optimizations that help on some NUMA systems\n");
-    printf("                        if run without this previously, it is recommended to drop the system page cache before using this\n");
-    printf("                        see https://github.com/ggerganov/llama.cpp/issues/1437\n");
-    printf("  --verbose-prompt      print prompt before generation\n");
-    printf("  --simple-io           use basic IO for better compatibility in subprocesses and limited consoles\n");
-    printf("  --lora FNAME          apply LoRA adapter (implies --no-mmap)\n");
-    printf("  --lora-scaled FNAME S apply LoRA adapter with user defined scaling S (implies --no-mmap)\n");
-    printf("  --lora-base FNAME     optional model to use as a base for the layers modified by the LoRA adapter\n");
-    printf("  -m FNAME, --model FNAME\n");
-    printf("                        model path (default: %s)\n", params.model.c_str());
-    printf("  -md FNAME, --model-draft FNAME\n");
-    printf("                        draft model for speculative decoding (default: %s)\n", params.model.c_str());
-    printf("  -ld LOGDIR, --logdir LOGDIR\n");
-    printf("                        path under which to save YAML logs (no logging if unset)\n");
-    printf("\n");
-}
 
 std::string gpt_random_prompt(std::mt19937 & rng) {
     const int r = rng() % 10;
@@ -513,8 +263,37 @@ struct llama_model_params llama_model_params_from_gpt_params(const gpt_params & 
     mparams.tensor_split    = params.tensor_split;
     mparams.use_mmap        = params.use_mmap;
     mparams.use_mlock       = params.use_mlock;
+    if (params.kv_overrides.empty()) {
+        mparams.kv_overrides = NULL;
+    } else {
+        GGML_ASSERT(params.kv_overrides.back().key[0] == 0 && "KV overrides not terminated with empty key");
+        mparams.kv_overrides = params.kv_overrides.data();
+    }
 
     return mparams;
+}
+
+static ggml_type kv_cache_type_from_str(const std::string & s) {
+    if (s == "f16") {
+        return GGML_TYPE_F16;
+    }
+    if (s == "q8_0") {
+        return GGML_TYPE_Q8_0;
+    }
+    if (s == "q4_0") {
+        return GGML_TYPE_Q4_0;
+    }
+    if (s == "q4_1") {
+        return GGML_TYPE_Q4_1;
+    }
+    if (s == "q5_0") {
+        return GGML_TYPE_Q5_0;
+    }
+    if (s == "q5_1") {
+        return GGML_TYPE_Q5_1;
+    }
+
+    throw std::runtime_error("Invalid cache type: " + s);
 }
 
 struct llama_context_params llama_context_params_from_gpt_params(const gpt_params & params) {
@@ -526,7 +305,6 @@ struct llama_context_params llama_context_params_from_gpt_params(const gpt_param
     cparams.n_threads_batch   = params.n_threads_batch == -1 ? params.n_threads : params.n_threads_batch;
     cparams.mul_mat_q         = params.mul_mat_q;
     cparams.seed              = params.seed;
-    cparams.f16_kv            = params.memory_f16;
     cparams.logits_all        = params.logits_all;
     cparams.embedding         = params.embedding;
     cparams.rope_scaling_type = params.rope_scaling_type;
@@ -537,6 +315,10 @@ struct llama_context_params llama_context_params_from_gpt_params(const gpt_param
     cparams.yarn_beta_fast    = params.yarn_beta_fast;
     cparams.yarn_beta_slow    = params.yarn_beta_slow;
     cparams.yarn_orig_ctx     = params.yarn_orig_ctx;
+    cparams.offload_kqv       = !params.no_kv_offload;
+
+    cparams.type_k = kv_cache_type_from_str(params.cache_type_k);
+    cparams.type_v = kv_cache_type_from_str(params.cache_type_v);
 
     return cparams;
 }
@@ -582,8 +364,6 @@ std::tuple<struct llama_model *, struct llama_context *> llama_init_from_gpt_par
     }
 
     {
-        printf("warming up the model with an empty run\n");
-
         std::vector<llama_token> tmp = { llama_token_bos(model), llama_token_eos(model), };
         llama_decode(lctx, llama_batch_get_one(tmp.data(), std::min(tmp.size(), (size_t) params.n_batch), 0, 0));
         llama_kv_cache_clear(lctx);
@@ -618,21 +398,46 @@ struct llama_sampling_context * llama_sampling_init(const struct llama_sampling_
     return result;
 }
 
-llama_token llama_sampling_sample(
-                                  struct llama_sampling_context * ctx_sampling,
-                                  struct llama_context * ctx_main,
-                                  struct llama_context * ctx_cfg,
-                                  const int idx = 0) {
+// no reasons to expose this function in header
+static void sampler_queue(
+                          struct llama_context * ctx_main,
+                          const llama_sampling_params & params,
+                          llama_token_data_array & cur_p,
+                          size_t & min_keep) {
+    const int n_vocab = llama_n_vocab(llama_get_model(ctx_main));
+
+    const float         temp              = params.temp;
+    const int32_t       top_k             = params.top_k <= 0 ? n_vocab : params.top_k;
+    const float         top_p             = params.top_p;
+    const float         min_p             = params.min_p;
+    const float         tfs_z             = params.tfs_z;
+    const float         typical_p         = params.typical_p;
+    const std::string & samplers_sequence = params.samplers_sequence;
+
+    for (auto s : samplers_sequence) {
+        switch (s){
+            case 'k': llama_sample_top_k    (ctx_main, &cur_p, top_k,     min_keep); break;
+            case 'f': llama_sample_tail_free(ctx_main, &cur_p, tfs_z,     min_keep); break;
+            case 'y': llama_sample_typical  (ctx_main, &cur_p, typical_p, min_keep); break;
+            case 'p': llama_sample_top_p    (ctx_main, &cur_p, top_p,     min_keep); break;
+            case 'm': llama_sample_min_p    (ctx_main, &cur_p, min_p,     min_keep); break;
+            case 't': llama_sample_temp     (ctx_main, &cur_p, temp); break;
+            default : break;
+        }
+    }
+}
+
+static llama_token llama_sampling_sample_impl(
+                                              struct llama_sampling_context * ctx_sampling,
+                                              struct llama_context * ctx_main,
+                                              struct llama_context * ctx_cfg,
+                                              const int idx,
+                                              bool is_resampling) {  // Add a parameter to indicate if we are resampling
     const llama_sampling_params & params = ctx_sampling->params;
 
     const int n_vocab = llama_n_vocab(llama_get_model(ctx_main));
 
     const float   temp            = params.temp;
-    const int32_t top_k           = params.top_k <= 0 ? n_vocab : params.top_k;
-    const float   top_p           = params.top_p;
-    const float   min_p           = params.min_p;
-    const float   tfs_z           = params.tfs_z;
-    const float   typical_p       = params.typical_p;
     const int32_t penalty_last_n  = params.penalty_last_n < 0 ? params.n_prev : params.penalty_last_n;
     const float   penalty_repeat  = params.penalty_repeat;
     const float   penalty_freq    = params.penalty_freq;
@@ -647,7 +452,16 @@ llama_token llama_sampling_sample(
 
     llama_token id = 0;
 
+    // Get a pointer to the logits
     float * logits = llama_get_logits_ith(ctx_main, idx);
+
+    // Declare original_logits at the beginning of the function scope
+    std::vector<float> original_logits;
+
+    if (!is_resampling) {
+        // Only make a copy of the original logits if we are not in the resampling phase, not sure if I actually have to do this.
+        original_logits = std::vector<float>(logits, logits + llama_n_vocab(llama_get_model(ctx_main)));
+    }
 
     // apply params.logit_bias map
     for (auto it = params.logit_bias.begin(); it != params.logit_bias.end(); it++) {
@@ -667,12 +481,14 @@ llama_token llama_sampling_sample(
     }
 
     // apply penalties
-    if (!prev.empty()) {
+    const auto& penalty_tokens = params.use_penalty_prompt_tokens ? params.penalty_prompt_tokens : prev;
+    const int penalty_tokens_used_size = std::min((int)penalty_tokens.size(), penalty_last_n);
+    if (penalty_tokens_used_size) {
         const float nl_logit = logits[llama_token_nl(llama_get_model(ctx_main))];
 
         llama_sample_repetition_penalties(ctx_main, &cur_p,
-                                          prev.data() + prev.size() - penalty_last_n,
-                                          penalty_last_n, penalty_repeat, penalty_freq, penalty_present);
+                                          penalty_tokens.data() + penalty_tokens.size() - penalty_tokens_used_size,
+                                          penalty_tokens_used_size, penalty_repeat, penalty_freq, penalty_present);
 
         if (!penalize_nl) {
             for (size_t idx = 0; idx < cur_p.size; idx++) {
@@ -684,7 +500,8 @@ llama_token llama_sampling_sample(
         }
     }
 
-    if (ctx_sampling->grammar != NULL) {
+    // If we are in the resampling phase, apply grammar checks before sampling logic
+    if (is_resampling && ctx_sampling->grammar != NULL) {
         llama_sample_grammar(ctx_main, &cur_p, ctx_sampling->grammar);
     }
 
@@ -707,12 +524,7 @@ llama_token llama_sampling_sample(
             // temperature sampling
             size_t min_keep = std::max(1, params.n_probs);
 
-            llama_sample_top_k    (ctx_main, &cur_p, top_k,     min_keep);
-            llama_sample_tail_free(ctx_main, &cur_p, tfs_z,     min_keep);
-            llama_sample_typical  (ctx_main, &cur_p, typical_p, min_keep);
-            llama_sample_top_p    (ctx_main, &cur_p, top_p,     min_keep);
-            llama_sample_min_p    (ctx_main, &cur_p, min_p,     min_keep);
-            llama_sample_temp     (ctx_main, &cur_p, temp);
+            sampler_queue(ctx_main, params, cur_p, min_keep);
 
             id = llama_sample_token(ctx_main, &cur_p);
 
@@ -729,7 +541,36 @@ llama_token llama_sampling_sample(
         }
     }
 
+    if (ctx_sampling->grammar != NULL && !is_resampling) {
+        // Create an array with a single token data element for the sampled id
+        llama_token_data single_token_data = {id, logits[id], 0.0f};
+        llama_token_data_array single_token_data_array = { &single_token_data, 1, false };
+
+        // Apply grammar constraints to the single token
+        llama_sample_grammar(ctx_main, &single_token_data_array, ctx_sampling->grammar);
+
+        // Check if the token is valid according to the grammar by seeing if its logit has been set to -INFINITY
+        bool is_valid = single_token_data_array.data[0].logit != -INFINITY;
+
+        // If the token is not valid according to the grammar, perform resampling
+        if (!is_valid) {
+            // Restore logits from the copy
+            std::copy(original_logits.begin(), original_logits.end(), logits);
+
+            return llama_sampling_sample_impl(ctx_sampling, ctx_main, ctx_cfg, idx, true);  // Pass true for is_resampling
+        }
+    }
+
     return id;
+}
+
+llama_token llama_sampling_sample(
+                                  struct llama_sampling_context * ctx_sampling,
+                                  struct llama_context * ctx_main,
+                                  struct llama_context * ctx_cfg,
+                                  const int idx = 0) {
+    // Call the implementation function with is_resampling set to false by default
+    return llama_sampling_sample_impl(ctx_sampling, ctx_main, ctx_cfg, idx, false);
 }
 
 void llama_sampling_accept(
@@ -881,6 +722,9 @@ int main_predict(struct llama_context * ctx,
 
     if (params.interactive_first || params.instruct || !params.prompt.empty() || session_tokens.empty()) {
         printf("tokenize the prompt\n");
+        if (params.chatml) {
+            params.prompt = "<|im_start|>system\n" + params.prompt + "<|im_end|>";
+        }
         embd_inp = ::llama_tokenize(ctx, params.prompt, add_bos, true);
     } else {
         printf("use session tokens\n");
@@ -940,7 +784,7 @@ int main_predict(struct llama_context * ctx,
     }
 
     // number of tokens to keep when resetting context
-    if (params.n_keep < 0 || params.n_keep > (int) embd_inp.size() || params.instruct) {
+    if (params.n_keep < 0 || params.n_keep > (int) embd_inp.size() || params.instruct || params.chatml) {
         params.n_keep = (int)embd_inp.size();
     }
 
@@ -948,10 +792,19 @@ int main_predict(struct llama_context * ctx,
     const auto inp_pfx = ::llama_tokenize(ctx, "\n\n### Instruction:\n\n", add_bos, true);
     const auto inp_sfx = ::llama_tokenize(ctx, "\n\n### Response:\n\n",    false,   true);
 
+    // chatml prefix & suffix
+    const auto cml_pfx = ::llama_tokenize(ctx, "\n<|im_start|>user\n", add_bos, true);
+    const auto cml_sfx = ::llama_tokenize(ctx, "<|im_end|>\n<|im_start|>assistant\n", false, true);
+
     // in instruct mode, we inject a prefix and a suffix to each input by the user
     if (params.instruct) {
         params.interactive_first = true;
         params.antiprompt.push_back("### Instruction:\n\n");
+    }
+    // similar for chatml mode
+    else if (params.chatml) {
+        params.interactive_first = true;
+        params.antiprompt.push_back("<|im_start|>user\n");
     }
 
     // enable interactive mode if interactive start is specified
@@ -1293,7 +1146,24 @@ int main_predict(struct llama_context * ctx,
             // deal with end of text token in interactive mode
             if (llama_sampling_last(ctx_sampling) == llama_token_eos(model)) {
                 printf("found EOS token\n");
+
+                if (params.interactive) {
+                    if (!params.antiprompt.empty()) {
+                        // tokenize and inject first reverse prompt
+                        const auto first_antiprompt = ::llama_tokenize(ctx, params.antiprompt.front(), false, true);
+                        embd_inp.insert(embd_inp.end(), first_antiprompt.begin(), first_antiprompt.end());
+                        is_antiprompt = true;
+                    }
+
+                    is_interacting = true;
+                    printf("\n");
+                } else if (params.instruct || params.chatml) {
+                    is_interacting = true;
+                }
             }
+
+            // NOTE: Remove block for is_interacting
+            // if (n_past > 0 && is_interacting)
 
             if (n_past > 0) {
                 is_interacting = false;
@@ -1301,7 +1171,7 @@ int main_predict(struct llama_context * ctx,
         }
 
         // end of text token
-        if (!embd.empty() && embd.back() == llama_token_eos(model) && !(params.instruct || params.interactive)) {
+        if (!embd.empty() && embd.back() == llama_token_eos(model) && !(params.instruct || params.interactive || params.chatml)) {
             printf(" [end of text]\n");
             break;
         }
@@ -1327,4 +1197,3 @@ int main_predict(struct llama_context * ctx,
     
     return 0;
 }
-
