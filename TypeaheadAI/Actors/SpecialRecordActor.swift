@@ -12,6 +12,7 @@ import os.log
 
 enum EventType {
     case mouseClicked
+    case mouseRightClicked
     case mouseMoved
     case keyPressed
     case appChanged
@@ -38,7 +39,7 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
     private var currentPlaybackTask: Task<Void, Error>? = nil
     private let systemWideElement = AXUIElementCreateSystemWide()
     private var lastMousePosition: CGPoint? = nil
-    private let mouseMoveThreshold: CGFloat = 10.0 // Set the threshold for mouse move
+    private let mouseMoveThreshold: CGFloat = 5.0 // Set the threshold for mouse move
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -66,18 +67,22 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
             var message = "Here is a log of the recorded events:"
             for event in events {
                 if let element = event.element {
-                    if let serialized = element.serialize(isIndexed: false, showActions: false, maxDepth: 1) {
-                        message += "\n - \(event.eventType) on \(serialized)"
+                    if let serialized = element.serialize(isIndexed: false, showActions: false, maxDepth: 2) {
+                        message += "\n\n - \(event.eventType) on\n\(serialized)"
+                        if let appContext = event.appContext {
+                            message += "\n\(appContext)"
+                        }
                     }
                 }
             }
-            message += "\nNarrate what I did at a high-level in a bulleted list of imperatives (e.g. \"click on '...' button\", \"type '...' into text field\")"
-            message += "\nIgnore potential mistakes or misclicks."
+
+            message += "\n\nFirst, in **bold**, describe what task this sequence of actions accomplished in one imperative phrase (e.g. \"**Export a PDF to ...**\")"
+            message += "\nThen, come up with a bulleted list of imperatives (e.g. \"click on '...' button\", \"type '...' into text field\") narrating the task."
 
             await self.modalManager.showModal()
             await self.modalManager.setUserMessage(message, isHidden: true, appContext: appContext)
             Task {
-                try await self.modalManager.replyToUserMessage()
+                try await self.modalManager.proposeQuickAction()
             }
         } else {
             await self.modalManager.forceRefresh()
@@ -87,6 +92,7 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
             self.eventMonitor = NSEvent.addGlobalMonitorForEvents(
                 matching: [
                     .leftMouseDown,
+                    .rightMouseDown,
                     .mouseMoved,
                     .keyDown,
                     .keyUp
@@ -99,6 +105,9 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
                         case .leftMouseDown:
                             let mousePos = NSEvent.mouseLocation
                             self.recordMouse(mousePos, eventType: .mouseClicked, appContext: appContext)
+                        case .rightMouseDown:
+                            let mousePos = NSEvent.mouseLocation
+                            self.recordMouse(mousePos, eventType: .mouseRightClicked, appContext: appContext)
                         case .mouseMoved:
                             // Throttle mouse-moved events
                             let currentMousePosition = NSEvent.mouseLocation
@@ -165,7 +174,7 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
                     processedEvents.append(event)
                 }
             case .mouseClicked:
-                guard let actions = event.element?.actions, actions.contains("AXPress") else {
+                guard let actions = event.element?.actions else {
                     print("nothing to click on, skipping...")
                     continue
                 }

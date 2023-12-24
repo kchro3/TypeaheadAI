@@ -26,6 +26,7 @@ enum JSONAny: Codable, Equatable {
     case double(Double)
     case integer(Int)
     case boolean(Bool)
+    case array([JSONAny])
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -37,6 +38,8 @@ enum JSONAny: Codable, Equatable {
             self = .string(stringVal)
         } else if let boolVal = try? container.decode(Bool.self) {
             self = .boolean(boolVal)
+        } else if let arrayVal = try? container.decode([JSONAny].self) {
+            self = .array(arrayVal)
         } else {
             throw DecodingError.typeMismatch(JSONAny.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Value is not JSON compatible"))
         }
@@ -53,6 +56,8 @@ enum JSONAny: Codable, Equatable {
             try container.encode(int)
         case .boolean(let bool):
             try container.encode(bool)
+        case .array(let arrayVal):
+            try container.encode(arrayVal)
         }
     }
 }
@@ -60,7 +65,7 @@ enum JSONAny: Codable, Equatable {
 struct FunctionCall: Codable, Equatable {
     let id: String?
     let name: String
-    let args: [String: JSONAny]
+    var args: [String: JSONAny]
 
     func stringArg(_ arg: String) -> String? {
         guard let value = args[arg] else { return nil }
@@ -68,6 +73,22 @@ struct FunctionCall: Codable, Equatable {
         switch value {
         case .string(let stringValue):
             return stringValue
+        default: return nil
+        }
+    }
+
+    func stringArrayArg(_ arg: String) -> [String]? {
+        guard let value = args[arg] else { return nil }
+
+        switch value {
+        case .array(let arrayValue):
+            return arrayValue.compactMap { element in
+                if case .string(let stringValue) = element {
+                    return stringValue
+                } else {
+                    return nil
+                }
+            }
         default: return nil
         }
     }

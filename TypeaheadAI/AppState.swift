@@ -98,6 +98,7 @@ final class AppState: ObservableObject {
         self.modalManager.functionManager = functionManager
         self.modalManager.promptManager = promptManager
         self.modalManager.settingsManager = settingsManager
+        self.modalManager.specialRecordActor = specialRecordActor
 
         self.settingsManager.clientManager = clientManager
         self.settingsManager.llamaModelManager = llamaModelManager

@@ -51,7 +51,9 @@ struct UIElement: Identifiable, Codable, Equatable {
 }
 
 extension UIElement {
+    private static let maxChildren = 25
     private static let maxCharacterCount = 4000
+    private static let defaultExcludedRoles = ["AXGroup", "AXImage"]
 
     init?(from element: AXUIElement, callback: ((String, AXUIElement) -> Void)? = nil) {
         guard let role = element.stringValue(forAttribute: kAXRoleAttribute) else {
@@ -123,7 +125,7 @@ extension UIElement {
         isVisible: Bool = true,
         isIndexed: Bool = true,
         showActions: Bool = false,
-        excludedRoles: [String]? = nil,
+        excludedRoles: [String]? = UIElement.defaultExcludedRoles,
         excludedActions: [String]? = nil,
         maxDepth: Int? = nil
     ) -> String? {
@@ -133,11 +135,10 @@ extension UIElement {
             return nil
         }
 
-        if (self.role == "AXGroup" && self.parentRole == "AXGroup")
-            || (excludedRoles ?? []).contains(self.role) {
-            // Collapse nested AXGroups OR Ignore excluded roles
+        if (excludedRoles ?? []).contains(self.role) {
+            // Ignore excluded roles
             var line = ""
-            for child in self.children {
+            for child in self.children.prefix(UIElement.maxChildren) {
                 if let childLine = child.serialize(
                     indent: indent,
                     isVisible: isVisible,
@@ -167,7 +168,7 @@ extension UIElement {
         // If neither exist:             none
         var text: String = "none"
         if role == "AXStaticText" {
-            text = renderAXStaticText()
+            return renderAXStaticText()
         } else {
             text = self.title ?? "none"
             if let desc = self.description {
@@ -230,7 +231,7 @@ extension UIElement {
 //        line += ", attributes: \(self.attributes)"
 
         if self.role == "AXCell" {
-            for (index, child) in self.children.enumerated() {
+            for (index, child) in self.children.prefix(UIElement.maxChildren).enumerated() {
                 if index > 0, self.children[index-1].role == "AXStaticText", self.children[index].role == "AXStaticText" {
                     // If there are consecutive children with the role AXStaticText, just keep appending to the line
                     line += child.renderAXStaticText()
@@ -247,7 +248,7 @@ extension UIElement {
                 }
             }
         } else {
-            for child in self.children {
+            for child in self.children.prefix(UIElement.maxChildren) {
                 if let childLine = child.serialize(
                     indent: indent + 1,
                     isVisible: isVisible,

@@ -56,6 +56,7 @@ class ModalManager: ObservableObject {
     var intentManager: IntentManager? = nil
     var promptManager: QuickActionManager? = nil
     var settingsManager: SettingsManager? = nil
+    var specialRecordActor: SpecialRecordActor? = nil
 
     var toastWindow: CustomModalWindow?
 
@@ -79,27 +80,28 @@ class ModalManager: ObservableObject {
         self.clientManager?.cancelStreamingTask()
         self.functionManager?.cancelTask()
 
-        var toolCallId: String? = nil
-        var fnCall: FunctionCall? = nil
-        var appContext: AppContext? = nil
+        // NOTE: Worry about this later... Deal with cancellations of tools
+//        var toolCallId: String? = nil
+//        var fnCall: FunctionCall? = nil
+//        var appContext: AppContext? = nil
 
         // The next API call will fail if there is a function call but no corresponding tool call.
-        for message in messages {
-            if case .function_call(let functionCall) = message.messageType {
-                fnCall = functionCall
-                toolCallId = functionCall.id
-                appContext = message.appContext
-            } else if case .tool_call(let functionCall) = message.messageType, functionCall.id == toolCallId {
-                // Marking as finished
-                fnCall = nil
-                toolCallId = nil
-                appContext = nil
-            }
-        }
-
-        if let fnCall = fnCall {
-            appendToolError("Function was canceled", functionCall: fnCall, appContext: appContext)
-        }
+//        for message in messages {
+//            if case .function_call(let functionCall) = message.messageType {
+//                fnCall = functionCall
+//                toolCallId = functionCall.id
+//                appContext = message.appContext
+//            } else if case .tool_call(let functionCall) = message.messageType, functionCall.id == toolCallId {
+//                // Marking as finished
+//                fnCall = nil
+//                toolCallId = nil
+//                appContext = nil
+//            }
+//        }
+//
+//        if let fnCall = fnCall {
+//            appendToolError("Function was canceled", functionCall: fnCall, appContext: appContext)
+//        }
     }
 
     @MainActor
@@ -161,6 +163,15 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func appendTool(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
+        if functionCall.name == "perform_ui_action" {
+            for index in messages.indices {
+                if case .tool_call(let functionCall) = messages[index].messageType,
+                   functionCall.name == "perform_ui_action" {
+                    messages[index].text = "<pruned>"
+                }
+            }
+        }
+
         if let lastMessage = messages.last {
             messages.append(
                 Message(
@@ -323,44 +334,98 @@ class ModalManager: ObservableObject {
         messages[idx].text += text
     }
 
+    /// Append plan to the AI response. Creates a new message if there is nothing to append to.
+    /// NOTE: This is kind of hacky, but the idea is that we can assign a QuickAction ID on message creation,
+    /// and we can use the existence of a "quickActionId" to render a "save" button in the UI.
+    ///
+    /// If you press save, then you can save the Quick Action to your settings.
+    @MainActor
+    func appendPlan(_ text: String, appContext: AppContext?) async {
+        guard let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden else {
+            // If the AI response doesn't exist yet, create one.
+            if let lastMessage = messages.last {
+                messages.append(
+                    Message(
+                        id: UUID(),
+                        rootId: lastMessage.rootId,
+                        inReplyToId: lastMessage.id,
+                        createdAt: Date(),
+                        rootCreatedAt: lastMessage.rootCreatedAt,
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: false,
+                        quickActionId: UUID(),
+                        appContext: appContext
+                    )
+                )
+            } else {
+                let id = UUID()
+                let date = Date()
+                messages.append(
+                    Message(
+                        id: id,
+                        rootId: id,
+                        inReplyToId: nil,
+                        createdAt: date,
+                        rootCreatedAt: date,
+                        text: text,
+                        isCurrentUser: false,
+                        isHidden: false,
+                        quickActionId: UUID(),
+                        appContext: appContext
+                    )
+                )
+            }
+            userIntents = nil
+            isPending = false
+            return
+        }
+
+        messages[idx].text += text
+    }
+
+    /// Buffer together consecutive functions
+    /// Assume that function calls are immediately followed by their tool calls.
     @MainActor
     func appendFunction(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        if let lastMessage = messages.last {
-            messages.append(
-                Message(
-                    id: UUID(),
-                    rootId: lastMessage.rootId,
-                    inReplyToId: lastMessage.id,
-                    createdAt: Date(),
-                    rootCreatedAt: lastMessage.rootCreatedAt,
-                    text: text,
-                    isCurrentUser: false,
-                    isHidden: false,
-                    appContext: appContext,
-                    messageType: .function_call(data: functionCall)
-                )
-            )
+        if functionCall.name == "perform_ui_action",
+           let lastMessage = messages.last,
+           case .tool_call(let fnCall) = lastMessage.messageType,
+           fnCall.name == "perform_ui_action",
+           let lastFnCallIndex = messages.lastIndex(where: { isFunctionCall(message: $0) }),
+           case .function_call(var functionCalls) = messages[lastFnCallIndex].messageType {
+
+            /// Mutate the function call so that it buffers the actions together.
+            /// NOTE: This is for both presentation and token efficiency
+            functionCalls.append(functionCall)
+            messages[lastFnCallIndex].messageType = .function_call(data: functionCalls)
         } else {
             let id = UUID()
             let date = Date()
-            messages.append(
-                Message(
-                    id: id,
-                    rootId: id,
-                    inReplyToId: nil,
-                    createdAt: date,
-                    rootCreatedAt: date,
-                    text: text,
-                    isCurrentUser: false,
-                    isHidden: false,
-                    appContext: appContext,
-                    messageType: .function_call(data: functionCall)
-                )
-            )
+            messages.append(Message(
+                id: id,
+                rootId: id,
+                inReplyToId: nil,
+                createdAt: date,
+                rootCreatedAt: date,
+                text: text,
+                isCurrentUser: false,
+                isHidden: false,
+                appContext: appContext,
+                messageType: .function_call(data: [functionCall])
+            ))
         }
 
         userIntents = nil
         isPending = false
+    }
+
+    private func isFunctionCall(message: Message) -> Bool {
+        if case .function_call(_) = message.messageType {
+            return true
+        } else {
+            return false
+        }
     }
 
     @MainActor
@@ -602,13 +667,51 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func continueReplying() async throws {
+    func proposeQuickAction() async throws {
+        isPending = true
+        userIntents = nil
+        Task {
+            try await self.clientManager?.refine(
+                messages: self.messages,
+                streamHandler: { result, appInfo in
+                    switch result {
+                    case .success(let chunk):
+                        await self.appendPlan(chunk, appContext: appInfo?.appContext)
+                    case .failure(let error as ClientManagerError):
+                        self.logger.error("Error: \(error.localizedDescription)")
+                        switch error {
+                        case .badRequest(let message):
+                            self.setError(message, appContext: appInfo?.appContext)
+                        case .serverError(let message):
+                            self.setError(message, appContext: appInfo?.appContext)
+                        case .clientError(let message):
+                            self.setError(message, appContext: appInfo?.appContext)
+                        case .modelNotFound(let message):
+                            self.setError(message, appContext: appInfo?.appContext)
+                        case .modelNotLoaded(let message):
+                            self.setError(message, appContext: appInfo?.appContext)
+                        default:
+                            self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
+                        }
+                    case .failure(let error):
+                        self.logger.error("Error: \(error.localizedDescription)")
+                        self.setError(error.localizedDescription, appContext: appInfo?.appContext)
+                    }
+                },
+                completion: defaultCompletionHandler
+            )
+        }
+    }
+
+    @MainActor
+    func continueReplying(appInfo: AppInfo? = nil) async throws {
         isPending = true
         userIntents = nil
 
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
+                prevAppInfo: appInfo,
                 streamHandler: defaultStreamHandler,
                 completion: defaultCompletionHandler
             )

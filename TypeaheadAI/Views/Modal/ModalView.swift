@@ -25,6 +25,12 @@ struct ModalView: View {
     @State private var searchText = ""
     @State private var debouncer: Timer?
 
+    // Quick Action proposal logic
+    @State private var proposedLabel: String = ""
+    @State private var proposedDetails: String = ""
+    @State private var showQuickActionSaveSheet: Bool = false
+    @State private var showQuickActionSaveAlert: Bool = false
+
     var query: Binding<String> {
         Binding {
             searchText
@@ -80,11 +86,66 @@ struct ModalView: View {
                     ConversationView(modalManager: modalManager)
                 }
 
-                ModalFooterView(
-                    modalManager: modalManager,
-                    clientManager: modalManager.clientManager!,
-                    functionManager: modalManager.functionManager!
-                )
+                if let lastMessage = modalManager.messages.last,
+                   !lastMessage.isCurrentUser,
+                   let quickActionId = lastMessage.quickActionId {
+
+                    HStack {
+                        RoundedButton("Cancel") {
+                            modalManager.forceRefresh()
+                            modalManager.closeModal()
+                        }
+
+                        Spacer()
+
+                        RoundedButton("Retry recording") {
+                            Task {
+                                modalManager.forceRefresh()
+                                modalManager.closeModal()
+                                try await Task.sleep(for: .seconds(3))
+                                try await modalManager.specialRecordActor?.specialRecord()
+                            }
+                        }
+
+                        RoundedButton("Save as Quick Action", isAccent: true) {
+                            let (proposedLabel, proposedDetails) =  parseProposedQuickAction(input: lastMessage.text)
+                            self.proposedLabel = proposedLabel
+                            self.proposedDetails = proposedDetails
+
+                            showQuickActionSaveSheet.toggle()
+                        }
+                        .sheet(isPresented: $showQuickActionSaveSheet, content: {
+                            NewQuickActionForm(
+                                newLabel: proposedLabel,
+                                newDetails: proposedDetails,
+                                onSubmit: { label, details in
+                                    modalManager.promptManager?.addPrompt(label, id: quickActionId, details: details)
+                                    showQuickActionSaveAlert = true
+                                    showQuickActionSaveSheet.toggle()
+                                }, onCancel: {
+                                    showQuickActionSaveSheet.toggle()
+                                }
+                            )
+                        })
+                        .alert(isPresented: $showQuickActionSaveAlert) {
+                            Alert(
+                                title: Text("Successfully saved Quick Action"),
+                                message: Text("The instructions can be updated in your Settings."),
+                                dismissButton: .default(Text("Ok")) {
+                                    modalManager.closeModal()
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 15)
+                } else {
+                    ModalFooterView(
+                        modalManager: modalManager,
+                        clientManager: modalManager.clientManager!,
+                        functionManager: modalManager.functionManager!
+                    )
+                }
             }
         }
         .font(.system(size: fontSize))
@@ -169,6 +230,29 @@ struct ModalView: View {
             RoundedRectangle(cornerRadius: 15)
                 .fill(.primary.opacity(0.1))
         )
+    }
+
+    /// TODO: This might be too fragile
+    private func parseProposedQuickAction(input: String) -> (String, String) {
+        // Regex to find bolded text
+        let boldTextRegex = "\\*\\*(.*?)\\*\\*"
+
+        var boldText = ""
+        var restOfText = input
+
+        if let regex = try? NSRegularExpression(pattern: boldTextRegex, options: []),
+           let match = regex.firstMatch(in: input, options: [], range: NSRange(input.startIndex..., in: input)),
+           let range = Range(match.range(at: 1), in: input) {
+            boldText = String(input[range])
+
+            if let entireMatchRange = Range(match.range(at: 0), in: input) {
+                restOfText.removeSubrange(entireMatchRange)
+            }
+        }
+
+        // Trim whitespace
+        restOfText = restOfText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return (boldText, restOfText)
     }
 }
 
