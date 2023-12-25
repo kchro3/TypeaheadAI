@@ -43,6 +43,7 @@ final class AppState: ObservableObject {
     private var specialPasteActor: SpecialPasteActor? = nil
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
+    private var specialRecordActor: SpecialRecordActor? = nil
 
     init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
 
@@ -78,6 +79,10 @@ final class AppState: ObservableObject {
             modalManager: modalManager,
             appContextManager: appContextManager
         )
+        self.specialRecordActor = SpecialRecordActor(
+            appContextManager: appContextManager,
+            modalManager: modalManager
+        )
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
@@ -93,6 +98,7 @@ final class AppState: ObservableObject {
         self.modalManager.functionManager = functionManager
         self.modalManager.promptManager = promptManager
         self.modalManager.settingsManager = settingsManager
+        self.modalManager.specialRecordActor = specialRecordActor
 
         self.settingsManager.clientManager = clientManager
         self.settingsManager.llamaModelManager = llamaModelManager
@@ -128,6 +134,17 @@ final class AppState: ObservableObject {
                         NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
                     }
                 } catch {
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .specialRecord) { [self] in
+            Task {
+                do {
+                    try await self.specialRecordActor?.specialRecord()
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }

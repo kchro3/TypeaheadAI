@@ -27,10 +27,10 @@
 		2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */; };
 		2B11FCF22B114C3F00325F38 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF12B114C3F00325F38 /* Message.swift */; };
 		2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF32B196E1500325F38 /* VersionManager.swift */; };
+		2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */; };
 		2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1F20452B1987E400152F13 /* ConversationManager.swift */; };
 		2B1F20482B1BE94000152F13 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */; };
 		2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B7D2AEC5F8500F1BB60 /* Supabase */; };
-		2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */; };
 		2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450D2AB0380C00F37D3E /* AppContextManager.swift */; };
 		2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27450F2AB03A3D00F37D3E /* CanSimulateCopy.swift */; };
 		2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2EF14D2AC17D4000EF2BD4 /* CustomTextField.swift */; };
@@ -118,6 +118,7 @@
 		2BF4A7E52AF1A52600AA2512 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */; };
 		2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */ = {isa = PBXBuildFile; productRef = 2BF929842AB13FEC00FC105B /* Highlighter */; };
 		2BFBCAA12B048AC0004F8374 /* QuickAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BFBCAA02B048AC0004F8374 /* QuickAction.swift */; };
+		2BFC51552B38DAB200F3E559 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2BFC51542B38DAB200F3E559 /* LaunchAtLogin */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -158,6 +159,7 @@
 		2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		2B11FCF12B114C3F00325F38 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		2B11FCF32B196E1500325F38 /* VersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionManager.swift; sourceTree = "<group>"; };
+		2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialRecordActor.swift; sourceTree = "<group>"; };
 		2B1F20452B1987E400152F13 /* ConversationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationManager.swift; sourceTree = "<group>"; };
 		2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
 		2B27450D2AB0380C00F37D3E /* AppContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContextManager.swift; sourceTree = "<group>"; };
@@ -255,12 +257,12 @@
 				2B4BDB892ACBED2100E55D78 /* SettingsAccess in Frameworks */,
 				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
+				2BFC51552B38DAB200F3E559 /* LaunchAtLogin in Frameworks */,
 				2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */,
 				2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */,
 				2BF4A7E52AF1A52600AA2512 /* GoogleSignInSwift in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 				2BDDB9892B27DDE100D52BF0 /* SwiftSoup in Frameworks */,
-				2B1F3B812AEDBDFF00F1BB60 /* LaunchAtLogin in Frameworks */,
 				2BF4A7E32AF1A52600AA2512 /* GoogleSignIn in Frameworks */,
 				2B8CD4BE2B0AB13B003E0589 /* MarkdownUI in Frameworks */,
 			);
@@ -308,6 +310,7 @@
 				2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */,
 				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
+				2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -611,11 +614,11 @@
 				2BF929842AB13FEC00FC105B /* Highlighter */,
 				2B4BDB882ACBED2100E55D78 /* SettingsAccess */,
 				2B1F3B7D2AEC5F8500F1BB60 /* Supabase */,
-				2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */,
 				2BF4A7E22AF1A52600AA2512 /* GoogleSignIn */,
 				2BF4A7E42AF1A52600AA2512 /* GoogleSignInSwift */,
 				2B8CD4BD2B0AB13B003E0589 /* MarkdownUI */,
 				2BDDB9882B27DDE100D52BF0 /* SwiftSoup */,
+				2BFC51542B38DAB200F3E559 /* LaunchAtLogin */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -697,10 +700,10 @@
 				2BF929832AB13FEC00FC105B /* XCRemoteSwiftPackageReference "HighlighterSwift" */,
 				2B4BDB872ACBED2100E55D78 /* XCRemoteSwiftPackageReference "SettingsAccess" */,
 				2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */,
-				2B1F3B7F2AEDBDFF00F1BB60 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2BC52A202AF1A27C00721033 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				2BDDB9872B27DDE100D52BF0 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				2BFC51532B38DAB200F3E559 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -756,6 +759,7 @@
 				2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */,
 				2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */,
 				2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */,
+				2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
@@ -1199,14 +1203,6 @@
 				minimumVersion = 0.3.0;
 			};
 		};
-		2B1F3B7F2AEDBDFF00F1BB60 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
@@ -1271,6 +1267,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		2BFC51532B38DAB200F3E559 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1278,11 +1282,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
-		};
-		2B1F3B802AEDBDFF00F1BB60 /* LaunchAtLogin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2B1F3B7F2AEDBDFF00F1BB60 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
-			productName = LaunchAtLogin;
 		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1328,6 +1327,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2BF929832AB13FEC00FC105B /* XCRemoteSwiftPackageReference "HighlighterSwift" */;
 			productName = Highlighter;
+		};
+		2BFC51542B38DAB200F3E559 /* LaunchAtLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2BFC51532B38DAB200F3E559 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
+			productName = LaunchAtLogin;
 		};
 /* End XCSwiftPackageProductDependency section */
 

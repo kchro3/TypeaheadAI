@@ -156,7 +156,7 @@ public extension String {
                         rows.append(n2)
                     }
                 }
-            } else if n.nodeName() == "tfood", let row = n.getChildNodes().first {
+            } else if n.nodeName() == "tfood", let _ = n.getChildNodes().first {
                 for n2 in n.getChildNodes() {
                     if n2.nodeName() == "tr" {
                         rows.append(n2)
@@ -249,7 +249,8 @@ public extension String {
                 let classes = c.split(separator: " ")
                 for cl in classes {
                     if cl.prefix(9) == "language-" {
-                        language = cl.substring(from: cl.index(cl.startIndex, offsetBy: 9))
+                        let index = cl.index(cl.startIndex, offsetBy: 9)
+                        language = String(cl[index...])
                     }
                     if cl == "inline" {
                         inline = true

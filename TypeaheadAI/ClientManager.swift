@@ -171,25 +171,32 @@ class ClientManager: ObservableObject, CanGetUIElements {
         }
     }
 
-    /// Refine the currently cached request
+    /// Refine the currently request
     func refine(
         messages: [Message],
         quickActionId: UUID? = nil,
+        prevAppInfo: AppInfo? = nil,
         timeout: TimeInterval = 120,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
         completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
     ) async throws {
-        var appInfo = try await appContextManager?.getActiveAppInfo()
+        var appInfo: AppInfo? = nil
+        if let prevAppInfo = prevAppInfo {
+            // Reuse the previous app info (specifically when the app info was extracted from a function call).
+            appInfo = prevAppInfo
+        } else {
+            appInfo = try await appContextManager?.getActiveAppInfo()
 
-        // Serialize the UIElement
-        if isAutopilotEnabled {
-            let (uiElement, elementMap) = getUIElements(appContext: appInfo?.appContext)
-            if let serializedUIElement = uiElement?.serialize(
-                excludedRoles: ["AXImage"],
-                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-            ) {
-                appInfo?.appContext?.serializedUIElement = serializedUIElement
-                appInfo?.elementMap = elementMap
+            // Serialize the UIElement
+            if isAutopilotEnabled {
+                let (uiElement, elementMap) = getUIElements(appContext: appInfo?.appContext)
+                if let serializedUIElement = uiElement?.serialize(
+                    excludedActions: ["AXScrollToVisible", "AXCancel", "AXRaise"]
+                ) {
+                    print(serializedUIElement)
+                    appInfo?.appContext?.serializedUIElement = serializedUIElement
+                    appInfo?.elementMap = elementMap
+                }
             }
         }
 
@@ -208,7 +215,11 @@ class ClientManager: ObservableObject, CanGetUIElements {
 
         var history: [Message]? = nil
         // NOTE: Need to fetch again in case the Quick Action has been edited
-        let quickAction: QuickAction? = quickActionId.flatMap { self.promptManager?.getById($0) }
+        let quickAction: QuickAction? = messages
+            .first(where: { $0.quickActionId != nil })
+            .flatMap { $0.quickActionId }
+            .flatMap { self.promptManager?.getById($0) }
+
         if let quickAction = quickAction,
            let appContext = appInfo?.appContext,
            let copiedText = copiedText {

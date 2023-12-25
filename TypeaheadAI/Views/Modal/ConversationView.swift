@@ -144,6 +144,7 @@ struct ConversationView: View {
                             }
                         }
                     )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     // This shouldn't happen though...
                     NewQuickActionForm(onSubmit: { label, details in

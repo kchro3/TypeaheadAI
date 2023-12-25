@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct NewQuickActionForm: View {
-    @State private var newLabel: String = ""
-    @State private var newDetails: String = ""
+    @State var newLabel: String = ""
+    @State var newDetails: String = ""
     let onSubmit: (String, String) -> Void
     let onCancel: () -> Void
 

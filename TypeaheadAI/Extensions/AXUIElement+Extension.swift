@@ -9,6 +9,10 @@ import AppKit
 import Foundation
 
 extension AXUIElement {
+    func toUIElement() -> UIElement? {
+        return UIElement(from: self)
+    }
+
     func value(forAttribute attribute: String) -> CFTypeRef? {
         var value: CFTypeRef?
         AXUIElementCopyAttributeValue(self, attribute as CFString, &value)
@@ -96,5 +100,58 @@ extension AXUIElement {
         }
 
         return actions
+    }
+
+    func getElementAtMousePosition(_ mousePos: NSPoint) -> AXUIElement? {
+        var element: AXUIElement?
+
+        let point = CGPoint(x: mousePos.x, y: NSHeight(NSScreen.screens[0].frame) - mousePos.y)
+        let result = AXUIElementCopyElementAtPosition(self, Float(point.x), Float(point.y), &element)
+        guard result == .success else {
+            return nil
+        }
+
+        return element
+    }
+
+    func getMouseOverElement(_ mousePos: NSPoint) -> AXUIElement? {
+        var element: AXUIElement?
+        let mousePoint = CGPoint(x: mousePos.x, y: NSHeight(NSScreen.screens[0].frame) - mousePos.y)
+        let result = AXUIElementCopyElementAtPosition(self, Float(mousePoint.x), Float(mousePoint.y), &element)
+        guard result == .success, let element = element else {
+            return nil
+        }
+
+        /// DFS until we find an element in the mouse position
+        /// NOTE: Push the children to stack in reverse-order for in-order traversal.
+        var stack: [AXUIElement] = []
+        for child in element.children().reversed() {
+            stack.append(child)
+        }
+
+        while let subElement = stack.popLast() {
+            if let point = subElement.pointValue(forAttribute: kAXPositionAttribute),
+               let size = subElement.sizeValue(forAttribute: kAXSizeAttribute),
+               CGRect(origin: point, size: size).contains(mousePoint),
+               subElement.actions().contains("AXPress") {
+                // EARLY TERMINATE if AXPress-able element is found
+                return subElement
+            }
+
+            // Add all children if dimensionless
+            for child in subElement.children().reversed() {
+                stack.append(child)
+            }
+        }
+
+        return element
+    }
+
+    func getElementInFocus() -> AXUIElement? {
+        guard let value = self.value(forAttribute: kAXFocusedUIElementAttribute) else {
+            return nil
+        }
+
+        return (value as! AXUIElement)
     }
 }

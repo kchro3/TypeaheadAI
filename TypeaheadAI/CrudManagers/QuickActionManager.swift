@@ -41,17 +41,11 @@ class QuickActionManager: ObservableObject {
 
     @discardableResult
     @MainActor
-    func addPrompt(_ prompt: String, details: String? = nil) -> QuickAction? {
+    func addPrompt(_ prompt: String, id: UUID? = nil, details: String? = nil) -> QuickAction? {
         let newPrompt = PromptEntry(context: context)
-        newPrompt.id = UUID()
+        newPrompt.id = id ?? UUID()
         newPrompt.prompt = prompt
-
-        if let details = details {
-            newPrompt.details = details
-        } else {
-            newPrompt.details = prompt
-        }
-
+        newPrompt.details = details ?? prompt
         newPrompt.createdAt = Date()
 
         do {

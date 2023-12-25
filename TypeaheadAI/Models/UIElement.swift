@@ -30,9 +30,31 @@ struct UIElement: Identifiable, Codable, Equatable {
         let id = String(id.uuidString.split(separator: "-")[0])
         return "\(self.role)\(id)"
     }
+
+    /// NOTE: This is not a true == because it ignores the ID & value
+    /// We ignore the value so that two text areas can match, even if their values are different
+    func equals(_ other: UIElement) -> Bool {
+        return (
+            self.role == other.role
+            && self.title == other.title
+            && self.description == other.description
+            && self.label == other.label
+            && self.link == other.link
+            && self.point == other.point
+            && self.size == other.size
+            && self.domId == other.domId
+            && self.domClasses == other.domClasses
+            && self.parentRole == other.parentRole
+            && self.attributes == other.attributes
+        )
+    }
 }
 
 extension UIElement {
+    private static let maxChildren = 25
+    private static let maxCharacterCount = 4000
+    private static let defaultExcludedRoles = ["AXGroup", "AXImage"]
+
     init?(from element: AXUIElement, callback: ((String, AXUIElement) -> Void)? = nil) {
         guard let role = element.stringValue(forAttribute: kAXRoleAttribute) else {
             return nil
@@ -73,11 +95,11 @@ extension UIElement {
             self.domId = nil
         }
 
-        if let domClassesAttr = element.stringArrayValue(forAttribute: "AXDOMClassList"), !domClassesAttr.isEmpty {
-            self.domClasses = domClassesAttr
-        } else {
-            self.domClasses = nil
-        }
+//        if let domClassesAttr = element.stringArrayValue(forAttribute: "AXDOMClassList"), !domClassesAttr.isEmpty {
+//            self.domClasses = domClassesAttr
+//        } else {
+        self.domClasses = nil
+//        }
 
         self.link = element.value(forAttribute: kAXURLAttribute) as? URL
         self.actions = element.actions()
@@ -103,21 +125,28 @@ extension UIElement {
         isVisible: Bool = true,
         isIndexed: Bool = true,
         showActions: Bool = false,
-        excludedRoles: [String]? = nil,
-        excludedActions: [String]? = nil
+        excludedRoles: [String]? = UIElement.defaultExcludedRoles,
+        excludedActions: [String]? = nil,
+        maxDepth: Int? = nil
     ) -> String? {
-        if (self.role == "AXGroup" && self.parentRole == "AXGroup") 
-            || (excludedRoles ?? []).contains(self.role) {
-            // Collapse nested AXGroups OR Ignore excluded roles
+        if let maxDepth = maxDepth, maxDepth == indent {
+            // If the indent reaches the maxDepth, terminate.
+            // If maxDepth is nil, then it recurses exhaustively.
+            return nil
+        }
+
+        if (excludedRoles ?? []).contains(self.role) {
+            // Ignore excluded roles
             var line = ""
-            for child in self.children {
+            for child in self.children.prefix(UIElement.maxChildren) {
                 if let childLine = child.serialize(
                     indent: indent,
                     isVisible: isVisible,
                     isIndexed: isIndexed,
                     showActions: showActions,
                     excludedRoles: excludedRoles,
-                    excludedActions: excludedActions
+                    excludedActions: excludedActions,
+                    maxDepth: maxDepth
                 ), !childLine.isEmpty {
                     if line.isEmpty {
                         line = childLine
@@ -139,7 +168,7 @@ extension UIElement {
         // If neither exist:             none
         var text: String = "none"
         if role == "AXStaticText" {
-            text = renderAXStaticText()
+            return renderAXStaticText()
         } else {
             text = self.title ?? "none"
             if let desc = self.description {
@@ -202,7 +231,7 @@ extension UIElement {
 //        line += ", attributes: \(self.attributes)"
 
         if self.role == "AXCell" {
-            for (index, child) in self.children.enumerated() {
+            for (index, child) in self.children.prefix(UIElement.maxChildren).enumerated() {
                 if index > 0, self.children[index-1].role == "AXStaticText", self.children[index].role == "AXStaticText" {
                     // If there are consecutive children with the role AXStaticText, just keep appending to the line
                     line += child.renderAXStaticText()
@@ -212,20 +241,22 @@ extension UIElement {
                     isIndexed: isIndexed,
                     showActions: showActions,
                     excludedRoles: excludedRoles,
-                    excludedActions: excludedActions
+                    excludedActions: excludedActions,
+                    maxDepth: maxDepth
                 ), !childLine.isEmpty {
                     line += "\n\(childLine)"
                 }
             }
         } else {
-            for child in self.children {
+            for child in self.children.prefix(UIElement.maxChildren) {
                 if let childLine = child.serialize(
                     indent: indent + 1,
                     isVisible: isVisible,
                     isIndexed: isIndexed,
                     showActions: showActions,
                     excludedRoles: excludedRoles,
-                    excludedActions: excludedActions
+                    excludedActions: excludedActions,
+                    maxDepth: maxDepth
                 ), !childLine.isEmpty {
                     line += "\n\(childLine)"
                 }
@@ -236,6 +267,15 @@ extension UIElement {
     }
 
     private func renderAXStaticText() -> String {
-        return self.value ?? ""
+        if let text = self.value {
+            if text.count > UIElement.maxCharacterCount {
+                let truncated = String(text.prefix(UIElement.maxCharacterCount))
+                return "\(truncated)..."
+            } else {
+                return text
+            }
+        } else {
+            return ""
+        }
     }
 }

@@ -14,7 +14,7 @@ enum MessageType: Codable, Equatable {
     case markdown(data: String)
     case image(data: ImageData)
     case data(data: Data)
-    case function_call(data: FunctionCall)
+    case function_call(data: [FunctionCall])
     case tool_call(data: FunctionCall)
 }
 
@@ -47,7 +47,7 @@ struct Message: Codable, Identifiable, Equatable {
         rootCreatedAt: Date,
         text: String,
         isCurrentUser: Bool,
-        isHidden: Bool = false,
+        isHidden: Bool,
         quickActionId: UUID? = nil,
         appContext: AppContext? = nil,
         responseError: String? = nil,

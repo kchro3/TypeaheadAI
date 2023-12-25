@@ -20,7 +20,8 @@ extension CanGetUIElements {
 
             // Narrow down to the first (top-most) window
             if let windowElement = element?.children().first(where: {
-                $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow"
+                $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow" &&
+                !$0.children().isEmpty
             }) {
                 element = windowElement
             }

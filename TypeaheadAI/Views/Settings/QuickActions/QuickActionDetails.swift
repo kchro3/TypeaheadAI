@@ -24,8 +24,6 @@ struct QuickActionDetails: View {
     @Binding var mutableLabel: String
     @Binding var mutableDetails: String
 
-    private let descWidth: CGFloat = 50
-
     init(
         quickAction: PromptEntry,
         isEditing: Binding<Bool>,
@@ -261,7 +259,7 @@ struct QuickActionDetails: View {
             })
             .buttonStyle(.plain)
         }
-        .frame(maxWidth: .infinity)
+        .frame(minWidth: 200, maxWidth: .infinity)
     }
 
     @ViewBuilder
