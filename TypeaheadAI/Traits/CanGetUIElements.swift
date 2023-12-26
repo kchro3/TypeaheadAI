@@ -18,18 +18,13 @@ extension CanGetUIElements {
         if let appContext = appContext, let pid = appContext.pid {
             element = AXUIElementCreateApplication(pid)
 
-            if let topMostElement = element?.topMost() {
-                print(topMostElement.serialize() ?? "could not serialize")
-                element = topMostElement
+            // Narrow down to the first (top-most) window
+            if let windowElement = element?.children().first(where: {
+                $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow" &&
+                !$0.children().isEmpty
+            }) {
+                element = windowElement
             }
-
-//            // Narrow down to the first (top-most) window
-//            if let windowElement = element?.children().first(where: {
-//                $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow" &&
-//                !$0.children().isEmpty
-//            }) {
-//                element = windowElement
-//            }
         } else {
             element = AXUIElementCreateSystemWide()
         }

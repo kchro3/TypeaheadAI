@@ -193,7 +193,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 if let serializedUIElement = uiElement?.serialize(
                     excludedActions: ["AXScrollToVisible", "AXCancel", "AXRaise"]
                 ) {
-                    print(serializedUIElement)
                     appInfo?.appContext?.serializedUIElement = serializedUIElement
                     appInfo?.elementMap = elementMap
                 }
