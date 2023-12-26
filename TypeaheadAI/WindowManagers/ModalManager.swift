@@ -163,10 +163,10 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func appendTool(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        if functionCall.name == "perform_ui_action" {
+        if functionCall.name == "perform_ui_action" || functionCall.name == "open_application" {
             for index in messages.indices {
-                if case .tool_call(let functionCall) = messages[index].messageType,
-                   functionCall.name == "perform_ui_action" {
+                if case .tool_call(let fnCall) = messages[index].messageType,
+                   fnCall.name == "perform_ui_action" || fnCall.name == "open_application" {
                     messages[index].text = "<pruned>"
                 }
             }
@@ -388,10 +388,10 @@ class ModalManager: ObservableObject {
     /// Assume that function calls are immediately followed by their tool calls.
     @MainActor
     func appendFunction(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        if functionCall.name == "perform_ui_action",
+        if (functionCall.name == "perform_ui_action" || functionCall.name == "open_application"),
            let lastMessage = messages.last,
            case .tool_call(let fnCall) = lastMessage.messageType,
-           fnCall.name == "perform_ui_action",
+           (fnCall.name == "perform_ui_action" || fnCall.name == "open_application"),
            let lastFnCallIndex = messages.lastIndex(where: { isFunctionCall(message: $0) }),
            case .function_call(var functionCalls) = messages[lastFnCallIndex].messageType {
 

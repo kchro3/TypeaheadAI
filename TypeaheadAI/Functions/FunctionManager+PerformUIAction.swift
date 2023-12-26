@@ -32,30 +32,9 @@ extension FunctionCall {
             delayInMillis: delayInMillis
         )
     }
-
-    /// This is super hacky. We are mutating the args to maintain state.
-    /// In a proper implementation, we would extend FunctionCall to support an extra state variable.
-    mutating func addAction(action: Action) {
-        var actions: [String] = self.stringArrayArg("actions") ?? []
-        if let data = try? JSONEncoder().encode(action),
-           let serialized = String(data: data, encoding: .utf8) {
-            actions.append(serialized)
-            self.args["actions"] = JSONAny.array(actions.map { JSONAny.string($0) })
-        }
-    }
-
-    func getActions() -> [Action] {
-        if let serializedActions = self.stringArrayArg("actions") {
-            return serializedActions
-                .compactMap { $0.data(using: .utf8) }
-                .compactMap { try? JSONDecoder().decode(Action.self, from: $0) }
-        } else {
-            return []
-        }
-    }
 }
 
-extension FunctionManager: CanSimulateEnter {
+extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
     func performUIAction(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
         let appContext = appInfo?.appContext
@@ -173,6 +152,7 @@ extension FunctionManager: CanSimulateEnter {
         }
 
         try await Task.sleep(for: .seconds(2))
+        await modalManager.showModal()
 
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
@@ -191,10 +171,9 @@ extension FunctionManager: CanSimulateEnter {
             )
         }
 
-        await modalManager.showModal()
         try Task.checkCancellation()
 
-        var newAppInfo = AppInfo(
+        let newAppInfo = AppInfo(
             appContext: appInfo?.appContext,
             elementMap: newElementMap,
             apps: appInfo?.apps ?? [:]

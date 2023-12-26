@@ -9,7 +9,7 @@ import AppKit
 import Foundation
 
 struct UIElement: Identifiable, Codable, Equatable {
-    let id: UUID
+    let id: Int
     let role: String
     let title: String?
     let description: String?
@@ -20,6 +20,7 @@ struct UIElement: Identifiable, Codable, Equatable {
     let size: CGSize?
     let domId: String?
     let domClasses: [String]?
+    let enabled: Bool
 
     let actions: [String]
     let parentRole: String?
@@ -27,7 +28,6 @@ struct UIElement: Identifiable, Codable, Equatable {
     let attributes: [String]
 
     var shortId: String {
-        let id = String(id.uuidString.split(separator: "-")[0])
         return "\(self.role)\(id)"
     }
 
@@ -55,12 +55,12 @@ extension UIElement {
     private static let maxCharacterCount = 4000
     private static let defaultExcludedRoles = ["AXGroup", "AXImage"]
 
-    init?(from element: AXUIElement, callback: ((String, AXUIElement) -> Void)? = nil) {
+    init?(from element: AXUIElement, idGenerator: (() -> Int)? = nil, callback: ((String, AXUIElement) -> Void)? = nil) {
         guard let role = element.stringValue(forAttribute: kAXRoleAttribute) else {
             return nil
         }
 
-        self.id = UUID()
+        self.id = idGenerator?() ?? 0
         self.role = role
         self.point = element.pointValue(forAttribute: kAXPositionAttribute)
         self.size = element.sizeValue(forAttribute: kAXSizeAttribute)
@@ -103,10 +103,11 @@ extension UIElement {
 
         self.link = element.value(forAttribute: kAXURLAttribute) as? URL
         self.actions = element.actions()
+        self.enabled = element.boolValue(forAttribute: kAXEnabledAttribute)
 
         self.parentRole = element.parent()?.stringValue(forAttribute: kAXRoleAttribute)
         if let children = element.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
-            self.children = children.compactMap { UIElement(from: $0, callback: callback) }
+            self.children = children.compactMap { UIElement(from: $0, idGenerator: idGenerator, callback: callback) }
         } else {
             self.children = []
         }
@@ -133,6 +134,29 @@ extension UIElement {
             // If the indent reaches the maxDepth, terminate.
             // If maxDepth is nil, then it recurses exhaustively.
             return nil
+        }
+
+        guard self.enabled else {
+            // Ignore disabled elements
+            var line = ""
+            for child in self.children.prefix(UIElement.maxChildren) {
+                if let childLine = child.serialize(
+                    indent: indent,
+                    isVisible: isVisible,
+                    isIndexed: isIndexed,
+                    showActions: showActions,
+                    excludedRoles: excludedRoles,
+                    excludedActions: excludedActions,
+                    maxDepth: maxDepth
+                ), !childLine.isEmpty {
+                    if line.isEmpty {
+                        line = childLine
+                    } else {
+                        line += "\n\(childLine)"
+                    }
+                }
+            }
+            return line
         }
 
         if (excludedRoles ?? []).contains(self.role) {
@@ -227,8 +251,6 @@ extension UIElement {
                 line += ", actionable: true"
             }
         }
-
-//        line += ", attributes: \(self.attributes)"
 
         if self.role == "AXCell" {
             for (index, child) in self.children.prefix(UIElement.maxChildren).enumerated() {

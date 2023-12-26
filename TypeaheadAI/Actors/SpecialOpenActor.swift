@@ -10,7 +10,7 @@ import CoreServices
 import Foundation
 import os.log
 
-actor SpecialOpenActor: CanGetUIElements {
+actor SpecialOpenActor {
     private let intentManager: IntentManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
@@ -78,24 +78,6 @@ actor SpecialOpenActor: CanGetUIElements {
                     await self.modalManager.appendUserIntents(intents: intents.intents)
                 }
             }
-        }
-    }
-
-    private func hack() {
-        let jsonString = """
-            {"tool_uses":[{"recipient_name":"functions.open_url","parameters":{"url":"https://mail.google.com/mail/u/0/#inbox?compose=new"}},{"recipient_name":"functions.perform_ui_action","parameters":{"actions":[{"id":"AXButton#0160FB27","action":"AXPress"}]}}]}
-        """
-
-        do {
-            if let jsonData = jsonString.data(using: .utf8),
-               let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: [[String: Any]]],
-               let toolUses = json["tool_uses"] {
-                for tool in toolUses {
-                    print(tool)
-                }
-            }
-        } catch {
-            print("Error decoding arbitrary JSON: \(error)")
         }
     }
 }

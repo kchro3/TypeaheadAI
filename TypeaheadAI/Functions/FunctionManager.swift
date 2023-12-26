@@ -124,7 +124,7 @@ struct FunctionCall: Codable, Equatable {
     }
 }
 
-class FunctionManager: ObservableObject, CanFetchAppContext, CanGetUIElements, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {
+class FunctionManager: ObservableObject, CanFetchAppContext, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {
 
     @Published var isExecuting: Bool = false
     private var currentTask: Task<Void, Error>? = nil

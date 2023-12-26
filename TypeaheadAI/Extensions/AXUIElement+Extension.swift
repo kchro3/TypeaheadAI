@@ -19,12 +19,28 @@ extension AXUIElement {
         return value
     }
 
+    func topMost() -> AXUIElement? {
+        guard let value = self.value(forAttribute: kAXTopLevelUIElementAttribute) else {
+            return nil
+        }
+
+        return (value as! AXUIElement)
+    }
+
     func stringValue(forAttribute attribute: String) -> String? {
         guard let value = self.value(forAttribute: attribute) else {
             return nil
         }
 
         return value as? String
+    }
+
+    func boolValue(forAttribute attribute: String) -> Bool {
+        guard let value = self.value(forAttribute: attribute) else {
+            return false
+        }
+
+        return (value as? Bool) ?? false
     }
 
     func stringArrayValue(forAttribute attribute: String) -> [String]? {
@@ -153,5 +169,14 @@ extension AXUIElement {
         }
 
         return (value as! AXUIElement)
+    }
+
+    func serialize() -> String? {
+        if let uiElement = UIElement(from: self),
+           let serialized = uiElement.serialize() {
+            return serialized
+        } else {
+            return nil
+        }
     }
 }
