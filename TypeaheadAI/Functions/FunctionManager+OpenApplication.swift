@@ -35,6 +35,7 @@ extension FunctionManager {
 
         // Activate the app, bringing it to the foreground
         NSWorkspace.shared.open(url)
+        try await Task.sleep(for: .seconds(2))
         try Task.checkCancellation()
 
         let newAppContext = try await fetchAppContext()

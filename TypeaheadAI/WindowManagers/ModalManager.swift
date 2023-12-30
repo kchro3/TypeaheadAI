@@ -163,10 +163,20 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func appendTool(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        if functionCall.name == "perform_ui_action" || functionCall.name == "open_application" {
+        if (
+            functionCall.name == "perform_ui_action"
+            || functionCall.name == "open_application"
+            || functionCall.name == "open_file"
+            || functionCall.name == "save_file"
+        ){
             for index in messages.indices {
                 if case .tool_call(let fnCall) = messages[index].messageType,
-                   fnCall.name == "perform_ui_action" || fnCall.name == "open_application" {
+                   (
+                    fnCall.name == "perform_ui_action"
+                    || fnCall.name == "open_application"
+                    || fnCall.name == "open_file"
+                    || fnCall.name == "save_file"
+                   ) {
                     messages[index].text = "<pruned>"
                 }
             }
@@ -388,10 +398,17 @@ class ModalManager: ObservableObject {
     /// Assume that function calls are immediately followed by their tool calls.
     @MainActor
     func appendFunction(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        if (functionCall.name == "perform_ui_action" || functionCall.name == "open_application"),
+        if (
+            functionCall.name == "perform_ui_action"
+            || functionCall.name == "open_application"
+            || functionCall.name == "open_file"
+            || functionCall.name == "save_file"),
            let lastMessage = messages.last,
            case .tool_call(let fnCall) = lastMessage.messageType,
-           (fnCall.name == "perform_ui_action" || fnCall.name == "open_application"),
+           (fnCall.name == "perform_ui_action" 
+            || fnCall.name == "open_application"
+            || fnCall.name == "open_file"
+            || fnCall.name == "save_file"),
            let lastFnCallIndex = messages.lastIndex(where: { isFunctionCall(message: $0) }),
            case .function_call(var functionCalls) = messages[lastFnCallIndex].messageType {
 

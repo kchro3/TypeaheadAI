@@ -179,4 +179,19 @@ extension AXUIElement {
             return nil
         }
     }
+
+    /// NOTE: if isReflexive is true, then the condition can be true of the caller.
+    func findFirst(condition: (AXUIElement) -> Bool, isReflexive: Bool = false) -> AXUIElement? {
+        if isReflexive, condition(self) {
+            return self
+        }
+
+        for child in self.children() {
+            if let match = child.findFirst(condition: condition, isReflexive: true) {
+                return match
+            }
+        }
+
+        return nil
+    }
 }

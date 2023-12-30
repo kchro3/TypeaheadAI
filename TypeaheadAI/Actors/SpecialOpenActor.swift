@@ -10,7 +10,7 @@ import CoreServices
 import Foundation
 import os.log
 
-actor SpecialOpenActor {
+actor SpecialOpenActor: CanGetUIElements {
     private let intentManager: IntentManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager

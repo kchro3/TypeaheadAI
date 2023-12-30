@@ -75,34 +75,12 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
         try await Task.sleep(for: .milliseconds(100))
         try Task.checkCancellation()
 
-        var result: AXError? = nil
-        if axElement.actions().contains("AXPress") {
-            result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
-        } else if let size = axElement.sizeValue(forAttribute: kAXSizeAttribute),
-                  let point = axElement.pointValue(forAttribute: kAXPositionAttribute),
-                  size.width * size.height > 1.0 {
-            // Simulate a mouse click event
-            let centerPoint = CGPoint(x: point.x + size.width / 2, y: point.y + size.height / 2)
-            print("click on \(centerPoint)")
-            simulateMouseClick(at: centerPoint)
-            result = .success
-        } else {
-            result = .actionUnsupported
-        }
-
-        try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
-
-        guard result == .success else {
+        do {
+            try await focus(on: axElement)
+        } catch {
             // TERMINATE on failure
             await modalManager.showModal()
-
-            if result == .actionUnsupported {
-                await modalManager.appendToolError("Action failed because the action was invalid.", functionCall: functionCall, appContext: appContext)
-            } else {
-                await modalManager.appendToolError("Action failed... (code: \(result?.rawValue ?? -1))", functionCall: functionCall, appContext: appContext)
-            }
-
+            await modalManager.appendToolError("Action failed...", functionCall: functionCall, appContext: appContext)
             return
         }
 
@@ -196,24 +174,5 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
         }
 
         return nil
-    }
-
-    /// Super janky, but I need to click on a point & return the mouse back to its original position
-    func simulateMouseClick(at point: CGPoint) {
-        // Store the original mouse position
-        let originalPosition = NSEvent.mouseLocation
-
-        // Create a mouse down event
-        if let mouseDown = CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: point, mouseButton: .left) {
-            mouseDown.post(tap: .cghidEventTap)
-        }
-
-        // Create a mouse up event
-        if let mouseUp = CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: point, mouseButton: .left) {
-            mouseUp.post(tap: .cghidEventTap)
-        }
-
-        // Move the mouse back to the original position
-        CGDisplayMoveCursorToPoint(CGMainDisplayID(), originalPosition)
     }
 }
