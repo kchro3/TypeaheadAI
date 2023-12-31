@@ -31,7 +31,36 @@ extension FunctionManager {
             functionCall: functionCall,
             appContext: appContext)
 
-        try await modalManager.continueReplying()
+        let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
+        if let serializedUIElement = newUIElement?.serialize(
+            excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
+        ) {
+            await modalManager.appendTool(
+                "Updated state: \(serializedUIElement)",
+                functionCall: functionCall,
+                appContext: appInfo?.appContext
+            )
+        } else {
+            await modalManager.appendToolError(
+                "Could not capture app state",
+                functionCall: functionCall,
+                appContext: appInfo?.appContext
+            )
+        }
+
+        let newAppInfo = AppInfo(
+            appContext: appInfo?.appContext,
+            elementMap: newElementMap,
+            apps: appInfo?.apps ?? [:]
+        )
+
+        Task {
+            do {
+                try await modalManager.continueReplying(appInfo: newAppInfo)
+            } catch {
+                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
+            }
+        }
     }
 
     func openAndScrapeURL(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {

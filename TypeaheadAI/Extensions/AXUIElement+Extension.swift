@@ -10,7 +10,7 @@ import Foundation
 
 extension AXUIElement {
     func toUIElement() -> UIElement? {
-        return UIElement(from: self)
+        return UIElementVisitor.visit(element: self)
     }
 
     func value(forAttribute attribute: String) -> CFTypeRef? {
@@ -19,12 +19,20 @@ extension AXUIElement {
         return value
     }
 
-    func topMost() -> AXUIElement? {
-        guard let value = self.value(forAttribute: kAXTopLevelUIElementAttribute) else {
+    func subelement(forAttribute attribute: String) -> AXUIElement? {
+        guard let value = self.value(forAttribute: attribute) else {
             return nil
         }
-
+        
         return (value as! AXUIElement)
+    }
+
+    func role() -> String? {
+        return self.stringValue(forAttribute: kAXSubroleAttribute) ?? self.stringValue(forAttribute: kAXRoleAttribute)
+    }
+
+    func topMost() -> AXUIElement? {
+        return self.subelement(forAttribute: kAXTopLevelUIElementAttribute)
     }
 
     func stringValue(forAttribute attribute: String) -> String? {
@@ -82,11 +90,7 @@ extension AXUIElement {
     }
 
     func parent() -> AXUIElement? {
-        guard let value = self.value(forAttribute: kAXParentAttribute) else {
-            return nil
-        }
-
-        return (value as! AXUIElement)
+        return self.subelement(forAttribute: kAXParentAttribute)
     }
 
     func children() -> [AXUIElement] {
@@ -164,15 +168,11 @@ extension AXUIElement {
     }
 
     func getElementInFocus() -> AXUIElement? {
-        guard let value = self.value(forAttribute: kAXFocusedUIElementAttribute) else {
-            return nil
-        }
-
-        return (value as! AXUIElement)
+        return self.subelement(forAttribute: kAXFocusedUIElementAttribute)
     }
 
     func serialize() -> String? {
-        if let uiElement = UIElement(from: self),
+        if let uiElement = UIElementVisitor.visit(element: self),
            let serialized = uiElement.serialize() {
             return serialized
         } else {

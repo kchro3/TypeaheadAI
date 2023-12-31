@@ -17,6 +17,7 @@ extension Notification.Name {
 
 class ModalManager: ObservableObject {
     private let context: NSManagedObjectContext
+    var cachedAppInfo: AppInfo? = nil
 
     @Published var messages: [Message]
     @Published var userIntents: [String]?

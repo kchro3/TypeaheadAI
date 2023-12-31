@@ -66,6 +66,13 @@ extension FunctionManager {
         )
 
         try Task.checkCancellation()
-        try await modalManager.continueReplying(appInfo: newAppInfo)
+
+        Task {
+            do {
+                try await modalManager.continueReplying(appInfo: newAppInfo)
+            } catch {
+                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
+            }
+        }
     }
 }

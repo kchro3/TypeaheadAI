@@ -55,71 +55,7 @@ struct UIElement: Identifiable, Codable, Equatable {
 extension UIElement {
     private static let maxChildren = 25
     private static let maxCharacterCount = 4000
-    private static let defaultExcludedRoles = ["AXGroup", "AXImage"]
-
-    init?(from element: AXUIElement, idGenerator: (() -> Int)? = nil, callback: ((String, AXUIElement) -> Void)? = nil) {
-        guard let role = element.stringValue(forAttribute: kAXRoleAttribute) else {
-            return nil
-        }
-
-        self.id = idGenerator?() ?? 0
-        self.role = role
-        self.point = element.pointValue(forAttribute: kAXPositionAttribute)
-        self.size = element.sizeValue(forAttribute: kAXSizeAttribute)
-
-        if let titleAttr = element.stringValue(forAttribute: kAXTitleAttribute), !titleAttr.isEmpty {
-            self.title = titleAttr
-        } else {
-            self.title = nil
-        }
-
-        if let descAttr = element.stringValue(forAttribute: kAXDescriptionAttribute), !descAttr.isEmpty {
-            self.description = descAttr
-        } else {
-            self.description = nil
-        }
-
-        if let valueAttr = element.stringValue(forAttribute: kAXValueAttribute), !valueAttr.isEmpty {
-            self.value = valueAttr
-        } else {
-            self.value = nil
-        }
-
-        if let labelAttr = element.stringValue(forAttribute: kAXLabelValueAttribute), !labelAttr.isEmpty {
-            self.label = labelAttr
-        } else {
-            self.label = nil
-        }
-
-        if let domAttr = element.stringValue(forAttribute: "AXDOMIdentifier"), !domAttr.isEmpty {
-            self.domId = domAttr
-        } else {
-            self.domId = nil
-        }
-
-//        if let domClassesAttr = element.stringArrayValue(forAttribute: "AXDOMClassList"), !domClassesAttr.isEmpty {
-//            self.domClasses = domClassesAttr
-//        } else {
-        self.domClasses = nil
-//        }
-
-        self.link = element.value(forAttribute: kAXURLAttribute) as? URL
-        self.actions = element.actions()
-        self.enabled = element.boolValue(forAttribute: kAXEnabledAttribute)
-        self.identifier = element.stringValue(forAttribute: kAXIdentifierAttribute)
-
-        self.parentRole = element.parent()?.stringValue(forAttribute: kAXRoleAttribute)
-        if let children = element.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
-            self.children = children.compactMap { UIElement(from: $0, idGenerator: idGenerator, callback: callback) }
-        } else {
-            self.children = []
-        }
-
-        self.attributes = element.attributes()
-
-        // NOTE: The caller can maintain state
-        callback?(self.shortId, element)
-    }
+    private static let defaultExcludedRoles = ["AXStaticText", "AXGroup"]
 
     /// Convert to string representation
     /// isVisible: Only print visible UIElements
@@ -206,7 +142,11 @@ extension UIElement {
                 text += ", domClasses: \(domClasses)"
             }
             if let link = self.link, link.absoluteString != "about:blank" {
-                text += ", link: \(link.path())"
+                if link.absoluteString.starts(with: "blob:null") {
+                    text += ", link: \(link.absoluteString)"
+                } else {
+                    text += ", link: \(link.path())"
+                }
             }
 
             /// Add actions
@@ -215,11 +155,11 @@ extension UIElement {
                 actions = self.actions.filter { !excludedActions.contains($0) }
             }
             if showActions {
-                if !actions.isEmpty {
+                if !actions.isEmpty, self.enabled {
                     text += ", actions: \(actions)"
                 }
             } else {
-                if !actions.isEmpty {
+                if !actions.isEmpty, self.enabled {
                     text += ", actionable: true"
                 }
             }

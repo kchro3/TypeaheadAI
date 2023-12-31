@@ -47,6 +47,10 @@ struct ModalFooterView: View {
                                 await modalManager.addUserMessage(text, appContext: nil)
                             }
                         }
+                    } else if let cachedAppInfo = modalManager.cachedAppInfo {
+                        Task {
+                            try await modalManager.continueReplying(appInfo: cachedAppInfo)
+                        }
                     }
                 }
                 .padding(.vertical, 5)

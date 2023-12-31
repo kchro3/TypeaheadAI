@@ -90,6 +90,12 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        try await modalManager.continueReplying(appInfo: newAppInfo)
+        Task {
+            do {
+                try await modalManager.continueReplying(appInfo: newAppInfo)
+            } catch {
+                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
+            }
+        }
     }
 }

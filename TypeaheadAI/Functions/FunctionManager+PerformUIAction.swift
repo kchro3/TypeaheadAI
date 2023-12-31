@@ -88,7 +88,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             if role == "AXComboBox" {
                 if let parent = axElement.parent(),
                    let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
-                   let serializedList = UIElement(from: axList)?.serialize(
+                   let serializedList = UIElementVisitor.visit(element: axList)?.serialize(
                     isIndexed: false,
                     excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
                    ),
@@ -157,7 +157,17 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             apps: appInfo?.apps ?? [:]
         )
 
-        try await modalManager.continueReplying(appInfo: newAppInfo)
+        DispatchQueue.main.async {
+            modalManager.cachedAppInfo = newAppInfo
+        }
+
+        Task {
+            do {
+                try await modalManager.continueReplying(appInfo: newAppInfo)
+            } catch {
+                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
+            }
+        }
     }
 
     /// Recursively traverse an AXList to select an option that matches the expected value.

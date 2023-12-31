@@ -32,8 +32,8 @@ extension CanGetUIElements {
         var elementId = 0
         var elementMap = ElementMap()
         if let element = element,
-           let uiElement = UIElement(
-            from: element,
+           let uiElement = UIElementVisitor.visit(
+            element: element,
             idGenerator: {
                 elementId += 1
                 return elementId
