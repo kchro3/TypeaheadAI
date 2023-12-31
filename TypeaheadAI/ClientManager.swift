@@ -144,6 +144,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
             // Incognito mode doesn't support this yet
             return nil
         } else {
+            return nil  // Disable for now, wasting tokens.
+
             guard let httpBody = try? JSONEncoder().encode(payload) else {
                 throw ClientManagerError.badRequest("Request was malformed...")
             }
@@ -193,7 +195,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 if let serializedUIElement = uiElement?.serialize(
                     excludedActions: ["AXScrollToVisible", "AXCancel", "AXRaise"]
                 ) {
-                    print(serializedUIElement)
                     appInfo?.appContext?.serializedUIElement = serializedUIElement
                     appInfo?.elementMap = elementMap
                 }

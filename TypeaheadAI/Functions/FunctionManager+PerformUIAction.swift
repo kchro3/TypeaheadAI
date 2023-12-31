@@ -32,30 +32,9 @@ extension FunctionCall {
             delayInMillis: delayInMillis
         )
     }
-
-    /// This is super hacky. We are mutating the args to maintain state.
-    /// In a proper implementation, we would extend FunctionCall to support an extra state variable.
-    mutating func addAction(action: Action) {
-        var actions: [String] = self.stringArrayArg("actions") ?? []
-        if let data = try? JSONEncoder().encode(action),
-           let serialized = String(data: data, encoding: .utf8) {
-            actions.append(serialized)
-            self.args["actions"] = JSONAny.array(actions.map { JSONAny.string($0) })
-        }
-    }
-
-    func getActions() -> [Action] {
-        if let serializedActions = self.stringArrayArg("actions") {
-            return serializedActions
-                .compactMap { $0.data(using: .utf8) }
-                .compactMap { try? JSONDecoder().decode(Action.self, from: $0) }
-        } else {
-            return []
-        }
-    }
 }
 
-extension FunctionManager: CanSimulateEnter {
+extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
     func performUIAction(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
         let appContext = appInfo?.appContext
@@ -96,34 +75,12 @@ extension FunctionManager: CanSimulateEnter {
         try await Task.sleep(for: .milliseconds(100))
         try Task.checkCancellation()
 
-        var result: AXError? = nil
-        if axElement.actions().contains("AXPress") {
-            result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
-        } else if let size = axElement.sizeValue(forAttribute: kAXSizeAttribute),
-                  let point = axElement.pointValue(forAttribute: kAXPositionAttribute),
-                  size.width * size.height > 1.0 {
-            // Simulate a mouse click event
-            let centerPoint = CGPoint(x: point.x + size.width / 2, y: point.y + size.height / 2)
-            print("click on \(centerPoint)")
-            simulateMouseClick(at: centerPoint)
-            result = .success
-        } else {
-            result = .actionUnsupported
-        }
-
-        try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
-
-        guard result == .success else {
+        do {
+            try await focus(on: axElement)
+        } catch {
             // TERMINATE on failure
             await modalManager.showModal()
-
-            if result == .actionUnsupported {
-                await modalManager.appendToolError("Action failed because the action was invalid.", functionCall: functionCall, appContext: appContext)
-            } else {
-                await modalManager.appendToolError("Action failed... (code: \(result?.rawValue ?? -1))", functionCall: functionCall, appContext: appContext)
-            }
-
+            await modalManager.appendToolError("Action failed...", functionCall: functionCall, appContext: appContext)
             return
         }
 
@@ -131,7 +88,7 @@ extension FunctionManager: CanSimulateEnter {
             if role == "AXComboBox" {
                 if let parent = axElement.parent(),
                    let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
-                   let serializedList = UIElement(from: axList)?.serialize(
+                   let serializedList = UIElementVisitor.visit(element: axList)?.serialize(
                     isIndexed: false,
                     excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
                    ),
@@ -173,6 +130,7 @@ extension FunctionManager: CanSimulateEnter {
         }
 
         try await Task.sleep(for: .seconds(2))
+        await modalManager.showModal()
 
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
@@ -191,16 +149,25 @@ extension FunctionManager: CanSimulateEnter {
             )
         }
 
-        await modalManager.showModal()
         try Task.checkCancellation()
 
-        var newAppInfo = AppInfo(
+        let newAppInfo = AppInfo(
             appContext: appInfo?.appContext,
             elementMap: newElementMap,
             apps: appInfo?.apps ?? [:]
         )
 
-        try await modalManager.continueReplying(appInfo: newAppInfo)
+        DispatchQueue.main.async {
+            modalManager.cachedAppInfo = newAppInfo
+        }
+
+        Task {
+            do {
+                try await modalManager.continueReplying(appInfo: newAppInfo)
+            } catch {
+                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
+            }
+        }
     }
 
     /// Recursively traverse an AXList to select an option that matches the expected value.
@@ -217,24 +184,5 @@ extension FunctionManager: CanSimulateEnter {
         }
 
         return nil
-    }
-
-    /// Super janky, but I need to click on a point & return the mouse back to its original position
-    func simulateMouseClick(at point: CGPoint) {
-        // Store the original mouse position
-        let originalPosition = NSEvent.mouseLocation
-
-        // Create a mouse down event
-        if let mouseDown = CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: point, mouseButton: .left) {
-            mouseDown.post(tap: .cghidEventTap)
-        }
-
-        // Create a mouse up event
-        if let mouseUp = CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: point, mouseButton: .left) {
-            mouseUp.post(tap: .cghidEventTap)
-        }
-
-        // Move the mouse back to the original position
-        CGDisplayMoveCursorToPoint(CGMainDisplayID(), originalPosition)
     }
 }

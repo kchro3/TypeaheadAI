@@ -29,10 +29,16 @@ extension CanGetUIElements {
             element = AXUIElementCreateSystemWide()
         }
 
+        var elementId = 0
         var elementMap = ElementMap()
-        if let element = element, let uiElement = UIElement(from: element, callback: { uuid, element in
-            elementMap[uuid] = element
-        }) {
+        if let element = element,
+           let uiElement = UIElementVisitor.visit(
+            element: element,
+            idGenerator: {
+                elementId += 1
+                return elementId
+            },
+            callback: { uuid, element in elementMap[uuid] = element }) {
             return (uiElement, elementMap)
         } else {
             return (nil, ElementMap())

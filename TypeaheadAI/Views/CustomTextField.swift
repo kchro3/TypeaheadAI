@@ -251,6 +251,6 @@ struct CustomTextField: View {
         text: $text,
         placeholderText: "Placeholder",
         autoCompleteSuggestions: ["apple", "banana", "orange", "grape", "watermelon"],
-        onEnter: { res in print(res) }
+        onEnter: { _ in }
     )
 }

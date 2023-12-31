@@ -124,7 +124,14 @@ struct FunctionCall: Codable, Equatable {
     }
 }
 
-class FunctionManager: ObservableObject, CanFetchAppContext, CanGetUIElements, CanSimulateSelectAll, CanSimulateCopy, CanSimulatePaste, CanSimulateClose {
+class FunctionManager: ObservableObject,
+                       CanFetchAppContext,
+                       CanSimulateSelectAll,
+                       CanSimulateCopy,
+                       CanSimulatePaste,
+                       CanSimulateClose,
+                       CanSimulateGoToFile,
+                       CanFocusOnElement {
 
     @Published var isExecuting: Bool = false
     private var currentTask: Task<Void, Error>? = nil
@@ -179,6 +186,20 @@ class FunctionManager: ObservableObject, CanFetchAppContext, CanGetUIElements, C
                     try await self?.openAndScrapeURL(functionCall, appInfo: appInfo, modalManager: modalManager)
                 } catch {
                     modalManager.setError("Failed when scraping URL...", appContext: appContext)
+                }
+
+            case "open_file":
+                do {
+                    try await self?.openFile(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch {
+                    modalManager.setError("Failed when opening file...", appContext: appContext)
+                }
+
+            case "save_file":
+                do {
+                    try await self?.saveFile(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch {
+                    modalManager.setError("Failed when saving file...", appContext: appContext)
                 }
 
             default:

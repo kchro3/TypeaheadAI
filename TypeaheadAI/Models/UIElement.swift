@@ -9,7 +9,7 @@ import AppKit
 import Foundation
 
 struct UIElement: Identifiable, Codable, Equatable {
-    let id: UUID
+    let id: Int
     let role: String
     let title: String?
     let description: String?
@@ -20,6 +20,8 @@ struct UIElement: Identifiable, Codable, Equatable {
     let size: CGSize?
     let domId: String?
     let domClasses: [String]?
+    let enabled: Bool
+    let identifier: String?
 
     let actions: [String]
     let parentRole: String?
@@ -27,7 +29,6 @@ struct UIElement: Identifiable, Codable, Equatable {
     let attributes: [String]
 
     var shortId: String {
-        let id = String(id.uuidString.split(separator: "-")[0])
         return "\(self.role)\(id)"
     }
 
@@ -45,6 +46,7 @@ struct UIElement: Identifiable, Codable, Equatable {
             && self.domId == other.domId
             && self.domClasses == other.domClasses
             && self.parentRole == other.parentRole
+            && self.identifier == other.identifier
             && self.attributes == other.attributes
         )
     }
@@ -53,73 +55,13 @@ struct UIElement: Identifiable, Codable, Equatable {
 extension UIElement {
     private static let maxChildren = 25
     private static let maxCharacterCount = 4000
-    private static let defaultExcludedRoles = ["AXGroup", "AXImage"]
-
-    init?(from element: AXUIElement, callback: ((String, AXUIElement) -> Void)? = nil) {
-        guard let role = element.stringValue(forAttribute: kAXRoleAttribute) else {
-            return nil
-        }
-
-        self.id = UUID()
-        self.role = role
-        self.point = element.pointValue(forAttribute: kAXPositionAttribute)
-        self.size = element.sizeValue(forAttribute: kAXSizeAttribute)
-
-        if let titleAttr = element.stringValue(forAttribute: kAXTitleAttribute), !titleAttr.isEmpty {
-            self.title = titleAttr
-        } else {
-            self.title = nil
-        }
-
-        if let descAttr = element.stringValue(forAttribute: kAXDescriptionAttribute), !descAttr.isEmpty {
-            self.description = descAttr
-        } else {
-            self.description = nil
-        }
-
-        if let valueAttr = element.stringValue(forAttribute: kAXValueAttribute), !valueAttr.isEmpty {
-            self.value = valueAttr
-        } else {
-            self.value = nil
-        }
-
-        if let labelAttr = element.stringValue(forAttribute: kAXLabelValueAttribute), !labelAttr.isEmpty {
-            self.label = labelAttr
-        } else {
-            self.label = nil
-        }
-
-        if let domAttr = element.stringValue(forAttribute: "AXDOMIdentifier"), !domAttr.isEmpty {
-            self.domId = domAttr
-        } else {
-            self.domId = nil
-        }
-
-//        if let domClassesAttr = element.stringArrayValue(forAttribute: "AXDOMClassList"), !domClassesAttr.isEmpty {
-//            self.domClasses = domClassesAttr
-//        } else {
-        self.domClasses = nil
-//        }
-
-        self.link = element.value(forAttribute: kAXURLAttribute) as? URL
-        self.actions = element.actions()
-
-        self.parentRole = element.parent()?.stringValue(forAttribute: kAXRoleAttribute)
-        if let children = element.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
-            self.children = children.compactMap { UIElement(from: $0, callback: callback) }
-        } else {
-            self.children = []
-        }
-
-        self.attributes = element.attributes()
-
-        // NOTE: The caller can maintain state
-        callback?(self.shortId, element)
-    }
+    private static let defaultExcludedRoles = ["AXStaticText", "AXGroup"]
 
     /// Convert to string representation
     /// isVisible: Only print visible UIElements
     /// isIndexed: Don't print indices
+    ///
+    /// Reimplement this as a Visitor pattern
     func serialize(
         indent: Int = 0,
         isVisible: Bool = true,
@@ -133,6 +75,14 @@ extension UIElement {
             // If the indent reaches the maxDepth, terminate.
             // If maxDepth is nil, then it recurses exhaustively.
             return nil
+        }
+
+        if let serializedOpenPanel = try? AXOpenPanelVisitor.visit(element: self, indent: indent, isIndexed: isIndexed) {
+            return serializedOpenPanel
+        }
+
+        if let serializedSavePanel = try? AXSavePanelVisitor.visit(element: self, indent: indent, isIndexed: isIndexed) {
+            return serializedSavePanel
         }
 
         if (excludedRoles ?? []).contains(self.role) {
@@ -168,7 +118,7 @@ extension UIElement {
         // If neither exist:             none
         var text: String = "none"
         if role == "AXStaticText" {
-            return renderAXStaticText()
+            return "\(indentation)\(renderAXStaticText())"
         } else {
             text = self.title ?? "none"
             if let desc = self.description {
@@ -191,6 +141,28 @@ extension UIElement {
             if let domClasses = self.domClasses {
                 text += ", domClasses: \(domClasses)"
             }
+            if let link = self.link, link.absoluteString != "about:blank" {
+                if link.absoluteString.starts(with: "blob:null") {
+                    text += ", link: \(link.absoluteString)"
+                } else {
+                    text += ", link: \(link.path())"
+                }
+            }
+
+            /// Add actions
+            var actions: [String] = self.actions
+            if let excludedActions = excludedActions {
+                actions = self.actions.filter { !excludedActions.contains($0) }
+            }
+            if showActions {
+                if !actions.isEmpty, self.enabled {
+                    text += ", actions: \(actions)"
+                }
+            } else {
+                if !actions.isEmpty, self.enabled {
+                    text += ", actionable: true"
+                }
+            }
         }
 
         if isVisible {
@@ -212,23 +184,6 @@ extension UIElement {
         } else {
             line += "\(indentation)\(self.role): \(text)"
         }
-
-        var actions: [String] = self.actions
-        if let excludedActions = excludedActions {
-            actions = self.actions.filter { !excludedActions.contains($0) }
-        }
-
-        if showActions {
-            if !actions.isEmpty {
-                line += ", actions: \(actions)"
-            }
-        } else {
-            if !actions.isEmpty {
-                line += ", actionable: true"
-            }
-        }
-
-//        line += ", attributes: \(self.attributes)"
 
         if self.role == "AXCell" {
             for (index, child) in self.children.prefix(UIElement.maxChildren).enumerated() {
@@ -277,5 +232,44 @@ extension UIElement {
         } else {
             return ""
         }
+    }
+
+    /// NOTE: if isReflexive is true, then the conditiion can be true of the caller.
+    func findFirst(condition: (UIElement) -> Bool, isReflexive: Bool = false) -> UIElement? {
+        if isReflexive, condition(self) {
+            return self
+        }
+
+        for child in self.children {
+            if let match = child.findFirst(condition: condition, isReflexive: true) {
+                return match
+            }
+        }
+
+        return nil
+    }
+
+    /// NOTE: if isReflexive is true, then the conditiion can be true of the caller.
+    func findAll(condition: (UIElement) -> Bool, isReflexive: Bool = false) -> [UIElement] {
+        var matches: [UIElement] = []
+
+        var stack: [UIElement]
+        if isReflexive {
+            stack = [self]
+        } else {
+            stack = self.children
+        }
+
+        while let next = stack.popLast() {
+            if condition(next) {
+                matches.append(next)
+            } else {
+                for child in next.children {
+                    stack.append(child)
+                }
+            }
+        }
+
+        return matches
     }
 }

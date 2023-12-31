@@ -270,32 +270,21 @@ struct MessageView: View {
                             .textSelection(.enabled)
                     }
                 case .function_call(let functionCalls):
-                    switch functionCalls.first?.name {
-                    case "perform_ui_action":
-                        Markdown {
-                            Paragraph {
-                                Strong("Autopilot Plan")
-                            }
-                            NumberedList(of: functionCalls.compactMap { $0.getAction() }) { action in
-                                ListItem {
-                                    action.narration
-                                }
+                    Markdown {
+                        Paragraph {
+                            Strong("Autopilot Plan")
+                        }
+                        NumberedList(of: functionCalls.compactMap(getHumanReadable)) { narration in
+                            ListItem {
+                                narration
                             }
                         }
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 15)
-                        .foregroundColor(.primary)
-                        .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                        .textSelection(.enabled)
-
-                    default:
-                        Text(message.text)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 15)
-                            .foregroundColor(.primary)
-                            .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                            .textSelection(.enabled)
                     }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .foregroundColor(.primary)
+                    .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                    .textSelection(.enabled)
                 case .html(let data):
                     WebView(html: data, dynamicHeight: $webViewHeight)
                         .frame(width: 400, height: webViewHeight)
@@ -319,6 +308,24 @@ struct MessageView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func getHumanReadable(functionCall: FunctionCall) -> String? {
+        if functionCall.name == "perform_ui_action",
+           let action = functionCall.getAction() {
+            return action.narration
+        } else if functionCall.name == "open_application",
+                  let bundleIdentifier = functionCall.stringArg("bundleIdentifier"){
+            return "Opened \(bundleIdentifier)"
+        } else if functionCall.name == "open_file",
+                  let file = functionCall.stringArg("file"){
+            return "Opened \(file)"
+        } else if functionCall.name == "save_file",
+                  let file = functionCall.stringArg("file"){
+            return "Saved as \(file)"
+        } else {
+            return nil
         }
     }
 

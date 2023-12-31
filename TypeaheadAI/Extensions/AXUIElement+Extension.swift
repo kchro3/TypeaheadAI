@@ -10,7 +10,7 @@ import Foundation
 
 extension AXUIElement {
     func toUIElement() -> UIElement? {
-        return UIElement(from: self)
+        return UIElementVisitor.visit(element: self)
     }
 
     func value(forAttribute attribute: String) -> CFTypeRef? {
@@ -19,12 +19,36 @@ extension AXUIElement {
         return value
     }
 
+    func subelement(forAttribute attribute: String) -> AXUIElement? {
+        guard let value = self.value(forAttribute: attribute) else {
+            return nil
+        }
+        
+        return (value as! AXUIElement)
+    }
+
+    func role() -> String? {
+        return self.stringValue(forAttribute: kAXSubroleAttribute) ?? self.stringValue(forAttribute: kAXRoleAttribute)
+    }
+
+    func topMost() -> AXUIElement? {
+        return self.subelement(forAttribute: kAXTopLevelUIElementAttribute)
+    }
+
     func stringValue(forAttribute attribute: String) -> String? {
         guard let value = self.value(forAttribute: attribute) else {
             return nil
         }
 
         return value as? String
+    }
+
+    func boolValue(forAttribute attribute: String) -> Bool {
+        guard let value = self.value(forAttribute: attribute) else {
+            return false
+        }
+
+        return (value as? Bool) ?? false
     }
 
     func stringArrayValue(forAttribute attribute: String) -> [String]? {
@@ -66,11 +90,7 @@ extension AXUIElement {
     }
 
     func parent() -> AXUIElement? {
-        guard let value = self.value(forAttribute: kAXParentAttribute) else {
-            return nil
-        }
-
-        return (value as! AXUIElement)
+        return self.subelement(forAttribute: kAXParentAttribute)
     }
 
     func children() -> [AXUIElement] {
@@ -148,10 +168,30 @@ extension AXUIElement {
     }
 
     func getElementInFocus() -> AXUIElement? {
-        guard let value = self.value(forAttribute: kAXFocusedUIElementAttribute) else {
+        return self.subelement(forAttribute: kAXFocusedUIElementAttribute)
+    }
+
+    func serialize() -> String? {
+        if let uiElement = UIElementVisitor.visit(element: self),
+           let serialized = uiElement.serialize() {
+            return serialized
+        } else {
             return nil
         }
+    }
 
-        return (value as! AXUIElement)
+    /// NOTE: if isReflexive is true, then the condition can be true of the caller.
+    func findFirst(condition: (AXUIElement) -> Bool, isReflexive: Bool = false) -> AXUIElement? {
+        if isReflexive, condition(self) {
+            return self
+        }
+
+        for child in self.children() {
+            if let match = child.findFirst(condition: condition, isReflexive: true) {
+                return match
+            }
+        }
+
+        return nil
     }
 }
