@@ -26,11 +26,6 @@ extension FunctionManager {
         try await openURL(url)
         try await Task.sleep(for: .seconds(5))
 
-        await modalManager.appendTool(
-            "Opened \(url) successfully",
-            functionCall: functionCall,
-            appContext: appContext)
-
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
