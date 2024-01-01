@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import AVFoundation
 import Foundation
 
 enum FunctionError: LocalizedError {
@@ -135,14 +136,7 @@ class FunctionManager: ObservableObject,
 
     @Published var isExecuting: Bool = false
     private var currentTask: Task<Void, Error>? = nil
-
-    func openURL(_ url: String) async throws {
-        guard let url = URL(string: url) else {
-            throw FunctionError.openURL("URL not found")
-        }
-
-        NSWorkspace.shared.open(url)
-    }
+    private var speaker = AVSpeechSynthesizer()
 
     @MainActor
     func parseAndCallFunction(jsonString: String, appInfo: AppInfo?, modalManager: ModalManager) async {
@@ -218,5 +212,11 @@ class FunctionManager: ObservableObject,
         currentTask?.cancel()
         currentTask = nil
         isExecuting = false
+    }
+
+    func narrate(text: String) {
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.prefersAssistiveTechnologySettings = true
+        speaker.speak(utterance)
     }
 }

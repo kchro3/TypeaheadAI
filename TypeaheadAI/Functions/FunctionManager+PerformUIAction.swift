@@ -13,13 +13,11 @@ struct Action: Identifiable, Codable {
     let narration: String
     let inputText: String?
     let pressEnter: Bool?
-    let delayInMillis: Int
 }
 
 extension FunctionCall {
     func getAction() -> Action? {
         guard let id = self.stringArg("id"),
-              let delayInMillis = self.intArg("delayInMillis"),
               let narration = self.stringArg("narration") else {
             return nil
         }
@@ -28,8 +26,7 @@ extension FunctionCall {
             id: id,
             narration: narration,
             inputText: self.stringArg("inputText"),
-            pressEnter: self.boolArg("pressEnter"),
-            delayInMillis: delayInMillis
+            pressEnter: self.boolArg("pressEnter")
         )
     }
 }
@@ -45,6 +42,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             return
         }
 
+        narrate(text: action.narration)
         await modalManager.appendFunction(
             "Performing action: \(action)...",
             functionCall: functionCall,

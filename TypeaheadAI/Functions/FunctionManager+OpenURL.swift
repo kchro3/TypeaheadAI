@@ -141,4 +141,12 @@ extension FunctionManager {
 
         try await modalManager.continueReplying()
     }
+
+    private func openURL(_ url: String) async throws {
+        guard let url = URL(string: url) else {
+            throw FunctionError.openURL("URL not found")
+        }
+
+        NSWorkspace.shared.open(url)
+    }
 }
