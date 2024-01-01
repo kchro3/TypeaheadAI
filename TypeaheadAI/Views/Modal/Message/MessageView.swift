@@ -318,6 +318,9 @@ struct MessageView: View {
         } else if functionCall.name == "open_application",
                   let bundleIdentifier = functionCall.stringArg("bundleIdentifier"){
             return "Opened \(bundleIdentifier)"
+        } else if functionCall.name == "open_url",
+                  let url = functionCall.stringArg("url"){
+            return "Opened \(url)"
         } else if functionCall.name == "open_file",
                   let file = functionCall.stringArg("file"){
             return "Opened \(file)"
