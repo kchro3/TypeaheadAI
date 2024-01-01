@@ -142,11 +142,7 @@ extension UIElement {
                 text += ", domClasses: \(domClasses)"
             }
             if let link = self.link, link.absoluteString != "about:blank" {
-                if link.absoluteString.starts(with: "blob:null") {
-                    text += ", link: \(link.absoluteString)"
-                } else {
-                    text += ", link: \(link.path())"
-                }
+                text += ", link: \(link.absoluteString)"
             }
 
             /// Add actions

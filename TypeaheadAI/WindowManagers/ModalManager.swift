@@ -168,6 +168,7 @@ class ModalManager: ObservableObject {
             functionCall.name == "perform_ui_action"
             || functionCall.name == "open_application"
             || functionCall.name == "open_file"
+            || functionCall.name == "open_url"
             || functionCall.name == "save_file"
         ){
             for index in messages.indices {
@@ -176,6 +177,7 @@ class ModalManager: ObservableObject {
                     fnCall.name == "perform_ui_action"
                     || fnCall.name == "open_application"
                     || fnCall.name == "open_file"
+                    || fnCall.name == "open_url"
                     || fnCall.name == "save_file"
                    ) {
                     messages[index].text = "<pruned>"
@@ -403,12 +405,14 @@ class ModalManager: ObservableObject {
             functionCall.name == "perform_ui_action"
             || functionCall.name == "open_application"
             || functionCall.name == "open_file"
+            || functionCall.name == "open_url"
             || functionCall.name == "save_file"),
            let lastMessage = messages.last,
            case .tool_call(let fnCall) = lastMessage.messageType,
            (fnCall.name == "perform_ui_action" 
             || fnCall.name == "open_application"
             || fnCall.name == "open_file"
+            || fnCall.name == "open_url"
             || fnCall.name == "save_file"),
            let lastFnCallIndex = messages.lastIndex(where: { isFunctionCall(message: $0) }),
            case .function_call(var functionCalls) = messages[lastFnCallIndex].messageType {
