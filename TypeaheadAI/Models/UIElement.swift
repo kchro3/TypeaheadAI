@@ -56,6 +56,7 @@ extension UIElement {
     private static let maxChildren = 25
     private static let maxCharacterCount = 4000
     private static let defaultExcludedRoles = ["AXStaticText", "AXGroup"]
+    private static let defaultExcludedActions = ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
 
     /// Convert to string representation
     /// isVisible: Only print visible UIElements
@@ -68,7 +69,7 @@ extension UIElement {
         isIndexed: Bool = true,
         showActions: Bool = false,
         excludedRoles: [String]? = UIElement.defaultExcludedRoles,
-        excludedActions: [String]? = nil,
+        excludedActions: [String]? = UIElement.defaultExcludedActions,
         maxDepth: Int? = nil
     ) -> String? {
         if let maxDepth = maxDepth, maxDepth == indent {

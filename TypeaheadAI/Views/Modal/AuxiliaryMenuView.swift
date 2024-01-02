@@ -20,7 +20,7 @@ struct AuxiliaryMenuView: View {
         VStack(spacing: 0) {
             MenuButtonView(title: "Clear chat") {
                 Task {
-                    try await modalManager.forceRefresh()
+                    modalManager.forceRefresh()
                 }
             }
 

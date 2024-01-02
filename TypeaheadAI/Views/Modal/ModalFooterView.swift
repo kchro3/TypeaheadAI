@@ -47,10 +47,6 @@ struct ModalFooterView: View {
                                 await modalManager.addUserMessage(text, appContext: nil)
                             }
                         }
-                    } else if let cachedAppInfo = modalManager.cachedAppInfo {
-                        Task {
-                            try await modalManager.continueReplying(appInfo: cachedAppInfo)
-                        }
                     }
                 }
                 .padding(.vertical, 5)
@@ -69,7 +65,7 @@ struct ModalFooterView: View {
                     }
                 }
 
-                if clientManager.isExecuting || functionManager.isExecuting {
+                if modalManager.isPending {
                     Button {
                         modalManager.cancelTasks()
                     } label: {

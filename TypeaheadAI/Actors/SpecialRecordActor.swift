@@ -174,7 +174,7 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
                     processedEvents.append(event)
                 }
             case .mouseClicked:
-                guard let actions = event.element?.actions else {
+                guard let _ = event.element?.actions else {
                     print("nothing to click on, skipping...")
                     continue
                 }

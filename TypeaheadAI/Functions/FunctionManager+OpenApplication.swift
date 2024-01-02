@@ -9,70 +9,31 @@ import AppKit
 import Foundation
 
 extension FunctionManager {
-    func openApplication(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
-        let appContext = appInfo?.appContext
-
-        guard let bundleIdentifier = functionCall.stringArg("bundleIdentifier") else {
-            await modalManager.setError("Failed to open application", appContext: appContext)
-            return
+    func openApplication(_ functionCall: FunctionCall, appInfo: AppInfo?) async throws {
+        guard case .openApplication(let bundleIdentifier) = try functionCall.parseArgs() else {
+            throw ClientManagerError.appError("Invalid app state")
         }
-
-        await modalManager.appendFunction("Opening \(bundleIdentifier)...", functionCall: functionCall, appContext: appContext)
 
         guard appInfo?.apps[bundleIdentifier] != nil else {
-            await modalManager.appendToolError("This app cannot be opened by Typeahead", functionCall: functionCall, appContext: appContext)
-            return
+            throw ClientManagerError.functionCallError(
+                "This app cannot be opened by Typeahead",
+                functionCall: functionCall,
+                appContext: appInfo?.appContext
+            )
         }
 
-        try Task.checkCancellation()
-        await modalManager.closeModal()
-
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else {
-            await modalManager.showModal()
-            await modalManager.appendToolError("Failed to open", functionCall: functionCall, appContext: appContext)
-            return
+            throw ClientManagerError.functionCallError(
+                "Failed to open \(bundleIdentifier)",
+                functionCall: functionCall,
+                appContext: appInfo?.appContext
+            )
         }
 
         // Activate the app, bringing it to the foreground
+        try Task.checkCancellation()
         NSWorkspace.shared.open(url)
-        try await Task.sleep(for: .seconds(2))
-        try Task.checkCancellation()
-
-        let newAppContext = try await fetchAppContext()
-        let (newUIElement, newElementMap) = getUIElements(appContext: newAppContext)
-        guard let serializedUIElement = newUIElement?.serialize(
-            excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-        ) else {
-            await modalManager.showModal()
-            await modalManager.appendToolError(
-                "Could not capture app state",
-                functionCall: functionCall,
-                appContext: newAppContext
-            )
-            return
-        }
-
-        await modalManager.showModal()
-        await modalManager.appendTool(
-            "Updated state: \(serializedUIElement)",
-            functionCall: functionCall,
-            appContext: newAppContext
-        )
-
-        let newAppInfo = AppInfo(
-            appContext: newAppContext,
-            elementMap: newElementMap,
-            apps: appInfo?.apps ?? [:]
-        )
-
-        try Task.checkCancellation()
-
-        Task {
-            do {
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        
+        try await Task.safeSleep(for: .seconds(2))
     }
 }
