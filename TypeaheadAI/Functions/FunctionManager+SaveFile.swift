@@ -39,18 +39,22 @@ extension FunctionManager {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(file, forType: .string)
         try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
 
         // Open file viewer
+        try Task.checkCancellation()
         try await simulateGoToFile()
         try await Task.sleep(for: .milliseconds(500))
 
         // Paste filename to file viewer
+        try Task.checkCancellation()
         try await simulatePaste()
 
         // Enter to save as filename
+        try Task.checkCancellation()
         try await simulateEnter()
         try await Task.sleep(for: .milliseconds(500))
+
+        try Task.checkCancellation()
         try await simulateEnter()
         try await Task.sleep(for: .seconds(1))
 
@@ -58,25 +62,26 @@ extension FunctionManager {
         if let replaceButton = savePanel.findFirst(condition: {
             $0.stringValue(forAttribute: kAXIdentifierAttribute) == "action-button-1"
         }) {
-            print("found replace button")
+            try Task.checkCancellation()
             _ = AXUIElementPerformAction(replaceButton, "AXPress" as CFString)
             try await Task.sleep(for: .seconds(1))
-        } else {
-            print("no replace button found")
         }
 
         await modalManager.showModal()
 
+        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
         ) {
+            try Task.checkCancellation()
             await modalManager.appendTool(
                 "Updated state: \(serializedUIElement)",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext
             )
         } else {
+            try Task.checkCancellation()
             await modalManager.appendToolError(
                 "Could not capture app state",
                 functionCall: functionCall,
@@ -92,6 +97,7 @@ extension FunctionManager {
 
         Task {
             do {
+                try Task.checkCancellation()
                 try await modalManager.continueReplying(appInfo: newAppInfo)
             } catch {
                 await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)

@@ -51,11 +51,9 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             appContext: appInfo?.appContext
         )
 
-        try await Task.sleep(for: .seconds(3))
-        try Task.checkCancellation()
-
         await modalManager.closeModal()
 
+        try Task.checkCancellation()
         if let bundleIdentifier = appContext?.bundleIdentifier,
            let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
             // Activate the app, bringing it to the foreground
@@ -63,7 +61,6 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
         }
 
         try Task.checkCancellation()
-
         guard let axElement = elementMap[action.id] else {
             // TERMINATE on invalid action
             await modalManager.showModal()
@@ -71,11 +68,12 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             return
         }
 
+        try Task.checkCancellation()
         _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
         try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
 
         do {
+            try Task.checkCancellation()
             try await focus(on: axElement)
         } catch {
             // TERMINATE on failure
@@ -84,6 +82,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             return
         }
 
+        try Task.checkCancellation()
         if let inputText = action.inputText, let role = axElement.stringValue(forAttribute: kAXRoleAttribute) {
             if role == "AXComboBox" {
                 if let parent = axElement.parent(),
@@ -106,10 +105,11 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(inputText, forType: .string)
                     try await Task.sleep(for: .milliseconds(100))
-                    try Task.checkCancellation()
 
+                    try Task.checkCancellation()
                     try await simulatePaste()
 
+                    try Task.checkCancellation()
                     if action.pressEnter ?? false {
                         try await simulateEnter()
                     }
@@ -118,30 +118,38 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(inputText, forType: .string)
                 try await Task.sleep(for: .milliseconds(100))
+                
                 try Task.checkCancellation()
-
                 try await simulateSelectAll()
+
+                try Task.checkCancellation()
                 try await simulatePaste()
 
                 if action.pressEnter ?? false {
+                    try Task.checkCancellation()
                     try await simulateEnter()
                 }
             }
         }
 
+        try Task.checkCancellation()
         try await Task.sleep(for: .seconds(2))
+
         await modalManager.showModal()
 
+        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
         ) {
+            try Task.checkCancellation()
             await modalManager.appendTool(
                 "Updated state: \(serializedUIElement)",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext
             )
         } else {
+            try Task.checkCancellation()
             await modalManager.appendToolError(
                 "Could not capture app state",
                 functionCall: functionCall,
@@ -163,6 +171,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
         Task {
             do {
+                try Task.checkCancellation()
                 try await modalManager.continueReplying(appInfo: newAppInfo)
             } catch {
                 await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)

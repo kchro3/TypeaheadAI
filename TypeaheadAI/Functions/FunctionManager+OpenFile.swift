@@ -39,21 +39,28 @@ extension FunctionManager {
         try Task.checkCancellation()
 
         // Select the file
+        try Task.checkCancellation()
         try await simulateGoToFile()
         try await Task.sleep(for: .seconds(1))
 
         // Paste filename to file search field
+        try Task.checkCancellation()
         try await simulatePaste()
         try await Task.sleep(for: .seconds(1))
 
         // Enter twice to pick and attach file
+        try Task.checkCancellation()
         try await simulateEnter()
         try await Task.sleep(for: .seconds(1))
+
+        try Task.checkCancellation()
         try await simulateEnter()
         try await Task.sleep(for: .seconds(2))
 
+        try Task.checkCancellation()
         await modalManager.showModal()
 
+        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
@@ -79,6 +86,7 @@ extension FunctionManager {
 
         Task {
             do {
+                try Task.checkCancellation()
                 try await modalManager.continueReplying(appInfo: newAppInfo)
             } catch {
                 await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)

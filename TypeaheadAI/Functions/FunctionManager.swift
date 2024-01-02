@@ -158,7 +158,7 @@ class FunctionManager: ObservableObject,
         }
 
         isExecuting = true
-        currentTask = Task.init { [weak self] in
+        currentTask = Task { [weak self] in
             switch functionCall.name {
             case "open_application":
                 do {

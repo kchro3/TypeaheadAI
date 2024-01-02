@@ -23,9 +23,11 @@ extension FunctionManager {
             appContext: appInfo?.appContext
         )
 
+        try Task.checkCancellation()
         try await openURL(url)
         try await Task.sleep(for: .seconds(5))
 
+        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
@@ -51,6 +53,7 @@ extension FunctionManager {
 
         Task {
             do {
+                try Task.checkCancellation()
                 try await modalManager.continueReplying(appInfo: newAppInfo)
             } catch {
                 await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
@@ -66,6 +69,7 @@ extension FunctionManager {
             return
         }
 
+        try Task.checkCancellation()
         if url == "<current>" {
             await modalManager.appendFunction(
                 "Scraping current page...",
@@ -79,8 +83,12 @@ extension FunctionManager {
                 app.activate(options: [.activateIgnoringOtherApps])
             }
 
+            try Task.checkCancellation()
             await modalManager.closeModal()
+
             try await Task.sleep(for: .seconds(1))
+
+            try Task.checkCancellation()
             try await simulateSelectAll()
             try await simulateCopy()
         } else {
@@ -91,12 +99,19 @@ extension FunctionManager {
             )
 
             try await openURL(url)
+            try Task.checkCancellation()
+
             await modalManager.closeModal()
             try await Task.sleep(for: .seconds(5))
+
+            try Task.checkCancellation()
             try await simulateSelectAll()
+            try Task.checkCancellation()
             try await simulateCopy()
+            try Task.checkCancellation()
             try await simulateClose()
 
+            try Task.checkCancellation()
             if let bundleIdentifier = appContext?.bundleIdentifier,
                let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
                 // Activate the app, bringing it to the foreground
@@ -139,6 +154,7 @@ extension FunctionManager {
             }
         }
 
+        try Task.checkCancellation()
         try await modalManager.continueReplying()
     }
 }

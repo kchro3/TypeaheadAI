@@ -732,6 +732,7 @@ class ModalManager: ObservableObject {
         userIntents = nil
 
         Task {
+            try Task.checkCancellation()
             try await self.clientManager?.refine(
                 messages: self.messages,
                 prevAppInfo: appInfo,

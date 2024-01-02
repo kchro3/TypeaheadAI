@@ -221,6 +221,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             .flatMap { $0.quickActionId }
             .flatMap { self.promptManager?.getById($0) }
 
+        try Task.checkCancellation()
         if let quickAction = quickAction,
            let appContext = appInfo?.appContext,
            let copiedText = copiedText {
@@ -233,6 +234,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             )
         }
 
+        try Task.checkCancellation()
         await self.sendStreamRequest(
             id: UUID(),
             username: NSUserName(),
@@ -320,6 +322,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                         completion: completion
                     )
 
+                    try Task.checkCancellation()
                     guard let stream = stream else {
                         self?.logger.debug("Failed to get stream")
                         return
