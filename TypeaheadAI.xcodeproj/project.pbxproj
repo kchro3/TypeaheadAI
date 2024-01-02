@@ -79,6 +79,8 @@
 		2B9A89852B3CDC9700041856 /* AXSavePanelVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89842B3CDC9700041856 /* AXSavePanelVisitor.swift */; };
 		2B9A89872B3CE1D300041856 /* CanFocusOnElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89862B3CE1D300041856 /* CanFocusOnElement.swift */; };
 		2B9A898B2B4122DC00041856 /* UIElementVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A898A2B4122DC00041856 /* UIElementVisitor.swift */; };
+		2B9A89912B44CBCC00041856 /* JSONAny.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89902B44CBCC00041856 /* JSONAny.swift */; };
+		2B9A89932B44D70D00041856 /* Task+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89922B44D70D00041856 /* Task+Extension.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
 		2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
@@ -216,6 +218,8 @@
 		2B9A89842B3CDC9700041856 /* AXSavePanelVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSavePanelVisitor.swift; sourceTree = "<group>"; };
 		2B9A89862B3CE1D300041856 /* CanFocusOnElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanFocusOnElement.swift; sourceTree = "<group>"; };
 		2B9A898A2B4122DC00041856 /* UIElementVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElementVisitor.swift; sourceTree = "<group>"; };
+		2B9A89902B44CBCC00041856 /* JSONAny.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONAny.swift; sourceTree = "<group>"; };
+		2B9A89922B44D70D00041856 /* Task+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Extension.swift"; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
@@ -592,6 +596,7 @@
 				2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */,
 				2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */,
 				2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */,
+				2B9A89922B44D70D00041856 /* Task+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -616,6 +621,7 @@
 				2B11FCF12B114C3F00325F38 /* Message.swift */,
 				2BE7BB8E2B258C7900164F88 /* UIElement.swift */,
 				2BDDB98E2B282B3000D52BF0 /* Application.swift */,
+				2B9A89902B44CBCC00041856 /* JSONAny.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -810,6 +816,7 @@
 				2BC5271C2ABD9C8200173E12 /* HistoryListView.swift in Sources */,
 				2B37922F2AB8371A008D812F /* SpecialPasteActor.swift in Sources */,
 				2B0B300A2ACD6E6B00338B76 /* UserIntentsView.swift in Sources */,
+				2B9A89932B44D70D00041856 /* Task+Extension.swift in Sources */,
 				2BDDB98D2B282AFF00D52BF0 /* AppManager.swift in Sources */,
 				2B11FCE52B0C555000325F38 /* CanFetchAppContext.swift in Sources */,
 				2B9A89812B3CD06C00041856 /* CanSimulateGoToFile.swift in Sources */,
@@ -826,6 +833,7 @@
 				2B520D852AC82EA100310426 /* AccountView.swift in Sources */,
 				2B27450E2AB0380C00F37D3E /* AppContextManager.swift in Sources */,
 				2B0B301B2ADE8E2A00338B76 /* SettingsManager.swift in Sources */,
+				2B9A89912B44CBCC00041856 /* JSONAny.swift in Sources */,
 				2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */,
 				2B7D357E2B00C1D100E85AEF /* SafariView.swift in Sources */,
 				2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */,

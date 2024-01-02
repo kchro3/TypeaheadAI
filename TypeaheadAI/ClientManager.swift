@@ -144,8 +144,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
             // Incognito mode doesn't support this yet
             return nil
         } else {
-            return nil  // Disable for now, wasting tokens.
-
             guard let httpBody = try? JSONEncoder().encode(payload) else {
                 throw ClientManagerError.badRequest("Request was malformed...")
             }
@@ -174,14 +172,16 @@ class ClientManager: ObservableObject, CanGetUIElements {
     }
 
     /// Refine the currently request
+    /// Returns a "bufferedPayload", which is a payload that has buffered together all of the chunks in the stream
     func refine(
         messages: [Message],
         quickActionId: UUID? = nil,
         prevAppInfo: AppInfo? = nil,
         timeout: TimeInterval = 120,
-        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
-    ) async throws {
+        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void
+    ) async throws -> (ChunkPayload, AppInfo?) {
+        try Task.checkCancellation()
+
         var appInfo: AppInfo? = nil
         if let prevAppInfo = prevAppInfo {
             // Reuse the previous app info (specifically when the app info was extracted from a function call).
@@ -233,7 +233,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
             )
         }
 
-        await self.sendStreamRequest(
+        try Task.checkCancellation()
+        let bufferedPayload = try await self.sendStreamRequest(
             id: UUID(),
             username: NSUserName(),
             userFullName: NSFullUserName(),
@@ -245,9 +246,10 @@ class ClientManager: ObservableObject, CanGetUIElements {
             history: history,
             appInfo: appInfo,
             timeout: timeout,
-            streamHandler: streamHandler,
-            completion: completion
+            streamHandler: streamHandler
         )
+
+        try Task.checkCancellation()
 
         // Add in any other relevant metadata
         NotificationCenter.default.post(
@@ -257,6 +259,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 "messages": messages
             ]
         )
+
+        return (bufferedPayload, appInfo)
     }
 
     /// Sends a request to the server with the given parameters and listens for a stream of data.
@@ -277,68 +281,58 @@ class ClientManager: ObservableObject, CanGetUIElements {
         history: [Message]?,
         appInfo: AppInfo?,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void,
-        completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
-    ) async {
-        cancelStreamingTask()
-        isExecuting = true
-        currentStreamingTask = Task.init { [weak self] in
-            let uuid = try? await self?.supabaseManager?.client.auth.session.user.id
-            let payload = RequestPayload(
-                uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
-                username: username,
-                userFullName: userFullName,
-                userObjective: userObjective,
-                userBio: userBio,
-                userLang: userLang,
-                copiedText: copiedText,
-                messages: self?.sanitizeMessages(messages),
-                history: history,
-                appContext: appInfo?.appContext,
-                version: self?.version,
-                isWebSearchEnabled: self?.isWebSearchEnabled,
-                isAutopilotEnabled: self?.isAutopilotEnabled,
-                apps: appInfo?.apps.values.map { $0.bundleIdentifier }
+        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void
+    ) async throws -> ChunkPayload {
+        let uuid = try? await self.supabaseManager?.client.auth.session.user.id
+        let payload = RequestPayload(
+            uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
+            username: username,
+            userFullName: userFullName,
+            userObjective: userObjective,
+            userBio: userBio,
+            userLang: userLang,
+            copiedText: copiedText,
+            messages: self.sanitizeMessages(messages),
+            history: history,
+            appContext: appInfo?.appContext,
+            version: self.version,
+            isWebSearchEnabled: self.isWebSearchEnabled,
+            isAutopilotEnabled: self.isAutopilotEnabled,
+            apps: appInfo?.apps.values.map { $0.bundleIdentifier }
+        )
+
+        // TODO: Reimplement the offline path
+        var bufferedPayload = ChunkPayload(finishReason: nil)
+        do {
+            let stream = try self.generateOnlineStream(
+                payload: payload,
+                timeout: timeout,
+                appInfo: appInfo
             )
 
-            if !(self?.online ?? true) {
-                guard let llamaModelManager = self?.llamaModelManager else {
-                    return
-                }
+            for try await chunk in stream {
+                try Task.checkCancellation()
 
-                do {
-                    try await llamaModelManager.predict(payload: payload, streamHandler: streamHandler)
-                } catch {
-                    await streamHandler(.failure(error), appInfo)
-                }
-            } else {
-                do {
-                    let stream = try self?.performStreamOnlineTask(
-                        payload: payload,
-                        timeout: timeout,
-                        appInfo: appInfo,
-                        completion: completion
-                    )
-
-                    guard let stream = stream else {
-                        self?.logger.debug("Failed to get stream")
-                        return
-                    }
-
-                    for try await text in stream {
-                        try Task.checkCancellation()
+                if let text = chunk.text {
+                    switch chunk.mode ?? .text {
+                    case .text:
                         await streamHandler(.success(text), appInfo)
+                        if bufferedPayload.mode != .image {
+                            bufferedPayload.text = (bufferedPayload.text ?? "") + text
+                            bufferedPayload.mode = .text
+                        }
+                    case .image:
+                        bufferedPayload = chunk
+                    case .function:
+                        bufferedPayload = chunk
                     }
-                } catch {
-                    await streamHandler(.failure(error), appInfo)
                 }
             }
-
-            DispatchQueue.main.async {
-                self?.currentStreamingTask = nil
-                self?.isExecuting = false
-            }
+        } catch {
+            await streamHandler(.failure(error), appInfo)
         }
+
+        return bufferedPayload
     }
 
     func generateImage(
@@ -374,12 +368,11 @@ class ClientManager: ObservableObject, CanGetUIElements {
         return response.data[0]
     }
 
-    private func performStreamOnlineTask(
+    private func generateOnlineStream(
         payload: RequestPayload,
         timeout: TimeInterval,
-        appInfo: AppInfo?,
-        completion: @escaping (Result<ChunkPayload, Error>, AppInfo?) async -> Void
-    ) throws -> AsyncThrowingStream<String, Error> {
+        appInfo: AppInfo?
+    ) throws -> AsyncThrowingStream<ChunkPayload, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Encoding error")
         }
@@ -420,41 +413,23 @@ class ClientManager: ObservableObject, CanGetUIElements {
                     return
                 }
 
-                // NOTE: This is complicated, but we want to support a case where the AI is responding to a user request
-                // but also making a function call. To support this, if a payload is something other than .text,
-                // it is a special payload and should be cached separately.
-                // In the future, we can think about how to support completions with a full response, but worry about that later.
-                var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
                 for try await line in data.lines {
                     guard let data = line.data(using: .utf8),
-                          let response = try? decoder.decode(ChunkPayload.self, from: data) else {
+                          let chunk = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
                         return
                     }
 
-                    if let text = response.text {
-                        switch response.mode ?? .text {
-                        case .text:
-                            continuation.yield(text)
-                            if bufferedPayload.mode != .image {
-                                bufferedPayload.text = (bufferedPayload.text ?? "") + text
-                                bufferedPayload.mode = .text
-                            }
-                        case .image:
-                            bufferedPayload = response
-                        case .function:
-                            bufferedPayload = response
-                        }
-                    } else if let finishReason = response.finishReason,
-                              !validFinishReasons.contains(finishReason) {
-                        let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \(finishReason)")
+                    guard chunk.finishReason == nil || validFinishReasons.contains(chunk.finishReason!) else {
+                        let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \"\(chunk.finishReason!)\"")
                         continuation.finish(throwing: error)
                         return
                     }
+
+                    continuation.yield(chunk)
                 }
 
-                await completion(.success(bufferedPayload), appInfo)
                 continuation.finish()
             }
         }
@@ -598,6 +573,12 @@ enum ClientManagerError: LocalizedError {
     case modelDirectoryNotAuthorized(_ message: String)
     case modelFailed(_ message: String)
 
+    // FunctionManager errors
+    case functionParsingError(_ message: String)
+    case functionArgParsingError(_ message: String)
+    case functionCallError(_ message: String, functionCall: FunctionCall, appContext: AppContext?)
+    case functionOnFocusError(_ message: String)
+
     var errorDescription: String {
         switch self {
         case .badRequest(let message): return message
@@ -614,6 +595,12 @@ enum ClientManagerError: LocalizedError {
         case .modelNotLoaded(let message): return message
         case .modelDirectoryNotAuthorized(let message): return message
         case .modelFailed(let message): return message
+
+        // FunctionManager errors
+        case .functionParsingError(let message): return message
+        case .functionArgParsingError(let message): return message
+        case .functionCallError(let message, _, _): return message
+        case .functionOnFocusError(let message): return message
         }
     }
 }
