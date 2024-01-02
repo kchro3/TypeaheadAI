@@ -59,7 +59,7 @@ struct ConversationView: View {
                                 Task {
                                     modalManager.cancelTasks()
                                     try await modalManager.rewindTo(index: index)
-                                    try await modalManager.replyToUserMessage()
+                                    try modalManager.replyToUserMessage()
                                 }
                             },
                             onTruncate: {

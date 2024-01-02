@@ -157,7 +157,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             apps: appInfo?.apps ?? [:]
         )
 
-        DispatchQueue.main.async {
+        await MainActor.run {
             modalManager.cachedAppInfo = newAppInfo
         }
 

@@ -206,7 +206,7 @@ class FunctionManager: ObservableObject,
                 modalManager.setError("Function \(functionCall.name) not supported", appContext: appContext)
             }
 
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self?.currentTask = nil
                 self?.isExecuting = false
             }

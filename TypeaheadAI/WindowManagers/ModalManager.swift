@@ -674,12 +674,13 @@ class ModalManager: ObservableObject {
 
     /// Reply to the user
     /// If refresh, then pop the previous message before responding.
-    @MainActor
-    func replyToUserMessage() async throws {
-        isPending = true
-        userIntents = nil
-
+    func replyToUserMessage() throws {
         Task {
+            await MainActor.run {
+                isPending = true
+                userIntents = nil
+            }
+
             try await self.clientManager?.refine(
                 messages: self.messages,
                 streamHandler: defaultStreamHandler,

@@ -334,7 +334,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 }
             }
 
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self?.currentStreamingTask = nil
                 self?.isExecuting = false
             }
@@ -426,6 +426,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 // In the future, we can think about how to support completions with a full response, but worry about that later.
                 var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
                 for try await line in data.lines {
+                    try Task.checkCancellation()
+
                     guard let data = line.data(using: .utf8),
                           let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
