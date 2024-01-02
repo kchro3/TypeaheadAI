@@ -25,9 +25,8 @@ extension FunctionManager {
 
         try Task.checkCancellation()
         try await openURL(url)
-        try await Task.sleep(for: .seconds(5))
+        try await Task.sleepSafe(for: .seconds(5))
 
-        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
@@ -51,14 +50,7 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        Task {
-            do {
-                try Task.checkCancellation()
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 
     func openAndScrapeURL(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
@@ -86,9 +78,8 @@ extension FunctionManager {
             try Task.checkCancellation()
             await modalManager.closeModal()
 
-            try await Task.sleep(for: .seconds(1))
+            try await Task.sleepSafe(for: .seconds(1))
 
-            try Task.checkCancellation()
             try await simulateSelectAll()
             try await simulateCopy()
         } else {
@@ -102,9 +93,8 @@ extension FunctionManager {
             try Task.checkCancellation()
 
             await modalManager.closeModal()
-            try await Task.sleep(for: .seconds(5))
+            try await Task.sleepSafe(for: .seconds(5))
 
-            try Task.checkCancellation()
             try await simulateSelectAll()
             try Task.checkCancellation()
             try await simulateCopy()
@@ -154,7 +144,6 @@ extension FunctionManager {
             }
         }
 
-        try Task.checkCancellation()
-        try await modalManager.continueReplying()
+        modalManager.continueReplying()
     }
 }

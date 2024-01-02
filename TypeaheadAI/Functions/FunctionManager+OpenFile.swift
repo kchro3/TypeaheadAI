@@ -27,40 +27,31 @@ extension FunctionManager {
            let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
             // Activate the app, bringing it to the foreground
             app.activate(options: [.activateIgnoringOtherApps])
-            try await Task.sleep(for: .milliseconds(100))
+            try await Task.sleepSafe(for: .milliseconds(100))
         }
-
-        try Task.checkCancellation()
 
         // Copy filename to clipboard
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(file, forType: .string)
-        try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
+        try await Task.sleepSafe(for: .milliseconds(100))
 
         // Select the file
-        try Task.checkCancellation()
         try await simulateGoToFile()
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleepSafe(for: .seconds(1))
 
         // Paste filename to file search field
-        try Task.checkCancellation()
         try await simulatePaste()
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleepSafe(for: .seconds(1))
 
         // Enter twice to pick and attach file
-        try Task.checkCancellation()
         try await simulateEnter()
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleepSafe(for: .seconds(1))
 
-        try Task.checkCancellation()
         try await simulateEnter()
-        try await Task.sleep(for: .seconds(2))
+        try await Task.sleepSafe(for: .seconds(2))
 
-        try Task.checkCancellation()
         await modalManager.showModal()
 
-        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
@@ -84,13 +75,6 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        Task {
-            do {
-                try Task.checkCancellation()
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 }

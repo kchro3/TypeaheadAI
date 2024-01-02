@@ -284,7 +284,11 @@ class ClientManager: ObservableObject, CanGetUIElements {
     ) async {
         cancelStreamingTask()
         isExecuting = true
+        print("starting stream request")
+
         currentStreamingTask = Task.init { [weak self] in
+            print("starting client manager task")
+
             let uuid = try? await self?.supabaseManager?.client.auth.session.user.id
             let payload = RequestPayload(
                 uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
@@ -338,6 +342,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
             }
 
             await MainActor.run {
+                print("finishing client manager task")
+
                 self?.currentStreamingTask = nil
                 self?.isExecuting = false
             }
@@ -467,6 +473,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
 
     @MainActor
     func cancelStreamingTask() {
+        print("cancelling client manager task")
         currentStreamingTask?.cancel()
         currentStreamingTask = nil
         isExecuting = false

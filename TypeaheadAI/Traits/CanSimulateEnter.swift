@@ -23,8 +23,8 @@ extension CanSimulateEnter {
         keyUp.flags = []
 
         keyDown.post(tap: .cghidEventTap)
-        try await Task.sleep(for: .milliseconds(20))
+        try await Task.sleepSafe(for: .milliseconds(20))
         keyUp.post(tap: .cghidEventTap)
-        try await Task.sleep(for: .milliseconds(200))
+        try await Task.sleepSafe(for: .milliseconds(200))
     }
 }

@@ -35,9 +35,8 @@ extension FunctionManager {
         try Task.checkCancellation()
         // Activate the app, bringing it to the foreground
         NSWorkspace.shared.open(url)
-        try await Task.sleep(for: .seconds(2))
+        try await Task.sleepSafe(for: .seconds(2))
 
-        try Task.checkCancellation()
         let newAppContext = try await fetchAppContext()
         let (newUIElement, newElementMap) = getUIElements(appContext: newAppContext)
         guard let serializedUIElement = newUIElement?.serialize(
@@ -66,13 +65,6 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        Task {
-            do {
-                try Task.checkCancellation()
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 }
