@@ -117,7 +117,7 @@ final class AppState: ObservableObject {
             Task {
                 do {
                     try await self.specialCopyActor?.specialCopy()
-                    DispatchQueue.main.async {
+                    await MainActor.run {
                         NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
                     }
                 } catch {
@@ -130,7 +130,7 @@ final class AppState: ObservableObject {
             Task {
                 do {
                     try await specialPasteActor?.specialPaste()
-                    DispatchQueue.main.async {
+                    await MainActor.run {
                         NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
                     }
                 } catch {

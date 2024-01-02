@@ -221,6 +221,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             .flatMap { $0.quickActionId }
             .flatMap { self.promptManager?.getById($0) }
 
+        try Task.checkCancellation()
         if let quickAction = quickAction,
            let appContext = appInfo?.appContext,
            let copiedText = copiedText {
@@ -233,6 +234,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             )
         }
 
+        try Task.checkCancellation()
         await self.sendStreamRequest(
             id: UUID(),
             username: NSUserName(),
@@ -282,7 +284,11 @@ class ClientManager: ObservableObject, CanGetUIElements {
     ) async {
         cancelStreamingTask()
         isExecuting = true
+        print("starting stream request")
+
         currentStreamingTask = Task.init { [weak self] in
+            print("starting client manager task")
+
             let uuid = try? await self?.supabaseManager?.client.auth.session.user.id
             let payload = RequestPayload(
                 uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
@@ -320,6 +326,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
                         completion: completion
                     )
 
+                    try Task.checkCancellation()
                     guard let stream = stream else {
                         self?.logger.debug("Failed to get stream")
                         return
@@ -334,7 +341,9 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 }
             }
 
-            DispatchQueue.main.async {
+            await MainActor.run {
+                print("finishing client manager task")
+
                 self?.currentStreamingTask = nil
                 self?.isExecuting = false
             }
@@ -426,6 +435,8 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 // In the future, we can think about how to support completions with a full response, but worry about that later.
                 var bufferedPayload: ChunkPayload = ChunkPayload(finishReason: nil)
                 for try await line in data.lines {
+                    try Task.checkCancellation()
+
                     guard let data = line.data(using: .utf8),
                           let response = try? decoder.decode(ChunkPayload.self, from: data) else {
                         let error = ClientManagerError.serverError("Failed to parse response...")
@@ -462,6 +473,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
 
     @MainActor
     func cancelStreamingTask() {
+        print("cancelling client manager task")
         currentStreamingTask?.cancel()
         currentStreamingTask = nil
         isExecuting = false

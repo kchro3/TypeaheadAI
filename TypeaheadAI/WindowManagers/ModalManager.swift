@@ -17,7 +17,6 @@ extension Notification.Name {
 
 class ModalManager: ObservableObject {
     private let context: NSManagedObjectContext
-    var cachedAppInfo: AppInfo? = nil
 
     @Published var messages: [Message]
     @Published var userIntents: [String]?
@@ -674,12 +673,14 @@ class ModalManager: ObservableObject {
 
     /// Reply to the user
     /// If refresh, then pop the previous message before responding.
-    @MainActor
-    func replyToUserMessage() async throws {
-        isPending = true
-        userIntents = nil
-
+    func replyToUserMessage() throws {
         Task {
+            await MainActor.run {
+                isPending = true
+                userIntents = nil
+            }
+
+            try Task.checkCancellation()
             try await self.clientManager?.refine(
                 messages: self.messages,
                 streamHandler: defaultStreamHandler,
@@ -725,12 +726,14 @@ class ModalManager: ObservableObject {
         }
     }
 
-    @MainActor
-    func continueReplying(appInfo: AppInfo? = nil) async throws {
-        isPending = true
-        userIntents = nil
-
+    func continueReplying(appInfo: AppInfo? = nil) {
         Task {
+            await MainActor.run {
+                isPending = true
+                userIntents = nil
+            }
+
+            try Task.checkCancellation()
             try await self.clientManager?.refine(
                 messages: self.messages,
                 prevAppInfo: appInfo,

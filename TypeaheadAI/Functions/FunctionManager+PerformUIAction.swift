@@ -51,11 +51,9 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             appContext: appInfo?.appContext
         )
 
-        try await Task.sleep(for: .seconds(3))
-        try Task.checkCancellation()
-
         await modalManager.closeModal()
 
+        try Task.checkCancellation()
         if let bundleIdentifier = appContext?.bundleIdentifier,
            let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
             // Activate the app, bringing it to the foreground
@@ -63,7 +61,6 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
         }
 
         try Task.checkCancellation()
-
         guard let axElement = elementMap[action.id] else {
             // TERMINATE on invalid action
             await modalManager.showModal()
@@ -71,9 +68,9 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             return
         }
 
-        _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
-        try await Task.sleep(for: .milliseconds(100))
         try Task.checkCancellation()
+        _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
+        try await Task.sleepSafe(for: .milliseconds(100))
 
         do {
             try await focus(on: axElement)
@@ -84,6 +81,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             return
         }
 
+        try Task.checkCancellation()
         if let inputText = action.inputText, let role = axElement.stringValue(forAttribute: kAXRoleAttribute) {
             if role == "AXComboBox" {
                 if let parent = axElement.parent(),
@@ -105,8 +103,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
                 } else {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(inputText, forType: .string)
-                    try await Task.sleep(for: .milliseconds(100))
-                    try Task.checkCancellation()
+                    try await Task.sleepSafe(for: .milliseconds(100))
 
                     try await simulatePaste()
 
@@ -117,31 +114,37 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             } else {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(inputText, forType: .string)
-                try await Task.sleep(for: .milliseconds(100))
-                try Task.checkCancellation()
+                try await Task.sleepSafe(for: .milliseconds(100))
 
                 try await simulateSelectAll()
+
+                try Task.checkCancellation()
                 try await simulatePaste()
 
                 if action.pressEnter ?? false {
+                    try Task.checkCancellation()
                     try await simulateEnter()
                 }
             }
         }
 
-        try await Task.sleep(for: .seconds(2))
+        try await Task.sleepSafe(for: .seconds(2))
+
         await modalManager.showModal()
 
+        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
         ) {
+            try Task.checkCancellation()
             await modalManager.appendTool(
                 "Updated state: \(serializedUIElement)",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext
             )
         } else {
+            try Task.checkCancellation()
             await modalManager.appendToolError(
                 "Could not capture app state",
                 functionCall: functionCall,
@@ -157,17 +160,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             apps: appInfo?.apps ?? [:]
         )
 
-        DispatchQueue.main.async {
-            modalManager.cachedAppInfo = newAppInfo
-        }
-
-        Task {
-            do {
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 
     /// Recursively traverse an AXList to select an option that matches the expected value.

@@ -30,53 +30,52 @@ extension FunctionManager {
            let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
             // Activate the app, bringing it to the foreground
             app.activate(options: [.activateIgnoringOtherApps])
-            try await Task.sleep(for: .milliseconds(100))
+            try await Task.sleepSafe(for: .milliseconds(100))
         }
-
-        try Task.checkCancellation()
 
         // Copy filename to clipboard
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(file, forType: .string)
-        try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
+        try await Task.sleepSafe(for: .milliseconds(100))
 
         // Open file viewer
         try await simulateGoToFile()
-        try await Task.sleep(for: .milliseconds(500))
+        try await Task.sleepSafe(for: .milliseconds(500))
 
         // Paste filename to file viewer
         try await simulatePaste()
 
         // Enter to save as filename
         try await simulateEnter()
-        try await Task.sleep(for: .milliseconds(500))
+        try await Task.sleepSafe(for: .milliseconds(500))
+
         try await simulateEnter()
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleepSafe(for: .seconds(1))
 
         // Check if there's a "Replace" dialog
         if let replaceButton = savePanel.findFirst(condition: {
             $0.stringValue(forAttribute: kAXIdentifierAttribute) == "action-button-1"
         }) {
-            print("found replace button")
+            try Task.checkCancellation()
             _ = AXUIElementPerformAction(replaceButton, "AXPress" as CFString)
-            try await Task.sleep(for: .seconds(1))
-        } else {
-            print("no replace button found")
+            try await Task.sleepSafe(for: .seconds(1))
         }
 
         await modalManager.showModal()
 
+        try Task.checkCancellation()
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
             excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
         ) {
+            try Task.checkCancellation()
             await modalManager.appendTool(
                 "Updated state: \(serializedUIElement)",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext
             )
         } else {
+            try Task.checkCancellation()
             await modalManager.appendToolError(
                 "Could not capture app state",
                 functionCall: functionCall,
@@ -90,12 +89,6 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        Task {
-            do {
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 }

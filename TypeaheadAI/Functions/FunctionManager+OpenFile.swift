@@ -27,30 +27,28 @@ extension FunctionManager {
            let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
             // Activate the app, bringing it to the foreground
             app.activate(options: [.activateIgnoringOtherApps])
-            try await Task.sleep(for: .milliseconds(100))
+            try await Task.sleepSafe(for: .milliseconds(100))
         }
-
-        try Task.checkCancellation()
 
         // Copy filename to clipboard
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(file, forType: .string)
-        try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
+        try await Task.sleepSafe(for: .milliseconds(100))
 
         // Select the file
         try await simulateGoToFile()
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleepSafe(for: .seconds(1))
 
         // Paste filename to file search field
         try await simulatePaste()
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleepSafe(for: .seconds(1))
 
         // Enter twice to pick and attach file
         try await simulateEnter()
-        try await Task.sleep(for: .seconds(1))
+        try await Task.sleepSafe(for: .seconds(1))
+
         try await simulateEnter()
-        try await Task.sleep(for: .seconds(2))
+        try await Task.sleepSafe(for: .seconds(2))
 
         await modalManager.showModal()
 
@@ -77,12 +75,6 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        Task {
-            do {
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 }

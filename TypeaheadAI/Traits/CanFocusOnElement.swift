@@ -19,7 +19,7 @@ extension CanFocusOnElement {
             result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
             if result == .cannotComplete {
                 // Retry the action after one second
-                try await Task.sleep(for: .seconds(1))
+                try await Task.sleepSafe(for: .seconds(1))
                 result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
             }
         } else if let size = axElement.sizeValue(forAttribute: kAXSizeAttribute),
@@ -33,8 +33,7 @@ extension CanFocusOnElement {
             result = .actionUnsupported
         }
 
-        try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
+        try await Task.sleepSafe(for: .milliseconds(100))
         guard result == .success else {
             print("Action failed (code: \(result?.rawValue ?? -1))")
             throw NSError()

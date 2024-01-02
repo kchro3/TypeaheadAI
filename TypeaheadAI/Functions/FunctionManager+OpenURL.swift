@@ -23,8 +23,9 @@ extension FunctionManager {
             appContext: appInfo?.appContext
         )
 
+        try Task.checkCancellation()
         try await openURL(url)
-        try await Task.sleep(for: .seconds(5))
+        try await Task.sleepSafe(for: .seconds(5))
 
         let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = newUIElement?.serialize(
@@ -49,13 +50,7 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        Task {
-            do {
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 
     func openAndScrapeURL(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
@@ -66,6 +61,7 @@ extension FunctionManager {
             return
         }
 
+        try Task.checkCancellation()
         if url == "<current>" {
             await modalManager.appendFunction(
                 "Scraping current page...",
@@ -79,8 +75,11 @@ extension FunctionManager {
                 app.activate(options: [.activateIgnoringOtherApps])
             }
 
+            try Task.checkCancellation()
             await modalManager.closeModal()
-            try await Task.sleep(for: .seconds(1))
+
+            try await Task.sleepSafe(for: .seconds(1))
+
             try await simulateSelectAll()
             try await simulateCopy()
         } else {
@@ -91,12 +90,18 @@ extension FunctionManager {
             )
 
             try await openURL(url)
+            try Task.checkCancellation()
+
             await modalManager.closeModal()
-            try await Task.sleep(for: .seconds(5))
+            try await Task.sleepSafe(for: .seconds(5))
+
             try await simulateSelectAll()
+            try Task.checkCancellation()
             try await simulateCopy()
+            try Task.checkCancellation()
             try await simulateClose()
 
+            try Task.checkCancellation()
             if let bundleIdentifier = appContext?.bundleIdentifier,
                let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
                 // Activate the app, bringing it to the foreground
@@ -139,6 +144,6 @@ extension FunctionManager {
             }
         }
 
-        try await modalManager.continueReplying()
+        modalManager.continueReplying()
     }
 }

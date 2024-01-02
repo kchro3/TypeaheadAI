@@ -149,6 +149,7 @@ class FunctionManager: ObservableObject,
         currentTask?.cancel()
         currentTask = nil
         isExecuting = false
+        print("starting parse-and-call")
 
         let appContext = appInfo?.appContext
         guard let jsonData = jsonString.data(using: .utf8),
@@ -158,11 +159,16 @@ class FunctionManager: ObservableObject,
         }
 
         isExecuting = true
-        currentTask = Task.init { [weak self] in
+        currentTask = Task { [weak self] in
+
+            print("starting parse-and-call task")
+
             switch functionCall.name {
             case "open_application":
                 do {
                     try await self?.openApplication(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch _ as CancellationError {
+                    modalManager.setError("Task was cancelled.", appContext: appContext)
                 } catch {
                     modalManager.setError("Failed when opening application...", appContext: appContext)
                 }
@@ -170,6 +176,8 @@ class FunctionManager: ObservableObject,
             case "open_url":
                 do {
                     try await self?.openURL(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch _ as CancellationError {
+                    modalManager.setError("Task was cancelled.", appContext: appContext)
                 } catch {
                     modalManager.setError("Failed when opening url...", appContext: appContext)
                 }
@@ -177,6 +185,8 @@ class FunctionManager: ObservableObject,
             case "perform_ui_action":
                 do {
                     try await self?.performUIAction(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch _ as CancellationError {
+                    modalManager.setError("Task was cancelled.", appContext: appContext)
                 } catch {
                     modalManager.setError("Failed when interacting with UI...", appContext: appContext)
                 }
@@ -184,6 +194,8 @@ class FunctionManager: ObservableObject,
             case "open_and_scrape_url":
                 do {
                     try await self?.openAndScrapeURL(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch _ as CancellationError {
+                    modalManager.setError("Task was cancelled.", appContext: appContext)
                 } catch {
                     modalManager.setError("Failed when scraping URL...", appContext: appContext)
                 }
@@ -191,6 +203,8 @@ class FunctionManager: ObservableObject,
             case "open_file":
                 do {
                     try await self?.openFile(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch _ as CancellationError {
+                    modalManager.setError("Task was cancelled.", appContext: appContext)
                 } catch {
                     modalManager.setError("Failed when opening file...", appContext: appContext)
                 }
@@ -198,6 +212,8 @@ class FunctionManager: ObservableObject,
             case "save_file":
                 do {
                     try await self?.saveFile(functionCall, appInfo: appInfo, modalManager: modalManager)
+                } catch _ as CancellationError {
+                    modalManager.setError("Task was cancelled.", appContext: appContext)
                 } catch {
                     modalManager.setError("Failed when saving file...", appContext: appContext)
                 }
@@ -206,7 +222,8 @@ class FunctionManager: ObservableObject,
                 modalManager.setError("Function \(functionCall.name) not supported", appContext: appContext)
             }
 
-            DispatchQueue.main.async {
+            print("finishing parse-and-call task")
+            await MainActor.run {
                 self?.currentTask = nil
                 self?.isExecuting = false
             }
@@ -215,6 +232,7 @@ class FunctionManager: ObservableObject,
 
     @MainActor
     func cancelTask() {
+        print("cancelling parse-and-call task")
         currentTask?.cancel()
         currentTask = nil
         isExecuting = false

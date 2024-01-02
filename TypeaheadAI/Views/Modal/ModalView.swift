@@ -102,7 +102,7 @@ struct ModalView: View {
                             Task {
                                 modalManager.forceRefresh()
                                 modalManager.closeModal()
-                                try await Task.sleep(for: .seconds(3))
+                                try await Task.sleepSafe(for: .seconds(3))
                                 try await modalManager.specialRecordActor?.specialRecord()
                             }
                         }

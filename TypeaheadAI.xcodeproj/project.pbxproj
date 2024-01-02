@@ -79,6 +79,7 @@
 		2B9A89852B3CDC9700041856 /* AXSavePanelVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89842B3CDC9700041856 /* AXSavePanelVisitor.swift */; };
 		2B9A89872B3CE1D300041856 /* CanFocusOnElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89862B3CE1D300041856 /* CanFocusOnElement.swift */; };
 		2B9A898B2B4122DC00041856 /* UIElementVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A898A2B4122DC00041856 /* UIElementVisitor.swift */; };
+		2B9A898F2B439BAC00041856 /* Task+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A898E2B439BAC00041856 /* Task+Extension.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
 		2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
@@ -216,6 +217,7 @@
 		2B9A89842B3CDC9700041856 /* AXSavePanelVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSavePanelVisitor.swift; sourceTree = "<group>"; };
 		2B9A89862B3CE1D300041856 /* CanFocusOnElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanFocusOnElement.swift; sourceTree = "<group>"; };
 		2B9A898A2B4122DC00041856 /* UIElementVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElementVisitor.swift; sourceTree = "<group>"; };
+		2B9A898E2B439BAC00041856 /* Task+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Extension.swift"; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
@@ -592,6 +594,7 @@
 				2B3435022B1EA33500423EE8 /* String+HTMLParser.swift */,
 				2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */,
 				2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */,
+				2B9A898E2B439BAC00041856 /* Task+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -802,6 +805,7 @@
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2B9A89872B3CE1D300041856 /* CanFocusOnElement.swift in Sources */,
 				2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */,
+				2B9A898F2B439BAC00041856 /* Task+Extension.swift in Sources */,
 				2BAA97912B0366C400EC6A63 /* OnboardingWindowManager.swift in Sources */,
 				2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */,
 				2BAA97892B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift in Sources */,

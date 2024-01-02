@@ -24,7 +24,6 @@ extension FunctionManager {
             return
         }
 
-        try Task.checkCancellation()
         await modalManager.closeModal()
 
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else {
@@ -33,10 +32,10 @@ extension FunctionManager {
             return
         }
 
+        try Task.checkCancellation()
         // Activate the app, bringing it to the foreground
         NSWorkspace.shared.open(url)
-        try await Task.sleep(for: .seconds(2))
-        try Task.checkCancellation()
+        try await Task.sleepSafe(for: .seconds(2))
 
         let newAppContext = try await fetchAppContext()
         let (newUIElement, newElementMap) = getUIElements(appContext: newAppContext)
@@ -52,6 +51,7 @@ extension FunctionManager {
             return
         }
 
+        try Task.checkCancellation()
         await modalManager.showModal()
         await modalManager.appendTool(
             "Updated state: \(serializedUIElement)",
@@ -65,14 +65,6 @@ extension FunctionManager {
             apps: appInfo?.apps ?? [:]
         )
 
-        try Task.checkCancellation()
-
-        Task {
-            do {
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        modalManager.continueReplying(appInfo: newAppInfo)
     }
 }
