@@ -25,12 +25,4 @@ extension FunctionManager {
         NSWorkspace.shared.open(url)        
         try await Task.safeSleep(for: .seconds(5))
     }
-
-    private func openURL(_ url: String) async throws {
-        guard let url = URL(string: url) else {
-            throw FunctionError.openURL("URL not found")
-        }
-
-        NSWorkspace.shared.open(url)
-    }
 }
