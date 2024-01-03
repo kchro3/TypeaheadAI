@@ -17,7 +17,7 @@ struct OnboardingView: View {
     var intentManager: IntentManager
 
     @AppStorage("step") var step: Int = 1
-    private let totalSteps: Int = 8
+    private let totalSteps: Int = 9
     @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
 
     init(
@@ -94,6 +94,8 @@ struct OnboardingView: View {
             AnyView(SmartPasteOnboardingView())
         } else if step == 8 {
             AnyView(QuickActionExplanationOnboardingView())
+        } else if step == 9 {
+            AnyView(AutopilotOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
         }

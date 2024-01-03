@@ -59,9 +59,9 @@ class HistoryManager {
         limit: Int,
         appContext: AppContext?,
         quickActionID: UUID? = nil
-    ) -> [Message] {
+    ) -> [Message]? {
         guard let appContext = appContext else {
-            return []
+            return nil
         }
 
         let fetchRequest: NSFetchRequest<HistoryEntry> = HistoryEntry.fetchRequest()
@@ -96,11 +96,16 @@ class HistoryManager {
                     let assistantMessage = Message(id: entry.id!, rootId: entry.id!, inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: entry.pastedResponse!, isCurrentUser: false, isHidden: false, appContext: appContext)
                     messages.append(contentsOf: [userMessage, assistantMessage])
                 }
-                return messages
+                
+                if messages.count == 0 {
+                    return nil
+                } else {
+                    return messages
+                }
             }
         } catch {
             logger.error("Failed to fetch history entries: \(error.localizedDescription)")
-            return []
+            return nil
         }
     }
 }

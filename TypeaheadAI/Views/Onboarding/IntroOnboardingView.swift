@@ -10,17 +10,17 @@ import SwiftUI
 struct IntroOnboardingView: View {
     var body: some View {
         VStack {
-            Text("How to use Typeahead")
+            Text("Welcome to Typeahead")
                 .font(.largeTitle)
                 .padding(.vertical, 10)
 
             Text(
             """
-            Typeahead is an **AI-powered clipboard** for Mac.
+            Typeahead is an AI tool that automates your busywork.
 
-            In this short tutorial, you will learn about Typeahead's basic features.
+            In this tutorial, you will learn about Typeahead's basic features, and we will explain how Typeahead works behind the scenes.
 
-            We will also explain how Typeahead works behind the scenes.
+            In this version, we are introducing "Autopilot" mode, where you can record and automate your workflows.
             """
             )
 

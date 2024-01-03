@@ -81,6 +81,8 @@
 		2B9A898B2B4122DC00041856 /* UIElementVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A898A2B4122DC00041856 /* UIElementVisitor.swift */; };
 		2B9A89912B44CBCC00041856 /* JSONAny.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89902B44CBCC00041856 /* JSONAny.swift */; };
 		2B9A89932B44D70D00041856 /* Task+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89922B44D70D00041856 /* Task+Extension.swift */; };
+		2B9A89952B4539DC00041856 /* SmartRecordOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89942B4539DC00041856 /* SmartRecordOnboardingView.swift */; };
+		2B9A89972B453A0A00041856 /* AutopilotOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89962B453A0A00041856 /* AutopilotOnboardingView.swift */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
 		2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
@@ -220,6 +222,8 @@
 		2B9A898A2B4122DC00041856 /* UIElementVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElementVisitor.swift; sourceTree = "<group>"; };
 		2B9A89902B44CBCC00041856 /* JSONAny.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONAny.swift; sourceTree = "<group>"; };
 		2B9A89922B44D70D00041856 /* Task+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Extension.swift"; sourceTree = "<group>"; };
+		2B9A89942B4539DC00041856 /* SmartRecordOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartRecordOnboardingView.swift; sourceTree = "<group>"; };
+		2B9A89962B453A0A00041856 /* AutopilotOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutopilotOnboardingView.swift; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
@@ -365,6 +369,8 @@
 				2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */,
 				2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */,
 				2BAA97882B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift */,
+				2B9A89962B453A0A00041856 /* AutopilotOnboardingView.swift */,
+				2B9A89942B4539DC00041856 /* SmartRecordOnboardingView.swift */,
 				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
 			);
 			path = Onboarding;
@@ -828,6 +834,7 @@
 				2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
+				2B9A89952B4539DC00041856 /* SmartRecordOnboardingView.swift in Sources */,
 				2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */,
 				2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */,
 				2B520D852AC82EA100310426 /* AccountView.swift in Sources */,
@@ -879,6 +886,7 @@
 				2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */,
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */,
+				2B9A89972B453A0A00041856 /* AutopilotOnboardingView.swift in Sources */,
 				2B0B30082ACCDA1100338B76 /* VisualEffect.swift in Sources */,
 				2B3435032B1EA33500423EE8 /* String+HTMLParser.swift in Sources */,
 				2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */,

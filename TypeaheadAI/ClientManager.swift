@@ -34,13 +34,13 @@ class ClientManager: CanGetUIElements {
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
     #if DEBUG
-//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v3/get_stream")!
 //    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
 //    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v3/latest")!
 //    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
-    private let apiUrlStreaming = URL(string: "http://localhost:8080/v2/get_stream")!
+    private let apiUrlStreaming = URL(string: "http://localhost:8080/v3/get_stream")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
@@ -48,7 +48,7 @@ class ClientManager: CanGetUIElements {
     private let apiFeedback = URL(string: "http://localhost:8080/v2/feedback")!
 
     #else
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v2/get_stream")!
+    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v3/get_stream")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
@@ -232,10 +232,10 @@ class ClientManager: CanGetUIElements {
             id: UUID(),
             username: NSUserName(),
             userFullName: NSFullUserName(),
-            userObjective: quickAction?.details ?? "",
-            userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-            userLang: Locale.preferredLanguages.first ?? "",
-            copiedText: copiedText ?? "",
+            userObjective: quickAction?.details,
+            userBio: UserDefaults.standard.string(forKey: "bio"),
+            userLang: Locale.preferredLanguages.first,
+            copiedText: copiedText,
             messages: self.sanitizeMessages(messages),
             history: history,
             appInfo: appInfo,
@@ -268,9 +268,9 @@ class ClientManager: CanGetUIElements {
         username: String,
         userFullName: String,
         userObjective: String?,
-        userBio: String,
-        userLang: String,
-        copiedText: String,
+        userBio: String?,
+        userLang: String?,
+        copiedText: String?,
         messages: [Message],
         history: [Message]?,
         appInfo: AppInfo?,
@@ -439,13 +439,13 @@ struct RequestPayload: Codable {
     var username: String
     var userFullName: String
     var userObjective: String?
-    var userBio: String
-    var userLang: String
-    var copiedText: String
-    var messages: [Message]?
+    var userBio: String?
+    var userLang: String?
+    var copiedText: String?
+    var messages: [Message]
     var history: [Message]?
     var appContext: AppContext?
-    var version: String?
+    var version: String
     var isWebSearchEnabled: Bool?
     var isAutopilotEnabled: Bool?
     var apps: [String]?

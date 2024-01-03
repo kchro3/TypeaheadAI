@@ -553,8 +553,6 @@ class ModalManager: ObservableObject {
     /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
     func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
-        self.cancelTasks()
-
         var quickAction: QuickAction? = nil
         if isQuickAction {
             // Look up the quick action by its label or create a new one
