@@ -12,7 +12,7 @@ import os.log
 import SwiftUI
 import Supabase
 
-class ClientManager: ObservableObject, CanGetUIElements {
+class ClientManager: CanGetUIElements {
     var llamaModelManager: LlamaModelManager? = nil
     var promptManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
@@ -60,10 +60,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "ClientManager"
     )
-
-    // Add a Task property to manage the streaming task
-    @Published var isExecuting: Bool = false
-    var currentStreamingTask: Task<Void, Error>? = nil
 
     init(session: URLSession = .shared) {
         self.session = session
@@ -192,9 +188,7 @@ class ClientManager: ObservableObject, CanGetUIElements {
             // Serialize the UIElement
             if isAutopilotEnabled {
                 let (uiElement, elementMap) = getUIElements(appContext: appInfo?.appContext)
-                if let serializedUIElement = uiElement?.serialize(
-                    excludedActions: ["AXScrollToVisible", "AXCancel", "AXRaise"]
-                ) {
+                if let serializedUIElement = uiElement?.serialize() {
                     appInfo?.appContext?.serializedUIElement = serializedUIElement
                     appInfo?.elementMap = elementMap
                 }
@@ -433,13 +427,6 @@ class ClientManager: ObservableObject, CanGetUIElements {
                 continuation.finish()
             }
         }
-    }
-
-    @MainActor
-    func cancelStreamingTask() {
-        currentStreamingTask?.cancel()
-        currentStreamingTask = nil
-        isExecuting = false
     }
 
     private func sanitizeMessages(_ messages: [Message]) -> [Message] {

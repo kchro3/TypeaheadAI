@@ -140,11 +140,7 @@ struct ModalView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 15)
                 } else {
-                    ModalFooterView(
-                        modalManager: modalManager,
-                        clientManager: modalManager.clientManager!,
-                        functionManager: modalManager.functionManager!
-                    )
+                    ModalFooterView(modalManager: modalManager)
                 }
             }
         }

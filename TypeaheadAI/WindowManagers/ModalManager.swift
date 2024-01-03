@@ -167,8 +167,6 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func appendTool(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        isPending = false
-
         for index in messages.indices {
             if case .tool_call(_) = messages[index].messageType {
                 messages[index].text = "<pruned>"
