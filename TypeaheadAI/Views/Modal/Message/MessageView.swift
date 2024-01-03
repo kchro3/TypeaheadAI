@@ -312,21 +312,8 @@ struct MessageView: View {
     }
 
     private func getHumanReadable(functionCall: FunctionCall) -> String? {
-        if functionCall.name == "perform_ui_action",
-           let action = functionCall.getAction() {
-            return action.narration
-        } else if functionCall.name == "open_application",
-                  let bundleIdentifier = functionCall.stringArg("bundleIdentifier"){
-            return "Opened \(bundleIdentifier)"
-        } else if functionCall.name == "open_url",
-                  let url = functionCall.stringArg("url"){
-            return "Opened \(url)"
-        } else if functionCall.name == "open_file",
-                  let file = functionCall.stringArg("file"){
-            return "Opened \(file)"
-        } else if functionCall.name == "save_file",
-                  let file = functionCall.stringArg("file"){
-            return "Saved as \(file)"
+        if let args = try? functionCall.parseArgs() {
+            return args.humanReadable
         } else {
             return nil
         }
@@ -394,7 +381,7 @@ struct MessageView: View {
         isHidden: false,
         messageType: .function_call(data: [FunctionCall(
             id: "toolcall_123",
-            name: "perform_ui_action",
+            name: .performUIAction,
             args: [
                 "actions": JSONAny.string("""
     [{"id":"AXTextField_DF3814C3","action":"AXPress","narration":"Add subject line","inputText":"Follow-Up on Typeahead Licensing Discussion"},{"id":"AXLink_638547DF","action":"AXPress","narration":"Click on this link"},{"id":"AXTextArea_B4B9E7B7","action":"AXPress","narration":"Add email body", "inputText":"Dear Kenichiro,\\n\\nI hope this message finds you well.\\n\\nI wanted to extend my gratitude for taking the time to meet with me on December 12, 2023, to discuss the potential licensing of Typeahead software for the Test.ai sales team. Your willingness to commit to a one-year license agreement for $20K is greatly appreciated and marks the beginning of what I am confident will be a fruitful collaboration.\\n\\nAs we discussed, there are some risks given that this is a new software, and we are aware of the potential for bugs. To mitigate this, I will be assigning a dedicated support engineer to ensure that your sales team is fully supported and can ramp up on the new changes efficiently.\\n\\nPlease feel free to reach out if you have any questions or need further information in the meantime.\\n\\nLooking forward to our next meeting scheduled for December 25, 2023, where we will review the progress on the action items and update on sales metrics.\\n\\nBest regards,\\n\\nJeff Hara"}]

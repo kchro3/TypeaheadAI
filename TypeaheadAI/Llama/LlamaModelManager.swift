@@ -245,22 +245,20 @@ class LlamaModelManager: ObservableObject {
         }
 
         var refinements = ""
-        if let messages = payload.messages {
-            for message in messages {
-                if message.isCurrentUser {
-                    refinements += """
-                    \(message.text)
+        for message in payload.messages {
+            if message.isCurrentUser {
+                refinements += """
+                \(message.text)
 
-                    ### Response:
-                    """
-                } else {
-                    refinements += """
-                    \(message.text)
+                ### Response:
+                """
+            } else {
+                refinements += """
+                \(message.text)
 
-                    ### Input:
+                ### Input:
 
-                    """
-                }
+                """
             }
         }
 

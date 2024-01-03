@@ -20,9 +20,10 @@ class UIElementVisitor {
             return nil
         }
 
-        if role == "AXGroup" && element.children().count == 1 {
+        let axChildren = element.children()
+        if role == "AXGroup" && axChildren.count == 1 {
             return visit(
-                element: element.children()[0],
+                element: axChildren[0],
                 idGenerator: idGenerator,
                 callback: callback
             )
@@ -60,7 +61,7 @@ class UIElementVisitor {
 
         // Recurse through the children
         var children: [UIElement] = []
-        for axChild in element.children() {
+        for axChild in axChildren {
             if let child = visit(
                 element: axChild,
                 idGenerator: idGenerator,

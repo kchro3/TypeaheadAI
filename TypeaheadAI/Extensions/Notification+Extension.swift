@@ -19,4 +19,6 @@ extension Notification.Name {
     static let scrollToMessage = Notification.Name("scrollToMessage")
 
     static let appDidChange = Notification.Name("NSWorkspaceDidActivateApplicationNotification")
+
+    static let userIntentSent = Notification.Name("userIntentSent")
 }

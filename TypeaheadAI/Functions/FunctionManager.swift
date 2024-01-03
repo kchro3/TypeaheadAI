@@ -9,65 +9,148 @@ import AppKit
 import AVFoundation
 import Foundation
 
-enum FunctionError: LocalizedError {
-    case openURL(_ message: String)
-    case notFound(_ message: String)
-
-    var errorDescription: String {
-        switch self {
-        case .openURL(let message): return message
-        case .notFound(let message): return message
-        }
-    }
+enum FunctionName: String, Codable {
+    case openApplication = "open_application"
+    case openFile = "open_file"
+    case openURL = "open_url"
+    case performUIAction = "perform_ui_action"
+    case saveFile = "save_file"
 }
 
-// Custom type to handle various JSON value types
-enum JSONAny: Codable, Equatable {
-    case string(String)
-    case double(Double)
-    case integer(Int)
-    case boolean(Bool)
-    case array([JSONAny])
+enum FunctionArgs: Codable {
+    case openApplication(bundleIdentifier: String)
+    case openFile(file: String)
+    case openURL(url: String)
+    case performUIAction(action: Action)
+    case saveFile(id: String, file: String)
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if let intVal = try? container.decode(Int.self) {
-            self = .integer(intVal)
-        } else if let doubleVal = try? container.decode(Double.self) {
-            self = .double(doubleVal)
-        } else if let stringVal = try? container.decode(String.self) {
-            self = .string(stringVal)
-        } else if let boolVal = try? container.decode(Bool.self) {
-            self = .boolean(boolVal)
-        } else if let arrayVal = try? container.decode([JSONAny].self) {
-            self = .array(arrayVal)
-        } else {
-            throw DecodingError.typeMismatch(JSONAny.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Value is not JSON compatible"))
-        }
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
+    var humanReadable: String {
         switch self {
-        case .string(let str):
-            try container.encode(str)
-        case .double(let num):
-            try container.encode(num)
-        case .integer(let int):
-            try container.encode(int)
-        case .boolean(let bool):
-            try container.encode(bool)
-        case .array(let arrayVal):
-            try container.encode(arrayVal)
+        case .openApplication(let bundleIdentifier):
+            return "Opening \(bundleIdentifier)..."
+        case .openFile(let file):
+            return "Opening \(file)..."
+        case .openURL(let url):
+            return "Opening \(url) and waiting for 5 seconds for the page to load..."
+        case .performUIAction(let action):
+            return action.narration
+        case .saveFile(_, let file):
+            return "Saving \(file)..."
         }
     }
 }
 
 struct FunctionCall: Codable, Equatable {
     let id: String?
-    let name: String
+    let name: FunctionName
     var args: [String: JSONAny]
 
+    func parseArgs() throws -> FunctionArgs {
+        switch self.name {
+        case .openApplication:
+            guard let bundleIdentifier = self.stringArg("bundleIdentifier") else {
+                throw ClientManagerError.functionArgParsingError("Failed to open application...")
+            }
+
+            return .openApplication(bundleIdentifier: bundleIdentifier)
+
+        case .openFile:
+            guard let file = self.stringArg("file") else {
+                throw ClientManagerError.functionArgParsingError("Failed to open file...")
+            }
+
+            return .openFile(file: file)
+
+        case .openURL:
+            guard let url = self.stringArg("url") else {
+                throw ClientManagerError.functionArgParsingError("Failed to open file...")
+            }
+
+            return .openURL(url: url)
+
+        case .performUIAction:
+            guard let id = self.stringArg("id"),
+                  let delayInMillis = self.intArg("delayInMillis"),
+                  let narration = self.stringArg("narration") else {
+                throw ClientManagerError.functionArgParsingError("Failed to perform UI action...")
+            }
+
+            return .performUIAction(action: Action(
+                id: id,
+                narration: narration,
+                inputText: self.stringArg("inputText"),
+                pressEnter: self.boolArg("pressEnter"),
+                delayInMillis: delayInMillis
+            ))
+
+        case .saveFile:
+            guard let id = self.stringArg("id"),
+                  let file = self.stringArg("file") else {
+                throw ClientManagerError.functionArgParsingError("Failed to save file...")
+            }
+
+            return .saveFile(id: id, file: file)
+        }
+    }
+}
+
+class FunctionManager: CanFetchAppContext,
+                       CanSimulateSelectAll,
+                       CanSimulateCopy,
+                       CanSimulatePaste,
+                       CanSimulateClose,
+                       CanSimulateGoToFile,
+                       CanFocusOnElement {
+
+    /// Return the parsed FunctionCall
+    func parse(jsonString: String) async throws -> FunctionCall {
+        guard let jsonData = jsonString.data(using: .utf8),
+              let functionCall = try? JSONDecoder().decode(FunctionCall.self, from: jsonData) else {
+            throw ClientManagerError.functionParsingError("Function could not be parsed: \(jsonString)")
+        }
+
+        return functionCall
+    }
+
+    func call(_ functionCall: FunctionCall, appInfo: AppInfo?) async throws -> AppInfo {
+        switch functionCall.name {
+        case .openApplication:
+            try await self.openApplication(functionCall, appInfo: appInfo)
+        case .openFile:
+            try await self.openFile(functionCall, appInfo: appInfo)
+        case .openURL:
+            try await self.openURL(functionCall, appInfo: appInfo)
+        case .performUIAction:
+            try await self.performUIAction(functionCall, appInfo: appInfo)
+        case .saveFile:
+            try await self.saveFile(functionCall, appInfo: appInfo)
+        }
+
+        // Return updated app state
+        var newAppContext = try await fetchAppContext()
+        let (newUIElement, newElementMap) = getUIElements(appContext: newAppContext)
+        try Task.checkCancellation()
+
+        guard let serializedUIElement = newUIElement?.serialize() else {
+            throw ClientManagerError.functionCallError(
+                "Failed to serialize UI state",
+                functionCall: functionCall,
+                appContext: appInfo?.appContext
+            )
+        }
+        
+        try Task.checkCancellation()
+        newAppContext?.serializedUIElement = serializedUIElement
+
+        return AppInfo(
+            appContext: newAppContext,
+            elementMap: newElementMap,
+            apps: appInfo?.apps ?? [:]
+        )
+    }
+}
+
+extension FunctionCall {
     func stringArg(_ arg: String) -> String? {
         guard let value = args[arg] else { return nil }
 
@@ -122,101 +205,5 @@ struct FunctionCall: Codable, Equatable {
             return boolValue
         default: return nil
         }
-    }
-}
-
-class FunctionManager: ObservableObject,
-                       CanFetchAppContext,
-                       CanSimulateSelectAll,
-                       CanSimulateCopy,
-                       CanSimulatePaste,
-                       CanSimulateClose,
-                       CanSimulateGoToFile,
-                       CanFocusOnElement {
-
-    @Published var isExecuting: Bool = false
-    private var currentTask: Task<Void, Error>? = nil
-    private var speaker = AVSpeechSynthesizer()
-
-    @MainActor
-    func parseAndCallFunction(jsonString: String, appInfo: AppInfo?, modalManager: ModalManager) async {
-        currentTask?.cancel()
-        currentTask = nil
-        isExecuting = false
-
-        let appContext = appInfo?.appContext
-        guard let jsonData = jsonString.data(using: .utf8),
-              let functionCall = try? JSONDecoder().decode(FunctionCall.self, from: jsonData) else {
-            modalManager.setError("Failed to parse function", appContext: appContext)
-            return
-        }
-
-        isExecuting = true
-        currentTask = Task.init { [weak self] in
-            switch functionCall.name {
-            case "open_application":
-                do {
-                    try await self?.openApplication(functionCall, appInfo: appInfo, modalManager: modalManager)
-                } catch {
-                    modalManager.setError("Failed when opening application...", appContext: appContext)
-                }
-
-            case "open_url":
-                do {
-                    try await self?.openURL(functionCall, appInfo: appInfo, modalManager: modalManager)
-                } catch {
-                    modalManager.setError("Failed when opening url...", appContext: appContext)
-                }
-
-            case "perform_ui_action":
-                do {
-                    try await self?.performUIAction(functionCall, appInfo: appInfo, modalManager: modalManager)
-                } catch {
-                    modalManager.setError("Failed when interacting with UI...", appContext: appContext)
-                }
-
-            case "open_and_scrape_url":
-                do {
-                    try await self?.openAndScrapeURL(functionCall, appInfo: appInfo, modalManager: modalManager)
-                } catch {
-                    modalManager.setError("Failed when scraping URL...", appContext: appContext)
-                }
-
-            case "open_file":
-                do {
-                    try await self?.openFile(functionCall, appInfo: appInfo, modalManager: modalManager)
-                } catch {
-                    modalManager.setError("Failed when opening file...", appContext: appContext)
-                }
-
-            case "save_file":
-                do {
-                    try await self?.saveFile(functionCall, appInfo: appInfo, modalManager: modalManager)
-                } catch {
-                    modalManager.setError("Failed when saving file...", appContext: appContext)
-                }
-
-            default:
-                modalManager.setError("Function \(functionCall.name) not supported", appContext: appContext)
-            }
-
-            DispatchQueue.main.async {
-                self?.currentTask = nil
-                self?.isExecuting = false
-            }
-        }
-    }
-
-    @MainActor
-    func cancelTask() {
-        currentTask?.cancel()
-        currentTask = nil
-        isExecuting = false
-    }
-
-    func narrate(text: String) {
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.prefersAssistiveTechnologySettings = true
-        speaker.speak(utterance)
     }
 }

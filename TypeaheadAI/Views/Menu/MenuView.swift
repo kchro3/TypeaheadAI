@@ -74,10 +74,7 @@ struct MenuView: View {
                     isMenuVisible = false
                 }
 
-                if (
-                    (modalManager.clientManager?.isExecuting ?? false) ||
-                    (modalManager.functionManager?.isExecuting ?? false)
-                ) {
+                if modalManager.isPending {
                     MenuButtonView(
                         title: "Cancel task",
                         shortcut: .cancelTasks

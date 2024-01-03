@@ -33,78 +33,61 @@ extension FunctionCall {
 
 extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
-    func performUIAction(_ functionCall: FunctionCall, appInfo: AppInfo?, modalManager: ModalManager) async throws {
+    func performUIAction(_ functionCall: FunctionCall, appInfo: AppInfo?) async throws {
         let appContext = appInfo?.appContext
 
-        guard let action = functionCall.getAction(),
+        guard case .performUIAction(let action) = try functionCall.parseArgs(),
               let elementMap = appInfo?.elementMap else {
-            await modalManager.setError("Failed to perform UI action", appContext: appContext)
-            return
+            throw ClientManagerError.appError("Invalid app state")
         }
 
-        narrate(text: action.narration)
-        await modalManager.appendFunction(
-            "Performing action: \(action)...",
-            functionCall: functionCall,
-            appContext: appInfo?.appContext
-        )
-
-        try await Task.sleep(for: .seconds(3))
-        try Task.checkCancellation()
-
-        await modalManager.closeModal()
+        guard let axElement = elementMap[action.id] else {
+            throw ClientManagerError.functionCallError(
+                "No such element \(action.id)",
+                functionCall: functionCall,
+                appContext: appInfo?.appContext
+            )
+        }
 
         if let bundleIdentifier = appContext?.bundleIdentifier,
            let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
             // Activate the app, bringing it to the foreground
             app.activate(options: [.activateIgnoringOtherApps])
-        }
-
-        try Task.checkCancellation()
-
-        guard let axElement = elementMap[action.id] else {
-            // TERMINATE on invalid action
-            await modalManager.showModal()
-            await modalManager.appendToolError("No such element \(action.id)", functionCall: functionCall, appContext: appContext)
-            return
+            try await Task.safeSleep(for: .milliseconds(100))
         }
 
         _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
-        try await Task.sleep(for: .milliseconds(100))
-        try Task.checkCancellation()
+
+        try await Task.safeSleep(for: .milliseconds(100))
 
         do {
             try await focus(on: axElement)
         } catch {
-            // TERMINATE on failure
-            await modalManager.showModal()
-            await modalManager.appendToolError("Action failed...", functionCall: functionCall, appContext: appContext)
-            return
+            throw ClientManagerError.functionCallError(
+                error.localizedDescription,
+                functionCall: functionCall,
+                appContext: appInfo?.appContext
+            )
         }
 
         if let inputText = action.inputText, let role = axElement.stringValue(forAttribute: kAXRoleAttribute) {
             if role == "AXComboBox" {
                 if let parent = axElement.parent(),
                    let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
-                   let serializedList = UIElementVisitor.visit(element: axList)?.serialize(
-                    isIndexed: false,
-                    excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-                   ),
+                   let serializedList = UIElementVisitor.visit(element: axList)?.serialize(isIndexed: false),
                    let pickResult = pickFromList(axElement: axList, value: inputText) {
                     if pickResult != .success {
                         print(serializedList)
-                        // TERMINATE on failure
-                        await modalManager.showModal()
-
-                        await modalManager.appendToolError("Action failed... Could not find \(inputText) in dropdown menu", functionCall: functionCall, appContext: appContext)
-
-                        return
+                        throw ClientManagerError.functionCallError(
+                            "Action failed... Could not find \(inputText) in dropdown menu",
+                            functionCall: functionCall,
+                            appContext: appInfo?.appContext
+                        )
                     }
                 } else {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(inputText, forType: .string)
-                    try await Task.sleep(for: .milliseconds(100))
-                    try Task.checkCancellation()
+                    try await Task.safeSleep(for: .milliseconds(100))
 
                     try await simulatePaste()
 
@@ -115,8 +98,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             } else {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(inputText, forType: .string)
-                try await Task.sleep(for: .milliseconds(100))
-                try Task.checkCancellation()
+                try await Task.safeSleep(for: .milliseconds(100))
 
                 try await simulateSelectAll()
                 try await simulatePaste()
@@ -127,45 +109,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             }
         }
 
-        try await Task.sleep(for: .seconds(2))
-        await modalManager.showModal()
-
-        let (newUIElement, newElementMap) = getUIElements(appContext: appInfo?.appContext)
-        if let serializedUIElement = newUIElement?.serialize(
-            excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-        ) {
-            await modalManager.appendTool(
-                "Updated state: \(serializedUIElement)",
-                functionCall: functionCall,
-                appContext: appInfo?.appContext
-            )
-        } else {
-            await modalManager.appendToolError(
-                "Could not capture app state",
-                functionCall: functionCall,
-                appContext: appInfo?.appContext
-            )
-        }
-
-        try Task.checkCancellation()
-
-        let newAppInfo = AppInfo(
-            appContext: appInfo?.appContext,
-            elementMap: newElementMap,
-            apps: appInfo?.apps ?? [:]
-        )
-
-        DispatchQueue.main.async {
-            modalManager.cachedAppInfo = newAppInfo
-        }
-
-        Task {
-            do {
-                try await modalManager.continueReplying(appInfo: newAppInfo)
-            } catch {
-                await modalManager.setError(error.localizedDescription, appContext: appInfo?.appContext)
-            }
-        }
+        try await Task.safeSleep(for: .seconds(2))
     }
 
     /// Recursively traverse an AXList to select an option that matches the expected value.

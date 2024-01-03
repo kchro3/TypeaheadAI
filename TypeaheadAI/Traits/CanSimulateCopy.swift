@@ -28,9 +28,9 @@ extension CanSimulateCopy {
 
         let changeCount = NSPasteboard.general.changeCount
         keyDown.post(tap: .cghidEventTap)
-        try await Task.sleep(for: .milliseconds(20))
+        try await Task.safeSleep(for: .milliseconds(20))
         keyUp.post(tap: .cghidEventTap)
-        try await Task.sleep(for: .milliseconds(200))
+        try await Task.safeSleep(for: .milliseconds(200))
         if changeCount == NSPasteboard.general.changeCount {
             throw CanSimulateCopyError.noChangesDetected
         }

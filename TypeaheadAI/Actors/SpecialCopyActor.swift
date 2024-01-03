@@ -65,20 +65,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
         }
 
         // Set the copied text as a new message
-        await self.modalManager.setUserMessage(copiedText, messageType: messageType, appContext: appInfo.appContext)
-
-        // Serialize the UIElement
-        if isAutopilotEnabled {
-            let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
-            if let serializedUIElement = uiElement?.serialize(
-                excludedRoles: ["AXImage"],
-                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-            ) {
-                print(serializedUIElement)
-                appInfo.appContext?.serializedUIElement = serializedUIElement
-                appInfo.elementMap = elementMap
-            }
-        }
+        await self.modalManager.setUserMessage("Smart-copied:\n\n\(copiedText)", messageType: messageType, appContext: appInfo.appContext)
 
         // Try to predict the user intent
         let contextualIntents = self.intentManager.fetchContextualIntents(limit: 10, appContext: appInfo.appContext)
@@ -88,6 +75,15 @@ actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
 
         // Kick off async
         Task {
+            // Serialize the UIElement
+            if isAutopilotEnabled {
+                let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
+                if let serializedUIElement = uiElement?.serialize() {
+                    appInfo.appContext?.serializedUIElement = serializedUIElement
+                    appInfo.elementMap = elementMap
+                }
+            }
+
             if let intents = try await self.clientManager.suggestIntents(
                 id: UUID(),
                 username: NSUserName(),

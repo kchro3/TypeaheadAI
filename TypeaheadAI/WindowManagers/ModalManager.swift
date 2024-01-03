@@ -11,13 +11,8 @@ import Foundation
 import MarkdownUI
 import os.log
 
-extension Notification.Name {
-    static let userIntentSent = Notification.Name("userIntentSent")
-}
-
 class ModalManager: ObservableObject {
     private let context: NSManagedObjectContext
-    var cachedAppInfo: AppInfo? = nil
 
     @Published var messages: [Message]
     @Published var userIntents: [String]?
@@ -25,6 +20,10 @@ class ModalManager: ObservableObject {
     @Published var triggerFocus: Bool
     @Published var isVisible: Bool
     @Published var isPending: Bool
+
+    // Add a Task property to manage task.
+    // NOTE: Only one task can be executing at a time!
+    var currentTask: Task<Void, Error>? = nil
 
     @AppStorage("online") var online: Bool = true
     @AppStorage("toastX") var toastX: Double?
@@ -38,7 +37,6 @@ class ModalManager: ObservableObject {
     )
 
     private let maxIntents = 9
-    private let maxMessages = 20
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -77,9 +75,9 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func cancelTasks() {
+        currentTask?.cancel()
+        currentTask = nil
         isPending = false
-        self.clientManager?.cancelStreamingTask()
-        self.functionManager?.cancelTask()
 
         // NOTE: Worry about this later... Deal with cancellations of tools
 //        var toolCallId: String? = nil
@@ -107,8 +105,8 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func forceRefresh() {
-        self.cancelTasks()
-
+        currentTask?.cancel()
+        currentTask = nil
         messages = []
         isPending = false
         userIntents = nil
@@ -164,24 +162,9 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func appendTool(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        if (
-            functionCall.name == "perform_ui_action"
-            || functionCall.name == "open_application"
-            || functionCall.name == "open_file"
-            || functionCall.name == "open_url"
-            || functionCall.name == "save_file"
-        ){
-            for index in messages.indices {
-                if case .tool_call(let fnCall) = messages[index].messageType,
-                   (
-                    fnCall.name == "perform_ui_action"
-                    || fnCall.name == "open_application"
-                    || fnCall.name == "open_file"
-                    || fnCall.name == "open_url"
-                    || fnCall.name == "save_file"
-                   ) {
-                    messages[index].text = "<pruned>"
-                }
+        for index in messages.indices {
+            if case .tool_call(_) = messages[index].messageType {
+                messages[index].text = "<pruned>"
             }
         }
 
@@ -222,6 +205,8 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func appendToolError(_ responseError: String, functionCall: FunctionCall, appContext: AppContext?) {
+        isPending = false
+
         if let lastMessage = messages.last {
             messages.append(
                 Message(
@@ -401,19 +386,11 @@ class ModalManager: ObservableObject {
     /// Assume that function calls are immediately followed by their tool calls.
     @MainActor
     func appendFunction(_ text: String, functionCall: FunctionCall, appContext: AppContext?) {
-        if (
-            functionCall.name == "perform_ui_action"
-            || functionCall.name == "open_application"
-            || functionCall.name == "open_file"
-            || functionCall.name == "open_url"
-            || functionCall.name == "save_file"),
-           let lastMessage = messages.last,
-           case .tool_call(let fnCall) = lastMessage.messageType,
-           (fnCall.name == "perform_ui_action" 
-            || fnCall.name == "open_application"
-            || fnCall.name == "open_file"
-            || fnCall.name == "open_url"
-            || fnCall.name == "save_file"),
+        userIntents = nil
+        isPending = true
+
+        if let lastMessage = messages.last,
+           case .tool_call(_) = lastMessage.messageType,
            let lastFnCallIndex = messages.lastIndex(where: { isFunctionCall(message: $0) }),
            case .function_call(var functionCalls) = messages[lastFnCallIndex].messageType {
 
@@ -437,9 +414,6 @@ class ModalManager: ObservableObject {
                 messageType: .function_call(data: [functionCall])
             ))
         }
-
-        userIntents = nil
-        isPending = false
     }
 
     private func isFunctionCall(message: Message) -> Bool {
@@ -579,8 +553,6 @@ class ModalManager: ObservableObject {
     /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
     func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
-        self.cancelTasks()
-
         var quickAction: QuickAction? = nil
         if isQuickAction {
             // Look up the quick action by its label or create a new one
@@ -627,13 +599,91 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        Task {
-            try await self.clientManager?.refine(
+
+        currentTask?.cancel()
+        currentTask = Task {
+            await reply(quickAction: quickAction)
+        }
+    }
+
+    private func reply(
+        quickAction: QuickAction? = nil,
+        prevAppInfo: AppInfo? = nil
+    ) async {
+        do {
+            try Task.checkCancellation()
+
+            if let (bufferedPayload, appInfo) = try await self.clientManager?.refine(
                 messages: self.messages,
                 quickActionId: quickAction?.id,
-                streamHandler: defaultStreamHandler,
-                completion: defaultCompletionHandler
-            )
+                prevAppInfo: prevAppInfo,
+                streamHandler: self.appendText) {
+
+                if bufferedPayload.mode == .function {
+                    try Task.checkCancellation()
+                    // Handle Function payloads
+                    guard let jsonString = bufferedPayload.text,
+                          let functionCall = try await functionManager?.parse(jsonString: jsonString) else {
+                        throw ClientManagerError.functionParsingError("Could not parse function payload.")
+                    }
+
+                    // Parse arguments and update UI with human readable description.
+                    let args = try functionCall.parseArgs()
+                    await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
+
+                    try await Task.safeSleep(for: .seconds(3))  // Add slight delay so that user can see the next action
+
+                    await self.closeModal()
+
+                    // Execute function and add the tool response
+                    let newAppInfo = try await functionManager?.call(functionCall, appInfo: appInfo)
+                    try Task.checkCancellation()
+
+                    guard let serialized = newAppInfo?.appContext?.serializedUIElement else {
+                        throw ClientManagerError.functionCallError(
+                            "Failed to get updated state",
+                            functionCall: functionCall,
+                            appContext: appInfo?.appContext
+                        )
+                    }
+
+                    await self.appendTool("Updated State\n\(serialized)", functionCall: functionCall, appContext: newAppInfo?.appContext)
+                    await self.showModal()
+
+                    try Task.checkCancellation()
+                    await self.reply(quickAction: quickAction, prevAppInfo: newAppInfo)
+                }
+            }
+        } catch let error as ClientManagerError {
+            switch error {
+            case .badRequest(let message):
+                await self.setError(message, appContext: prevAppInfo?.appContext)
+            case .serverError(let message):
+                await self.setError(message, appContext: prevAppInfo?.appContext)
+            case .clientError(let message):
+                await self.setError(message, appContext: prevAppInfo?.appContext)
+            case .modelNotFound(let message):
+                await self.setError(message, appContext: prevAppInfo?.appContext)
+            case .modelNotLoaded(let message):
+                await self.setError(message, appContext: prevAppInfo?.appContext)
+            case .functionCallError(let message, let functionCall, let appContext):
+                await self.showModal()
+                await self.appendToolError(message, functionCall: functionCall, appContext: appContext)
+            default:
+                await self.setError("Something went wrong. \(error.localizedDescription)", appContext: prevAppInfo?.appContext)
+            }
+        } catch _ as CancellationError {
+            if !self.isVisible {
+                await self.showModal()
+            }
+
+            await self.setError("Task was cancelled", appContext: nil)
+        } catch {
+            if !self.isVisible {
+                await self.showModal()
+            }
+
+            await self.setError("Something went wrong: \(error.localizedDescription)", appContext: nil)
         }
     }
 
@@ -651,13 +701,8 @@ class ModalManager: ObservableObject {
             isPending = true
             userIntents = nil
 
-            Task {
-                try await self.clientManager?.refine(
-                    messages: self.messages,
-                    streamHandler: defaultStreamHandler,
-                    completion: defaultCompletionHandler
-                )
-            }
+            currentTask?.cancel()
+            currentTask = Task { await reply() }
         }
     }
 
@@ -679,63 +724,19 @@ class ModalManager: ObservableObject {
         isPending = true
         userIntents = nil
 
-        Task {
-            try await self.clientManager?.refine(
-                messages: self.messages,
-                streamHandler: defaultStreamHandler,
-                completion: defaultCompletionHandler
-            )
-        }
+        currentTask?.cancel()
+        currentTask = Task { await reply() }
     }
 
     @MainActor
     func proposeQuickAction() async throws {
         isPending = true
         userIntents = nil
-        Task {
-            try await self.clientManager?.refine(
-                messages: self.messages,
-                streamHandler: { result, appInfo in
-                    switch result {
-                    case .success(let chunk):
-                        await self.appendPlan(chunk, appContext: appInfo?.appContext)
-                    case .failure(let error as ClientManagerError):
-                        self.logger.error("Error: \(error.localizedDescription)")
-                        switch error {
-                        case .badRequest(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .serverError(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .clientError(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .modelNotFound(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .modelNotLoaded(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        default:
-                            self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
-                        }
-                    case .failure(let error):
-                        self.logger.error("Error: \(error.localizedDescription)")
-                        self.setError(error.localizedDescription, appContext: appInfo?.appContext)
-                    }
-                },
-                completion: defaultCompletionHandler
-            )
-        }
-    }
-
-    @MainActor
-    func continueReplying(appInfo: AppInfo? = nil) async throws {
-        isPending = true
-        userIntents = nil
 
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
-                prevAppInfo: appInfo,
-                streamHandler: defaultStreamHandler,
-                completion: defaultCompletionHandler
+                streamHandler: self.appendPlan
             )
         }
     }
@@ -882,60 +883,6 @@ class ModalManager: ObservableObject {
                 self.toastWidth = size.width
                 self.toastHeight = size.height
             }
-        }
-    }
-
-    @MainActor
-    func defaultCompletionHandler(result: Result<ChunkPayload, Error>, appInfo: AppInfo?) async {
-        switch result {
-        case .success(let success):
-            guard let text = success.text else {
-                return
-            }
-
-            switch success.mode ?? .text {
-            case .text, .image:
-                return // no-op
-            case .function:
-                await functionManager?.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
-            }
-        case .failure(let error as ClientManagerError):
-            switch error {
-            case .badRequest(let message):
-                self.setError(message, appContext: appInfo?.appContext)
-            default:
-                self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
-                self.logger.error("Something went wrong.")
-            }
-        case .failure(let error):
-            self.logger.error("Error: \(error.localizedDescription)")
-            self.setError(error.localizedDescription, appContext: appInfo?.appContext)
-        }
-    }
-
-    func defaultStreamHandler(result: Result<String, Error>, appInfo: AppInfo?) async {
-        switch result {
-        case .success(let chunk):
-            await self.appendText(chunk, appContext: appInfo?.appContext)
-        case .failure(let error as ClientManagerError):
-            self.logger.error("Error: \(error.localizedDescription)")
-            switch error {
-            case .badRequest(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .serverError(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .clientError(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .modelNotFound(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .modelNotLoaded(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            default:
-                await self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
-            }
-        case .failure(let error):
-            self.logger.error("Error: \(error.localizedDescription)")
-            await self.setError(error.localizedDescription, appContext: appInfo?.appContext)
         }
     }
 }

@@ -16,21 +16,20 @@ struct PermissionsOnboardingView: View {
 
             Text(
             """
-            Before we can get started, Typeahead will need some Accessibility permissions to use your clipboard and to use Autopilot mode.
+            Before we can get started, Typeahead will need some Accessibility permissions to work.
 
             In **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.
 
-            You may also press the button below to request these permissions. If you have already granted permissions, the button will not do anything.
+            Press the button below to open System Preferences and modify your Accessibility settings.
             """
             )
 
             Spacer()
 
-            RoundedButton("Check Accessibility Permissions", isAccent: true) {
-                // Simulate a key press to trigger permission request
-                let source = CGEventSource(stateID: .hidSystemState)!
-                let cmdCDown = CGEvent(keyboardEventSource: source, virtualKey: 0x08, keyDown: true)!
-                cmdCDown.post(tap: .cghidEventTap)
+            RoundedButton("Open System Preferences", isAccent: true) {
+                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                    NSWorkspace.shared.open(url)
+                }
             }
 
             Spacer()

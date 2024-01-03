@@ -102,7 +102,7 @@ struct ModalView: View {
                             Task {
                                 modalManager.forceRefresh()
                                 modalManager.closeModal()
-                                try await Task.sleep(for: .seconds(3))
+                                try await Task.safeSleep(for: .seconds(3))
                                 try await modalManager.specialRecordActor?.specialRecord()
                             }
                         }
@@ -140,11 +140,7 @@ struct ModalView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 15)
                 } else {
-                    ModalFooterView(
-                        modalManager: modalManager,
-                        clientManager: modalManager.clientManager!,
-                        functionManager: modalManager.functionManager!
-                    )
+                    ModalFooterView(modalManager: modalManager)
                 }
             }
         }
@@ -336,7 +332,7 @@ Task {
     }
 
     let context = PersistenceController.preview.container.viewContext
-    var modalManager = ModalManager(context: context)
+    let modalManager = ModalManager(context: context)
     modalManager.userIntents = [
         "testing a new idea", "test a test", "testing a test test test testing a test test test testing a test test test testing a test test test"
     ]
