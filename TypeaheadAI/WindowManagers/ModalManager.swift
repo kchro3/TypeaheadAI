@@ -669,7 +669,6 @@ class ModalManager: ObservableObject {
             case .modelNotLoaded(let message):
                 await self.setError(message, appContext: prevAppInfo?.appContext)
             case .functionCallError(let message, let functionCall, let appContext):
-                await MainActor.run { isPending = false }
                 await self.showModal()
                 await self.appendToolError(message, functionCall: functionCall, appContext: appContext)
             default:

@@ -70,11 +70,7 @@ actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
         // Serialize the UIElement
         if isAutopilotEnabled {
             let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
-            if let serializedUIElement = uiElement?.serialize(
-                excludedRoles: ["AXImage"],
-                excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-            ) {
-                print(serializedUIElement)
+            if let serializedUIElement = uiElement?.serialize() {
                 appInfo.appContext?.serializedUIElement = serializedUIElement
                 appInfo.elementMap = elementMap
             }

@@ -9,6 +9,7 @@ import AppKit
 import CoreServices
 import Foundation
 import os.log
+import SwiftUI
 
 actor SpecialOpenActor: CanGetUIElements {
     private let intentManager: IntentManager
@@ -37,7 +38,7 @@ actor SpecialOpenActor: CanGetUIElements {
     }
 
     func specialOpen(forceRefresh: Bool = false) async throws {
-        let appInfo = try await self.appContextManager.getActiveAppInfo()
+        var appInfo = try await self.appContextManager.getActiveAppInfo()
 
         if forceRefresh {
             self.logger.debug("special new")
@@ -63,6 +64,13 @@ actor SpecialOpenActor: CanGetUIElements {
 
             // Kick off async
             Task {
+                // Serialize the UIElement
+                let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
+                if let serializedUIElement = uiElement?.serialize() {
+                    appInfo.appContext?.serializedUIElement = serializedUIElement
+                    appInfo.elementMap = elementMap
+                }
+
                 if let intents = try await self.clientManager.suggestIntents(
                     id: UUID(),
                     username: NSUserName(),

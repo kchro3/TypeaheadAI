@@ -77,12 +77,10 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
             if role == "AXComboBox" {
                 if let parent = axElement.parent(),
                    let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
-                   let serializedList = UIElementVisitor.visit(element: axList)?.serialize(
-                    isIndexed: false,
-                    excludedActions: ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
-                   ),
+                   let serializedList = UIElementVisitor.visit(element: axList)?.serialize(isIndexed: false),
                    let pickResult = pickFromList(axElement: axList, value: inputText) {
                     if pickResult != .success {
+                        print(serializedList)
                         throw ClientManagerError.functionCallError(
                             "Action failed... Could not find \(inputText) in dropdown menu",
                             functionCall: functionCall,
