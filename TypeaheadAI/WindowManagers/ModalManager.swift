@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import AVFoundation
 import SwiftUI
 import Foundation
 import MarkdownUI
@@ -30,6 +31,7 @@ class ModalManager: ObservableObject {
     @AppStorage("toastY") var toastY: Double?
     @AppStorage("toastWidth") var toastWidth: Double = 400.0
     @AppStorage("toastHeight") var toastHeight: Double = 400.0
+    @AppStorage("isNarrateEnabled") var isNarrateEnabled: Bool = false
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -37,6 +39,7 @@ class ModalManager: ObservableObject {
     )
 
     private let maxIntents = 9
+    private let speaker = AVSpeechSynthesizer()
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -249,7 +252,7 @@ class ModalManager: ObservableObject {
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
 
-        if let idx = messages.indices.last, !messages[idx].isCurrentUser {
+        if let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden {
             messages[idx].responseError = responseError
         } else {
             if let lastMessage = messages.last {
@@ -602,88 +605,91 @@ class ModalManager: ObservableObject {
 
         currentTask?.cancel()
         currentTask = Task {
-            await reply(quickAction: quickAction)
+            do {
+                try await reply(quickAction: quickAction)
+            } catch let error as ClientManagerError {
+                switch error {
+                case .badRequest(let message):
+                    self.setError(message, appContext: appContext)
+                case .serverError(let message):
+                    self.setError(message, appContext: appContext)
+                case .clientError(let message):
+                    self.setError(message, appContext: appContext)
+                case .modelNotFound(let message):
+                    self.setError(message, appContext: appContext)
+                case .modelNotLoaded(let message):
+                    self.setError(message, appContext: appContext)
+                case .functionCallError(let message, let functionCall, let appContext):
+                    self.showModal()
+                    self.appendToolError(message, functionCall: functionCall, appContext: appContext)
+                default:
+                    self.setError("Something went wrong. \(error.localizedDescription)", appContext: appContext)
+                }
+            } catch _ as CancellationError {
+                if !self.isVisible {
+                    self.showModal()
+                }
+
+                self.setError("Task was cancelled.", appContext: appContext)
+            } catch {
+                if !self.isVisible {
+                    self.showModal()
+                }
+
+                self.setError("Something went wrong: \(error.localizedDescription)", appContext: nil)
+            }
         }
     }
 
     private func reply(
         quickAction: QuickAction? = nil,
         prevAppInfo: AppInfo? = nil
-    ) async {
-        do {
-            try Task.checkCancellation()
+    ) async throws {
+        try Task.checkCancellation()
 
-            if let (bufferedPayload, appInfo) = try await self.clientManager?.refine(
-                messages: self.messages,
-                quickActionId: quickAction?.id,
-                prevAppInfo: prevAppInfo,
-                streamHandler: self.appendText) {
+        if let (bufferedPayload, appInfo) = try await self.clientManager?.refine(
+            messages: self.messages,
+            quickActionId: quickAction?.id,
+            prevAppInfo: prevAppInfo,
+            streamHandler: self.appendText) {
 
-                if bufferedPayload.mode == .function {
-                    try Task.checkCancellation()
-                    // Handle Function payloads
-                    guard let jsonString = bufferedPayload.text,
-                          let functionCall = try await functionManager?.parse(jsonString: jsonString) else {
-                        throw ClientManagerError.functionParsingError("Could not parse function payload.")
-                    }
-
-                    // Parse arguments and update UI with human readable description.
-                    let args = try functionCall.parseArgs()
-                    await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
-
-                    try await Task.safeSleep(for: .seconds(3))  // Add slight delay so that user can see the next action
-
-                    await self.closeModal()
-
-                    // Execute function and add the tool response
-                    let newAppInfo = try await functionManager?.call(functionCall, appInfo: appInfo)
-                    try Task.checkCancellation()
-
-                    guard let serialized = newAppInfo?.appContext?.serializedUIElement else {
-                        throw ClientManagerError.functionCallError(
-                            "Failed to get updated state",
-                            functionCall: functionCall,
-                            appContext: appInfo?.appContext
-                        )
-                    }
-
-                    await self.appendTool("Updated State\n\(serialized)", functionCall: functionCall, appContext: newAppInfo?.appContext)
-                    await self.showModal()
-
-                    try Task.checkCancellation()
-                    await self.reply(quickAction: quickAction, prevAppInfo: newAppInfo)
+            if bufferedPayload.mode == .text, let text = bufferedPayload.text {
+                narrate(text: text)
+            } else if bufferedPayload.mode == .function {
+                try Task.checkCancellation()
+                // Handle Function payloads
+                guard let jsonString = bufferedPayload.text,
+                      let functionCall = try await functionManager?.parse(jsonString: jsonString) else {
+                    throw ClientManagerError.functionParsingError("Could not parse function payload.")
                 }
-            }
-        } catch let error as ClientManagerError {
-            switch error {
-            case .badRequest(let message):
-                await self.setError(message, appContext: prevAppInfo?.appContext)
-            case .serverError(let message):
-                await self.setError(message, appContext: prevAppInfo?.appContext)
-            case .clientError(let message):
-                await self.setError(message, appContext: prevAppInfo?.appContext)
-            case .modelNotFound(let message):
-                await self.setError(message, appContext: prevAppInfo?.appContext)
-            case .modelNotLoaded(let message):
-                await self.setError(message, appContext: prevAppInfo?.appContext)
-            case .functionCallError(let message, let functionCall, let appContext):
-                await self.showModal()
-                await self.appendToolError(message, functionCall: functionCall, appContext: appContext)
-            default:
-                await self.setError("Something went wrong. \(error.localizedDescription)", appContext: prevAppInfo?.appContext)
-            }
-        } catch _ as CancellationError {
-            if !self.isVisible {
-                await self.showModal()
-            }
 
-            await self.setError("Task was cancelled", appContext: nil)
-        } catch {
-            if !self.isVisible {
-                await self.showModal()
-            }
+                // Parse arguments and update UI with human readable description.
+                let args = try functionCall.parseArgs()
+                await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
 
-            await self.setError("Something went wrong: \(error.localizedDescription)", appContext: nil)
+                narrate(text: args.humanReadable)
+                try await Task.safeSleep(for: .seconds(3))  // Add slight delay so that user can see the next action
+
+                await self.closeModal()
+
+                // Execute function and add the tool response
+                let newAppInfo = try await functionManager?.call(functionCall, appInfo: appInfo)
+                try Task.checkCancellation()
+
+                guard let serialized = newAppInfo?.appContext?.serializedUIElement else {
+                    throw ClientManagerError.functionCallError(
+                        "Failed to get updated state",
+                        functionCall: functionCall,
+                        appContext: appInfo?.appContext
+                    )
+                }
+
+                await self.appendTool("Updated State\n\(serialized)", functionCall: functionCall, appContext: newAppInfo?.appContext)
+                await self.showModal()
+
+                try Task.checkCancellation()
+                try await self.reply(quickAction: quickAction, prevAppInfo: newAppInfo)
+            }
         }
     }
 
@@ -702,7 +708,41 @@ class ModalManager: ObservableObject {
             userIntents = nil
 
             currentTask?.cancel()
-            currentTask = Task { await reply() }
+            currentTask = Task {
+                do {
+                    try await reply()
+                } catch let error as ClientManagerError {
+                    switch error {
+                    case .badRequest(let message):
+                        self.setError(message, appContext: nil)
+                    case .serverError(let message):
+                        self.setError(message, appContext: nil)
+                    case .clientError(let message):
+                        self.setError(message, appContext: nil)
+                    case .modelNotFound(let message):
+                        self.setError(message, appContext: nil)
+                    case .modelNotLoaded(let message):
+                        self.setError(message, appContext: nil)
+                    case .functionCallError(let message, let functionCall, let appContext):
+                        self.showModal()
+                        self.appendToolError(message, functionCall: functionCall, appContext: appContext)
+                    default:
+                        self.setError("Something went wrong. \(error.localizedDescription)", appContext: nil)
+                    }
+                } catch _ as CancellationError {
+                    if !self.isVisible {
+                        self.showModal()
+                    }
+
+                    self.setError("Task was cancelled.", appContext: nil)
+                } catch {
+                    if !self.isVisible {
+                        self.showModal()
+                    }
+
+                    self.setError("Something went wrong: \(error.localizedDescription)", appContext: nil)
+                }
+            }
         }
     }
 
@@ -725,7 +765,41 @@ class ModalManager: ObservableObject {
         userIntents = nil
 
         currentTask?.cancel()
-        currentTask = Task { await reply() }
+        currentTask = Task {
+            do {
+                try await reply()
+            } catch let error as ClientManagerError {
+                switch error {
+                case .badRequest(let message):
+                    self.setError(message, appContext: nil)
+                case .serverError(let message):
+                    self.setError(message, appContext: nil)
+                case .clientError(let message):
+                    self.setError(message, appContext: nil)
+                case .modelNotFound(let message):
+                    self.setError(message, appContext: nil)
+                case .modelNotLoaded(let message):
+                    self.setError(message, appContext: nil)
+                case .functionCallError(let message, let functionCall, let appContext):
+                    self.showModal()
+                    self.appendToolError(message, functionCall: functionCall, appContext: appContext)
+                default:
+                    self.setError("Something went wrong. \(error.localizedDescription)", appContext: nil)
+                }
+            } catch _ as CancellationError {
+                if !self.isVisible {
+                    self.showModal()
+                }
+
+                self.setError("Task was cancelled.", appContext: nil)
+            } catch {
+                if !self.isVisible {
+                    self.showModal()
+                }
+
+                self.setError("Something went wrong: \(error.localizedDescription)", appContext: nil)
+            }
+        }
     }
 
     @MainActor
@@ -774,6 +848,14 @@ class ModalManager: ObservableObject {
     func closeModal() {
         toastWindow?.close()
         isVisible = false
+    }
+
+    func narrate(text: String) {
+        if isNarrateEnabled {
+            let utterance = AVSpeechUtterance(string: text)
+            utterance.prefersAssistiveTechnologySettings = true
+            speaker.speak(utterance)
+        }
     }
 
     @MainActor

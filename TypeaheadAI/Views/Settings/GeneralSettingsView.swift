@@ -17,6 +17,7 @@ struct GeneralSettingsView: View {
     @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
     @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
+    @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -84,22 +85,30 @@ struct GeneralSettingsView: View {
                         Button("Reset User Settings", action: clearUserDefaults)
                         Spacer()
                     }
-                }
 
-                HStack {
-                    Spacer()
-                    Toggle(isOn: $notifyOnUpdate) {
-                        Text("Notify on new version")
+                    HStack {
+                        Spacer()
+                        Toggle(isOn: $notifyOnUpdate) {
+                            Text("Notify on new version")
+                        }
+                        Spacer()
+                        Toggle(isOn: $isWebSearchEnabled) {
+                            Text("Enable web search")
+                        }
+                        Spacer()
                     }
-                    Spacer()
-                    Toggle(isOn: $isWebSearchEnabled) {
-                        Text("Enable web search")
+
+                    HStack {
+                        Spacer()
+                        Toggle(isOn: $isAutopilotEnabled) {
+                            Text("Enable Autopilot")
+                        }
+                        Spacer()
+                        Toggle(isOn: $isNarrateEnabled) {
+                            Text("Enable Narration")
+                        }
+                        Spacer()
                     }
-                    Spacer()
-                    Toggle(isOn: $isAutopilotEnabled) {
-                        Text("Enable Autopilot")
-                    }
-                    Spacer()
                 }
             }
 

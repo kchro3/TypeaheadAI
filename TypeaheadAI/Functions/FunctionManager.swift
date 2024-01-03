@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import AVFoundation
 import Foundation
 
 enum FunctionName: String, Codable {
@@ -78,8 +79,7 @@ struct FunctionCall: Codable, Equatable {
                 id: id,
                 narration: narration,
                 inputText: self.stringArg("inputText"),
-                pressEnter: self.boolArg("pressEnter"),
-                delayInMillis: delayInMillis
+                pressEnter: self.boolArg("pressEnter")
             ))
 
         case .saveFile:
