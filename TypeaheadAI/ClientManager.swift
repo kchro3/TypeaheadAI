@@ -174,7 +174,7 @@ class ClientManager: CanGetUIElements {
         quickActionId: UUID? = nil,
         prevAppInfo: AppInfo? = nil,
         timeout: TimeInterval = 120,
-        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void
+        streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> (ChunkPayload, AppInfo?) {
         try Task.checkCancellation()
 
@@ -275,7 +275,7 @@ class ClientManager: CanGetUIElements {
         history: [Message]?,
         appInfo: AppInfo?,
         timeout: TimeInterval = 30,
-        streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void
+        streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> ChunkPayload {
         let uuid = try? await self.supabaseManager?.client.auth.session.user.id
         let payload = RequestPayload(
@@ -297,33 +297,29 @@ class ClientManager: CanGetUIElements {
 
         // TODO: Reimplement the offline path
         var bufferedPayload = ChunkPayload(finishReason: nil)
-        do {
-            let stream = try self.generateOnlineStream(
-                payload: payload,
-                timeout: timeout,
-                appInfo: appInfo
-            )
+        let stream = try self.generateOnlineStream(
+            payload: payload,
+            timeout: timeout,
+            appInfo: appInfo
+        )
 
-            for try await chunk in stream {
-                try Task.checkCancellation()
+        for try await chunk in stream {
+            try Task.checkCancellation()
 
-                if let text = chunk.text {
-                    switch chunk.mode ?? .text {
-                    case .text:
-                        await streamHandler(.success(text), appInfo)
-                        if bufferedPayload.mode != .image {
-                            bufferedPayload.text = (bufferedPayload.text ?? "") + text
-                            bufferedPayload.mode = .text
-                        }
-                    case .image:
-                        bufferedPayload = chunk
-                    case .function:
-                        bufferedPayload = chunk
+            if let text = chunk.text {
+                switch chunk.mode ?? .text {
+                case .text:
+                    await streamHandler(text, appInfo?.appContext)
+                    if bufferedPayload.mode != .image {
+                        bufferedPayload.text = (bufferedPayload.text ?? "") + text
+                        bufferedPayload.mode = .text
                     }
+                case .image:
+                    bufferedPayload = chunk
+                case .function:
+                    bufferedPayload = chunk
                 }
             }
-        } catch {
-            await streamHandler(.failure(error), appInfo)
         }
 
         return bufferedPayload

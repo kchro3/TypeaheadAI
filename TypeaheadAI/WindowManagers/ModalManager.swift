@@ -11,10 +11,6 @@ import Foundation
 import MarkdownUI
 import os.log
 
-extension Notification.Name {
-    static let userIntentSent = Notification.Name("userIntentSent")
-}
-
 class ModalManager: ObservableObject {
     private let context: NSManagedObjectContext
 
@@ -41,7 +37,6 @@ class ModalManager: ObservableObject {
     )
 
     private let maxIntents = 9
-    private let maxMessages = 20
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -624,7 +619,7 @@ class ModalManager: ObservableObject {
                 messages: self.messages,
                 quickActionId: quickAction?.id,
                 prevAppInfo: prevAppInfo,
-                streamHandler: defaultStreamHandler) {
+                streamHandler: self.appendText) {
 
                 if bufferedPayload.mode == .function {
                     try Task.checkCancellation()
@@ -744,31 +739,7 @@ class ModalManager: ObservableObject {
         Task {
             try await self.clientManager?.refine(
                 messages: self.messages,
-                streamHandler: { result, appInfo in
-                    switch result {
-                    case .success(let chunk):
-                        await self.appendPlan(chunk, appContext: appInfo?.appContext)
-                    case .failure(let error as ClientManagerError):
-                        self.logger.error("Error: \(error.localizedDescription)")
-                        switch error {
-                        case .badRequest(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .serverError(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .clientError(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .modelNotFound(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        case .modelNotLoaded(let message):
-                            self.setError(message, appContext: appInfo?.appContext)
-                        default:
-                            self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
-                        }
-                    case .failure(let error):
-                        self.logger.error("Error: \(error.localizedDescription)")
-                        self.setError(error.localizedDescription, appContext: appInfo?.appContext)
-                    }
-                }
+                streamHandler: self.appendPlan
             )
         }
     }
@@ -915,60 +886,6 @@ class ModalManager: ObservableObject {
                 self.toastWidth = size.width
                 self.toastHeight = size.height
             }
-        }
-    }
-//
-//    @MainActor
-//    func defaultCompletionHandler(result: Result<ChunkPayload, Error>, appInfo: AppInfo?) async {
-//        switch result {
-//        case .success(let success):
-//            guard let text = success.text else {
-//                return
-//            }
-//
-//            switch success.mode ?? .text {
-//            case .text, .image:
-//                return // no-op
-//            case .function:
-//                await functionManager?.parseAndCallFunction(jsonString: text, appInfo: appInfo, modalManager: self)
-//            }
-//        case .failure(let error as ClientManagerError):
-//            switch error {
-//            case .badRequest(let message):
-//                self.setError(message, appContext: appInfo?.appContext)
-//            default:
-//                self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
-//                self.logger.error("Something went wrong.")
-//            }
-//        case .failure(let error):
-//            self.logger.error("Error: \(error.localizedDescription)")
-//            self.setError(error.localizedDescription, appContext: appInfo?.appContext)
-//        }
-//    }
-
-    func defaultStreamHandler(result: Result<String, Error>, appInfo: AppInfo?) async {
-        switch result {
-        case .success(let chunk):
-            await self.appendText(chunk, appContext: appInfo?.appContext)
-        case .failure(let error as ClientManagerError):
-            self.logger.error("Error: \(error.localizedDescription)")
-            switch error {
-            case .badRequest(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .serverError(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .clientError(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .modelNotFound(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            case .modelNotLoaded(let message):
-                await self.setError(message, appContext: appInfo?.appContext)
-            default:
-                await self.setError("Something went wrong. Please try again.", appContext: appInfo?.appContext)
-            }
-        case .failure(let error):
-            self.logger.error("Error: \(error.localizedDescription)")
-            await self.setError(error.localizedDescription, appContext: appInfo?.appContext)
         }
     }
 }
