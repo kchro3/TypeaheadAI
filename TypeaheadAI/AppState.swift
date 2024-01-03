@@ -26,9 +26,9 @@ final class AppState: ObservableObject {
 
     // Managers (alphabetize)
     private let appContextManager: AppContextManager = AppContextManager()
-    @Published var clientManager: ClientManager
+    var clientManager: ClientManager
     var conversationManager: ConversationManager
-    @Published var functionManager = FunctionManager()
+    var functionManager = FunctionManager()
     private let historyManager: HistoryManager
     @Published var intentManager: IntentManager
     @Published var promptManager: QuickActionManager

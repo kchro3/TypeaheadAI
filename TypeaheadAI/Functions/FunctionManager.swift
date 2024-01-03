@@ -93,8 +93,7 @@ struct FunctionCall: Codable, Equatable {
     }
 }
 
-class FunctionManager: ObservableObject,
-                       CanFetchAppContext,
+class FunctionManager: CanFetchAppContext,
                        CanSimulateSelectAll,
                        CanSimulateCopy,
                        CanSimulatePaste,

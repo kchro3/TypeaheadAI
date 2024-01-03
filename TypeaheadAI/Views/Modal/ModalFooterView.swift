@@ -9,8 +9,6 @@ import SwiftUI
 
 struct ModalFooterView: View {
     @ObservedObject var modalManager: ModalManager
-    @ObservedObject var clientManager: ClientManager
-    @ObservedObject var functionManager: FunctionManager
 
     @State private var text: String = ""
 
@@ -89,8 +87,6 @@ struct ModalFooterView: View {
 #Preview {
     let context = PersistenceController.preview.container.viewContext
     return ModalFooterView(
-        modalManager: ModalManager(context: context),
-        clientManager: ClientManager(),
-        functionManager: FunctionManager()
+        modalManager: ModalManager(context: context)
     )
 }
