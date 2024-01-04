@@ -251,6 +251,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
+        narrate(text: responseError)
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden {
             messages[idx].responseError = responseError
@@ -619,11 +620,15 @@ class ModalManager: ObservableObject {
                     self.setError(message, appContext: appContext)
                 case .modelNotLoaded(let message):
                     self.setError(message, appContext: appContext)
+                case .functionParsingError(let message):
+                    self.setError(message, appContext: appContext)
+                case .functionArgParsingError(let message):
+                    self.setError(message, appContext: appContext)
                 case .functionCallError(let message, let functionCall, let appContext):
                     self.showModal()
                     self.appendToolError(message, functionCall: functionCall, appContext: appContext)
                 default:
-                    self.setError("Something went wrong. \(error.localizedDescription)", appContext: appContext)
+                    self.setError("Something went wrong. \(error.errorDescription)", appContext: appContext)
                 }
             } catch _ as CancellationError {
                 if !self.isVisible {
@@ -695,6 +700,7 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func updateMessage(index: Int, newContent: String) throws {
+
         self.messages[index].text = newContent
 
         if self.messages[index].isCurrentUser {
@@ -723,11 +729,15 @@ class ModalManager: ObservableObject {
                         self.setError(message, appContext: nil)
                     case .modelNotLoaded(let message):
                         self.setError(message, appContext: nil)
+                    case .functionParsingError(let message):
+                        self.setError(message, appContext: nil)
+                    case .functionArgParsingError(let message):
+                        self.setError(message, appContext: nil)
                     case .functionCallError(let message, let functionCall, let appContext):
                         self.showModal()
                         self.appendToolError(message, functionCall: functionCall, appContext: appContext)
                     default:
-                        self.setError("Something went wrong. \(error.localizedDescription)", appContext: nil)
+                        self.setError("Something went wrong. \(error.errorDescription)", appContext: nil)
                     }
                 } catch _ as CancellationError {
                     if !self.isVisible {
@@ -780,11 +790,15 @@ class ModalManager: ObservableObject {
                     self.setError(message, appContext: nil)
                 case .modelNotLoaded(let message):
                     self.setError(message, appContext: nil)
+                case .functionParsingError(let message):
+                    self.setError(message, appContext: nil)
+                case .functionArgParsingError(let message):
+                    self.setError(message, appContext: nil)
                 case .functionCallError(let message, let functionCall, let appContext):
                     self.showModal()
                     self.appendToolError(message, functionCall: functionCall, appContext: appContext)
                 default:
-                    self.setError("Something went wrong. \(error.localizedDescription)", appContext: nil)
+                    self.setError("Something went wrong. \(error.errorDescription)", appContext: nil)
                 }
             } catch _ as CancellationError {
                 if !self.isVisible {
@@ -807,12 +821,10 @@ class ModalManager: ObservableObject {
         isPending = true
         userIntents = nil
 
-        Task {
-            try await self.clientManager?.refine(
-                messages: self.messages,
-                streamHandler: self.appendPlan
-            )
-        }
+        try await self.clientManager?.proposeQuickAction(
+            messages: self.messages,
+            streamHandler: self.appendPlan
+        )
     }
 
     @MainActor
