@@ -75,6 +75,7 @@ class ClientManager: CanGetUIElements {
         }
     }
 
+
     func sendFeedback(feedback: String, timeout: TimeInterval = 30) async throws {
         guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
             throw ClientManagerError.signInRequired("Must be signed in to share feedback!")
