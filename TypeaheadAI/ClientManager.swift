@@ -170,7 +170,6 @@ class ClientManager: CanGetUIElements {
     /// Propose a Quick Action
     func proposeQuickAction(
         messages: [Message],
-        timeout: TimeInterval = 120,
         streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> (ChunkPayload, AppInfo?) {
         try Task.checkCancellation()
@@ -182,11 +181,7 @@ class ClientManager: CanGetUIElements {
             userObjective: "<record>",
             userBio: UserDefaults.standard.string(forKey: "bio"),
             userLang: Locale.preferredLanguages.first,
-            copiedText: nil,
             messages: self.sanitizeMessages(messages),
-            history: nil,
-            appInfo: nil,
-            timeout: timeout,
             streamHandler: streamHandler
         )
 
@@ -203,7 +198,6 @@ class ClientManager: CanGetUIElements {
 
         return (bufferedPayload, nil)
     }
-
 
     /// Refine the currently request
     /// Returns a "bufferedPayload", which is a payload that has buffered together all of the chunks in the stream
@@ -308,10 +302,10 @@ class ClientManager: CanGetUIElements {
         userObjective: String?,
         userBio: String?,
         userLang: String?,
-        copiedText: String?,
+        copiedText: String? = nil,
         messages: [Message],
-        history: [Message]?,
-        appInfo: AppInfo?,
+        history: [Message]? = nil,
+        appInfo: AppInfo? = nil,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> ChunkPayload {

@@ -62,6 +62,8 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
         try await focus(on: axElement, functionCall: functionCall, appContext: appInfo?.appContext)
 
+        try await Task.safeSleep(for: .milliseconds(200))
+
         if let inputText = action.inputText, let role = axElement.stringValue(forAttribute: kAXRoleAttribute) {
             if role == "AXComboBox" || role == "AXPopUpButton" {
                 if let parent = axElement.parent(),
@@ -70,15 +72,7 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
                     try await focus(on: result, functionCall: functionCall, appContext: appInfo?.appContext)
                 } else {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(inputText, forType: .string)
-                    try await Task.safeSleep(for: .milliseconds(100))
-
-                    try await simulatePaste()
-
-                    if action.pressEnter ?? false {
-                        try await simulateEnter()
-                    }
+                    print("Could not find element in dropdown window")
                 }
             } else {
                 NSPasteboard.general.clearContents()

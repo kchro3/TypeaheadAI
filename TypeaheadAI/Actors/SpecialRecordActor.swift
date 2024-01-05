@@ -76,14 +76,9 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
                 }
             }
 
-            message += "\n\nFirst, in **bold**, describe what task this sequence of actions accomplished in one imperative phrase (e.g. \"**Export a PDF to ...**\")"
-            message += "\nThen, come up with a bulleted list of imperatives (e.g. \"click on '...' button\", \"type '...' into text field\") narrating the task."
-
             await self.modalManager.showModal()
             await self.modalManager.setUserMessage(message, isHidden: true, appContext: appContext)
-            Task {
-                try await self.modalManager.proposeQuickAction()
-            }
+            try await self.modalManager.proposeQuickAction()
         } else {
             await self.modalManager.forceRefresh()
             self.recordedEvents = []

@@ -821,10 +821,21 @@ class ModalManager: ObservableObject {
         isPending = true
         userIntents = nil
 
-        try await self.clientManager?.proposeQuickAction(
-            messages: self.messages,
-            streamHandler: self.appendPlan
-        )
+        do {
+            guard let (bufferedPayload, _) = try await self.clientManager?.proposeQuickAction(
+                messages: self.messages,
+                streamHandler: self.appendPlan
+            ), let text = bufferedPayload.text else {
+                self.setError("Could not generate a plan", appContext: nil)
+                return
+            }
+
+            narrate(text: text)
+        } catch {
+            self.setError("Could not generate a plan", appContext: nil)
+        }
+
+        isPending = false
     }
 
     @MainActor
