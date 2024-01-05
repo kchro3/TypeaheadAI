@@ -9,11 +9,11 @@ import AppKit
 import Foundation
 
 protocol CanFocusOnElement {
-    func focus(on: AXUIElement) async throws
+    func focus(on: AXUIElement, functionCall: FunctionCall, appContext: AppContext?) async throws
 }
 
 extension CanFocusOnElement {
-    func focus(on axElement: AXUIElement) async throws {
+    func focus(on axElement: AXUIElement, functionCall: FunctionCall, appContext: AppContext?) async throws {
         var result: AXError? = nil
         if axElement.actions().contains("AXPress") {
             result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
@@ -35,7 +35,11 @@ extension CanFocusOnElement {
 
         try await Task.safeSleep(for: .milliseconds(100))
         guard result == .success else {
-            throw ClientManagerError.appError("Action failed (code: \(result?.rawValue ?? -1))")
+            throw ClientManagerError.functionCallError(
+                "Action failed (code: \(result?.rawValue ?? -1))",
+                functionCall: functionCall,
+                appContext: appContext
+            )
         }
     }
 

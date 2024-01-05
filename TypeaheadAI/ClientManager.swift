@@ -167,6 +167,38 @@ class ClientManager: CanGetUIElements {
         }
     }
 
+    /// Propose a Quick Action
+    func proposeQuickAction(
+        messages: [Message],
+        streamHandler: @escaping (String, AppContext?) async -> Void
+    ) async throws -> (ChunkPayload, AppInfo?) {
+        try Task.checkCancellation()
+
+        let bufferedPayload = try await self.sendStreamRequest(
+            id: UUID(),
+            username: NSUserName(),
+            userFullName: NSFullUserName(),
+            userObjective: "<record>",
+            userBio: UserDefaults.standard.string(forKey: "bio"),
+            userLang: Locale.preferredLanguages.first,
+            messages: self.sanitizeMessages(messages),
+            streamHandler: streamHandler
+        )
+
+        try Task.checkCancellation()
+
+        // Add in any other relevant metadata
+        NotificationCenter.default.post(
+            name: .chatComplete,
+            object: nil,
+            userInfo: [
+                "messages": messages
+            ]
+        )
+
+        return (bufferedPayload, nil)
+    }
+
     /// Refine the currently request
     /// Returns a "bufferedPayload", which is a payload that has buffered together all of the chunks in the stream
     func refine(
@@ -270,10 +302,10 @@ class ClientManager: CanGetUIElements {
         userObjective: String?,
         userBio: String?,
         userLang: String?,
-        copiedText: String?,
+        copiedText: String? = nil,
         messages: [Message],
-        history: [Message]?,
-        appInfo: AppInfo?,
+        history: [Message]? = nil,
+        appInfo: AppInfo? = nil,
         timeout: TimeInterval = 30,
         streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> ChunkPayload {

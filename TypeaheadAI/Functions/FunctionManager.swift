@@ -70,7 +70,6 @@ struct FunctionCall: Codable, Equatable {
 
         case .performUIAction:
             guard let id = self.stringArg("id"),
-                  let delayInMillis = self.intArg("delayInMillis"),
                   let narration = self.stringArg("narration") else {
                 throw ClientManagerError.functionArgParsingError("Failed to perform UI action...")
             }

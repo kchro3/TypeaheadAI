@@ -60,40 +60,19 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
         try await Task.safeSleep(for: .milliseconds(100))
 
-        do {
-            try await focus(on: axElement)
-        } catch {
-            throw ClientManagerError.functionCallError(
-                error.localizedDescription,
-                functionCall: functionCall,
-                appContext: appInfo?.appContext
-            )
-        }
+        try await focus(on: axElement, functionCall: functionCall, appContext: appInfo?.appContext)
+
+        try await Task.safeSleep(for: .milliseconds(200))
 
         if let inputText = action.inputText, let role = axElement.stringValue(forAttribute: kAXRoleAttribute) {
-            if role == "AXComboBox" {
+            if role == "AXComboBox" || role == "AXPopUpButton" {
                 if let parent = axElement.parent(),
-                   let axList = parent.children().first(where: { child in child.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
-                   let serializedList = UIElementVisitor.visit(element: axList)?.serialize(isIndexed: false),
-                   let pickResult = pickFromList(axElement: axList, value: inputText) {
-                    if pickResult != .success {
-                        print(serializedList)
-                        throw ClientManagerError.functionCallError(
-                            "Action failed... Could not find \(inputText) in dropdown menu",
-                            functionCall: functionCall,
-                            appContext: appInfo?.appContext
-                        )
-                    }
+                   let axList = parent.findFirst(condition: { $0.stringValue(forAttribute: kAXRoleAttribute) == "AXList" }),
+                   let result = axList.findFirst(condition: { $0.stringValue(forAttribute: kAXValueAttribute) == inputText }) {
+
+                    try await focus(on: result, functionCall: functionCall, appContext: appInfo?.appContext)
                 } else {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(inputText, forType: .string)
-                    try await Task.safeSleep(for: .milliseconds(100))
-
-                    try await simulatePaste()
-
-                    if action.pressEnter ?? false {
-                        try await simulateEnter()
-                    }
+                    print("Could not find element in dropdown window")
                 }
             } else {
                 NSPasteboard.general.clearContents()
@@ -110,21 +89,5 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
         }
 
         try await Task.safeSleep(for: .seconds(2))
-    }
-
-    /// Recursively traverse an AXList to select an option that matches the expected value.
-    /// This is probably pretty brittle. We should try this out on a few use-cases
-    private func pickFromList(axElement: AXUIElement, value: String) -> AXError? {
-        guard axElement.stringValue(forAttribute: kAXValueAttribute) != value else {
-            return AXUIElementPerformAction(axElement, "AXPress" as CFString)
-        }
-
-        for child in axElement.children() {
-            if let result = pickFromList(axElement: child, value: value) {
-                return result
-            }
-        }
-
-        return nil
     }
 }
