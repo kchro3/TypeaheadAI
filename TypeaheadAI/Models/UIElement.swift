@@ -53,10 +53,10 @@ struct UIElement: Identifiable, Codable, Equatable {
 }
 
 extension UIElement {
-    private static let maxChildren = 25
+    private static let maxChildren = 50
     private static let maxCharacterCount = 4000
-    private static let defaultExcludedRoles = ["AXStaticText", "AXGroup"]
-    private static let defaultExcludedActions = ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
+    private static let defaultExcludedRoles: [String] = ["AXGroup"]
+    private static let defaultExcludedActions: [String] = ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
 
     /// Convert to string representation
     /// isVisible: Only print visible UIElements
@@ -117,9 +117,10 @@ extension UIElement {
         // If title doesn't exist:       <desc>
         // If description doesn't exist: <title>
         // If neither exist:             none
-        var text: String = "none"
+        var text: String
+
         if role == "AXStaticText" {
-            return "\(indentation)\(renderAXStaticText())"
+            text = self.value ?? "none"
         } else {
             text = self.title ?? "none"
             if let desc = self.description {
@@ -136,29 +137,30 @@ extension UIElement {
             if let value = self.value {
                 text += ", value: \(value)"
             }
-            if let domId = self.domId {
-                text += ", domId: \(domId)"
-            }
-            if let domClasses = self.domClasses {
-                text += ", domClasses: \(domClasses)"
-            }
-            if let link = self.link, link.absoluteString != "about:blank" {
-                text += ", link: \(link.absoluteString)"
-            }
+        }
 
-            /// Add actions
-            var actions: [String] = self.actions
-            if let excludedActions = excludedActions {
-                actions = self.actions.filter { !excludedActions.contains($0) }
+        if let domId = self.domId {
+            text += ", domId: \(domId)"
+        }
+        if let domClasses = self.domClasses {
+            text += ", domClasses: \(domClasses)"
+        }
+        if let link = self.link, link.absoluteString != "about:blank" {
+            text += ", link: \(link.absoluteString)"
+        }
+
+        /// Add actions
+        var actions: [String] = self.actions
+        if let excludedActions = excludedActions {
+            actions = self.actions.filter { !excludedActions.contains($0) }
+        }
+        if showActions {
+            if !actions.isEmpty, self.enabled {
+                text += ", actions: \(actions)"
             }
-            if showActions {
-                if !actions.isEmpty, self.enabled {
-                    text += ", actions: \(actions)"
-                }
-            } else {
-                if !actions.isEmpty, self.enabled {
-                    text += ", actionable: true"
-                }
+        } else {
+            if !actions.isEmpty, self.enabled {
+                text += ", actionable: true"
             }
         }
 
@@ -199,6 +201,8 @@ extension UIElement {
                     line += "\n\(childLine)"
                 }
             }
+        } else if self.role == "AXStaticText" {
+            return line
         } else {
             for child in self.children.prefix(UIElement.maxChildren) {
                 if let childLine = child.serialize(
