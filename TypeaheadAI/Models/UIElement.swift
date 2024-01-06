@@ -55,7 +55,7 @@ struct UIElement: Identifiable, Codable, Equatable {
 extension UIElement {
     private static let maxChildren = 50
     private static let maxCharacterCount = 4000
-    private static let defaultExcludedRoles: [String] = []
+    private static let defaultExcludedRoles: [String] = ["AXGroup"]
     private static let defaultExcludedActions: [String] = ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
 
     /// Convert to string representation
@@ -84,10 +84,6 @@ extension UIElement {
 
         if let serializedSavePanel = try? AXSavePanelVisitor.visit(element: self, indent: indent, isIndexed: isIndexed) {
             return serializedSavePanel
-        }
-
-        if role == "AXContentList" {
-            print("oh shit")
         }
 
         if (excludedRoles ?? []).contains(self.role) {
