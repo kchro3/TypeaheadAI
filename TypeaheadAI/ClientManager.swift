@@ -205,7 +205,7 @@ class ClientManager: CanGetUIElements {
         messages: [Message],
         quickActionId: UUID? = nil,
         prevAppInfo: AppInfo? = nil,
-        timeout: TimeInterval = 120,
+        timeout: TimeInterval = 30,
         streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> (ChunkPayload, AppInfo?) {
         try Task.checkCancellation()

@@ -31,6 +31,7 @@ struct HistoryListView: View {
     @AppStorage("numSmartPastes") var numSmartPastes: Int?
     @AppStorage("numSmartCuts") var numSmartCuts: Int?
     @AppStorage("historyTab") var historyTab: String = HistoryTab.messages.id
+    @AppStorage("isHistoryEnabled") private var isHistoryEnabled: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -44,6 +45,12 @@ struct HistoryListView: View {
                 Text("^[\(numSmartCopies ?? 0) smart-copy](inflect: true)")
                 Text("^[\(numSmartCuts ?? 0) smart-cut](inflect: true)")
                 Text("^[\(numSmartPastes ?? 0) smart-paste](inflect: true)")
+
+                Spacer()
+
+                Toggle(isOn: $isHistoryEnabled) {
+                    Text("Keep message history")
+                }
             }
 
             Divider()

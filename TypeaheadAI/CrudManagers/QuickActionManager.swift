@@ -8,6 +8,7 @@
 import CoreData
 import Foundation
 import os.log
+import SwiftUI
 
 /// The QuickActionManager handles reads and writes to the underlying CoreData.
 /// We originally called them PromptEntry, but we unmarshal them into QuickAction structs.
@@ -15,6 +16,8 @@ import os.log
 class QuickActionManager: ObservableObject {
     private let context: NSManagedObjectContext
     private let backgroundContext: NSManagedObjectContext
+
+    @AppStorage("isHistoryEnabled") private var isHistoryEnabled: Bool = true
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -102,6 +105,9 @@ class QuickActionManager: ObservableObject {
     func getOrCreateByLabel(_ label: String) async -> QuickAction? {
         if let quickAction = getByLabel(label) {
             return quickAction
+        } else if !isHistoryEnabled {
+            // Don't implicitly create a Quick Action if the history is not kept
+            return nil
         } else {
             return await addPrompt(label)
         }

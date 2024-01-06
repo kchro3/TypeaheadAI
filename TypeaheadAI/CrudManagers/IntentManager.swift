@@ -8,6 +8,7 @@
 import Foundation
 import CoreData
 import os.log
+import SwiftUI
 
 struct UserIntent: Codable {
     let copiedText: String
@@ -20,6 +21,7 @@ class IntentManager {
     private let context: NSManagedObjectContext
     private let backgroundContext: NSManagedObjectContext
     private let maxLength: Int = 1000  // Truncate each copiedText
+    @AppStorage("isHistoryEnabled") private var isHistoryEnabled: Bool = true
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -37,6 +39,10 @@ class IntentManager {
         copiedText: String,
         appContext: AppContext?
     ) {
+        guard isHistoryEnabled else {
+            return
+        }
+
         let newEntry = IntentEntry(context: context)
         newEntry.prompt = prompt
         newEntry.copiedText = copiedText
