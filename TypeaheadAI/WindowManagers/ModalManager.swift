@@ -78,6 +78,7 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func cancelTasks() {
+        speaker.stopSpeaking(at: .immediate)
         currentTask?.cancel()
         currentTask = nil
         isPending = false
@@ -514,6 +515,8 @@ class ModalManager: ObservableObject {
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false, appContext: AppContext?) {
+        speaker.stopSpeaking(at: .immediate)
+
         isPending = true
         userIntents = nil
 
@@ -557,6 +560,8 @@ class ModalManager: ObservableObject {
     /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
     func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
+        speaker.stopSpeaking(at: .immediate)
+
         var quickAction: QuickAction? = nil
         if isQuickAction {
             // Look up the quick action by its label or create a new one
