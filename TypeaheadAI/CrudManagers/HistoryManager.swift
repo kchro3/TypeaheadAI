@@ -8,12 +8,14 @@
 import Foundation
 import CoreData
 import os.log
+import SwiftUI
 
 /// The HistoryManager handles reads and writes to the underlying CoreData.
 /// The History domain model is required for thread-safety.
 class HistoryManager {
     private let context: NSManagedObjectContext
     private let backgroundContext: NSManagedObjectContext
+    @AppStorage("isHistoryEnabled") private var isHistoryEnabled: Bool = true
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -36,6 +38,10 @@ class HistoryManager {
         activeAppBundleIdentifier: String?,
         numMessages: Int
     ) {
+        guard isHistoryEnabled else {
+            return
+        }
+
         let newEntry = HistoryEntry(context: context)
         newEntry.id = UUID()
         newEntry.timestamp = Date()

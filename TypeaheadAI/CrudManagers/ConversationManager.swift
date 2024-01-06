@@ -13,6 +13,7 @@ import SwiftUI
 class ConversationManager: CanFetchAppContext {
     private let context: NSManagedObjectContext
     private var cached: [Message]?
+    @AppStorage("isHistoryEnabled") private var isHistoryEnabled: Bool = true
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -110,6 +111,10 @@ class ConversationManager: CanFetchAppContext {
 
     @MainActor
     func saveConversation(messages: [Message]) throws {
+        guard isHistoryEnabled else {
+            return
+        }
+
         if messages == cached {
             return
         } else {
