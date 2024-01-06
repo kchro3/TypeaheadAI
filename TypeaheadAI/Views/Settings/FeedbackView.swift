@@ -16,7 +16,7 @@ struct FeedbackView: View {
     @State private var showAlert = false
     @State private var errorMessage: String? = nil
 
-    private let maxCharacterCount = 500
+    private let maxCharacterCount = 4000
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -30,7 +30,7 @@ struct FeedbackView: View {
 
                 If you experience any bugs or have a poor user experience, please let us know, and we will try to address them as soon as possible. We are also open to feature requests and suggestions!
 
-                We may reach out by email to ask about more details.
+                We may reach out by email to ask about more details. You can also reach me at @kchro3 on Twitter or jeff@typeahead.ai by email.
                 """
             )
 
