@@ -11,6 +11,7 @@ struct ModalFooterView: View {
     @ObservedObject var modalManager: ModalManager
 
     @State private var text: String = ""
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(spacing: 5) {
@@ -21,6 +22,7 @@ struct ModalFooterView: View {
                         await modalManager.addUserMessage(userIntent, isQuickAction: true, appContext: nil)
                     }
                 }
+                .accessibilityLabel("Suggestions")
             }
 
             HStack {
@@ -47,12 +49,18 @@ struct ModalFooterView: View {
                         }
                     }
                 }
+                .focused($isFocused)
+                .accessibilityLabel("Message")
                 .padding(.vertical, 5)
                 .padding(.horizontal, 10)
                 .background(RoundedRectangle(cornerRadius: 15)
                     .fill(.secondary.opacity(0.1))
                 )
                 .onAppear {
+                    DispatchQueue.main.async {
+                        isFocused = true
+                    }
+
                     NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
                         if event.keyCode == 125 {  // Down arrow
                             NotificationCenter.default.post(name: NSNotification.Name("ArrowKeyPressed"), object: nil, userInfo: ["direction": "down"])
@@ -76,6 +84,7 @@ struct ModalFooterView: View {
                     }
                     .buttonStyle(.plain)
                     .transition(.slide.animation(.spring))
+                    .accessibilityLabel("Cancel")
                 }
             }
         }
