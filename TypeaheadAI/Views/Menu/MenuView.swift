@@ -37,7 +37,7 @@ struct MenuView: View {
         VStack(spacing: verticalPadding) {
             // Menu Header
             HStack {
-                Text("TypeaheadAI").font(.headline)
+                Text("Typeahead").font(.headline)
 
                 Spacer()
 
@@ -67,7 +67,7 @@ struct MenuView: View {
 
             VStack(spacing: 0) {
                 MenuButtonView(
-                    title: "Quick Actions"
+                    title: NSLocalizedString("Quick Actions", comment: "")
                 ) {
                     modalManager.closeModal()
                     settingsManager.showModal(tab: .quickActions)
@@ -76,7 +76,7 @@ struct MenuView: View {
 
                 if modalManager.isPending {
                     MenuButtonView(
-                        title: "Cancel task",
+                        title: NSLocalizedString("Cancel task", comment: ""),
                         shortcut: .cancelTasks
                     ) {
                         modalManager.cancelTasks()
@@ -84,7 +84,10 @@ struct MenuView: View {
                 }
 
                 if modalManager.isVisible {
-                    MenuButtonView(title: "New chat", shortcut: .chatNew) {
+                    MenuButtonView(
+                        title: NSLocalizedString("New chat", comment: ""),
+                        shortcut: .chatNew
+                    ) {
                         Task {
                             modalManager.forceRefresh()
                             NSApp.activate(ignoringOtherApps: true)
@@ -93,7 +96,7 @@ struct MenuView: View {
                     }
                 } else {
                     MenuButtonView(
-                        title: "Open chat",
+                        title: NSLocalizedString("Open chat", comment: ""),
                         shortcut: KeyboardShortcuts.Name.chatOpen
                     ) {
                         modalManager.showModal()
@@ -107,7 +110,7 @@ struct MenuView: View {
                     .padding(.horizontal, horizontalPadding)
 
                 MenuButtonView(
-                    title: "Feedback"
+                    title: NSLocalizedString("Feedback", comment: "")
                 ) {
                     modalManager.closeModal()
                     settingsManager.showModal(tab: .feedback)
@@ -118,14 +121,16 @@ struct MenuView: View {
                     .padding(.vertical, verticalPadding)
                     .padding(.horizontal, horizontalPadding)
 
-                MenuButtonView(title: "Settings") {
+                MenuButtonView(
+                    title: NSLocalizedString("Settings", comment: "")
+                ) {
                     modalManager.closeModal()
                     settingsManager.showModal()
                     isMenuVisible = false
                 }
 
                 MenuButtonView(
-                    title: "Check for updates"
+                    title: NSLocalizedString("Check for updates", comment: "")
                 ) {
                     Task {
                         try await versionManager.checkForUpdates(adhoc: true)
@@ -134,21 +139,27 @@ struct MenuView: View {
                 }
 
                 if supabaseManager.uuid != nil {
-                    MenuButtonView(title: "Sign out") {
+                    MenuButtonView(
+                        title: NSLocalizedString("Sign out", comment: "")
+                    ) {
                         Task {
                             isMenuVisible = false
                             try await supabaseManager.signout()
                         }
                     }
                 } else {
-                    MenuButtonView(title: "Sign in") {
+                    MenuButtonView(
+                        title: NSLocalizedString("Sign in", comment: "")
+                    ) {
                         modalManager.closeModal()
                         settingsManager.showModal(tab: .account)
                         isMenuVisible = false
                     }
                 }
 
-                MenuButtonView(title: "Quit") {
+                MenuButtonView(
+                    title: NSLocalizedString("Quit", comment: "")
+                ) {
                     NSApplication.shared.terminate(self)
                 }
             }

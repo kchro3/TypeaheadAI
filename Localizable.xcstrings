@@ -1,0 +1,1493 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ [tab]" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ [scheda]"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "^[%lld smart-copy](inflect: true)" : {
+
+    },
+    "^[%lld smart-cut](inflect: true)" : {
+
+    },
+    "^[%lld smart-paste](inflect: true)" : {
+
+    },
+    "Aborts any streaming results or autopilot tasks." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interrompe qualsiasi risultato di streaming o compiti in modalità pilota automatico."
+          }
+        }
+      }
+    },
+    "Account Settings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni dell'account"
+          }
+        }
+      }
+    },
+    "Active App" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App attiva"
+          }
+        }
+      }
+    },
+    "Active Bundle ID" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ID del bundle attivo"
+          }
+        }
+      }
+    },
+    "Active URL" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incolla il testo dell'URL attivo."
+          }
+        }
+      }
+    },
+    "Add New Example" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi Nuovo Esempio"
+          }
+        }
+      }
+    },
+    "and type \"Check Microsoft's stock\"" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e digita \"Controlla le azioni di Microsoft\""
+          }
+        }
+      }
+    },
+    "Are you sure you want to all messages? This action cannot be undone." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sei sicuro di voler cancellare tutti i messaggi? Questa azione non può essere annullata."
+          }
+        }
+      }
+    },
+    "Are you sure you want to delete this example?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sei sicuro di voler eliminare questo esempio?"
+          }
+        }
+      }
+    },
+    "Are you sure you want to the intents? This action cannot be undone." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sei sicuro di voler procedere con gli intenti? Questa azione non può essere annullata."
+          }
+        }
+      }
+    },
+    "Are you sure you want to the smart copy-paste history? This action cannot be undone." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sei sicuro di voler cancellare la cronologia di copia-incolla intelligente? Questa azione non può essere annullata."
+          }
+        }
+      }
+    },
+    "Autopilot Mode" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modalità pilota automatico"
+          }
+        }
+      }
+    },
+    "Before we can get started, Typeahead will need some Accessibility permissions to work.\n\nIn **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.\n\nPress the button below to open System Preferences and modify your Accessibility settings." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima di poter iniziare, Typeahead avrà bisogno di alcuni permessi di Accessibilità per funzionare.\n\nNelle **Impostazioni di Sistema**, sotto la scheda **Privacy e Sicurezza**, si prega di navigare nelle opzioni di **Accessibilità** e aggiungere Typeahead alle app autorizzate.\n\nPremi il pulsante qui sotto per aprire le Preferenze di Sistema e modificare le tue impostazioni di Accessibilità."
+          }
+        }
+      }
+    },
+    "By continuing, you agree to Typeahead's [Privacy Policy](https://typeahead.ai/privacy-policy) and [Terms of Use](https://typeahead.ai/terms-of-use)." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuando, accetti la [Politica sulla Privacy](https://typeahead.ai/privacy-policy) e i [Termini di Utilizzo](https://typeahead.ai/terms-of-use) di Typeahead."
+          }
+        }
+      }
+    },
+    "C" : {
+
+    },
+    "Cancel" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla"
+          }
+        }
+      }
+    },
+    "Cancel task" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla compito"
+          }
+        }
+      }
+    },
+    "Character count: %lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Character count: %1$lld/%2$lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conteggio dei caratteri: %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "Check for updates" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controlla gli aggiornamenti"
+          }
+        }
+      }
+    },
+    "Choose different folder" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli una cartella diversa"
+          }
+        }
+      }
+    },
+    "Choose folder" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli la cartella"
+          }
+        }
+      }
+    },
+    "Clear" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiaro"
+          }
+        }
+      }
+    },
+    "Clear history" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancella cronologia"
+          }
+        }
+      }
+    },
+    "Clear Intents" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intenzioni chiare"
+          }
+        }
+      }
+    },
+    "Clear Messages" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messaggi cancellati"
+          }
+        }
+      }
+    },
+    "Click here and press \"smart-paste\"" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicca qui e premi \"smart-paste\""
+          }
+        }
+      }
+    },
+    "Command" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esegui il comando"
+          }
+        }
+      }
+    },
+    "Confirm clearing history" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma cancellazione cronologia"
+          }
+        }
+      }
+    },
+    "Confirm clearing intents" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma la cancellazione degli intenti"
+          }
+        }
+      }
+    },
+    "Confirm clearing messages" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma l'eliminazione dei messaggi"
+          }
+        }
+      }
+    },
+    "Copied Text" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testo copiato"
+          }
+        }
+      }
+    },
+    "Create" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creare"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina"
+          }
+        }
+      }
+    },
+    "Describe what this quick action should do.\n\nThe more descriptive, the better." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descrivi cosa dovrebbe fare questa azione rapida.\n\nPiù è descrittiva, meglio è."
+          }
+        }
+      }
+    },
+    "Detailed Plan" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piano dettagliato"
+          }
+        }
+      }
+    },
+    "Directory:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartella:"
+          }
+        }
+      }
+    },
+    "Edit" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifica"
+          }
+        }
+      }
+    },
+    "Edit your email by clicking the edit button next to the Typeahead response. Press **Enter** to save or **Shift-Enter** for a new line.\n\nAlternatively, you can type feedback like \"make it more concise\" or \"more casual,\" and it will provide a revised draft.\n\nIf you want it to remember detailed instructions for the future, you can click on the wrench icon to configure a Quick Action.\n\nClick continue when you're satisfied." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifica la tua email cliccando sul pulsante di modifica accanto alla risposta di Typeahead. Premi **Invio** per salvare o **Maiusc+Invio** per una nuova riga.\n\nIn alternativa, puoi digitare un feedback come \"rendilo più conciso\" o \"più informale\", e riceverai una bozza rivista.\n\nSe desideri che ricordi istruzioni dettagliate per il futuro, puoi cliccare sull'icona a forma di chiave inglese per configurare un'azione rapida.\n\nClicca su continua quando sei soddisfatto."
+          }
+        }
+      }
+    },
+    "Email" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indirizzo email"
+          }
+        }
+      }
+    },
+    "Enable Autopilot" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abilita il pilota automatico"
+          }
+        }
+      }
+    },
+    "Enable Narration" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abilita la narrazione"
+          }
+        }
+      }
+    },
+    "Enable web search" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abilita la ricerca sul web"
+          }
+        }
+      }
+    },
+    "Examples" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esempi"
+          }
+        }
+      }
+    },
+    "Expected Output" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Risultato Atteso"
+          }
+        }
+      }
+    },
+    "Explain what you want this action to do." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spiega cosa vuoi che faccia questa azione."
+          }
+        }
+      }
+    },
+    "Failed to register" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non riuscito a registrare"
+          }
+        }
+      }
+    },
+    "Failed to sign-in" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile accedere"
+          }
+        }
+      }
+    },
+    "Failed to sign-in with Apple" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile accedere con Apple"
+          }
+        }
+      }
+    },
+    "Failed to sign-in with email" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile accedere con l'email"
+          }
+        }
+      }
+    },
+    "Failed to sign-in with Google" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile accedere con Google"
+          }
+        }
+      }
+    },
+    "Failed to submit feedback" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile inviare feedback"
+          }
+        }
+      }
+    },
+    "Feedback" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riscontro"
+          }
+        }
+      }
+    },
+    "Filter by context" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtra per contesto"
+          }
+        }
+      }
+    },
+    "General" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generale"
+          }
+        }
+      }
+    },
+    "General Settings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni Generali"
+          }
+        }
+      }
+    },
+    "Getting Started" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniziare"
+          }
+        }
+      }
+    },
+    "Hi,\n\nThanks for trying out Typeahead! We are working on new features and fixing bugs every day, so we appreciate your support. Please let us know if you run into any issues.\n\nBest,\nThe Typeahead Team" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciao,\n\nGrazie per aver provato Typeahead! Stiamo lavorando ogni giorno su nuove funzionalità e sulla risoluzione dei bug, quindi apprezziamo il tuo supporto. Per favore, facci sapere se incontri qualche problema.\n\nCordiali saluti,\nIl Team di Typeahead"
+          }
+        }
+      }
+    },
+    "History" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storia"
+          }
+        }
+      }
+    },
+    "Hot-key configurations" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurazioni dei tasti di scelta rapida"
+          }
+        }
+      }
+    },
+    "How to **activate** a Typeahead window" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per **attivare** una finestra Typeahead"
+          }
+        }
+      }
+    },
+    "How to **smart-copy**" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come fare il **smart-copy**"
+          }
+        }
+      }
+    },
+    "How to **Smart-paste**" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come fare il **smart-paste**"
+          }
+        }
+      }
+    },
+    "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf" : {
+
+    },
+    "If you delete this, TypeaheadAI will forget about this example, and this action cannot be undone." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se elimini questo, TypeaheadAI dimenticherà questo esempio e questa azione non può essere annullata."
+          }
+        }
+      }
+    },
+    "In incognito mode, TypeaheadAI works without connecting to the Internet, and your copy-paste history is 100% private. We will make this more user-friendly, but you can choose which model you want to run below." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In modalità incognito, TypeaheadAI funziona senza connettersi a Internet e la tua cronologia di copia-incolla è privata al 100%. Renderemo questo più facile da usare, ma puoi scegliere quale modello vuoi eseguire qui sotto."
+          }
+        }
+      }
+    },
+    "In the chat window, you can tell Typeahead what to do with the copied data, and Typeahead may also try to suggest relevant actions.\n\nFor this tutorial, you can click on the \"reply to this email\" suggestion." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nella finestra di chat, puoi dire a Typeahead cosa fare con i dati copiati, e Typeahead potrebbe anche cercare di suggerire azioni pertinenti.\n\nPer questo tutorial, puoi cliccare sul suggerimento \"rispondi a questa email\"."
+          }
+        }
+      }
+    },
+    "Incognito Settings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni di navigazione in incognito"
+          }
+        }
+      }
+    },
+    "Keep message history" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenere la cronologia dei messaggi"
+          }
+        }
+      }
+    },
+    "Label" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etichetta"
+          }
+        }
+      }
+    },
+    "Let's break down what happened behind the scenes.\n\nAt its core, **smart-copy** and **smart-paste** is an **interface** to make AI more accessible, but it also learns how you like to work.\n\nEvery time you **smart-copy** and **smart-paste** something, Typeahead will use the copied input and the pasted output as an example for how to do that task again.\n\nFor example, if you edited the email manually or by prompting, your preferences would be remembered for the next time you say \"reply to this email.\" It can learn to generalize patterns across examples, and the more you use Typeahead, the better it will become." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analizziamo cosa è successo dietro le quinte.\n\nAl suo nucleo, **smart-copy** e **smart-paste** è un'**interfaccia** per rendere l'IA più accessibile, ma impara anche come ti piace lavorare.\n\nOgni volta che fai **smart-copy** e **smart-paste** di qualcosa, Typeahead utilizzerà l'input copiato e l'output incollato come esempio per come fare di nuovo quel compito.\n\nAd esempio, se hai modificato l'email manualmente o tramite un comando, le tue preferenze verranno ricordate per la prossima volta che dici \"rispondi a questa email\". Può imparare a generalizzare schemi attraverso esempi, e più usi Typeahead, migliore diventerà."
+          }
+        }
+      }
+    },
+    "Message" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messaggio"
+          }
+        }
+      }
+    },
+    "N" : {
+
+    },
+    "Name" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome"
+          }
+        }
+      }
+    },
+    "Navigational Shortcuts" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scorciatoie di navigazione"
+          }
+        }
+      }
+    },
+    "New chat" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuova chat"
+          }
+        }
+      }
+    },
+    "New Quick Action" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azione rapida nuova"
+          }
+        }
+      }
+    },
+    "Next, we will show you how to use **Autopilot**. Typeahead can do your busywork for you, like filling out forms and even sending emails.\n\nIt knows how to **open apps and websites** and **interact with the UI**, so you can think of it like a self-driving car. You can tell it what to do, and it will try to carry out the task on its own. If it gets stuck or needs more clarification, it will ask for help.\n\nThis is still in early development, so we appreciate your patience if there are bugs. If you don't want it, you can disable it in the settings.\n\nLet's give it a try. Open a new window with:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Successivamente, ti mostreremo come utilizzare **Autopilot**. Typeahead può svolgere il tuo lavoro di routine per te, come compilare moduli e persino inviare email.\n\nSa come **aprire app e siti web** e **interagire con l'interfaccia utente**, quindi puoi pensarlo come un'auto a guida autonoma. Puoi dirgli cosa fare e cercherà di eseguire il compito autonomamente. Se si blocca o ha bisogno di ulteriori chiarimenti, chiederà aiuto.\n\nQuesto è ancora in fase di sviluppo iniziale, quindi apprezziamo la tua pazienza se ci sono bug. Se non lo desideri, puoi disabilitarlo nelle impostazioni.\n\nProviamoci. Apri una nuova finestra con:"
+          }
+        }
+      }
+    },
+    "Notify on new version" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifica per la nuova versione"
+          }
+        }
+      }
+    },
+    "Offline Mode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modalità offline"
+          }
+        }
+      }
+    },
+    "Ok" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Va bene"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Va bene"
+          }
+        }
+      }
+    },
+    "Once you're happy with Typeahead's response, you can **smart-paste** the latest draft into Gmail or your favorite email app.\n\nFor this tutorial, you can **smart-paste** the response into the text box below with:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una volta che sei soddisfatto della risposta di Typeahead, puoi **incollare in modo intelligente** la bozza più recente in Gmail o nella tua app di posta elettronica preferita.\n\nPer questo tutorial, puoi **incollare in modo intelligente** la risposta nel riquadro di testo qui sotto con:"
+          }
+        }
+      }
+    },
+    "Online" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In linea"
+          }
+        }
+      }
+    },
+    "Open chat" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri la chat"
+          }
+        }
+      }
+    },
+    "Open in Finder" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri in Finder"
+          }
+        }
+      }
+    },
+    "Opens a new chat window" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apre una nuova finestra di chat"
+          }
+        }
+      }
+    },
+    "Opens an existing chat window" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apre una finestra di chat esistente"
+          }
+        }
+      }
+    },
+    "Option" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opzione"
+          }
+        }
+      }
+    },
+    "Password" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password"
+          }
+        }
+      }
+    },
+    "Pasted Text" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testo incollato"
+          }
+        }
+      }
+    },
+    "Pastes the most recent Typeahead response." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incolla la risposta più recente di Typeahead."
+          }
+        }
+      }
+    },
+    "Personalize your email" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalizza la tua email"
+          }
+        }
+      }
+    },
+    "Plan" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piano"
+          }
+        }
+      }
+    },
+    "Please register or sign-in to get started." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per favore registrati o accedi per iniziare."
+          }
+        }
+      }
+    },
+    "Please share your feedback here! Your feedback is valuable." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per favore condividi il tuo feedback qui! Il tuo feedback è prezioso."
+          }
+        }
+      }
+    },
+    "Please sign-in to use TypeaheadAI in online mode." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per favore, accedi per utilizzare TypeaheadAI in modalità online."
+          }
+        }
+      }
+    },
+    "Profile" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilo"
+          }
+        }
+      }
+    },
+    "Prompt" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prompt"
+          }
+        }
+      }
+    },
+    "Quick Action" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azione rapida"
+          }
+        }
+      }
+    },
+    "Quick Action ID" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ID Azione Rapida"
+          }
+        }
+      }
+    },
+    "Quick Actions" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azioni rapide"
+          }
+        }
+      }
+    },
+    "Quickly search for specific quick actions using the search bar or scroll through the list to find the one you want.\n\nYou can then edit or delete them, or create a brand new one." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ricerca rapidamente azioni rapide specifiche utilizzando la barra di ricerca o scorri l'elenco per trovare quella che desideri.\n\nPuoi poi modificarle o eliminarle, oppure crearne una completamente nuova."
+          }
+        }
+      }
+    },
+    "Quit" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uscire"
+          }
+        }
+      }
+    },
+    "Recent chats" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chat recenti"
+          }
+        }
+      }
+    },
+    "Reset User Prompts" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reimposta i prompt degli utenti"
+          }
+        }
+      }
+    },
+    "Reset User Settings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reimposta le impostazioni utente"
+          }
+        }
+      }
+    },
+    "Responds to what you've selected." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Risponde a ciò che hai selezionato."
+          }
+        }
+      }
+    },
+    "Sample Input" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresso campione"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva"
+          }
+        }
+      }
+    },
+    "Search messages..." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca messaggi..."
+          }
+        }
+      }
+    },
+    "Search quick actions..." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azioni rapide di ricerca..."
+          }
+        }
+      }
+    },
+    "See less" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vedi meno"
+          }
+        }
+      }
+    },
+    "See more" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vedi di più"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni"
+          }
+        }
+      }
+    },
+    "Sign in" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi"
+          }
+        }
+      }
+    },
+    "Sign out" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esci"
+          }
+        }
+      }
+    },
+    "Something went wrong..." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualcosa è andato storto..."
+          }
+        }
+      }
+    },
+    "Something went wrong... Please check your internet connection and make sure that you are signed in." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualcosa è andato storto... Si prega di controllare la connessione a Internet e assicurarsi di essere connessi."
+          }
+        }
+      }
+    },
+    "Space" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spazio"
+          }
+        }
+      }
+    },
+    "Specify your **intent**" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Specifica il tuo **intento**"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Step %1$lld of %2$lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passo %1$lld di %2$lld"
+          }
+        }
+      }
+    },
+    "Successfully saved Quick Action" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azione rapida salvata con successo"
+          }
+        }
+      }
+    },
+    "Suggestions" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggerimenti"
+          }
+        }
+      }
+    },
+    "Text" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testo"
+          }
+        }
+      }
+    },
+    "Thank you for your feedback! We will review it as soon as possible and take it into consideration. Please feel free to reach out to @kchro3 on Twitter or jeff@typeahead.ai" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grazie per il tuo feedback! Lo esamineremo il prima possibile e lo prenderemo in considerazione. Non esitare a contattare @kchro3 su Twitter o jeff@typeahead.ai"
+          }
+        }
+      }
+    },
+    "Thanks for trying out TypeaheadAI! We are working on building new features, and we would appreciate your support." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grazie per aver provato TypeaheadAI! Stiamo lavorando allo sviluppo di nuove funzionalità e apprezzeremmo il tuo sostegno."
+          }
+        }
+      }
+    },
+    "Thanks for using Typeahead!\n\nIf you experience any bugs or have a poor user experience, please let us know, and we will try to address them as soon as possible. We are also open to feature requests and suggestions!\n\nWe may reach out by email to ask about more details. You can also reach me at @kchro3 on Twitter or jeff@typeahead.ai by email." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grazie per aver utilizzato Typeahead!\n\nSe riscontri dei bug o hai un'esperienza utente insoddisfacente, ti preghiamo di farcelo sapere e cercheremo di risolverli il prima possibile. Siamo anche aperti a richieste di nuove funzionalità e suggerimenti!\n\nPotremmo contattarti via email per chiedere ulteriori dettagli. Puoi anche contattarmi su Twitter @kchro3 o via email all'indirizzo jeff@typeahead.ai."
+          }
+        }
+      }
+    },
+    "The first thing you will need to learn is how to **activate** Typeahead.\n\nUnlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you will see the Typeahead logo in the menu bar to indicate when the app is running.\n\nTo open and close a Typeahead window, you can press:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La prima cosa che dovrai imparare è come **attivare** Typeahead.\n\nA differenza di molte app, Typeahead funziona in **background**, quindi non lo vedrai nel tuo dock. Invece, vedrai il logo di Typeahead nella barra dei menu per indicare quando l'app è in esecuzione.\n\nPer aprire e chiudere una finestra di Typeahead, puoi premere:"
+          }
+        }
+      }
+    },
+    "The instructions can be updated in your Settings." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le istruzioni possono essere aggiornate nelle tue Impostazioni."
+          }
+        }
+      }
+    },
+    "The model failed to load." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il modello non è riuscito a caricarsi."
+          }
+        }
+      }
+    },
+    "The primary interface for Typeahead is **smart-copy** and **smart-paste**. It is smarter than your standard clipboard because it uses AI to take what you've copied and predict what you want to paste.\n\nFor example, let's say you want to reply to this email. You can select the email below and **smart-copy** it with:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'interfaccia principale di Typeahead è **smart-copy** e **smart-paste**. È più intelligente della tua normale clipboard perché utilizza l'AI per prendere ciò che hai copiato e prevedere ciò che vuoi incollare.\n\nAd esempio, diciamo che vuoi rispondere a questa email. Puoi selezionare l'email qui sotto e **smart-copiarla** con:"
+          }
+        }
+      }
+    },
+    "There are plenty of ways to get started! You can think of Typeahead as a new tool in your toolkit, where you can ask it to convert meeting notes into follow-up emails or summarize news articles, and it is like a copilot for all of your apps.\n\n**Smart-copy** works on anything that you can copy, and **smart-paste** works anywhere that you can paste.\n\nIt even works in full-screen apps, so it's always at your fingertips.\n\nYou can access your settings from the menu bar." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ci sono molti modi per iniziare! Puoi pensare a Typeahead come a un nuovo strumento nel tuo kit, dove puoi chiederle di convertire appunti di riunioni in email di follow-up o riassumere articoli di notizie, ed è come un copilota per tutte le tue app.\n\n**Smart-copy** funziona su qualsiasi cosa tu possa copiare, e **smart-paste** funziona ovunque tu possa incollare.\n\nFunziona anche in app a schermo intero, quindi è sempre a portata di mano.\n\nPuoi accedere alle tue impostazioni dalla barra dei menu."
+          }
+        }
+      }
+    },
+    "This is still a work in progress. Need to use a more advanced sampling method, since it's currently just doing a greedy search. Will integrate with HuggingFace in a future version, but for now, try downloading this to your model directory:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo è ancora un lavoro in corso. È necessario utilizzare un metodo di campionamento più avanzato, poiché attualmente sta eseguendo solo una ricerca avida. Si integrerà con HuggingFace in una versione futura, ma per ora, prova a scaricare questo nella tua directory dei modelli:"
+          }
+        }
+      }
+    },
+    "Typeahead" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typeahead"
+          }
+        }
+      }
+    },
+    "Typeahead is an AI tool that automates your busywork.\n\nIn this tutorial, you will learn about Typeahead's basic features, and we will explain how Typeahead works behind the scenes.\n\nIn this version, we are introducing \"Autopilot\" mode, where you can record and automate your workflows." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typeahead è uno strumento AI che automatizza il tuo lavoro noioso.\n\nIn questo tutorial, imparerai le funzionalità di base di Typeahead e spiegheremo come funziona Typeahead dietro le quinte.\n\nIn questa versione, stiamo introducendo la modalità \"Autopilota\", dove puoi registrare e automatizzare i tuoi flussi di lavoro."
+          }
+        }
+      }
+    },
+    "unknown" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sconosciuto"
+          }
+        }
+      }
+    },
+    "User ID: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ID utente: %@"
+          }
+        }
+      }
+    },
+    "V" : {
+
+    },
+    "v%@" : {
+
+    },
+    "Welcome to Typeahead" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benvenuto a Typeahead"
+          }
+        }
+      }
+    },
+    "What should TypeaheadAI know about you to provide better responses?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cosa dovrebbe sapere TypeaheadAI su di te per fornire risposte migliori?"
+          }
+        }
+      }
+    },
+    "Why use smart-copy and smart-paste?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perché usare la funzione di \"smart-copy\" e \"smart-paste?\""
+          }
+        }
+      }
+    },
+    "You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.\n\nNOTE: All hotkeys can be reconfigured in your Settings." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puoi spostare la finestra trascinandola dalla parte superiore della finestra e puoi ridimensionarla trascinando gli angoli.\n\nNOTA: Tutti i tasti di scelta rapida possono essere riconfigurati nelle tue Impostazioni."
+          }
+        }
+      }
+    },
+    "You can view and manage your history here." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puoi visualizzare e gestire la tua cronologia qui."
+          }
+        }
+      }
+    },
+    "You're all set!" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sei a posto!"
+          }
+        }
+      }
+    },
+    "You're signed in!" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sei connesso!"
+          }
+        }
+      }
+    },
+    "Your feedback has been received!" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo feedback è stato ricevuto!"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
