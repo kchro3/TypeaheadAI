@@ -9,7 +9,9 @@ import AppKit
 import Foundation
 
 class UIElementVisitor {
-    private static let defaultExclusiveRoles = ["AXSheet", "AXApplicationDialog"]  // If a child is one of these types, then other children are ignored.
+    private static let defaultExclusiveRoles = [
+        "AXSheet",
+    ]  // If a child is one of these types, then other children are ignored.
 
     static func visit(
         element: AXUIElement,
