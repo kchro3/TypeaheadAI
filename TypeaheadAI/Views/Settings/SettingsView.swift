@@ -17,6 +17,10 @@ enum Tab: String, CaseIterable, Identifiable {
     case feedback = "Feedback"
 
     var id: String { self.rawValue }
+
+    var localized: String {
+        NSLocalizedString(self.rawValue, comment: "")
+    }
 }
 
 struct SettingsView: View {
@@ -85,7 +89,7 @@ struct ItemRow: View {
 
     var body: some View {
         HStack {
-            Text(tab.rawValue)
+            Text(tab.localized)
                 .foregroundStyle((settingsTab == tab.id || colorScheme == .dark) ? Color.white : Color.black)
             Spacer()
         }

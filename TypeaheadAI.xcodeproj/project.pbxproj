@@ -83,6 +83,7 @@
 		2B9A89932B44D70D00041856 /* Task+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89922B44D70D00041856 /* Task+Extension.swift */; };
 		2B9A89952B4539DC00041856 /* SmartRecordOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89942B4539DC00041856 /* SmartRecordOnboardingView.swift */; };
 		2B9A89972B453A0A00041856 /* AutopilotOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A89962B453A0A00041856 /* AutopilotOnboardingView.swift */; };
+		2B9A89992B4AC52900041856 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2B9A89982B4AC52900041856 /* Localizable.xcstrings */; };
 		2BA3C2352AADAC5700537F95 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2BA3C2342AADAC5700537F95 /* llama */; };
 		2BA3C2372AADAD9A00537F95 /* SpecialCopyActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */; };
 		2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */; };
@@ -224,6 +225,7 @@
 		2B9A89922B44D70D00041856 /* Task+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Extension.swift"; sourceTree = "<group>"; };
 		2B9A89942B4539DC00041856 /* SmartRecordOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartRecordOnboardingView.swift; sourceTree = "<group>"; };
 		2B9A89962B453A0A00041856 /* AutopilotOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutopilotOnboardingView.swift; sourceTree = "<group>"; };
+		2B9A89982B4AC52900041856 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		2BA3C2362AADAD9A00537F95 /* SpecialCopyActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialCopyActor.swift; sourceTree = "<group>"; };
 		2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TypeaheadAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeaheadAIApp.swift; sourceTree = "<group>"; };
@@ -440,6 +442,7 @@
 		2BA7F06C2A9ABBA7003D38BA = {
 			isa = PBXGroup;
 			children = (
+				2B9A89982B4AC52900041856 /* Localizable.xcstrings */,
 				2BA7F0772A9ABBA8003D38BA /* TypeaheadAI */,
 				2BA7F08E2A9ABBA8003D38BA /* TypeaheadAITests */,
 				2BA7F0982A9ABBA8003D38BA /* TypeaheadAIUITests */,
@@ -732,6 +735,7 @@
 			knownRegions = (
 				en,
 				Base,
+				it,
 			);
 			mainGroup = 2BA7F06C2A9ABBA7003D38BA;
 			packageReferences = (
@@ -764,6 +768,7 @@
 			files = (
 				2BA7F0802A9ABBA8003D38BA /* Preview Assets.xcassets in Resources */,
 				2BA7F07D2A9ABBA8003D38BA /* Assets.xcassets in Resources */,
+				2B9A89992B4AC52900041856 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

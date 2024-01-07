@@ -96,18 +96,8 @@ struct LoggedOutOnboardingView: View {
 
             Spacer()
 
-            HStack(spacing: 0) {
-                Text("By continuing, you agree to Typeahead's ")
-                    .font(.caption)
-                Link("Privacy Policy", destination: URL(string: "https://typeahead.ai/privacy-policy")!)
-                    .font(.caption)
-                    .foregroundStyle(Color.accentColor)
-                Text(" and ")
-                    .font(.caption)
-                Link("Terms of Use", destination: URL(string: "https://typeahead.ai/terms-of-use")!)
-                    .font(.caption)
-                    .foregroundStyle(Color.accentColor)
-            }
+            Text(legalAttributedText())
+                .font(.caption)
         }
         .padding(30)
         .frame(
@@ -115,6 +105,20 @@ struct LoggedOutOnboardingView: View {
             maxHeight: .infinity,
             alignment: .center
         )
+    }
+
+    private func legalAttributedText() -> AttributedString {
+        var text = AttributedString(localized: "By continuing, you agree to Typeahead's [Privacy Policy](https://typeahead.ai/privacy-policy) and [Terms of Use](https://typeahead.ai/terms-of-use).")
+
+        if let privacyRange = text.range(of: "[Privacy Policy]") {
+            text[privacyRange].link = URL(string: "https://typeahead.ai/privacy-policy")
+        }
+
+        if let termsRange = text.range(of: "[Terms of Use]") {
+            text[termsRange].link = URL(string: "https://typeahead.ai/terms-of-use")
+        }
+
+        return text
     }
 }
 
