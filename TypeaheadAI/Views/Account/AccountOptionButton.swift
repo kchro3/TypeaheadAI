@@ -54,6 +54,7 @@ struct AccountOptionButton: View {
         .buttonStyle(.plain)
     }
 }
+
 #Preview {
     AccountOptionButton(label: "Sign in with Apple")
 }

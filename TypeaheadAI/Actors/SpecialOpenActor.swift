@@ -67,6 +67,8 @@ actor SpecialOpenActor: CanGetUIElements {
                 // Serialize the UIElement
                 let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
                 if let serializedUIElement = uiElement?.serialize() {
+                    print(serializedUIElement)
+                    
                     appInfo.appContext?.serializedUIElement = serializedUIElement
                     appInfo.elementMap = elementMap
                 }
