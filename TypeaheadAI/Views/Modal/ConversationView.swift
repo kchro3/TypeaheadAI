@@ -67,6 +67,8 @@ struct ConversationView: View {
                             }
                         )
                         .id(message.id.uuidString)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityAddTraits(.isHeader)
                         .padding(3)
                     }
                 }

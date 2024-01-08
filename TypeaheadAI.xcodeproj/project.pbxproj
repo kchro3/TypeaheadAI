@@ -378,6 +378,13 @@
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
+		2B79DFB42B4CA75A0038E577 /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "New Group";
+			sourceTree = "<group>";
+		};
 		2B7BBABE2AF2B47900E4CE1F /* QuickActions */ = {
 			isa = PBXGroup;
 			children = (
@@ -539,6 +546,7 @@
 			isa = PBXGroup;
 			children = (
 				2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */,
+				2B79DFB42B4CA75A0038E577 /* New Group */,
 				2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */,
 				2B0B301A2ADE8E2A00338B76 /* SettingsManager.swift */,
 				2BAA97902B0366C400EC6A63 /* OnboardingWindowManager.swift */,

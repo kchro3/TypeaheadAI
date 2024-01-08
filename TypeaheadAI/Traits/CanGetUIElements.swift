@@ -19,7 +19,11 @@ extension CanGetUIElements {
             element = AXUIElementCreateApplication(pid)
 
             // Narrow down to the first (top-most) window
-            if let windowElement = element?.children().first(where: {
+            if NSWorkspace.shared.isVoiceOverEnabled, 
+               let focusedElement = element?.subelement(forAttribute: kAXFocusedUIElementAttribute) {
+                // This works when VoiceOver is enabled
+                element = focusedElement
+            } else if let windowElement = element?.children().first(where: {
                 $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow" &&
                 !$0.children().isEmpty
             }) {
