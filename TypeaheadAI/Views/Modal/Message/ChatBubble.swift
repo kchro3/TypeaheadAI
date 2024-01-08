@@ -43,11 +43,12 @@ struct ChatBubble<Content>: View where Content: View {
         HStack(alignment: .bottom) {
             Spacer()
 
-            userButtons
-                .padding(.leading, 10)
-
             content()
+                .accessibilityHeading(.h1)
                 .clipShape(ChatBubbleShape(direction: direction))
+
+            userButtons
+                .padding(.trailing, 10)
         }
     }
 
@@ -55,6 +56,7 @@ struct ChatBubble<Content>: View where Content: View {
     var aiMessage: some View {
         HStack(alignment: .bottom) {
             content()
+                .accessibilityHeading(.h1)
                 .clipShape(ChatBubbleShape(direction: direction))
 
             aiButtons
@@ -75,6 +77,10 @@ struct ChatBubble<Content>: View where Content: View {
                         .padding(.bottom, 10)
                 })
                 .buttonStyle(.plain)
+                .accessibilityElement()
+                .accessibilityLabel("Edit message")
+                .accessibilityHint("Edit Typeahead's message")
+                .accessibilityAddTraits(.isButton)
             }
 
             if let onButtonDown = onRefresh {
@@ -85,6 +91,9 @@ struct ChatBubble<Content>: View where Content: View {
                         .padding(.bottom, 8)
                 })
                 .buttonStyle(.plain)
+                .accessibilityElement()
+                .accessibilityLabel("Retry")
+                .accessibilityAddTraits(.isButton)
             }
         }
     }
@@ -100,6 +109,10 @@ struct ChatBubble<Content>: View where Content: View {
                 })
                 .padding(.bottom, 10)
                 .buttonStyle(.plain)
+                .accessibilityElement()
+                .accessibilityLabel("Edit message")
+                .accessibilityHint("Edit your previous message")
+                .accessibilityAddTraits(.isButton)
             }
 
             if let onConfigure = onConfigure {
@@ -110,6 +123,10 @@ struct ChatBubble<Content>: View where Content: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.bottom, 7)
+                .accessibilityElement()
+                .accessibilityLabel("Configure Quick Action")
+                .accessibilityHint("Create or edit a Quick Action")
+                .accessibilityAddTraits(.isButton)
             }
         }
     }

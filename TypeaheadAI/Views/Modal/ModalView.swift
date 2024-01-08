@@ -80,11 +80,7 @@ struct ModalView: View {
                     }
                 }
             } else {
-                if modalManager.messages.isEmpty {
-                    RecentConversationsView(modalManager: modalManager)
-                } else {
-                    ConversationView(modalManager: modalManager)
-                }
+                ConversationView(modalManager: modalManager)
 
                 if let lastMessage = modalManager.messages.last,
                    !lastMessage.isCurrentUser,
