@@ -880,9 +880,16 @@ class ModalManager: ObservableObject {
 
     func narrate(text: String) {
         if isNarrateEnabled {
-            let utterance = AVSpeechUtterance(string: text)
-            utterance.prefersAssistiveTechnologySettings = true
-            speaker.speak(utterance)
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/say")
+            task.arguments = [text]
+
+            do {
+                try task.run()
+                task.waitUntilExit()
+            } catch {
+                print("failed to say")
+            }
         }
     }
 
