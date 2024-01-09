@@ -77,8 +77,9 @@ actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
         // Serialize the UIElement
         if isAutopilotEnabled {
             let appContext = appInfo.appContext
-            async let (uiElement, elementMap) = getUIElements(appContext: appContext)
+            async let (uiElement, elementMap) = getUIElements(appContext: appContext, inFocus: true)
             if let serializedUIElement = await uiElement?.serialize() {
+                print(serializedUIElement)
                 appInfo.appContext?.serializedUIElement = serializedUIElement
                 appInfo.elementMap = await elementMap
             }

@@ -17,7 +17,7 @@ struct GeneralSettingsView: View {
     @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
     @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
-    @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = false
+    @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = true
 
     var body: some View {
         VStack(alignment: .leading) {
