@@ -33,7 +33,7 @@ struct AccountOptionButton: View {
             action?()
         } label: {
             HStack {
-                Text(label)
+                Text(NSLocalizedString(label, comment: ""))
                     .foregroundStyle(isAccent ? .white : .primary)
             }
             .padding(.vertical, 8)

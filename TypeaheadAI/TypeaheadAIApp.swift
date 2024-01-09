@@ -41,6 +41,7 @@ struct TypeaheadAIApp: App {
             )
         } label: {
             Image(nsImage: NSImage(named: "MenuIcon")!.withTemplate())
+                .accessibilityLabel(Text("Menu"))
         }
         .menuBarExtraAccess(isPresented: $appState.isMenuVisible)
         .menuBarExtraStyle(.window)
