@@ -18,6 +18,8 @@ actor SpecialOpenActor: CanGetUIElements {
     private let modalManager: ModalManager
     private let appContextManager: AppContextManager
 
+    @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialOpenActor"
@@ -63,29 +65,13 @@ actor SpecialOpenActor: CanGetUIElements {
             await self.modalManager.setUserIntents(intents: contextualIntents)
 
             // Kick off async
-            Task {
-                // Serialize the UIElement
-                let (uiElement, elementMap) = getUIElements(appContext: appInfo.appContext)
-                if let serializedUIElement = uiElement?.serialize() {
-                    print(serializedUIElement)
-                    
+            // Serialize the UIElement
+            if isAutopilotEnabled {
+                let appContext = appInfo.appContext
+                async let (uiElement, elementMap) = getUIElements(appContext: appContext)
+                if let serializedUIElement = await uiElement?.serialize() {
                     appInfo.appContext?.serializedUIElement = serializedUIElement
-                    appInfo.elementMap = elementMap
-                }
-
-                if let intents = try await self.clientManager.suggestIntents(
-                    id: UUID(),
-                    username: NSUserName(),
-                    userFullName: NSFullUserName(),
-                    userObjective: self.modalManager.getQuickAction()?.prompt,
-                    userBio: UserDefaults.standard.string(forKey: "bio") ?? "",
-                    userLang: Locale.preferredLanguages.first ?? "",
-                    copiedText: "",
-                    messages: self.modalManager.messages,
-                    history: [],
-                    appContext: appInfo.appContext
-                ), !intents.intents.isEmpty {
-                    await self.modalManager.appendUserIntents(intents: intents.intents)
+                    appInfo.elementMap = await elementMap
                 }
             }
         }
