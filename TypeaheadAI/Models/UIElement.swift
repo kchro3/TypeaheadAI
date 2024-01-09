@@ -135,7 +135,8 @@ extension UIElement {
             }
 
             if let value = self.value {
-                text += ", value: \(value)"
+                let escapedNewlines = value.replacingOccurrences(of: "\n", with: "\\n")
+                text += ", value: \(escapedNewlines)"
             }
         }
 

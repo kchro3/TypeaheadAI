@@ -13,16 +13,20 @@ protocol CanGetUIElements {
 }
 
 extension CanGetUIElements {
-    func getUIElements(appContext: AppContext?) -> (UIElement?, ElementMap) {
+    func getUIElements(appContext: AppContext?, inFocus: Bool = false) -> (UIElement?, ElementMap) {
         var element: AXUIElement? = nil
         if let appContext = appContext, let pid = appContext.pid {
             element = AXUIElementCreateApplication(pid)
 
-            // Narrow down to the first (top-most) window
-            if let windowElement = element?.children().first(where: {
+            if inFocus, NSWorkspace.shared.isVoiceOverEnabled, let focusedElement = element?.getElementInFocus() {
+                element = focusedElement
+            } else if NSWorkspace.shared.isVoiceOverEnabled, let focusedWindow = element?.subelement(forAttribute: kAXFocusedWindowAttribute) {
+                element = focusedWindow
+            } else if let windowElement = element?.children().first(where: {
                 $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow" &&
                 !$0.children().isEmpty
             }) {
+                // Narrow down to the first (top-most) window
                 element = windowElement
             }
         } else {
