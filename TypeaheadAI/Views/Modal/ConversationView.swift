@@ -53,7 +53,6 @@ struct ConversationView: View {
                             },
                             onEditAppear: {
                                 modalManager.cancelTasks()
-                                message.isEdited.toggle()
                             },
                             onRefresh: {
                                 Task {

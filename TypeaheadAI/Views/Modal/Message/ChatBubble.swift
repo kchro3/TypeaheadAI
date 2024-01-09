@@ -45,9 +45,27 @@ struct ChatBubble<Content>: View where Content: View {
 
             userButtons
                 .padding(.leading, 10)
+                .accessibilityHidden(true)
 
             content()
                 .clipShape(ChatBubbleShape(direction: direction))
+                .contextMenu {
+                    if let onEdit = onEdit {
+                        Button {
+                            onEdit()
+                        } label: {
+                            Text("Edit Message")
+                        }
+                    }
+
+                    if let onConfigure = onConfigure {
+                        Button {
+                            onConfigure()
+                        } label: {
+                            Text("Configure Quick Action")
+                        }                        
+                    }
+                }
         }
     }
 
@@ -56,9 +74,27 @@ struct ChatBubble<Content>: View where Content: View {
         HStack(alignment: .bottom) {
             content()
                 .clipShape(ChatBubbleShape(direction: direction))
+                .contextMenu {
+                    if let onEdit = onEdit {
+                        Button {
+                            onEdit()
+                        } label: {
+                            Text("Edit Message")
+                        }
+                    }
+
+                    if let onRefresh = onRefresh {
+                        Button {
+                            onRefresh()
+                        } label: {
+                            Text("Retry")
+                        }
+                    }
+                }
 
             aiButtons
                 .padding(.trailing, 10)
+                .accessibilityHidden(true)
 
             Spacer()
         }
@@ -67,15 +103,7 @@ struct ChatBubble<Content>: View where Content: View {
     @ViewBuilder
     var aiButtons: some View {
         HStack(spacing: 5) {
-            if let onEdit = onEdit {
-                Button(action: {
-                    onEdit()
-                }, label: {
-                    Image(systemName: "square.and.pencil")
-                        .padding(.bottom, 10)
-                })
-                .buttonStyle(.plain)
-            }
+            editButton
 
             if let onButtonDown = onRefresh {
                 Button(action: {
@@ -92,25 +120,39 @@ struct ChatBubble<Content>: View where Content: View {
     @ViewBuilder
     var userButtons: some View {
         HStack(spacing: 5) {
-            if let onEdit = onEdit {
-                Button(action: {
-                    onEdit()
-                }, label: {
-                    Image(systemName: "square.and.pencil")
-                })
-                .padding(.bottom, 10)
-                .buttonStyle(.plain)
-            }
+            editButton
 
-            if let onConfigure = onConfigure {
-                Button {
-                    onConfigure()
-                } label: {
-                    Image(systemName: "wrench.adjustable")
-                }
-                .buttonStyle(.plain)
-                .padding(.bottom, 7)
+            configButton
+        }
+    }
+
+    @ViewBuilder
+    var editButton: some View {
+        if let onEdit = onEdit {
+            Button(action: {
+                onEdit()
+            }, label: {
+                Image(systemName: "square.and.pencil")
+            })
+            .padding(.bottom, 10)
+            .buttonStyle(.plain)
+        } else {
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    var configButton: some View {
+        if let onConfigure = onConfigure {
+            Button {
+                onConfigure()
+            } label: {
+                Image(systemName: "wrench.adjustable")
             }
+            .buttonStyle(.plain)
+            .padding(.bottom, 7)
+        } else {
+            EmptyView()
         }
     }
 }

@@ -22,6 +22,7 @@ struct MessageView: View {
     @State private var isMessageTruncated = true
     @State private var isEditing = false
     @State private var localContent: String = ""
+    @FocusState private var isFocused: Bool
 
     private let maxMessageLength: Int
     private let isMarkdown: Bool
@@ -82,9 +83,7 @@ struct MessageView: View {
             onConfigure: onConfigure,
             onEdit: (onEditAppear != nil) ? {
                 isEditing.toggle()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                    onEditAppear?()
-                }
+                onEditAppear?()
             } : nil
         ) {
             switch message.messageType {
@@ -101,12 +100,16 @@ struct MessageView: View {
                             }
                         }
                     )
+                    .focused($isFocused)
                     .padding(.vertical, 10)
                     .padding(.horizontal, 15)
                     .foregroundColor(.primary)
                     .background(Color.accentColor.opacity(0.2))
                     .onAppear(perform: {
-                        localContent = message.text
+                        DispatchQueue.main.async {
+                            localContent = message.text
+                            isFocused = true
+                        }
                     })
                 } else if message.text.count > maxMessageLength {
                     // Truncatable string
@@ -156,12 +159,16 @@ struct MessageView: View {
                             }
                         }
                     )
+                    .focused($isFocused)
                     .padding(.vertical, 10)
                     .padding(.horizontal, 15)
                     .foregroundColor(.primary)
                     .background(Color.accentColor.opacity(0.2))
                     .onAppear(perform: {
-                        localContent = message.text
+                        DispatchQueue.main.async {
+                            localContent = message.text
+                            isFocused = true
+                        }
                     })
                 } else if message.text.count > maxMessageLength {
                     // Truncatable string
@@ -224,89 +231,116 @@ struct MessageView: View {
     @ViewBuilder
     var aiMessage: some View {
         HStack {
-            ChatBubble(
-                direction: .left,
-                onEdit: (onEditAppear != nil) ? {
-                    isEditing.toggle()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+            switch message.messageType {
+            case .string, .markdown, .tool_call:
+                ChatBubble(
+                    direction: .left,
+                    onEdit: (onEditAppear != nil) ? {
+                        isEditing.toggle()
                         onEditAppear?()
-                    }
-                } : nil,
-                onRefresh: onRefresh) {
-                switch message.messageType {
-                case .string, .markdown, .tool_call:
-                    if isEditing {
-                        CustomTextField(
-                            text: $localContent,
-                            placeholderText: "",
-                            autoCompleteSuggestions: [],
-                            onEnter: { newContent in
-                                isEditing = false
-                                if !localContent.isEmpty {
-                                    onEdit?(localContent)
+                    } : nil,
+                    onRefresh: onRefresh,
+                    content: {
+                        if isEditing {
+                            CustomTextField(
+                                text: $localContent,
+                                placeholderText: "",
+                                autoCompleteSuggestions: [],
+                                onEnter: { newContent in
+                                    isEditing = false
+                                    if !localContent.isEmpty {
+                                        onEdit?(localContent)
+                                    }
+                                }
+                            )
+                            .focused($isFocused)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 15)
+                            .foregroundColor(.primary)
+                            .background(Color.accentColor.opacity(0.2))
+                            .onAppear(perform: {
+                                DispatchQueue.main.async {
+                                    localContent = message.text
+                                    isFocused = true
+                                }
+                            })
+                        } else if isMarkdown {
+                            Markdown(message.text)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 15)
+                                .foregroundColor(.primary)
+                                .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                                .textSelection(.enabled)
+                        } else {
+                            Text(message.text)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 15)
+                                .foregroundColor(.primary)
+                                .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                                .textSelection(.enabled)
+                        }
+                    })
+            case .function_call(let functionCalls):
+                ChatBubble(
+                    direction: .left,
+                    onRefresh: onRefresh,
+                    content: {
+                        Markdown {
+                            Paragraph {
+                                Strong("Autopilot Plan")
+                            }
+                            NumberedList(of: functionCalls.compactMap(getHumanReadable)) { narration in
+                                ListItem {
+                                    narration
                                 }
                             }
-                        )
+                        }
                         .padding(.vertical, 10)
                         .padding(.horizontal, 15)
                         .foregroundColor(.primary)
-                        .background(Color.accentColor.opacity(0.2))
-                        .onAppear(perform: {
-                            localContent = message.text
-                        })
-                    } else if isMarkdown {
-                        Markdown(message.text)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 15)
-                            .foregroundColor(.primary)
-                            .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                            .textSelection(.enabled)
-                    } else {
-                        Text(message.text)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 15)
-                            .foregroundColor(.primary)
-                            .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                            .textSelection(.enabled)
-                    }
-                case .function_call(let functionCalls):
-                    Markdown {
-                        Paragraph {
-                            Strong("Autopilot Plan")
+                        .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
+                        .textSelection(.enabled)
+                    })
+            case .html(let data):
+                ChatBubble(
+                    direction: .left,
+                    onRefresh: onRefresh,
+                    content: {
+                        WebView(html: data, dynamicHeight: $webViewHeight)
+                            .frame(width: 400, height: webViewHeight)
+                            .background(Color.accentColor.opacity(0.8))
+                    })
+            case .image(let data):
+                ChatBubble(
+                    direction: .left,
+                    onRefresh: onRefresh,
+                    content: {
+                        if let imageData = try? self.decodeBase64Image(data.image) {
+                            Image(nsImage: imageData)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 512, height: 512)
+                                .onDrag {
+                                    return NSItemProvider(item: data.toURL() as NSSecureCoding, typeIdentifier: UTType.fileURL.identifier)
+                                }
+                        } else {
+                            EmptyView()
                         }
-                        NumberedList(of: functionCalls.compactMap(getHumanReadable)) { narration in
-                            ListItem {
-                                narration
-                            }
+                    })
+            case .data(let data):
+                ChatBubble(
+                    direction: .left,
+                    onRefresh: onRefresh,
+                    content: {
+                        if let imageData = try? self.decodeImage(data) {
+                            Image(nsImage: imageData)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 512, height: 512)
+                        } else {
+                            EmptyView()
                         }
-                    }
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .foregroundColor(.primary)
-                    .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
-                    .textSelection(.enabled)
-                case .html(let data):
-                    WebView(html: data, dynamicHeight: $webViewHeight)
-                        .frame(width: 400, height: webViewHeight)
-                        .background(Color.accentColor.opacity(0.8))
-                case .image(let data):
-                    if let imageData = try? self.decodeBase64Image(data.image) {
-                        Image(nsImage: imageData)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 512, height: 512)
-                            .onDrag {
-                                return NSItemProvider(item: data.toURL() as NSSecureCoding, typeIdentifier: UTType.fileURL.identifier)
-                            }
-                    }
-                case .data(let data):
-                    if let imageData = try? self.decodeImage(data) {
-                        Image(nsImage: imageData)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 512, height: 512)
-                    }
-                }
+                    })
             }
         }
     }
