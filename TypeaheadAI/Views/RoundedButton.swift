@@ -28,7 +28,7 @@ struct RoundedButton: View {
         Button(action: {
             action?()
         }, label: {
-            Text(label)
+            Text(NSLocalizedString(label, comment: ""))
                 .padding(.vertical, 5)
                 .padding(.horizontal, 10)
                 .foregroundStyle(isAccent ? .white : .primary)

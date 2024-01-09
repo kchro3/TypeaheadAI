@@ -5,7 +5,14 @@
 
     },
     "%@" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
     },
     "%@ [tab]" : {
       "localizations" : {
@@ -18,16 +25,44 @@
       }
     },
     "%lld" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
     },
     "^[%lld smart-copy](inflect: true)" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld smart-copy](inflect: true)"
+          }
+        }
+      }
     },
     "^[%lld smart-cut](inflect: true)" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld smart-cut](inflect: true)"
+          }
+        }
+      }
     },
     "^[%lld smart-paste](inflect: true)" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld smart-paste](inflect: true)"
+          }
+        }
+      }
     },
     "Aborts any streaming results or autopilot tasks." : {
       "localizations" : {
@@ -149,6 +184,17 @@
         }
       }
     },
+    "Back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indietro"
+          }
+        }
+      }
+    },
     "Before we can get started, Typeahead will need some Accessibility permissions to work.\n\nIn **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.\n\nPress the button below to open System Preferences and modify your Accessibility settings." : {
       "localizations" : {
         "it" : {
@@ -170,7 +216,14 @@
       }
     },
     "C" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C"
+          }
+        }
+      }
     },
     "Cancel" : {
       "localizations" : {
@@ -324,6 +377,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Conferma l'eliminazione dei messaggi"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continua"
+          }
+        }
+      }
+    },
+    "Continue with Apple" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi con Apple"
+          }
+        }
+      }
+    },
+    "Continue with Google" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accedi con Google"
           }
         }
       }
@@ -568,6 +654,17 @@
         }
       }
     },
+    "Finish" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termina"
+          }
+        }
+      }
+    },
     "General" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -624,7 +721,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurazioni dei tasti di scelta rapida"
+            "value" : "Configurazione dei tasti di scelta rapida"
           }
         }
       }
@@ -660,7 +757,14 @@
       }
     },
     "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf"
+          }
+        }
+      }
     },
     "If you delete this, TypeaheadAI will forget about this example, and this action cannot be undone." : {
       "localizations" : {
@@ -732,6 +836,16 @@
         }
       }
     },
+    "Menu" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menù"
+          }
+        }
+      }
+    },
     "Message" : {
       "localizations" : {
         "it" : {
@@ -743,7 +857,14 @@
       }
     },
     "N" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N"
+          }
+        }
+      }
     },
     "Name" : {
       "localizations" : {
@@ -781,6 +902,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Azione rapida nuova"
+          }
+        }
+      }
+    },
+    "New user? Register with email." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuovo utente? Registrati con l'email."
           }
         }
       }
@@ -872,6 +1004,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apri in Finder"
+          }
+        }
+      }
+    },
+    "Open System Preferences" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Preferenze di Sistema"
           }
         }
       }
@@ -1066,6 +1209,17 @@
         }
       }
     },
+    "Register" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrati"
+          }
+        }
+      }
+    },
     "Reset User Prompts" : {
       "localizations" : {
         "it" : {
@@ -1096,6 +1250,17 @@
         }
       }
     },
+    "Retry recording" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riprova la registrazione"
+          }
+        }
+      }
+    },
     "Sample Input" : {
       "localizations" : {
         "it" : {
@@ -1112,6 +1277,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salva"
+          }
+        }
+      }
+    },
+    "Save as Quick Action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva come Azione Rapida"
           }
         }
       }
@@ -1186,6 +1362,17 @@
         }
       }
     },
+    "Skip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salta"
+          }
+        }
+      }
+    },
     "Something went wrong..." : {
       "localizations" : {
         "it" : {
@@ -1238,6 +1425,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passo %1$lld di %2$lld"
+          }
+        }
+      }
+    },
+    "Submit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invia"
           }
         }
       }
@@ -1403,10 +1601,24 @@
       }
     },
     "V" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V"
+          }
+        }
+      }
     },
     "v%@" : {
-
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "v%@"
+          }
+        }
+      }
     },
     "Welcome to Typeahead" : {
       "localizations" : {
