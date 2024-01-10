@@ -67,7 +67,7 @@ actor SpecialRecordActor: CanFetchAppContext, CanGetUIElements {
             var message = "Here is a log of the recorded events:"
             for event in events {
                 if let element = event.element {
-                    if let serialized = element.serialize(isIndexed: false, showActions: false, maxDepth: 2) {
+                    if let serialized = element.serialize(isIndexed: false, showActions: false) {
                         message += "\n\n - \(event.eventType) on\n\(serialized)"
                         if let appContext = event.appContext {
                             message += "\n\(appContext)"

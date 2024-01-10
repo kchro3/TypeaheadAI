@@ -20,7 +20,7 @@ struct AppInfo {
     var apps: [String: Application]
 }
 
-class AppContextManager: CanFetchAppContext, CanGetUIElements {
+class AppContextManager: CanFetchAppContext {
     private let scriptManager = ScriptManager()
     private let appManager = AppManager()
 
