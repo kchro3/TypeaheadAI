@@ -8,7 +8,22 @@
 import AppKit
 import Foundation
 
-struct UIElement: Identifiable, Codable, Equatable {
+// Wrapper class that manages uiElements and how they relate to each other
+struct UIElementTree {
+    let uiElements: [String : UIElement]
+    let root: UIElement
+    let hierarchy: [String : [String]]
+
+    func getChildren(_ uiElement: UIElement) -> [UIElement] {
+        guard let children = hierarchy[uiElement.shortId] else {
+            return []
+        }
+
+        return children.compactMap { uiElements[$0] }
+    }
+}
+
+struct UIElement: Identifiable, Equatable {
     let id: Int
     let role: String
     let title: String?
@@ -25,7 +40,6 @@ struct UIElement: Identifiable, Codable, Equatable {
 
     let actions: [String]
     let parentRole: String?
-    let children: [UIElement]
     let attributes: [String]
 
     var shortId: String {
@@ -52,79 +66,63 @@ struct UIElement: Identifiable, Codable, Equatable {
     }
 }
 
+extension UIElementTree {
+    /// Implement iteratively with DFS
+    func serialize() -> String? {
+        var serialized: String? = nil
+        var stack: [(Int, UIElement)] = [(0, root)]  // (Indent, UIElement)
+
+        while let (indent, element) = stack.popLast() {
+            guard let serializedElement = element.serialize() else {
+                continue
+            }
+
+            if serialized == nil {
+                serialized = serializedElement
+            } else {
+                // Add a new line, an indentation, and the serialized element
+                serialized?.append("\n\(String(repeating: "  ", count: indent))\(serializedElement)")
+            }
+
+            for child in self.getChildren(element).reversed() {
+                stack.append((indent + 1, child))
+            }
+        }
+
+        return serialized
+    }
+}
+
 extension UIElement {
-    private static let maxChildren = 50
     private static let maxCharacterCount = 4000
     private static let defaultExcludedRoles: [String] = ["AXGroup"]
     private static let defaultExcludedActions: [String] = ["AXShowMenu", "AXScrollToVisible", "AXCancel", "AXRaise"]
 
-    /// Convert to string representation
-    /// isVisible: Only print visible UIElements
-    /// isIndexed: Don't print indices
-    ///
-    /// Reimplement this as a Visitor pattern
     func serialize(
-        indent: Int = 0,
-        isVisible: Bool = true,
         isIndexed: Bool = true,
+        isVisible: Bool = true,
         showActions: Bool = false,
-        excludedRoles: [String]? = UIElement.defaultExcludedRoles,
-        excludedActions: [String]? = UIElement.defaultExcludedActions,
-        maxDepth: Int? = nil
+        excludedActions: [String]? = UIElement.defaultExcludedActions
     ) -> String? {
-        if let maxDepth = maxDepth, maxDepth == indent {
-            // If the indent reaches the maxDepth, terminate.
-            // If maxDepth is nil, then it recurses exhaustively.
-            return nil
-        }
-
-        if let serializedOpenPanel = try? AXOpenPanelVisitor.visit(element: self, indent: indent, isIndexed: isIndexed) {
-            return serializedOpenPanel
-        }
-
-        if let serializedSavePanel = try? AXSavePanelVisitor.visit(element: self, indent: indent, isIndexed: isIndexed) {
-            return serializedSavePanel
-        }
-
-        if (excludedRoles ?? []).contains(self.role) {
-            // Ignore excluded roles
-            var line = ""
-            for child in self.children.prefix(UIElement.maxChildren) {
-                if let childLine = child.serialize(
-                    indent: indent,
-                    isVisible: isVisible,
-                    isIndexed: isIndexed,
-                    showActions: showActions,
-                    excludedRoles: excludedRoles,
-                    excludedActions: excludedActions,
-                    maxDepth: maxDepth
-                ), !childLine.isEmpty {
-                    if line.isEmpty {
-                        line = childLine
-                    } else {
-                        line += "\n\(childLine)"
-                    }
-                }
-            }
-            return line
-        }
-
-        let indentation = String(repeating: "  ", count: indent)
-
-        // NOTE: This is to help the LLM parse the UIElement tree. This will get complicated fast.
-        //
-        // If title & description exist: <title> (<desc>)
-        // If title doesn't exist:       <desc>
-        // If description doesn't exist: <title>
-        // If neither exist:             none
         var text: String
+        if isIndexed {
+            text = "\(self.shortId): "
+        } else {
+            text = ""
+        }
 
         if role == "AXStaticText" {
-            text = self.value ?? "none"
+            text += self.value ?? ""
+        } else if role == "AXLink", let link = self.link, link.absoluteString != "about:blank" {
+            if let value = self.value {
+                text += "\(value), link: \(link.absoluteString)"
+            } else {
+                text += link.absoluteString
+            }
         } else {
-            text = self.title ?? "none"
+            text += self.title ?? ""
             if let desc = self.description {
-                if text == "none" {
+                if text == "" {
                     text = desc
                 } else {
                     text += " (\(desc))"
@@ -137,16 +135,16 @@ extension UIElement {
             if let value = self.value {
                 text += ", value: \(value)"
             }
-        }
 
-        if let domId = self.domId {
-            text += ", domId: \(domId)"
-        }
-        if let domClasses = self.domClasses {
-            text += ", domClasses: \(domClasses)"
-        }
-        if let link = self.link, link.absoluteString != "about:blank" {
-            text += ", link: \(link.absoluteString)"
+            if let domId = self.domId {
+                text += ", domId: \(domId)"
+            }
+            if let domClasses = self.domClasses {
+                text += ", domClasses: \(domClasses)"
+            }
+            if let link = self.link, link.absoluteString != "about:blank" {
+                text += ", link: \(link.absoluteString)"
+            }
         }
 
         /// Add actions
@@ -154,6 +152,7 @@ extension UIElement {
         if let excludedActions = excludedActions {
             actions = self.actions.filter { !excludedActions.contains($0) }
         }
+
         if showActions {
             if !actions.isEmpty, self.enabled {
                 text += ", actions: \(actions)"
@@ -166,7 +165,7 @@ extension UIElement {
 
         if isVisible {
             if let width = self.size?.width,
-                let height = self.size?.height,
+               let height = self.size?.height,
                width + height <= 1.0 {
                 return nil
             }
@@ -177,49 +176,7 @@ extension UIElement {
             }
         }
 
-        var line = ""
-        if isIndexed {
-            line += "\(indentation)\(self.shortId): \(text)"
-        } else {
-            line += "\(indentation)\(self.role): \(text)"
-        }
-
-        if self.role == "AXCell" {
-            for (index, child) in self.children.prefix(UIElement.maxChildren).enumerated() {
-                if index > 0, self.children[index-1].role == "AXStaticText", self.children[index].role == "AXStaticText" {
-                    // If there are consecutive children with the role AXStaticText, just keep appending to the line
-                    line += child.renderAXStaticText()
-                } else if let childLine = child.serialize(
-                    indent: indent + 1,
-                    isVisible: isVisible,
-                    isIndexed: isIndexed,
-                    showActions: showActions,
-                    excludedRoles: excludedRoles,
-                    excludedActions: excludedActions,
-                    maxDepth: maxDepth
-                ), !childLine.isEmpty {
-                    line += "\n\(childLine)"
-                }
-            }
-        } else if self.role == "AXStaticText" {
-            return line
-        } else {
-            for child in self.children.prefix(UIElement.maxChildren) {
-                if let childLine = child.serialize(
-                    indent: indent + 1,
-                    isVisible: isVisible,
-                    isIndexed: isIndexed,
-                    showActions: showActions,
-                    excludedRoles: excludedRoles,
-                    excludedActions: excludedActions,
-                    maxDepth: maxDepth
-                ), !childLine.isEmpty {
-                    line += "\n\(childLine)"
-                }
-            }
-        }
-
-        return line
+        return text
     }
 
     private func renderAXStaticText() -> String {
@@ -236,13 +193,13 @@ extension UIElement {
     }
 
     /// NOTE: if isReflexive is true, then the conditiion can be true of the caller.
-    func findFirst(condition: (UIElement) -> Bool, isReflexive: Bool = false) -> UIElement? {
+    func findFirst(tree: UIElementTree, condition: (UIElement) -> Bool, isReflexive: Bool = false) -> UIElement? {
         if isReflexive, condition(self) {
             return self
         }
 
-        for child in self.children {
-            if let match = child.findFirst(condition: condition, isReflexive: true) {
+        for child in tree.getChildren(self) {
+            if let match = child.findFirst(tree: tree, condition: condition, isReflexive: true) {
                 return match
             }
         }
@@ -251,21 +208,21 @@ extension UIElement {
     }
 
     /// NOTE: if isReflexive is true, then the conditiion can be true of the caller.
-    func findAll(condition: (UIElement) -> Bool, isReflexive: Bool = false) -> [UIElement] {
+    func findAll(tree: UIElementTree, condition: (UIElement) -> Bool, isReflexive: Bool = false) -> [UIElement] {
         var matches: [UIElement] = []
 
         var stack: [UIElement]
         if isReflexive {
             stack = [self]
         } else {
-            stack = self.children
+            stack = tree.getChildren(self)
         }
 
         while let next = stack.popLast() {
             if condition(next) {
                 matches.append(next)
             } else {
-                for child in next.children {
+                for child in tree.getChildren(next) {
                     stack.append(child)
                 }
             }

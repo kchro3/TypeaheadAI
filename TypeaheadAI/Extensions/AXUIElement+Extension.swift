@@ -10,7 +10,28 @@ import Foundation
 
 extension AXUIElement {
     func toUIElement() -> UIElement? {
-        return UIElementVisitor.visit(element: self)
+        guard let role = self.stringValue(forAttribute: kAXRoleAttribute) else {
+            return nil
+        }
+
+        return UIElement(
+            id: 0,
+            role: role,
+            title: self.getTitle(),
+            description: self.getDescription(),
+            label: self.getLabel(),
+            value: self.getValue(),
+            link: self.value(forAttribute: kAXURLAttribute) as? URL,
+            point: self.pointValue(forAttribute: kAXPositionAttribute),
+            size: self.sizeValue(forAttribute: kAXSizeAttribute),
+            domId: self.getDomId(),
+            domClasses: nil,
+            enabled: self.boolValue(forAttribute: kAXEnabledAttribute),
+            identifier: self.stringValue(forAttribute: kAXIdentifierAttribute),
+            actions: self.actions(),
+            parentRole: self.parent()?.stringValue(forAttribute: kAXRoleAttribute),
+            attributes: self.attributes()
+        )
     }
 
     func value(forAttribute attribute: String) -> CFTypeRef? {
@@ -93,9 +114,17 @@ extension AXUIElement {
         return self.subelement(forAttribute: kAXParentAttribute)
     }
 
-    func children() -> [AXUIElement] {
+    func children(maxChildren: Int? = nil) -> [AXUIElement] {
         if let children = self.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
-            return children
+            if let maxChildren = maxChildren, children.count > maxChildren {
+                if let visibleChildren = self.value(forAttribute: kAXVisibleChildrenAttribute) as? [AXUIElement] {
+                    return visibleChildren
+                } else {
+                    return Array(children.prefix(maxChildren))
+                }
+            } else {
+                return children
+            }
         } else {
             return []
         }
@@ -171,15 +200,6 @@ extension AXUIElement {
         return self.subelement(forAttribute: kAXFocusedUIElementAttribute)
     }
 
-    func serialize() -> String? {
-        if let uiElement = UIElementVisitor.visit(element: self),
-           let serialized = uiElement.serialize() {
-            return serialized
-        } else {
-            return nil
-        }
-    }
-
     /// NOTE: if isReflexive is true, then the condition can be true of the caller.
     func findFirst(condition: (AXUIElement) -> Bool, isReflexive: Bool = false) -> AXUIElement? {
         if isReflexive, condition(self) {
@@ -193,5 +213,50 @@ extension AXUIElement {
         }
 
         return nil
+    }
+
+    private func getTitle() -> String? {
+        if let title = self.stringValue(forAttribute: kAXTitleAttribute), !title.isEmpty {
+            return title
+        } else if let titleUIElement = self.subelement(forAttribute: kAXTitleUIElementAttribute),
+                  titleUIElement.stringValue(forAttribute: kAXRoleAttribute) == "AXStaticText",
+                  let title = titleUIElement.stringValue(forAttribute: kAXValueAttribute),
+                  !title.isEmpty {
+            return title
+        } else {
+            return nil
+        }
+    }
+
+    private func getDescription() -> String? {
+        if let description = self.stringValue(forAttribute: kAXDescriptionAttribute), !description.isEmpty {
+            return description
+        } else {
+            return nil
+        }
+    }
+
+    private func getLabel() -> String? {
+        if let label = self.stringValue(forAttribute: kAXLabelValueAttribute), !label.isEmpty {
+            return label
+        } else {
+            return nil
+        }
+    }
+
+    private func getValue() -> String? {
+        if let value = self.stringValue(forAttribute: kAXValueAttribute), !value.isEmpty {
+            return value
+        } else {
+            return nil
+        }
+    }
+
+    private func getDomId() -> String? {
+        if let domId = self.stringValue(forAttribute: "AXDOMIdentifier"), !domId.isEmpty {
+            return domId
+        } else {
+            return nil
+        }
     }
 }

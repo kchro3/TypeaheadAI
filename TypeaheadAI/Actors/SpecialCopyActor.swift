@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import os.log
 
-actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
+actor SpecialCopyActor: CanSimulateCopy {
     private let intentManager: IntentManager
     private let historyManager: HistoryManager
     private let clientManager: ClientManager
@@ -72,16 +72,5 @@ actor SpecialCopyActor: CanSimulateCopy, CanGetUIElements {
         await self.modalManager.setUserIntents(intents: contextualIntents)
 
         await NSApp.activate(ignoringOtherApps: true)
-
-        // Kick off async
-        // Serialize the UIElement
-        if isAutopilotEnabled {
-            let appContext = appInfo.appContext
-            async let (uiElement, elementMap) = getUIElements(appContext: appContext)
-            if let serializedUIElement = await uiElement?.serialize() {
-                appInfo.appContext?.serializedUIElement = serializedUIElement
-                appInfo.elementMap = await elementMap
-            }
-        }
     }
 }

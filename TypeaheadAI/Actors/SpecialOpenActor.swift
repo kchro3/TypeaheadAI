@@ -11,7 +11,7 @@ import Foundation
 import os.log
 import SwiftUI
 
-actor SpecialOpenActor: CanGetUIElements {
+actor SpecialOpenActor {
     private let intentManager: IntentManager
     private let clientManager: ClientManager
     private let promptManager: QuickActionManager
@@ -63,17 +63,6 @@ actor SpecialOpenActor: CanGetUIElements {
             // Try to predict the user intent
             let contextualIntents = self.intentManager.fetchContextualIntents(limit: 3, appContext: appInfo.appContext)
             await self.modalManager.setUserIntents(intents: contextualIntents)
-
-            // Kick off async
-            // Serialize the UIElement
-            if isAutopilotEnabled {
-                let appContext = appInfo.appContext
-                async let (uiElement, elementMap) = getUIElements(appContext: appContext)
-                if let serializedUIElement = await uiElement?.serialize() {
-                    appInfo.appContext?.serializedUIElement = serializedUIElement
-                    appInfo.elementMap = await elementMap
-                }
-            }
         }
     }
 }

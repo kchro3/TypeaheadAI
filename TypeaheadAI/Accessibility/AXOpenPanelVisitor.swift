@@ -10,6 +10,7 @@ import Foundation
 /// Ideally not static, but whatever. I don't know if we'll need stateful visitors yet.
 class AXOpenPanelVisitor {
     static func visit(
+        tree: UIElementTree,
         element: UIElement,
         indent: Int,
         isIndexed: Bool
@@ -28,11 +29,11 @@ class AXOpenPanelVisitor {
 
         /// NOTE: This actually depends on the user preferences on how to render the files...
         /// Let's fix this later.
-        if let listView = element.findFirst(condition: {
+        if let listView = element.findFirst(tree: tree, condition: {
             $0.role == "AXOutline" && $0.identifier == "ListView"
         }) {
-            for listItem in listView.findAll(condition: { $0.role == "AXTextField" && $0.link != nil }) {
-                if let childLine = listItem.serialize(indent: indent + 1, isIndexed: isIndexed, maxDepth: 1) {
+            for listItem in listView.findAll(tree: tree, condition: { $0.role == "AXTextField" && $0.link != nil }) {
+                if let childLine = listItem.serialize(isIndexed: isIndexed) {
                     line += "\n\(childLine)"
                 }
             }

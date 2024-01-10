@@ -9,96 +9,126 @@ import AppKit
 import Foundation
 
 class UIElementVisitor {
+    private static let maxChildren = 25
     private static let defaultExclusiveRoles = [
         "AXSheet",
     ]  // If a child is one of these types, then other children are ignored.
 
-    static func visit(
-        element: AXUIElement,
-        idGenerator: (() -> Int)? = nil,
-        callback: ((String, AXUIElement) -> Void)? = nil
-    ) -> UIElement? {
-        guard let role = element.role() else {
-            return nil
-        }
+    static func visitIterative(
+        element: AXUIElement
+    ) -> (UIElementTree?, ElementMap) {
+        var stack: [(String?, AXUIElement)] = [(nil, element)]
 
-        let axChildren = element.children()
-        if role == "AXGroup" && axChildren.count == 1 {
-            return visit(
-                element: axChildren[0],
-                idGenerator: idGenerator,
-                callback: callback
+        // Iteratively construct a UIElementTree
+        var uiElements: [String : UIElement] = [:]
+        var root: UIElement? = nil
+        var hierarchy: [String : [String]] = [:]
+
+        var elementMap = ElementMap()
+        var count = 0
+
+        while let (parentId, child) = stack.popLast() {
+            guard let role = child.role() else {
+                continue
+            }
+
+            // Optimization to collapse deeply nested AXGroup's
+            let children = child.children(maxChildren: maxChildren)
+            if role == "AXGroup", children.count == 1 {
+                stack.append((parentId, children[0]))
+                continue
+            }
+
+            count += 1
+            let uiElement = UIElement(
+                id: count,
+                role: role,
+                title: getTitle(child),
+                description: getDescription(child),
+                label: getLabel(child),
+                value: getValue(child),
+                link: child.value(forAttribute: kAXURLAttribute) as? URL,
+                point: child.pointValue(forAttribute: kAXPositionAttribute),
+                size: child.sizeValue(forAttribute: kAXSizeAttribute),
+                domId: getDomId(child),
+                domClasses: nil,
+                enabled: child.boolValue(forAttribute: kAXEnabledAttribute),
+                identifier: child.stringValue(forAttribute: kAXIdentifierAttribute),
+                actions: child.actions(),
+                parentRole: child.parent()?.stringValue(forAttribute: kAXRoleAttribute),
+                attributes: child.attributes()
             )
-        }
 
-        var title: String? = nil
-        if let titleAttr = element.stringValue(forAttribute: kAXTitleAttribute), !titleAttr.isEmpty {
-            title = titleAttr
-        } else if let titleUIElement = element.subelement(forAttribute: kAXTitleUIElementAttribute),
-                  titleUIElement.stringValue(forAttribute: kAXRoleAttribute) == "AXStaticText",
-                  let titleAttr = titleUIElement.stringValue(forAttribute: kAXValueAttribute),
-                  !titleAttr.isEmpty {
-            title = titleAttr
-        }
+            elementMap[uiElement.shortId] = child
+            uiElements[uiElement.shortId] = uiElement
+            hierarchy[uiElement.shortId] = []
 
-        var description: String? = nil
-        if let descAttr = element.stringValue(forAttribute: kAXDescriptionAttribute), !descAttr.isEmpty {
-            description = descAttr
-        }
+            if root == nil {
+                // Initialize root
+                root = uiElement
+            } else if let parentId = parentId, var childrenIds = hierarchy[parentId] {
+                // Update children IDs
+                childrenIds.append(uiElement.shortId)
+                hierarchy[parentId] = childrenIds
+            }
 
-        var label: String? = nil
-        if let labelAttr = element.stringValue(forAttribute: kAXLabelValueAttribute), !labelAttr.isEmpty {
-            label = labelAttr
-        }
-
-        var value: String? = nil
-        if let valueAttr = element.stringValue(forAttribute: kAXValueAttribute), !valueAttr.isEmpty {
-            value = valueAttr
-        }
-
-        var domId: String? = nil
-        if let domAttr = element.stringValue(forAttribute: "AXDOMIdentifier"), !domAttr.isEmpty {
-            domId = domAttr
-        }
-
-        // Recurse through the children
-        var children: [UIElement] = []
-        for axChild in axChildren {
-            if let child = visit(
-                element: axChild,
-                idGenerator: idGenerator,
-                callback: callback
-            ) {
-                if UIElementVisitor.defaultExclusiveRoles.contains(child.role) {
-                    children = [child]
-                    break
-                } else {
-                    children.append(child)
-                }
+            for axChild in children {
+                stack.append((uiElement.shortId, axChild))
             }
         }
 
-        let uiElement = UIElement(
-            id: idGenerator?() ?? 0,
-            role: role,
-            title: title,
-            description: description,
-            label: label,
-            value: value,
-            link: element.value(forAttribute: kAXURLAttribute) as? URL,
-            point: element.pointValue(forAttribute: kAXPositionAttribute),
-            size: element.sizeValue(forAttribute: kAXSizeAttribute),
-            domId: domId,
-            domClasses: nil,
-            enabled: element.boolValue(forAttribute: kAXEnabledAttribute),
-            identifier: element.stringValue(forAttribute: kAXIdentifierAttribute),
-            actions: element.actions(),
-            parentRole: element.parent()?.stringValue(forAttribute: kAXRoleAttribute),
-            children: children,
-            attributes: element.attributes()
-        )
+        if let root = root {
+            let tree = UIElementTree(uiElements: uiElements, root: root, hierarchy: hierarchy)
+            return (tree, elementMap)
+        } else {
+            return (nil, elementMap)
+        }
+    }
+}
 
-        callback?(uiElement.shortId, element)
-        return uiElement
+extension UIElementVisitor {
+    private static func getTitle(_ element: AXUIElement) -> String? {
+        if let title = element.stringValue(forAttribute: kAXTitleAttribute), !title.isEmpty {
+            return title
+        } else if let titleUIElement = element.subelement(forAttribute: kAXTitleUIElementAttribute),
+                  titleUIElement.stringValue(forAttribute: kAXRoleAttribute) == "AXStaticText",
+                  let title = titleUIElement.stringValue(forAttribute: kAXValueAttribute),
+                  !title.isEmpty {
+            return title
+        } else {
+            return nil
+        }
+    }
+
+    private static func getDescription(_ element: AXUIElement) -> String? {
+        if let description = element.stringValue(forAttribute: kAXDescriptionAttribute), !description.isEmpty {
+            return description
+        } else {
+            return nil
+        }
+    }
+
+    private static func getLabel(_ element: AXUIElement) -> String? {
+        if let label = element.stringValue(forAttribute: kAXLabelValueAttribute), !label.isEmpty {
+            return label
+        } else {
+            return nil
+        }
+    }
+
+    private static func getValue(_ element: AXUIElement) -> String? {
+        if let value = element.stringValue(forAttribute: kAXValueAttribute), !value.isEmpty {
+            return value
+        } else {
+            return nil
+        }
+    }
+
+    private static func getDomId(_ element: AXUIElement) -> String? {
+        if let domId = element.stringValue(forAttribute: "AXDOMIdentifier"), !domId.isEmpty {
+            return domId
+        } else {
+            return nil
+        }
     }
 }
