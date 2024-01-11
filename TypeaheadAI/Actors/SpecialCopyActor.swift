@@ -42,7 +42,7 @@ actor SpecialCopyActor: CanSimulateCopy {
     }
     
     func specialCopy() async throws {
-        var appInfo = try await self.appContextManager.getActiveAppInfo()
+        let appInfo = try await self.appContextManager.getActiveAppInfo()
         try await self.simulateCopy()
 
         // Clear the current state
