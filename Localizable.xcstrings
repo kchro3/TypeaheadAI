@@ -261,6 +261,16 @@
         }
       }
     },
+    "Chat with Typeahead" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chatta con Typeahead"
+          }
+        }
+      }
+    },
     "Check for updates" : {
       "localizations" : {
         "it" : {
@@ -1576,6 +1586,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ci sono molti modi per iniziare! Puoi pensare a Typeahead come a un nuovo strumento nel tuo kit, dove puoi chiederle di convertire appunti di riunioni in email di follow-up o riassumere articoli di notizie, ed è come un copilota per tutte le tue app.\n\n**Smart-copy** funziona su qualsiasi cosa tu possa copiare, e **smart-paste** funziona ovunque tu possa incollare.\n\nFunziona anche in app a schermo intero, quindi è sempre a portata di mano.\n\nPuoi accedere alle tue impostazioni dalla barra dei menu."
+          }
+        }
+      }
+    },
+    "Thinking" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riflessione"
           }
         }
       }

@@ -608,6 +608,7 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
+        narrate(text: "Thinking...")
 
         currentTask?.cancel()
         currentTask = Task {
@@ -678,7 +679,7 @@ class ModalManager: ObservableObject {
                 await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
 
                 narrate(text: args.humanReadable)
-                try await Task.safeSleep(for: .seconds(3))  // Add slight delay so that user can see the next action
+                try await Task.safeSleep(for: .seconds(2))  // Add slight delay so that user can see the next action
 
                 await self.closeModal()
 
@@ -716,6 +717,7 @@ class ModalManager: ObservableObject {
             }
 
             isPending = true
+            narrate(text: "Thinking...")
             userIntents = nil
 
             currentTask?.cancel()
@@ -777,6 +779,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func replyToUserMessage() async throws {
         isPending = true
+        narrate(text: "Thinking...")
         userIntents = nil
 
         currentTask?.cancel()
@@ -824,6 +827,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func proposeQuickAction() async throws {
         isPending = true
+        narrate(text: "Thinking...")
         userIntents = nil
 
         do {
@@ -880,7 +884,7 @@ class ModalManager: ObservableObject {
 
     func narrate(text: String) {
         if isNarrateEnabled {
-            let utterance = AVSpeechUtterance(string: text)
+            let utterance = AVSpeechUtterance(string: NSLocalizedString(text, comment: ""))
             utterance.prefersAssistiveTechnologySettings = true
             speaker.speak(utterance)
         }
