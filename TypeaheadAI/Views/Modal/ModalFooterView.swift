@@ -51,6 +51,7 @@ struct ModalFooterView: View {
                 }
                 .focused($isFocused)
                 .accessibilityLabel("Message")
+                .accessibilityHint("Chat with Typeahead")
                 .padding(.vertical, 5)
                 .padding(.horizontal, 10)
                 .background(RoundedRectangle(cornerRadius: 15)
