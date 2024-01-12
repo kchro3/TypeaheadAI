@@ -957,16 +957,6 @@
         }
       }
     },
-    "Notify on new version" : {
-      "localizations" : {
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notifica per la nuova versione"
-          }
-        }
-      }
-    },
     "Offline Mode" : {
       "extractionState" : "manual",
       "localizations" : {

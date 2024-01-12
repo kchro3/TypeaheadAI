@@ -42,6 +42,7 @@
 		2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3792302AB83739008D812F /* CanSimulatePaste.swift */; };
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
+		2B3FF5352B50B70F00D7BE49 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3FF5342B50B70F00D7BE49 /* Sparkle */; };
 		2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B44FA972ABA783F00C6B542 /* OnboardingView.swift */; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
@@ -287,6 +288,7 @@
 				2BF4A7E52AF1A52600AA2512 /* GoogleSignInSwift in Frameworks */,
 				2BA7F0AE2A9ABC47003D38BA /* KeyboardShortcuts in Frameworks */,
 				2BDDB9892B27DDE100D52BF0 /* SwiftSoup in Frameworks */,
+				2B3FF5352B50B70F00D7BE49 /* Sparkle in Frameworks */,
 				2BF4A7E32AF1A52600AA2512 /* GoogleSignIn in Frameworks */,
 				2B8CD4BE2B0AB13B003E0589 /* MarkdownUI in Frameworks */,
 			);
@@ -663,6 +665,7 @@
 				2B8CD4BD2B0AB13B003E0589 /* MarkdownUI */,
 				2BDDB9882B27DDE100D52BF0 /* SwiftSoup */,
 				2BFC51542B38DAB200F3E559 /* LaunchAtLogin */,
+				2B3FF5342B50B70F00D7BE49 /* Sparkle */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -749,6 +752,7 @@
 				2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				2BDDB9872B27DDE100D52BF0 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				2BFC51532B38DAB200F3E559 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
+				2B3FF5332B50B70F00D7BE49 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -1083,7 +1087,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.19;
+				MARKETING_VERSION = 2.1.20;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1124,7 +1128,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.19;
+				MARKETING_VERSION = 2.1.20;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1260,6 +1264,14 @@
 				minimumVersion = 0.3.0;
 			};
 		};
+		2B3FF5332B50B70F00D7BE49 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.2;
+			};
+		};
 		2B473E8A2AA860380042913D /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
@@ -1339,6 +1351,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2B1F3B7C2AEC5F8500F1BB60 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		2B3FF5342B50B70F00D7BE49 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B3FF5332B50B70F00D7BE49 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 		2B473E8B2AA860380042913D /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
