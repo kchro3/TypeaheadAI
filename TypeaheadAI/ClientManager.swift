@@ -219,14 +219,14 @@ class ClientManager: CanGetUIElements {
 
             // Serialize the UIElement
             if isAutopilotEnabled {
-                let startTime = Date()
-                let (tree, elementMap) = getUIElements(appContext: appInfo?.appContext)
-                if let serializedUIElement = tree?.serialize() {
-                    print(serializedUIElement)
-                    print("End-to-end Latency: \(Date().timeIntervalSince(startTime)) seconds")
-                    appInfo?.appContext?.serializedUIElement = serializedUIElement
-                    appInfo?.elementMap = elementMap
-                }
+//                let startTime = Date()
+//                let (tree, elementMap) = getUIElements(appContext: appInfo?.appContext)
+//                if let serializedUIElement = tree?.serialize() {
+//                    print(serializedUIElement)
+//                    print("End-to-end Latency: \(Date().timeIntervalSince(startTime)) seconds")
+//                    appInfo?.appContext?.serializedUIElement = serializedUIElement
+//                    appInfo?.elementMap = elementMap
+//                }
             }
         }
 
