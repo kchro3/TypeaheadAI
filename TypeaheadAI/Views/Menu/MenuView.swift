@@ -5,10 +5,20 @@
 //  Created by Jeff Hara on 8/22/23.
 //
 
+import Sparkle
 import SwiftUI
 import CoreData
 import KeyboardShortcuts
 import SettingsAccess
+
+final class MenuViewModel: ObservableObject {
+    @Published var canCheckForUpdates = false
+
+    init(updater: SPUUpdater) {
+        updater.publisher(for: \.canCheckForUpdates)
+            .assign(to: &$canCheckForUpdates)
+    }
+}
 
 struct MenuView: View {
     // Alphabetize
@@ -16,7 +26,9 @@ struct MenuView: View {
     @ObservedObject var promptManager: QuickActionManager
     @ObservedObject var settingsManager: SettingsManager
     @ObservedObject var supabaseManager: SupabaseManager
-    var versionManager: VersionManager
+
+    @ObservedObject private var menuViewModel: MenuViewModel
+    private let updater: SPUUpdater
 
     @Binding var isMenuVisible: Bool
     @Environment(\.managedObjectContext) private var viewContext
@@ -32,6 +44,23 @@ struct MenuView: View {
 
     private let verticalPadding: CGFloat = 5
     private let horizontalPadding: CGFloat = 5
+
+    init(
+        modalManager: ModalManager, 
+        promptManager: QuickActionManager,
+        settingsManager: SettingsManager,
+        supabaseManager: SupabaseManager,
+        isMenuVisible: Binding<Bool>,
+        updater: SPUUpdater
+    ) {
+        self.modalManager = modalManager
+        self.promptManager = promptManager
+        self.settingsManager = settingsManager
+        self.supabaseManager = supabaseManager
+        self._isMenuVisible = isMenuVisible
+        self.updater = updater
+        self.menuViewModel = MenuViewModel(updater: updater)
+    }
 
     var body: some View {
         VStack(spacing: verticalPadding) {
@@ -132,10 +161,8 @@ struct MenuView: View {
                 MenuButtonView(
                     title: NSLocalizedString("Check for updates", comment: "")
                 ) {
-                    Task {
-                        try await versionManager.checkForUpdates(adhoc: true)
-                        isMenuVisible = false
-                    }
+                    updater.checkForUpdates()
+                    isMenuVisible = false
                 }
 
                 if supabaseManager.uuid != nil {
@@ -194,14 +221,15 @@ struct MenuView_Previews: PreviewProvider {
         }
 
         let modalManager = ModalManager(context: context)
+        let updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
 
         return MenuView(
             modalManager: modalManager,
             promptManager: promptManager,
             settingsManager: SettingsManager(context: context),
             supabaseManager: SupabaseManager(),
-            versionManager: VersionManager(),
-            isMenuVisible: $isMenuVisible
+            isMenuVisible: $isMenuVisible,
+            updater: updaterController.updater
         )
         .environment(\.managedObjectContext, context)
         .frame(width: 300)

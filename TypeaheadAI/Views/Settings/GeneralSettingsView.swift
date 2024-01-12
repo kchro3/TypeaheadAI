@@ -14,7 +14,6 @@ struct GeneralSettingsView: View {
     @ObservedObject var promptManager: QuickActionManager
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
-    @AppStorage("notifyOnUpdate") private var notifyOnUpdate: Bool = true
     @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
     @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = false
@@ -32,17 +31,17 @@ struct GeneralSettingsView: View {
             Form {
                 VStack(alignment: .trailing) {
                     HStack {
-                        KeyboardShortcuts.Recorder("Smart Copy:", name: .specialCopy)
+                        KeyboardShortcuts.Recorder(NSLocalizedString("Smart Copy:", comment: ""), name: .specialCopy)
                         Text("Responds to what you've selected.")
                             .frame(width: 325, alignment: .leading)
                     }
                     HStack {
-                        KeyboardShortcuts.Recorder("Smart Paste:", name: .specialPaste)
+                        KeyboardShortcuts.Recorder(NSLocalizedString("Smart Paste:", comment: ""), name: .specialPaste)
                         Text("Pastes the most recent Typeahead response.")
                             .frame(width: 325, alignment: .leading)
                     }
                     HStack {
-                        KeyboardShortcuts.Recorder("Cancel Tasks:", name: .cancelTasks)
+                        KeyboardShortcuts.Recorder(NSLocalizedString("Cancel Tasks:", comment: ""), name: .cancelTasks)
                         Text("Aborts any streaming results or autopilot tasks.")
                             .frame(width: 325, alignment: .leading)
                     }
@@ -58,12 +57,12 @@ struct GeneralSettingsView: View {
 
             Form {
                 HStack {
-                    KeyboardShortcuts.Recorder("New Chat:", name: .chatNew)
+                    KeyboardShortcuts.Recorder(NSLocalizedString("New Chat:", comment: ""), name: .chatNew)
                     Text("Opens a new chat window")
                         .frame(width: 325, alignment: .leading)
                 }
                 HStack {
-                    KeyboardShortcuts.Recorder("Open Chat:", name: .chatOpen)
+                    KeyboardShortcuts.Recorder(NSLocalizedString("Open Chat:", comment: ""), name: .chatOpen)
                     Text("Opens an existing chat window")
                         .frame(width: 325, alignment: .leading)
                 }
@@ -76,8 +75,6 @@ struct GeneralSettingsView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        LaunchAtLogin.Toggle()
-                        Spacer()
                         Button("Reset User Prompts", action: {
                             promptManager.clearPrompts()
                         })
@@ -88,8 +85,8 @@ struct GeneralSettingsView: View {
 
                     HStack {
                         Spacer()
-                        Toggle(isOn: $notifyOnUpdate) {
-                            Text("Notify on new version")
+                        LaunchAtLogin.Toggle {
+                            Text("Launch at Login")
                         }
                         Spacer()
                         Toggle(isOn: $isWebSearchEnabled) {

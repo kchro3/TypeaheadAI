@@ -37,7 +37,6 @@ final class AppState: ObservableObject {
     @Published var llamaModelManager = LlamaModelManager()
     @Published var settingsManager: SettingsManager
     var supabaseManager = SupabaseManager()
-    var versionManager = VersionManager()
 
     // Actors
     private var specialPasteActor: SpecialPasteActor? = nil
@@ -108,8 +107,6 @@ final class AppState: ObservableObject {
         self.onboardingWindowManager.supabaseManager = supabaseManager
         self.onboardingWindowManager.modalManager = modalManager
         self.onboardingWindowManager.intentManager = intentManager
-
-        self.versionManager.clientManager = clientManager
 
         checkAndRequestNotificationPermissions()
 

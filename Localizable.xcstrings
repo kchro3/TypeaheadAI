@@ -245,6 +245,16 @@
         }
       }
     },
+    "Cancel Tasks:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla Compiti:"
+          }
+        }
+      }
+    },
     "Character count: %lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -856,6 +866,16 @@
         }
       }
     },
+    "Launch at Login" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvia all'accesso"
+          }
+        }
+      }
+    },
     "Let's break down what happened behind the scenes.\n\nAt its core, **smart-copy** and **smart-paste** is an **interface** to make AI more accessible, but it also learns how you like to work.\n\nEvery time you **smart-copy** and **smart-paste** something, Typeahead will use the copied input and the pasted output as an example for how to do that task again.\n\nFor example, if you edited the email manually or by prompting, your preferences would be remembered for the next time you say \"reply to this email.\" It can learn to generalize patterns across examples, and the more you use Typeahead, the better it will become." : {
       "localizations" : {
         "it" : {
@@ -926,6 +946,16 @@
         }
       }
     },
+    "New Chat:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Chat:"
+          }
+        }
+      }
+    },
     "New Quick Action" : {
       "localizations" : {
         "it" : {
@@ -953,16 +983,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Successivamente, ti mostreremo come utilizzare **Autopilot**. Typeahead può svolgere il tuo lavoro di routine per te, come compilare moduli e persino inviare email.\n\nSa come **aprire app e siti web** e **interagire con l'interfaccia utente**, quindi puoi pensarlo come un'auto a guida autonoma. Puoi dirgli cosa fare e cercherà di eseguire il compito autonomamente. Se si blocca o ha bisogno di ulteriori chiarimenti, chiederà aiuto.\n\nQuesto è ancora in fase di sviluppo iniziale, quindi apprezziamo la tua pazienza se ci sono bug. Se non lo desideri, puoi disabilitarlo nelle impostazioni.\n\nProviamoci. Apri una nuova finestra con:"
-          }
-        }
-      }
-    },
-    "Notify on new version" : {
-      "localizations" : {
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notifica per la nuova versione"
           }
         }
       }
@@ -1024,6 +1044,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apri la chat"
+          }
+        }
+      }
+    },
+    "Open Chat:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri la chat:"
           }
         }
       }
@@ -1409,6 +1439,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salta"
+          }
+        }
+      }
+    },
+    "Smart Copy:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incolla intelligente:"
+          }
+        }
+      }
+    },
+    "Smart Paste:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incolla intelligente:"
           }
         }
       }

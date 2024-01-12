@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>SUFeedURL</key>
+	<string>https://typeahead-ai.fly.dev/static/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>7bg36tIga0vFeX6UATDdEd6vZHVOKskQPliZrcIKfeQ=</string>
 	<key>GIDClientID</key>
 	<string>740152617489-ctcjqh4jae9flccc7g7t5tj3962u3ilt.apps.googleusercontent.com</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

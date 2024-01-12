@@ -5,12 +5,14 @@
 //  Created by Jeff Hara on 8/26/23.
 //
 
+import Sparkle
 import SwiftUI
 import MenuBarExtraAccess
 
 @main
 struct TypeaheadAIApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    private let updaterController: SPUStandardUpdaterController
 
     let persistenceController = PersistenceController.shared
     @StateObject var appState: AppState
@@ -27,6 +29,8 @@ struct TypeaheadAIApp: App {
 
         let backgroundContext = persistenceController.container.newBackgroundContext()
         _appState = StateObject(wrappedValue: AppState(context: context, backgroundContext: backgroundContext))
+
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
     }
 
     var body: some Scene {
@@ -36,8 +40,8 @@ struct TypeaheadAIApp: App {
                 promptManager: appState.promptManager,
                 settingsManager: appState.settingsManager,
                 supabaseManager: appState.supabaseManager,
-                versionManager: appState.versionManager,
-                isMenuVisible: $appState.isMenuVisible
+                isMenuVisible: $appState.isMenuVisible,
+                updater: updaterController.updater
             )
         } label: {
             Image(nsImage: NSImage(named: "MenuIcon")!.withTemplate())

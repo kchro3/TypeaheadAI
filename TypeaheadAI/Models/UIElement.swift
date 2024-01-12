@@ -112,7 +112,7 @@ extension UIElement {
         }
 
         if role == "AXStaticText" {
-            text += self.value ?? ""
+            text += renderAXStaticText()
         } else if role == "AXLink", let link = self.link, link.absoluteString != "about:blank" {
             if let value = self.value {
                 text += "\(value), link: \(link.absoluteString)"
@@ -179,6 +179,7 @@ extension UIElement {
         return text
     }
 
+    /// Consider adding some way to focus on truncated text? Or only show visible text?
     private func renderAXStaticText() -> String {
         if let text = self.value {
             if text.count > UIElement.maxCharacterCount {
