@@ -14,18 +14,16 @@ let excludedBundleIds = [
 ]
 
 protocol CanGetUIElements {
-    func getUIElements(appContext: AppContext?, inFocus: Bool) -> (UIElementTree?, ElementMap)
+    func getUIElements(appContext: AppContext?) -> (UIElementTree?, ElementMap)
 }
 
 extension CanGetUIElements {
-    func getUIElements(appContext: AppContext?, inFocus: Bool = false) -> (UIElementTree?, ElementMap) {
+    func getUIElements(appContext: AppContext?) -> (UIElementTree?, ElementMap) {
         var element: AXUIElement? = nil
         if let appContext = appContext, let pid = appContext.pid {
             element = AXUIElementCreateApplication(pid)
 
-            if inFocus, NSWorkspace.shared.isVoiceOverEnabled, let focusedElement = element?.subelement(forAttribute: kAXFocusedUIElementAttribute) {
-                element = focusedElement
-            } else if let windowElement = getFirstTopMostWindow(element: element, appContext: appContext) {
+            if let windowElement = getFirstTopMostWindow(element: element, appContext: appContext) {
                 element = windowElement
             }
         } else {

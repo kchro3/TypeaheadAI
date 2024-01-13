@@ -41,6 +41,11 @@ struct GeneralSettingsView: View {
                             .frame(width: 325, alignment: .leading)
                     }
                     HStack {
+                        KeyboardShortcuts.Recorder(NSLocalizedString("Smart Vision:", comment: ""), name: .specialVision)
+                        Text("Takes a screenshot.")
+                            .frame(width: 325, alignment: .leading)
+                    }
+                    HStack {
                         KeyboardShortcuts.Recorder(NSLocalizedString("Cancel Tasks:", comment: ""), name: .cancelTasks)
                         Text("Aborts any streaming results or autopilot tasks.")
                             .frame(width: 325, alignment: .leading)

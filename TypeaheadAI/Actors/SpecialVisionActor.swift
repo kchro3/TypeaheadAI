@@ -28,34 +28,25 @@ actor SpecialVisionActor: CanGetUIElements {
 
     @MainActor
     func specialVision() async throws {
-        if self.modalManager.isVisible {
-            self.modalManager.closeModal()
-            try await Task.sleep(for: .milliseconds(100))
+        let appInfo = try await appContextManager.getActiveAppInfo()
+        let (tree, elementMap) = getUIElements(appContext: appInfo.appContext)
+
+        guard let tree = tree, let point = tree.root.point, let size = tree.root.size else {
+            return
         }
 
-        let appInfo = try await self.appContextManager.getActiveAppInfo()
+        if let image = await captureScreen(point: point, size: size) {
+            // Clear the current state
+            self.modalManager.forceRefresh()
+            self.modalManager.showModal()
 
-        let (tree, elementMap) = getUIElements(appContext: appInfo.appContext, inFocus: true)
-
-        if let serialized = tree?.serialize() {
-            print(serialized)
-        }
-
-        // Clear the current state
-        self.modalManager.forceRefresh()
-        self.modalManager.showModal()
-
-        if let tree = tree, let point = tree.root.point, let size = tree.root.size {
-            if let image = await captureScreen(point: point, size: size) {
-                modalManager.appendUserImage(
-                    image,
-                    appContext: appInfo.appContext
-                )
-            } else {
-                print("failed to get tiff representation")
-            }
+            // Add user image
+            modalManager.appendUserImage(
+                image,
+                appContext: appInfo.appContext
+            )
         } else {
-            print("failed to get snapshot")
+            print("failed to get tiff representation")
         }
     }
 

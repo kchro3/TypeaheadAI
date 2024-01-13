@@ -1472,6 +1472,9 @@
         }
       }
     },
+    "Smart Vision:" : {
+
+    },
     "Something went wrong..." : {
       "localizations" : {
         "it" : {
@@ -1558,6 +1561,9 @@
           }
         }
       }
+    },
+    "Takes a screenshot." : {
+
     },
     "Text" : {
       "localizations" : {
