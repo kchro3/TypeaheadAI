@@ -476,7 +476,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func appendUserImage(_ data: Data, caption: String, ocrText: String, appContext: AppContext?) {
+    func appendUserImage(_ data: Data, appContext: AppContext?) {
         if let lastMessage = messages.last {
             messages.append(
                 Message(
@@ -485,9 +485,9 @@ class ModalManager: ObservableObject {
                     inReplyToId: lastMessage.id,
                     createdAt: Date(),
                     rootCreatedAt: lastMessage.rootCreatedAt,
-                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
-                    isCurrentUser: false,
-                    isHidden: true,
+                    text: "<image placeholder>",
+                    isCurrentUser: true,
+                    isHidden: false,
                     appContext: appContext,
                     messageType: .data(data: data)
                 )
@@ -502,9 +502,9 @@ class ModalManager: ObservableObject {
                     inReplyToId: nil,
                     createdAt: date,
                     rootCreatedAt: date,
-                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
-                    isCurrentUser: false,
-                    isHidden: true,
+                    text: "<image placeholder>",
+                    isCurrentUser: true,
+                    isHidden: false,
                     appContext: appContext,
                     messageType: .data(data: data)
                 )

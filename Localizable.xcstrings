@@ -64,6 +64,9 @@
         }
       }
     },
+    "<Error: Images are not saved to history>" : {
+
+    },
     "Aborts any streaming results or autopilot tasks." : {
       "localizations" : {
         "it" : {
@@ -614,6 +617,9 @@
         }
       }
     },
+    "Failed to decode image" : {
+
+    },
     "Failed to register" : {
       "localizations" : {
         "it" : {
@@ -986,6 +992,9 @@
           }
         }
       }
+    },
+    "Not implemented yet" : {
+
     },
     "Offline Mode" : {
       "extractionState" : "manual",
