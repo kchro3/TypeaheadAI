@@ -119,8 +119,9 @@ extension Message {
         entry.quickActionId = self.quickActionId
 
         switch self.messageType {
-        case .data(_):
-            if let data = try? JSONEncoder().encode(MessageType.string), let serialized = String(data: data, encoding: .utf8) {
+        case .image(.b64Json(_)):
+            if let data = try? JSONEncoder().encode(MessageType.string),
+               let serialized = String(data: data, encoding: .utf8) {
                 entry.serializedMessageType = serialized
                 entry.text = NSLocalizedString("<Error: Images are not saved to history>", comment: "")
             }

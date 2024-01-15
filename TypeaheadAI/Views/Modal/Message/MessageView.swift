@@ -148,6 +148,7 @@ struct MessageView: View {
                         .textSelection(.enabled)
                 }
             }
+
         case .markdown(let data):
             ChatBubble(
                 direction: .right,
@@ -217,16 +218,21 @@ struct MessageView: View {
                 }
             }
 
-        case .data(let data):
-            ChatBubble(direction: .right) {
-                if let imageData = try? self.decodeImage(data) {
+        case .image(let data):
+            ChatBubble(
+                direction: .right
+            ) {
+                if let imageData = try? self.decodeBase64Image(data.image) {
                     Image(nsImage: imageData)
                         .resizable()
                         .scaledToFit()
+                        .accessibilityLabel(Text("Screenshot"))
+                        .accessibilityHint(Text("Ask Typeahead about this screenshot. Currently, this workflow does not support autopilot."))
                 } else {
-                    Text("Failed to decode image")
+                    Text("Failed to render image")
                 }
             }
+
         default:
             Text("Not implemented yet")
         }

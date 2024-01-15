@@ -17,40 +17,44 @@ actor SpecialVisionActor: CanGetUIElements {
 
     private let appContextManager: AppContextManager
     private let modalManager: ModalManager
+    private let speaker: Speaker
 
     init(
         appContextManager: AppContextManager,
-        modalManager: ModalManager
+        modalManager: ModalManager,
+        speaker: Speaker
     ) {
         self.appContextManager = appContextManager
         self.modalManager = modalManager
+        self.speaker = speaker
     }
 
-    @MainActor
     func specialVision() async throws {
         let appInfo = try await appContextManager.getActiveAppInfo()
-        let (tree, elementMap) = getUIElements(appContext: appInfo.appContext)
+        let (tree, _) = getUIElements(appContext: appInfo.appContext)
 
         guard let tree = tree, let point = tree.root.point, let size = tree.root.size else {
             return
         }
 
-        if let image = await captureScreen(point: point, size: size) {
+        if let image = captureScreen(point: point, size: size) {
             // Clear the current state
-            self.modalManager.forceRefresh()
-            self.modalManager.showModal()
+            await self.modalManager.forceRefresh()
+            await self.modalManager.showModal()
 
             // Add user image
-            modalManager.appendUserImage(
+            await modalManager.appendUserImage(
                 image,
                 appContext: appInfo.appContext
             )
         } else {
             print("failed to get tiff representation")
         }
+
+        await NSApp.activate(ignoringOtherApps: true)
     }
 
-    func captureScreen(point: CGPoint, size: CGSize) -> Data? {
+    func captureScreen(point: CGPoint, size: CGSize) -> ImageData? {
         let rect = CGRect(x: point.x, y: point.y, width: size.width, height: size.height)
 
         guard let screenshot = CGWindowListCreateImage(
@@ -60,6 +64,8 @@ actor SpecialVisionActor: CanGetUIElements {
         }
 
         let imageSize = CGSize(width: screenshot.width, height: screenshot.height)
-        return NSImage(cgImage: screenshot, size: imageSize).tiffRepresentation
+        let nsImage = NSImage(cgImage: screenshot, size: imageSize)
+        return nsImage.downscale(toWidth: 1024)
+            .b64JPEG(compressionFactor: 0.75)
     }
 }

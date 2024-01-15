@@ -220,7 +220,7 @@ struct MenuView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt)
         }
 
-        let modalManager = ModalManager(context: context)
+        let modalManager = ModalManager(context: context, speaker: Speaker())
         let updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
 
         return MenuView(

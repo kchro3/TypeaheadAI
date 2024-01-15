@@ -164,7 +164,7 @@ struct OnboardingView: View {
     let context = container.viewContext
     return OnboardingView(
         supabaseManager: SupabaseManager(),
-        modalManager: ModalManager(context: context),
+        modalManager: ModalManager(context: context, speaker: Speaker()),
         intentManager: IntentManager(context: context, backgroundContext: context)
     )
 }

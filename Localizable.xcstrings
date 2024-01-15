@@ -177,6 +177,9 @@
         }
       }
     },
+    "Ask Typeahead about this screenshot. Currently, this workflow does not support autopilot." : {
+
+    },
     "Autopilot Mode" : {
       "localizations" : {
         "it" : {
@@ -617,9 +620,6 @@
         }
       }
     },
-    "Failed to decode image" : {
-
-    },
     "Failed to register" : {
       "localizations" : {
         "it" : {
@@ -629,6 +629,9 @@
           }
         }
       }
+    },
+    "Failed to render image" : {
+
     },
     "Failed to sign-in" : {
       "localizations" : {
@@ -1371,6 +1374,9 @@
         }
       }
     },
+    "Screenshot" : {
+
+    },
     "Search messages..." : {
       "localizations" : {
         "it" : {
@@ -1665,6 +1671,9 @@
           }
         }
       }
+    },
+    "Thinking..." : {
+
     },
     "This is still a work in progress. Need to use a more advanced sampling method, since it's currently just doing a greedy search. Will integrate with HuggingFace in a future version, but for now, try downloading this to your model directory:" : {
       "localizations" : {
