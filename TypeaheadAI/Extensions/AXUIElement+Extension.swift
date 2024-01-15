@@ -197,7 +197,12 @@ extension AXUIElement {
     }
 
     func getElementInFocus() -> AXUIElement? {
-        return self.subelement(forAttribute: kAXFocusedUIElementAttribute)
+        if let focusedElement = self.subelement(forAttribute: kAXFocusedUIElementAttribute) {
+            return focusedElement.getElementInFocus() ?? focusedElement
+        } else {
+        }
+
+        return nil
     }
 
     /// NOTE: if isReflexive is true, then the condition can be true of the caller.

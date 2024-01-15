@@ -124,6 +124,9 @@
 		2BDDB9952B2834B100D52BF0 /* FunctionManager+OpenURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB9942B2834B100D52BF0 /* FunctionManager+OpenURL.swift */; };
 		2BDDB9972B28352800D52BF0 /* FunctionManager+PerformUIAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */; };
 		2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE0EC212AA0956C00E47C52 /* ModalView.swift */; };
+		2BE5E00A2B5204AB00E34AD2 /* SpecialVisionActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE5E0092B5204AB00E34AD2 /* SpecialVisionActor.swift */; };
+		2BE5E00E2B53747800E34AD2 /* NSImage+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE5E00D2B53747800E34AD2 /* NSImage+Extension.swift */; };
+		2BE5E0102B537E3900E34AD2 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE5E00F2B537E3900E34AD2 /* Speaker.swift */; };
 		2BE7BB882B258B4C00164F88 /* CanGetUIElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */; };
 		2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */; };
 		2BE7BB8F2B258C7900164F88 /* UIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE7BB8E2B258C7900164F88 /* UIElement.swift */; };
@@ -268,6 +271,9 @@
 		2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+PerformUIAction.swift"; sourceTree = "<group>"; };
 		2BE0EC212AA0956C00E47C52 /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
 		2BE0EC242AA17DB600E47C52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2BE5E0092B5204AB00E34AD2 /* SpecialVisionActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialVisionActor.swift; sourceTree = "<group>"; };
+		2BE5E00D2B53747800E34AD2 /* NSImage+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+Extension.swift"; sourceTree = "<group>"; };
+		2BE5E00F2B537E3900E34AD2 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanGetUIElements.swift; sourceTree = "<group>"; };
 		2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AXUIElement+Extension.swift"; sourceTree = "<group>"; };
 		2BE7BB8E2B258C7900164F88 /* UIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElement.swift; sourceTree = "<group>"; };
@@ -337,6 +343,7 @@
 				2B37922E2AB8371A008D812F /* SpecialPasteActor.swift */,
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
 				2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */,
+				2BE5E0092B5204AB00E34AD2 /* SpecialVisionActor.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -437,6 +444,7 @@
 				2B9A897A2B3BD9EA00041856 /* AXOpenPanelVisitor.swift */,
 				2B9A89842B3CDC9700041856 /* AXSavePanelVisitor.swift */,
 				2B9A898A2B4122DC00041856 /* UIElementVisitor.swift */,
+				2BE5E00F2B537E3900E34AD2 /* Speaker.swift */,
 			);
 			path = Accessibility;
 			sourceTree = "<group>";
@@ -608,6 +616,7 @@
 				2BE7BB8C2B258C4400164F88 /* AXUIElement+Extension.swift */,
 				2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */,
 				2B9A89922B44D70D00041856 /* Task+Extension.swift */,
+				2BE5E00D2B53747800E34AD2 /* NSImage+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -810,6 +819,7 @@
 				2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */,
 				2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */,
 				2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */,
+				2BE5E00A2B5204AB00E34AD2 /* SpecialVisionActor.swift in Sources */,
 				2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
@@ -823,6 +833,7 @@
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2B9A89872B3CE1D300041856 /* CanFocusOnElement.swift in Sources */,
 				2B7D35862B01B16A00E85AEF /* OutroOnboardingView.swift in Sources */,
+				2BE5E0102B537E3900E34AD2 /* Speaker.swift in Sources */,
 				2BAA97912B0366C400EC6A63 /* OnboardingWindowManager.swift in Sources */,
 				2BAFDB662AF58E0B009C8370 /* ConversationView.swift in Sources */,
 				2BAA97892B02DF6E00EC6A63 /* QuickActionExplanationOnboardingView.swift in Sources */,
@@ -868,6 +879,7 @@
 				2BAC14762AF61DD000B33E13 /* WebView.swift in Sources */,
 				2B2EF1522AC40CB500EF2BD4 /* MessagePendingView.swift in Sources */,
 				2BA7F0A92A9ABBE2003D38BA /* ClientManager.swift in Sources */,
+				2BE5E00E2B53747800E34AD2 /* NSImage+Extension.swift in Sources */,
 				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
 				2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */,
 				2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */,

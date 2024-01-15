@@ -97,6 +97,6 @@ struct ModalFooterView: View {
 #Preview {
     let context = PersistenceController.preview.container.viewContext
     return ModalFooterView(
-        modalManager: ModalManager(context: context)
+        modalManager: ModalManager(context: context, speaker: Speaker())
     )
 }

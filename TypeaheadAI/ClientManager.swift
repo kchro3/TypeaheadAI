@@ -271,7 +271,7 @@ class ClientManager: CanGetUIElements {
             userBio: UserDefaults.standard.string(forKey: "bio"),
             userLang: Locale.preferredLanguages.first,
             copiedText: copiedText,
-            messages: self.sanitizeMessages(messages),
+            messages: messages,
             history: history,
             appInfo: appInfo,
             timeout: timeout,
@@ -412,8 +412,12 @@ class ClientManager: CanGetUIElements {
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-                guard let (data, resp) = try? await self.session.bytes(for: urlRequest) else {
-                    let error = ClientManagerError.serverError("Couldn't connect to server... Retry or use in offline mode.")
+                let data: URLSession.AsyncBytes
+                let resp: URLResponse
+                do {
+                    (data, resp) = try await self.session.bytes(for: urlRequest)
+                } catch {
+                    let error = ClientManagerError.serverError(error.localizedDescription)
                     continuation.finish(throwing: error)
                     return
                 }

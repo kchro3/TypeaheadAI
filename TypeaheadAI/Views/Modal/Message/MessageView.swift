@@ -71,6 +71,7 @@ struct MessageView: View {
             Divider()
         } else if message.isCurrentUser {
             userMessage
+                .padding(.leading, 100)
         } else {
             aiMessage
         }
@@ -78,16 +79,16 @@ struct MessageView: View {
 
     @ViewBuilder
     var userMessage: some View {
-        ChatBubble(
-            direction: .right,
-            onConfigure: onConfigure,
-            onEdit: (onEditAppear != nil) ? {
-                isEditing.toggle()
-                onEditAppear?()
-            } : nil
-        ) {
-            switch message.messageType {
-            case .string, .function_call, .tool_call:
+        switch message.messageType {
+        case .string:
+            ChatBubble(
+                direction: .right,
+                onConfigure: onConfigure,
+                onEdit: (onEditAppear != nil) ? {
+                    isEditing.toggle()
+                    onEditAppear?()
+                } : nil
+            ) {
                 if isEditing {
                     CustomTextField(
                         text: $localContent,
@@ -146,7 +147,17 @@ struct MessageView: View {
                         .background(Color.accentColor.opacity(0.8))
                         .textSelection(.enabled)
                 }
-            case .markdown(let data):
+            }
+
+        case .markdown(let data):
+            ChatBubble(
+                direction: .right,
+                onConfigure: onConfigure,
+                onEdit: (onEditAppear != nil) ? {
+                    isEditing.toggle()
+                    onEditAppear?()
+                } : nil
+            ) {
                 if isEditing {
                     CustomTextField(
                         text: $localContent,
@@ -205,27 +216,26 @@ struct MessageView: View {
                         .background(Color.accentColor.opacity(0.8))
                         .textSelection(.enabled)
                 }
-            case .html(let data):
-                WebView(html: data, dynamicHeight: $webViewHeight)
-                    .frame(width: 400, height: webViewHeight)
-                    .background(Color.accentColor.opacity(0.8))
-            case .image(let data):
+            }
+
+        case .image(let data):
+            ChatBubble(
+                direction: .right
+            ) {
                 if let imageData = try? self.decodeBase64Image(data.image) {
                     Image(nsImage: imageData)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 512, height: 512)
-                }
-            case .data(let data):
-                if let imageData = try? self.decodeImage(data) {
-                    Image(nsImage: imageData)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 512, height: 512)
+                        .accessibilityLabel(Text("Screenshot"))
+                        .accessibilityHint(Text("Ask Typeahead about this screenshot. Currently, this workflow does not support autopilot."))
+                } else {
+                    Text("Failed to render image")
                 }
             }
+
+        default:
+            Text("Not implemented yet")
         }
-        .padding(.leading, 100)
     }
 
     @ViewBuilder

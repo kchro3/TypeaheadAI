@@ -118,9 +118,18 @@ extension Message {
         entry.isHidden = self.isHidden
         entry.quickActionId = self.quickActionId
 
-        if let data = try? JSONEncoder().encode(self.messageType),
-           let serialized = String(data: data, encoding: .utf8) {
-            entry.serializedMessageType = serialized
+        switch self.messageType {
+        case .image(.b64Json(_)):
+            if let data = try? JSONEncoder().encode(MessageType.string),
+               let serialized = String(data: data, encoding: .utf8) {
+                entry.serializedMessageType = serialized
+                entry.text = NSLocalizedString("<Error: Images are not saved to history>", comment: "")
+            }
+        default:
+            if let data = try? JSONEncoder().encode(self.messageType),
+               let serialized = String(data: data, encoding: .utf8) {
+                entry.serializedMessageType = serialized
+            }
         }
 
         if let appContext = self.appContext,

@@ -26,6 +26,7 @@ final class AppState: ObservableObject {
 
     // Managers (alphabetize)
     private let appContextManager: AppContextManager = AppContextManager()
+    private let speaker: Speaker = Speaker()
     var clientManager: ClientManager
     var conversationManager: ConversationManager
     var functionManager = FunctionManager()
@@ -43,15 +44,19 @@ final class AppState: ObservableObject {
     private var specialCopyActor: SpecialCopyActor? = nil
     private var specialOpenActor: SpecialOpenActor? = nil
     private var specialRecordActor: SpecialRecordActor? = nil
+    private var specialVisionActor: SpecialVisionActor? = nil
 
-    init(context: NSManagedObjectContext, backgroundContext: NSManagedObjectContext) {
+    init(
+        context: NSManagedObjectContext,
+        backgroundContext: NSManagedObjectContext
+    ) {
 
         // Initialize managers (alphabetize)
         self.clientManager = ClientManager()
         self.conversationManager = ConversationManager(context: context)
         self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
         self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
-        self.modalManager = ModalManager(context: context)
+        self.modalManager = ModalManager(context: context, speaker: speaker)
         self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
         self.onboardingWindowManager = OnboardingWindowManager(context: context)
         self.settingsManager = SettingsManager(context: context)
@@ -81,6 +86,11 @@ final class AppState: ObservableObject {
         self.specialRecordActor = SpecialRecordActor(
             appContextManager: appContextManager,
             modalManager: modalManager
+        )
+        self.specialVisionActor = SpecialVisionActor(
+            appContextManager: appContextManager,
+            modalManager: modalManager,
+            speaker: speaker
         )
 
         // Set lazy params
@@ -140,6 +150,17 @@ final class AppState: ObservableObject {
             Task {
                 do {
                     try await self.specialRecordActor?.specialRecord()
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .specialVision) { [self] in
+            Task {
+                do {
+                    try await self.specialVisionActor?.specialVision()
                 } catch {
                     self.logger.error("\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)

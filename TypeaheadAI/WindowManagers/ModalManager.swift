@@ -6,7 +6,6 @@
 //
 
 import AppKit
-import AVFoundation
 import SwiftUI
 import Foundation
 import MarkdownUI
@@ -31,7 +30,6 @@ class ModalManager: ObservableObject {
     @AppStorage("toastY") var toastY: Double?
     @AppStorage("toastWidth") var toastWidth: Double = 400.0
     @AppStorage("toastHeight") var toastHeight: Double = 400.0
-    @AppStorage("isNarrateEnabled") var isNarrateEnabled: Bool = false
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -39,15 +37,16 @@ class ModalManager: ObservableObject {
     )
 
     private let maxIntents = 9
-    private let speaker = AVSpeechSynthesizer()
+    private let speaker: Speaker
 
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext, speaker: Speaker) {
         self.context = context
         self.messages = []
         self.userIntents = nil
         self.triggerFocus = false
         self.isVisible = false
         self.isPending = false
+        self.speaker = speaker
     }
 
     // Alphabetize
@@ -78,7 +77,7 @@ class ModalManager: ObservableObject {
 
     @MainActor
     func cancelTasks() {
-        speaker.stopSpeaking(at: .immediate)
+        speaker.cancel()
         currentTask?.cancel()
         currentTask = nil
         isPending = false
@@ -252,7 +251,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
-        narrate(text: responseError)
+        speaker.narrate(responseError)
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden {
             messages[idx].responseError = responseError
@@ -335,6 +334,14 @@ class ModalManager: ObservableObject {
         }
 
         messages[idx].text += text
+        if text.contains("\n") {
+            let chunks = messages[idx].text.split(separator: "\n", omittingEmptySubsequences: true)
+            if chunks.count >= 2 {
+                speaker.narrate(String(chunks[chunks.count - 2]))
+            } else {
+                speaker.narrate(String(chunks[0]))
+            }
+        }
     }
 
     /// Append plan to the AI response. Creates a new message if there is nothing to append to.
@@ -476,7 +483,7 @@ class ModalManager: ObservableObject {
     }
 
     @MainActor
-    func appendUserImage(_ data: Data, caption: String, ocrText: String, appContext: AppContext?) {
+    func appendUserImage(_ data: ImageData, appContext: AppContext?) {
         if let lastMessage = messages.last {
             messages.append(
                 Message(
@@ -485,11 +492,11 @@ class ModalManager: ObservableObject {
                     inReplyToId: lastMessage.id,
                     createdAt: Date(),
                     rootCreatedAt: lastMessage.rootCreatedAt,
-                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
-                    isCurrentUser: false,
-                    isHidden: true,
+                    text: "<image placeholder>",
+                    isCurrentUser: true,
+                    isHidden: false,
                     appContext: appContext,
-                    messageType: .data(data: data)
+                    messageType: .image(data: data)
                 )
             )
         } else {
@@ -502,11 +509,11 @@ class ModalManager: ObservableObject {
                     inReplyToId: nil,
                     createdAt: date,
                     rootCreatedAt: date,
-                    text: "<image placeholder> caption generated: \(caption); OCR text: \(ocrText)",
-                    isCurrentUser: false,
-                    isHidden: true,
+                    text: "<image placeholder>",
+                    isCurrentUser: true,
+                    isHidden: false,
                     appContext: appContext,
-                    messageType: .data(data: data)
+                    messageType: .image(data: data)
                 )
             )
         }
@@ -515,7 +522,7 @@ class ModalManager: ObservableObject {
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false, appContext: AppContext?) {
-        speaker.stopSpeaking(at: .immediate)
+        speaker.cancel()
 
         isPending = true
         userIntents = nil
@@ -560,7 +567,7 @@ class ModalManager: ObservableObject {
     /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
     func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
-        speaker.stopSpeaking(at: .immediate)
+        speaker.cancel()
 
         var quickAction: QuickAction? = nil
         if isQuickAction {
@@ -608,7 +615,7 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        narrate(text: "Thinking...")
+        speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
 
         currentTask?.cancel()
         currentTask = Task {
@@ -665,7 +672,11 @@ class ModalManager: ObservableObject {
             streamHandler: self.appendText) {
 
             if bufferedPayload.mode == .text, let text = bufferedPayload.text {
-                narrate(text: text)
+
+                if let lastChunk = text.split(separator: "\n", omittingEmptySubsequences: true).last {
+                    speaker.narrate(String(lastChunk))
+                }
+
             } else if bufferedPayload.mode == .function {
                 try Task.checkCancellation()
                 // Handle Function payloads
@@ -678,7 +689,7 @@ class ModalManager: ObservableObject {
                 let args = try functionCall.parseArgs()
                 await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
 
-                narrate(text: args.humanReadable)
+                speaker.narrate(args.humanReadable)
                 try await Task.safeSleep(for: .seconds(2))  // Add slight delay so that user can see the next action
 
                 await self.closeModal()
@@ -717,7 +728,7 @@ class ModalManager: ObservableObject {
             }
 
             isPending = true
-            narrate(text: "Thinking...")
+            speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
             userIntents = nil
 
             currentTask?.cancel()
@@ -779,7 +790,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func replyToUserMessage() async throws {
         isPending = true
-        narrate(text: "Thinking...")
+        speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
         userIntents = nil
 
         currentTask?.cancel()
@@ -827,7 +838,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func proposeQuickAction() async throws {
         isPending = true
-        narrate(text: "Thinking...")
+        speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
         userIntents = nil
 
         do {
@@ -839,7 +850,7 @@ class ModalManager: ObservableObject {
                 return
             }
 
-            narrate(text: text)
+            speaker.narrate(text)
         } catch {
             self.setError("Could not generate a plan", appContext: nil)
         }
@@ -880,14 +891,6 @@ class ModalManager: ObservableObject {
     func closeModal() {
         toastWindow?.close()
         isVisible = false
-    }
-
-    func narrate(text: String) {
-        if isNarrateEnabled {
-            let utterance = AVSpeechUtterance(string: NSLocalizedString(text, comment: ""))
-            utterance.prefersAssistiveTechnologySettings = true
-            speaker.speak(utterance)
-        }
     }
 
     @MainActor

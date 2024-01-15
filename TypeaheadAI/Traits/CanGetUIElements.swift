@@ -23,12 +23,7 @@ extension CanGetUIElements {
         if let appContext = appContext, let pid = appContext.pid {
             element = AXUIElementCreateApplication(pid)
 
-            // Narrow down to the first (top-most) window
-            if let windowElement = element?.children().first(where: {
-                $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow" &&
-                !$0.children().isEmpty
-            }), let bundleIdentifier = appContext.bundleIdentifier,
-               !excludedBundleIds.contains(bundleIdentifier) {
+            if let windowElement = getFirstTopMostWindow(element: element, appContext: appContext) {
                 element = windowElement
             }
         } else {
@@ -39,6 +34,21 @@ extension CanGetUIElements {
             return UIElementVisitor.visitIterative(element: element)
         } else {
             return (nil, ElementMap())
+        }
+    }
+
+    private func getFirstTopMostWindow(
+        element: AXUIElement?,
+        appContext: AppContext
+    ) -> AXUIElement? {
+        if let window = element?.children().first(where: {
+            $0.stringValue(forAttribute: kAXRoleAttribute) == "AXWindow" &&
+            !$0.children().isEmpty
+        }), let bundleIdentifier = appContext.bundleIdentifier,
+           !excludedBundleIds.contains(bundleIdentifier) {
+            return window
+        } else {
+            return nil
         }
     }
 }
