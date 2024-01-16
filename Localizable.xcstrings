@@ -154,6 +154,23 @@
         }
       }
     },
+    "Account" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compte"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account"
+          }
+        }
+      }
+    },
     "Account Settings" : {
       "localizations" : {
         "fr" : {
@@ -1620,23 +1637,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Narrazione"
-          }
-        }
-      }
-    },
-    "Narration Settings" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paramètres de narration"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impostazioni della narrazione"
           }
         }
       }

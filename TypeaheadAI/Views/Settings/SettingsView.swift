@@ -10,11 +10,11 @@ import SwiftUI
 enum Tab: String, CaseIterable, Identifiable {
     case general = "General"
     case profile = "Profile"
-    case narration = "Narration Settings"
+    case narration = "Narration"
     case quickActions = "Quick Actions"
     case history = "History"
     case incognito = "Offline Mode"
-    case account = "Account Settings"
+    case account = "Account"
     case feedback = "Feedback"
 
     var id: String { self.rawValue }
@@ -35,24 +35,18 @@ struct SettingsView: View {
     @AppStorage("settingsTab") var settingsTab: String = Tab.general.rawValue
 
     var body: some View {
-        HStack {
-            VStack {
+        NavigationSplitView {
+            List(selection: $settingsTab) {
                 ForEach(Tab.allCases, id: \.self) { tab in
                     ItemRow(tab: tab, settingsTab: $settingsTab)
+                        .tag(tab.rawValue)
                 }
-
-                Spacer()
             }
-            .frame(width: 150)
-            .padding(10)
+            .listStyle(SidebarListStyle())
             .padding(.top, 25)
-
+        } detail: {
             viewForTab(settingsTab)
-                .frame(minWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
-                .padding(10)
-                .background(Color(NSColor.windowBackgroundColor))
         }
-        .background(VisualEffect().ignoresSafeArea())
     }
 
     private func viewForTab(_ tab: String) -> some View {

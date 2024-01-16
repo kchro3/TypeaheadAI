@@ -142,16 +142,6 @@ struct IncognitoModeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
-        .onAppear {
-            Task {
-                do {
-                    try await self.llamaModelManager.load()
-                } catch {
-                    showAlert = true
-                    print(error.localizedDescription)
-                }
-            }
-        }
     }
 }
 

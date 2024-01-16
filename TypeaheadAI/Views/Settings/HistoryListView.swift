@@ -14,6 +14,10 @@ enum HistoryTab: String, CaseIterable, Identifiable {
     case intents = "Intents"
 
     var id: String { self.rawValue }
+
+    var localized: String {
+        NSLocalizedString(self.rawValue, comment: "")
+    }
 }
 
 struct HistoryListView: View {
@@ -57,19 +61,19 @@ struct HistoryListView: View {
                 messagesTable
                     .tabItem {
                         Image(systemName: "1.square.fill")
-                        Text(HistoryTab.messages.id)
+                        Text(HistoryTab.messages.localized)
                     }
 
                 smartCopyPastesTable
                     .tabItem {
                         Image(systemName: "2.square.fill")
-                        Text(HistoryTab.smartCopyPastes.id)
+                        Text(HistoryTab.smartCopyPastes.localized)
                     }
 
                 intentsTable
                     .tabItem {
                         Image(systemName: "3.square.fill")
-                        Text(HistoryTab.intents.id)
+                        Text(HistoryTab.intents.localized)
                     }
             }
         }
