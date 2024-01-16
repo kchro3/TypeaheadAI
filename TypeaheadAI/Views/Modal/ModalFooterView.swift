@@ -30,11 +30,11 @@ struct ModalFooterView: View {
                     text: $text,
                     placeholderText: (
                         modalManager.messages.isEmpty ?
-                        "Ask me anything!" :
+                        NSLocalizedString("Ask me anything!", comment: "") :
                             (
                                 modalManager.userIntents == nil ?
-                                "Ask a follow-up question..." :
-                                    "What do you want to do with this?"
+                                NSLocalizedString("Ask a follow-up question...", comment: "") :
+                                    NSLocalizedString("What do you want to do with this?", comment: "")
                             )
                     ),
                     autoCompleteSuggestions: self.modalManager.promptManager?.getPrompts() ?? []

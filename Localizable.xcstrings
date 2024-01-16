@@ -122,22 +122,6 @@
         }
       }
     },
-    "^[%lld smart-cut](inflect: true)" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "^[%lld découpage intelligent](inflect: true)"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "^[%lld smart-cut](inflect: true)"
-          }
-        }
-      }
-    },
     "^[%lld smart-paste](inflect: true)" : {
       "localizations" : {
         "fr" : {
@@ -166,22 +150,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "<Errore: Le immagini non sono salvate nella cronologia>"
-          }
-        }
-      }
-    },
-    "Aborts any streaming results or autopilot tasks." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interrompt tout résultat de streaming ou tâches d'autopilotage."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interrompe qualsiasi risultato di streaming o compiti in modalità pilota automatico."
           }
         }
       }
@@ -346,6 +314,38 @@
         }
       }
     },
+    "Ask a follow-up question..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posez une question complémentaire..."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fai una domanda di approfondimento..."
+          }
+        }
+      }
+    },
+    "Ask me anything!" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandez-moi n'importe quoi !"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiedimi qualsiasi cosa!"
+          }
+        }
+      }
+    },
     "Ask Typeahead about this screenshot. Currently, this workflow does not support autopilot." : {
       "localizations" : {
         "fr" : {
@@ -475,18 +475,18 @@
         }
       }
     },
-    "Cancel Tasks:" : {
+    "Cancel Tasks: Aborts any streaming results or autopilot tasks" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Annuler les tâches :"
+            "value" : "Annuler les tâches : Interrompt tout résultat de streaming ou tâches d'autopilotage"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Annulla Compiti:"
+            "value" : "Annulla Compiti: Interrompe qualsiasi risultato di streaming o compiti in modalità pilota automatico"
           }
         }
       }
@@ -1446,6 +1446,23 @@
         }
       }
     },
+    "Intents" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intentions"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intenzioni"
+          }
+        }
+      }
+    },
     "Keep message history" : {
       "localizations" : {
         "fr" : {
@@ -1542,6 +1559,23 @@
         }
       }
     },
+    "Messages" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messages"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messaggi"
+          }
+        }
+      }
+    },
     "N" : {
       "localizations" : {
         "fr" : {
@@ -1590,6 +1624,23 @@
         }
       }
     },
+    "Narration Settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paramètres de narration"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni della narrazione"
+          }
+        }
+      }
+    },
     "Navigational Shortcuts" : {
       "localizations" : {
         "fr" : {
@@ -1622,18 +1673,18 @@
         }
       }
     },
-    "New Chat:" : {
+    "New Chat: Opens a new chat window" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nouveau Chat :"
+            "value" : "Nouveau Chat : Ouvre une nouvelle fenêtre de chat"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apri Chat:"
+            "value" : "Apri Chat: Apre una nuova finestra di chat"
           }
         }
       }
@@ -1800,18 +1851,18 @@
         }
       }
     },
-    "Open Chat:" : {
+    "Open Chat: Opens an existing chat window" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvrir le Chat :"
+            "value" : "Ouvrir le Chat : Ouvre une fenêtre de chat existante"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apri la chat:"
+            "value" : "Apri la chat: Apre una finestra di chat esistente"
           }
         }
       }
@@ -1845,38 +1896,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apri Preferenze di Sistema"
-          }
-        }
-      }
-    },
-    "Opens a new chat window" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre une nouvelle fenêtre de chat"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apre una nuova finestra di chat"
-          }
-        }
-      }
-    },
-    "Opens an existing chat window" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvre une fenêtre de chat existante"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apre una finestra di chat esistente"
           }
         }
       }
@@ -1925,22 +1944,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Testo incollato"
-          }
-        }
-      }
-    },
-    "Pastes the most recent Typeahead response." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Colle la réponse Typeahead la plus récente."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Incolla la risposta più recente di Typeahead."
           }
         }
       }
@@ -2218,22 +2221,6 @@
         }
       }
     },
-    "Responds to what you've selected." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Répond à ce que vous avez sélectionné."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Risponde a ciò che hai selezionato."
-          }
-        }
-      }
-    },
     "Retry" : {
       "localizations" : {
         "fr" : {
@@ -2461,50 +2448,67 @@
         }
       }
     },
-    "Smart Copy:" : {
+    "Smart Copy-Pastes" : {
+      "extractionState" : "manual",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Copie Intelligente:"
+            "value" : "Copier-Coller intelligents"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Incolla intelligente:"
+            "value" : "Copia-incolla intelligenti"
           }
         }
       }
     },
-    "Smart Paste:" : {
+    "Smart-Copy: Responds to what you've selected" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Collage Intelligent :"
+            "value" : "Copie Intelligente : Répond à ce que vous avez sélectionné"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Incolla intelligente:"
+            "value" : "Incolla intelligente: Risponde a ciò che hai selezionato"
           }
         }
       }
     },
-    "Smart Vision:" : {
+    "Smart-Paste: Pastes the most recent Typeahead response" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vision Intelligente :"
+            "value" : "Collage Intelligent : Colle la réponse Typeahead la plus récente"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Visione Intelligente:"
+            "value" : "Incolla intelligente: Incolla la risposta più recente di Typeahead"
+          }
+        }
+      }
+    },
+    "Smart-Vision: Takes a screenshot" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vision Intelligente : Prend une capture d'écran"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visione Intelligente: Effettua uno screenshot"
           }
         }
       }
@@ -2704,22 +2708,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voce del sistema"
-          }
-        }
-      }
-    },
-    "Takes a screenshot." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prend une capture d'écran."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Effettua uno screenshot."
           }
         }
       }
@@ -3025,6 +3013,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Benvenuto a Typeahead"
+          }
+        }
+      }
+    },
+    "What do you want to do with this?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que voulez-vous faire avec cela ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cosa vuoi fare con questo?"
           }
         }
       }

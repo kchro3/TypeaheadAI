@@ -29,7 +29,6 @@ struct HistoryListView: View {
 
     @AppStorage("numSmartCopies") var numSmartCopies: Int?
     @AppStorage("numSmartPastes") var numSmartPastes: Int?
-    @AppStorage("numSmartCuts") var numSmartCuts: Int?
     @AppStorage("historyTab") var historyTab: String = HistoryTab.messages.id
     @AppStorage("isHistoryEnabled") private var isHistoryEnabled: Bool = true
 
@@ -43,7 +42,6 @@ struct HistoryListView: View {
 
             HStack {
                 Text("^[\(numSmartCopies ?? 0) smart-copy](inflect: true)")
-                Text("^[\(numSmartCuts ?? 0) smart-cut](inflect: true)")
                 Text("^[\(numSmartPastes ?? 0) smart-paste](inflect: true)")
 
                 Spacer()
@@ -259,7 +257,6 @@ struct HistoryListView: View {
         }
 
         numSmartCopies = 0
-        numSmartCuts = 0
         numSmartPastes = 0
     }
 

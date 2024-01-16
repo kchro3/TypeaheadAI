@@ -29,26 +29,25 @@ struct GeneralSettingsView: View {
                 .padding(.bottom, 5)
 
             Form {
-                VStack(alignment: .trailing) {
-                    HStack {
-                        KeyboardShortcuts.Recorder(NSLocalizedString("Smart Copy:", comment: ""), name: .specialCopy)
-                        Text("Responds to what you've selected.")
-                            .frame(width: 325, alignment: .leading)
+                VStack(alignment: .leading) {
+                    KeyboardShortcuts.Recorder(for: .specialCopy) {
+                        Text("Smart-Copy: Responds to what you've selected")
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    HStack {
-                        KeyboardShortcuts.Recorder(NSLocalizedString("Smart Paste:", comment: ""), name: .specialPaste)
-                        Text("Pastes the most recent Typeahead response.")
-                            .frame(width: 325, alignment: .leading)
+
+                    KeyboardShortcuts.Recorder(for: .specialPaste) {
+                        Text("Smart-Paste: Pastes the most recent Typeahead response")
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    HStack {
-                        KeyboardShortcuts.Recorder(NSLocalizedString("Smart Vision:", comment: ""), name: .specialVision)
-                        Text("Takes a screenshot.")
-                            .frame(width: 325, alignment: .leading)
+
+                    KeyboardShortcuts.Recorder(for: .specialVision) {
+                        Text("Smart-Vision: Takes a screenshot")
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    HStack {
-                        KeyboardShortcuts.Recorder(NSLocalizedString("Cancel Tasks:", comment: ""), name: .cancelTasks)
-                        Text("Aborts any streaming results or autopilot tasks.")
-                            .frame(width: 325, alignment: .leading)
+
+                    KeyboardShortcuts.Recorder(for: .cancelTasks) {
+                        Text("Cancel Tasks: Aborts any streaming results or autopilot tasks")
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }
@@ -61,15 +60,14 @@ struct GeneralSettingsView: View {
                 .padding(.bottom, 5)
 
             Form {
-                HStack {
-                    KeyboardShortcuts.Recorder(NSLocalizedString("New Chat:", comment: ""), name: .chatNew)
-                    Text("Opens a new chat window")
-                        .frame(width: 325, alignment: .leading)
+                KeyboardShortcuts.Recorder(for: .chatNew) {
+                    Text("New Chat: Opens a new chat window")
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                HStack {
-                    KeyboardShortcuts.Recorder(NSLocalizedString("Open Chat:", comment: ""), name: .chatOpen)
-                    Text("Opens an existing chat window")
-                        .frame(width: 325, alignment: .leading)
+
+                KeyboardShortcuts.Recorder(for: .chatNew) {
+                    Text("Open Chat: Opens an existing chat window")
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding(.horizontal, 10)
