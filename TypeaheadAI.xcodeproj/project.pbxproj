@@ -27,6 +27,7 @@
 		2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */; };
 		2B11FCF22B114C3F00325F38 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF12B114C3F00325F38 /* Message.swift */; };
 		2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF32B196E1500325F38 /* VersionManager.swift */; };
+		2B16093F2B5649210057FC32 /* NarrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B16093E2B5649210057FC32 /* NarrationView.swift */; };
 		2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */; };
 		2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1F20452B1987E400152F13 /* ConversationManager.swift */; };
 		2B1F20482B1BE94000152F13 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */; };
@@ -175,6 +176,7 @@
 		2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		2B11FCF12B114C3F00325F38 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		2B11FCF32B196E1500325F38 /* VersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionManager.swift; sourceTree = "<group>"; };
+		2B16093E2B5649210057FC32 /* NarrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationView.swift; sourceTree = "<group>"; };
 		2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialRecordActor.swift; sourceTree = "<group>"; };
 		2B1F20452B1987E400152F13 /* ConversationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationManager.swift; sourceTree = "<group>"; };
 		2B1F20472B1BE93F00152F13 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
@@ -589,6 +591,7 @@
 				2B33D87C2AAC3330001193A2 /* ProfileView.swift */,
 				2BC5271B2ABD9C8200173E12 /* HistoryListView.swift */,
 				2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */,
+				2B16093E2B5649210057FC32 /* NarrationView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -748,6 +751,7 @@
 				en,
 				Base,
 				it,
+				fr,
 			);
 			mainGroup = 2BA7F06C2A9ABBA7003D38BA;
 			packageReferences = (
@@ -822,6 +826,7 @@
 				2BE5E00A2B5204AB00E34AD2 /* SpecialVisionActor.swift in Sources */,
 				2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
+				2B16093F2B5649210057FC32 /* NarrationView.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
 				2B0116F32AF98D68000C78E1 /* LoggedOutAccountView.swift in Sources */,

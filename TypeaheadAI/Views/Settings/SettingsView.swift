@@ -10,6 +10,7 @@ import SwiftUI
 enum Tab: String, CaseIterable, Identifiable {
     case general = "General"
     case profile = "Profile"
+    case narration = "Narration Settings"
     case quickActions = "Quick Actions"
     case history = "History"
     case incognito = "Offline Mode"
@@ -62,6 +63,8 @@ struct SettingsView: View {
         switch tab {
         case .profile:
             return AnyView(ProfileView())
+        case .narration:
+            return AnyView(NarrationView())
         case .general:
             return AnyView(GeneralSettingsView(promptManager: promptManager))
         case .quickActions:
