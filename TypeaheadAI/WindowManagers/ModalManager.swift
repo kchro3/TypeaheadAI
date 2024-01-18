@@ -615,7 +615,7 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
+        speaker.narrate(text)
 
         currentTask?.cancel()
         currentTask = Task {

@@ -117,11 +117,7 @@ extension AXUIElement {
     func children(maxChildren: Int? = nil) -> [AXUIElement] {
         if let children = self.value(forAttribute: kAXChildrenAttribute) as? [AXUIElement] {
             if let maxChildren = maxChildren, children.count > maxChildren {
-                if let visibleChildren = self.value(forAttribute: kAXVisibleChildrenAttribute) as? [AXUIElement] {
-                    return visibleChildren
-                } else {
-                    return Array(children.prefix(maxChildren))
-                }
+                return Array(children.prefix(maxChildren))
             } else {
                 return children
             }

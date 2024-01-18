@@ -67,12 +67,37 @@ struct UIElement: Identifiable, Equatable {
 }
 
 extension UIElementTree {
+    static let rolesToIgnoreByBundleIdentifier: [String: [String]] = [
+        "com.google.Chrome": [
+            "AXToolbar",
+            "AXTabGroup"
+        ]
+    ]
+
+    /// Serialize with context
+    func serializeWithContext(appContext: AppContext?) -> String? {
+        if let bundleIdentifier = appContext?.bundleIdentifier,
+           let rolesToIgnore = UIElementTree.rolesToIgnoreByBundleIdentifier[bundleIdentifier] {
+            return serialize(rolesToIgnore: rolesToIgnore)
+        } else {
+            return serialize()
+        }
+    }
+
     /// Implement iteratively with DFS
-    func serialize() -> String? {
+    /// Can optionally ignore roles (useful for tuning specific applications or websites)
+    func serialize(
+        rolesToIgnore: [String]? = nil
+    ) -> String? {
         var serialized: String? = nil
         var stack: [(Int, UIElement)] = [(0, root)]  // (Indent, UIElement)
 
         while let (indent, element) = stack.popLast() {
+            // If a role is ignored, then don't serialize the element
+            if let rolesToIgnore = rolesToIgnore, rolesToIgnore.contains(element.role) {
+                continue
+            }
+
             guard let serializedElement = element.serialize() else {
                 continue
             }
@@ -160,19 +185,6 @@ extension UIElement {
         } else {
             if !actions.isEmpty, self.enabled {
                 text += ", actionable: true"
-            }
-        }
-
-        if isVisible {
-            if let width = self.size?.width,
-               let height = self.size?.height,
-               width + height <= 1.0 {
-                return nil
-            }
-        } else {
-            if let width = self.size?.width,
-               let height = self.size?.height {
-                text += ", size: (\(width), \(height))"
             }
         }
 
