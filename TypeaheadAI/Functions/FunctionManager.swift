@@ -129,7 +129,7 @@ class FunctionManager: CanFetchAppContext,
         let (newTree, newElementMap) = getUIElements(appContext: newAppContext)
         try Task.checkCancellation()
 
-        guard let serializedUIElement = newTree?.serialize() else {
+        guard let serializedUIElement = newTree?.serializeWithContext(appContext: newAppContext) else {
             throw ClientManagerError.functionCallError(
                 "Failed to serialize UI state",
                 functionCall: functionCall,
