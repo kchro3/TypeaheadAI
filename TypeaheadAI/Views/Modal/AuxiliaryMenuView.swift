@@ -60,7 +60,7 @@ struct AuxiliaryMenuView: View {
         promptManager.addPrompt(prompt)
     }
 
-    let modalManager = ModalManager(context: context, speaker: Speaker())
+    let modalManager = ModalManager(context: context)
 
     return AuxiliaryMenuView(
         modalManager: modalManager,

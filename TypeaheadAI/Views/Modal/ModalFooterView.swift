@@ -41,6 +41,7 @@ struct ModalFooterView: View {
                 ) { text in
                     if !text.isEmpty {
                         Task {
+                            try await modalManager.stopDictation()
                             if modalManager.userIntents != nil {
                                 await modalManager.addUserMessage(text, isQuickAction: true, appContext: nil)
                             } else {
@@ -97,6 +98,6 @@ struct ModalFooterView: View {
 #Preview {
     let context = PersistenceController.preview.container.viewContext
     return ModalFooterView(
-        modalManager: ModalManager(context: context, speaker: Speaker())
+        modalManager: ModalManager(context: context)
     )
 }

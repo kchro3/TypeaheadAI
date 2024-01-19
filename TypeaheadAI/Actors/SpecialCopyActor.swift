@@ -47,7 +47,6 @@ actor SpecialCopyActor: CanSimulateCopy {
 
         // Clear the current state
         await self.modalManager.forceRefresh()
-        await self.modalManager.showModal()
 
         var messageType: MessageType = .string
         guard let copiedText = NSPasteboard.general.string(forType: .string) else {
@@ -71,6 +70,6 @@ actor SpecialCopyActor: CanSimulateCopy {
         let contextualIntents = self.intentManager.fetchContextualIntents(limit: 10, appContext: appInfo.appContext)
         await self.modalManager.setUserIntents(intents: contextualIntents)
 
-        await NSApp.activate(ignoringOtherApps: true)
+        try await self.modalManager.prepareUserInput()
     }
 }

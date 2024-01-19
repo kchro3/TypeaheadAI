@@ -30,7 +30,6 @@ class ClientManager: CanGetUIElements {
     ]
 
     @AppStorage("online") private var online: Bool = true
-    @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
     #if DEBUG
@@ -325,7 +324,6 @@ class ClientManager: CanGetUIElements {
             history: history,
             appContext: appInfo?.appContext,
             version: self.version,
-            isWebSearchEnabled: self.isWebSearchEnabled,
             isAutopilotEnabled: self.isAutopilotEnabled,
             apps: appInfo?.apps.values.map { $0.bundleIdentifier }
         )
@@ -485,7 +483,6 @@ struct RequestPayload: Codable {
     var history: [Message]?
     var appContext: AppContext?
     var version: String
-    var isWebSearchEnabled: Bool?
     var isAutopilotEnabled: Bool?
     var apps: [String]?
 }

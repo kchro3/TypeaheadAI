@@ -55,6 +55,7 @@
 		2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */; };
 		2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */; };
 		2B7669A12B5A2CD00071D713 /* CanSimulateControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */; };
+		2B7669A32B5A72A50071D713 /* CanSimulateDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */; };
 		2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */; };
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
 		2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */; };
@@ -204,6 +205,7 @@
 		2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentConversationsView.swift; sourceTree = "<group>"; };
 		2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteScript.swift; sourceTree = "<group>"; };
 		2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateControl.swift; sourceTree = "<group>"; };
+		2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateDictation.swift; sourceTree = "<group>"; };
 		2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDetails.swift; sourceTree = "<group>"; };
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
 		2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutOnboardingView.swift; sourceTree = "<group>"; };
@@ -433,6 +435,7 @@
 				2B9A89862B3CE1D300041856 /* CanFocusOnElement.swift */,
 				2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */,
 				2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */,
+				2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */,
 			);
 			path = Traits;
 			sourceTree = "<group>";
@@ -864,6 +867,7 @@
 				2B11FCE32B0C47FA00325F38 /* CanSimulateSelectAll.swift in Sources */,
 				2BD3821E2B2C4B2E00F96C19 /* CanSimulateEnter.swift in Sources */,
 				2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */,
+				2B7669A32B5A72A50071D713 /* CanSimulateDictation.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
 				2B9A89952B4539DC00041856 /* SmartRecordOnboardingView.swift in Sources */,

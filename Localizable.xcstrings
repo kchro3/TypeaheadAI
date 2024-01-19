@@ -980,6 +980,9 @@
         }
       }
     },
+    "Enable Dictation" : {
+
+    },
     "Enable Narration" : {
       "localizations" : {
         "fr" : {
@@ -997,6 +1000,7 @@
       }
     },
     "Enable web search" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1285,6 +1289,9 @@
           }
         }
       }
+    },
+    "Hide Modal during Autopilot" : {
+
     },
     "History" : {
       "localizations" : {

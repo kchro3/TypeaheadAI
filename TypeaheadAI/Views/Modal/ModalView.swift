@@ -250,7 +250,7 @@ struct ModalView: View {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    let modalManager = ModalManager(context: context, speaker: Speaker())
+    let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
     modalManager.setText("hello world", appContext: nil)
     return ModalView(showModal: .constant(true), modalManager: modalManager)
@@ -258,7 +258,7 @@ struct ModalView: View {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    let modalManager = ModalManager(context: context, speaker: Speaker())
+    let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
         Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
@@ -269,7 +269,7 @@ struct ModalView: View {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    let modalManager = ModalManager(context: context, speaker: Speaker())
+    let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
         Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "", isCurrentUser: false, isHidden: false, appContext: nil, responseError: "Request took too long"),
@@ -280,7 +280,7 @@ struct ModalView: View {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    let modalManager = ModalManager(context: context, speaker: Speaker())
+    let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
 
     let markdownString = """
@@ -308,7 +308,7 @@ Task {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    let modalManager = ModalManager(context: context, speaker: Speaker())
+    let modalManager = ModalManager(context: context)
     modalManager.clientManager = ClientManager()
     modalManager.messages = [
         Message(id: UUID(), rootId: UUID(), inReplyToId: nil, createdAt: Date(), rootCreatedAt: Date(), text: "hello world", isCurrentUser: false, isHidden: false, appContext: nil),
@@ -328,7 +328,7 @@ Task {
     }
 
     let context = PersistenceController.preview.container.viewContext
-    let modalManager = ModalManager(context: context, speaker: Speaker())
+    let modalManager = ModalManager(context: context)
     modalManager.userIntents = [
         "testing a new idea", "test a test", "testing a test test test testing a test test test testing a test test test testing a test test test"
     ]
