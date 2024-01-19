@@ -17,16 +17,13 @@ actor SpecialVisionActor: CanGetUIElements {
 
     private let appContextManager: AppContextManager
     private let modalManager: ModalManager
-    private let speaker: Speaker
 
     init(
         appContextManager: AppContextManager,
-        modalManager: ModalManager,
-        speaker: Speaker
+        modalManager: ModalManager
     ) {
         self.appContextManager = appContextManager
         self.modalManager = modalManager
-        self.speaker = speaker
     }
 
     func specialVision() async throws {

@@ -10,7 +10,7 @@ import Carbon.HIToolbox
 import Foundation
 import SwiftUI
 
-class Speaker: CanSimulateControl {
+class Speaker: NSObject, AVSpeechSynthesizerDelegate, CanSimulateControl {
     @AppStorage("isNarrateEnabled") var isNarrateEnabled: Bool = false
     @AppStorage("selectedVoice") private var selectedVoice: String?
     @AppStorage("speakingRate") private var speakingRate: Double?
@@ -18,8 +18,14 @@ class Speaker: CanSimulateControl {
     @AppStorage("speakingPitch") private var speakingPitch: Double?
 
     private let speaker: AVSpeechSynthesizer = AVSpeechSynthesizer()
+    var onFinish: (() -> Void)? = nil
 
-    func narrate(_ text: String) {
+    override init() {
+        super.init()
+        speaker.delegate = self
+    }
+
+    func speak(_ text: String) {
         if isNarrateEnabled {
             Task {
                 let utterance = AVSpeechUtterance(string: NSLocalizedString(text, comment: ""))
@@ -53,5 +59,11 @@ class Speaker: CanSimulateControl {
 
     func cancel() {
         speaker.stopSpeaking(at: .immediate)
+    }
+
+    // MARK: - AVSpeechSynthesizerDelegate methods
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        onFinish?()
     }
 }

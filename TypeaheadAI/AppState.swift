@@ -26,7 +26,6 @@ final class AppState: ObservableObject {
 
     // Managers (alphabetize)
     private let appContextManager: AppContextManager = AppContextManager()
-    private let speaker: Speaker = Speaker()
     var clientManager: ClientManager
     var conversationManager: ConversationManager
     var functionManager = FunctionManager()
@@ -56,7 +55,7 @@ final class AppState: ObservableObject {
         self.conversationManager = ConversationManager(context: context)
         self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
         self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
-        self.modalManager = ModalManager(context: context, speaker: speaker)
+        self.modalManager = ModalManager(context: context)
         self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
         self.onboardingWindowManager = OnboardingWindowManager(context: context)
         self.settingsManager = SettingsManager(context: context)
@@ -89,8 +88,7 @@ final class AppState: ObservableObject {
         )
         self.specialVisionActor = SpecialVisionActor(
             appContextManager: appContextManager,
-            modalManager: modalManager,
-            speaker: speaker
+            modalManager: modalManager
         )
 
         // Set lazy params

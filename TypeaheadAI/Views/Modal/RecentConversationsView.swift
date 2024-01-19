@@ -45,5 +45,5 @@ struct RecentConversationsView: View {
 }
 
 #Preview {
-    RecentConversationsView(modalManager: ModalManager(context: PersistenceController.preview.container.viewContext, speaker: Speaker()))
+    RecentConversationsView(modalManager: ModalManager(context: PersistenceController.preview.container.viewContext))
 }

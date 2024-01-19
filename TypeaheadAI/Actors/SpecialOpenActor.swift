@@ -45,8 +45,7 @@ actor SpecialOpenActor {
         if forceRefresh {
             self.logger.debug("special new")
             await self.modalManager.forceRefresh()
-            await self.modalManager.showModal()
-            await NSApp.activate(ignoringOtherApps: true)
+            try await self.modalManager.prepareUserInput()
         } else {
             self.logger.debug("special open")
             if await self.modalManager.isWindowVisible() {
@@ -54,8 +53,7 @@ actor SpecialOpenActor {
                 await self.modalManager.closeModal()
                 return
             } else {
-                await self.modalManager.showModal()
-                await NSApp.activate(ignoringOtherApps: true)
+                try await self.modalManager.prepareUserInput()
             }
         }
 

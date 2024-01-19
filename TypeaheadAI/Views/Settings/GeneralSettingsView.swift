@@ -14,8 +14,10 @@ struct GeneralSettingsView: View {
     @ObservedObject var promptManager: QuickActionManager
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
-    @AppStorage("isWebSearchEnabled") private var isWebSearchEnabled: Bool = true
+
+    @AppStorage("isDictationEnabled") private var isDictationEnabled: Bool = false
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
+    @AppStorage("hideModalDuringAutopilot") private var hideModalDuringAutopilot: Bool = true
     @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = false
 
     var body: some View {
@@ -92,8 +94,8 @@ struct GeneralSettingsView: View {
                             Text("Launch at Login")
                         }
                         Spacer()
-                        Toggle(isOn: $isWebSearchEnabled) {
-                            Text("Enable web search")
+                        Toggle(isOn: $isDictationEnabled) {
+                            Text("Enable Dictation")
                         }
                         Spacer()
                     }
@@ -106,6 +108,10 @@ struct GeneralSettingsView: View {
                         Spacer()
                         Toggle(isOn: $isNarrateEnabled) {
                             Text("Enable Narration")
+                        }
+                        Spacer()
+                        Toggle(isOn: $hideModalDuringAutopilot) {
+                            Text("Hide Modal during Autopilot")
                         }
                         Spacer()
                     }

@@ -8,6 +8,7 @@
 import AppKit
 import AVFoundation
 import Foundation
+import SwiftUI
 
 enum FunctionName: String, Codable {
     case openApplication = "open_application"

@@ -11,7 +11,7 @@ import Foundation
 import MarkdownUI
 import os.log
 
-class ModalManager: ObservableObject {
+class ModalManager: ObservableObject, CanSimulateDictation {
     private let context: NSManagedObjectContext
 
     @Published var messages: [Message]
@@ -30,6 +30,8 @@ class ModalManager: ObservableObject {
     @AppStorage("toastY") var toastY: Double?
     @AppStorage("toastWidth") var toastWidth: Double = 400.0
     @AppStorage("toastHeight") var toastHeight: Double = 400.0
+    @AppStorage("hideModalDuringAutopilot") private var hideModalDuringAutopilot: Bool = true
+    @AppStorage("isDictationEnabled") private var isDictationEnabled: Bool = false
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -37,16 +39,22 @@ class ModalManager: ObservableObject {
     )
 
     private let maxIntents = 9
-    private let speaker: Speaker
 
-    init(context: NSManagedObjectContext, speaker: Speaker) {
+    private let speaker = Speaker()
+    private let speakerWithCallback = Speaker()
+
+    init(context: NSManagedObjectContext) {
         self.context = context
         self.messages = []
         self.userIntents = nil
         self.triggerFocus = false
         self.isVisible = false
         self.isPending = false
-        self.speaker = speaker
+        self.speakerWithCallback.onFinish = {
+            Task {
+                try await self.prepareUserInput()
+            }
+        }
     }
 
     // Alphabetize
@@ -75,8 +83,30 @@ class ModalManager: ObservableObject {
         return toastWindow?.isVisible ?? false
     }
 
+    func prepareUserInput() async throws {
+        await NSApp.activate(ignoringOtherApps: true)
+        try await Task.sleep(for: .milliseconds(200))
+
+        if !self.isVisible {
+            await self.showModal()
+        }
+
+        if self.isDictationEnabled {
+            try await simulateDictation()
+        }
+    }
+
+    func stopDictation() async throws {
+        guard self.isDictationEnabled else {
+            return
+        }
+
+        try await simulateDictation()
+    }
+
     @MainActor
     func cancelTasks() {
+        speakerWithCallback.cancel()
         speaker.cancel()
         currentTask?.cancel()
         currentTask = nil
@@ -251,7 +281,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
-        speaker.narrate(responseError)
+        speaker.speak(responseError)
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden {
             messages[idx].responseError = responseError
@@ -339,12 +369,12 @@ class ModalManager: ObservableObject {
 
             if text.trimmingCharacters(in: .whitespaces).hasSuffix("\n") {
                 // Case: If text looks like "bcd\n ", then chunks will look like ["abc", "bcd"]
-                speaker.narrate(String(chunks[chunks.count - 1]))
+                speaker.speak(String(chunks[chunks.count - 1]))
             } else if chunks.count >= 2 {
                 // Case: If chunks looks like ["abc", "bcd", "def"]
-                speaker.narrate(String(chunks[chunks.count - 2]))
+                speaker.speak(String(chunks[chunks.count - 2]))
             } else {
-                speaker.narrate(String(chunks[0]))
+                speaker.speak(String(chunks[0]))
             }
         }
     }
@@ -527,6 +557,7 @@ class ModalManager: ObservableObject {
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false, appContext: AppContext?) {
+        speakerWithCallback.cancel()
         speaker.cancel()
 
         isPending = true
@@ -572,6 +603,7 @@ class ModalManager: ObservableObject {
     /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
     func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
+        speakerWithCallback.cancel()
         speaker.cancel()
 
         var quickAction: QuickAction? = nil
@@ -620,7 +652,7 @@ class ModalManager: ObservableObject {
         }
 
         isPending = true
-        speaker.narrate(text)
+        speaker.speak(text)
 
         currentTask?.cancel()
         currentTask = Task {
@@ -679,7 +711,7 @@ class ModalManager: ObservableObject {
             if bufferedPayload.mode == .text, let text = bufferedPayload.text {
 
                 if let lastChunk = text.split(separator: "\n", omittingEmptySubsequences: true).last {
-                    speaker.narrate(String(lastChunk))
+                    speakerWithCallback.speak(String(lastChunk))
                 }
 
             } else if bufferedPayload.mode == .function {
@@ -694,10 +726,12 @@ class ModalManager: ObservableObject {
                 let args = try functionCall.parseArgs()
                 await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
 
-                speaker.narrate(args.humanReadable)
+                speaker.speak(args.humanReadable)
                 try await Task.safeSleep(for: .seconds(2))  // Add slight delay so that user can see the next action
 
-                await self.closeModal()
+                if self.isVisible {
+                    await self.closeModal()
+                }
 
                 // Execute function and add the tool response
                 let newAppInfo = try await functionManager?.call(functionCall, appInfo: appInfo)
@@ -712,7 +746,10 @@ class ModalManager: ObservableObject {
                 }
 
                 await self.appendTool("Updated State\n\(serialized)", functionCall: functionCall, appContext: newAppInfo?.appContext)
-                await self.showModal()
+
+                if !hideModalDuringAutopilot {
+                    await self.showModal()
+                }
 
                 try Task.checkCancellation()
                 try await self.reply(quickAction: quickAction, prevAppInfo: newAppInfo)
@@ -733,7 +770,7 @@ class ModalManager: ObservableObject {
             }
 
             isPending = true
-            speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
+            speaker.speak(NSLocalizedString("Thinking...", comment: ""))
             userIntents = nil
 
             currentTask?.cancel()
@@ -795,7 +832,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func replyToUserMessage() async throws {
         isPending = true
-        speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
+        speaker.speak(NSLocalizedString("Thinking...", comment: ""))
         userIntents = nil
 
         currentTask?.cancel()
@@ -843,7 +880,7 @@ class ModalManager: ObservableObject {
     @MainActor
     func proposeQuickAction() async throws {
         isPending = true
-        speaker.narrate(NSLocalizedString("Thinking...", comment: ""))
+        speaker.speak(NSLocalizedString("Thinking...", comment: ""))
         userIntents = nil
 
         do {
@@ -855,7 +892,7 @@ class ModalManager: ObservableObject {
                 return
             }
 
-            speaker.narrate(text)
+            speaker.speak(text)
         } catch {
             self.setError("Could not generate a plan", appContext: nil)
         }
