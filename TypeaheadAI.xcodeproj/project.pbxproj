@@ -53,6 +53,8 @@
 		2B520D812AC7FD4800310426 /* AuxiliaryMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */; };
 		2B520D852AC82EA100310426 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D842AC82EA100310426 /* AccountView.swift */; };
 		2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */; };
+		2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */; };
+		2B7669A12B5A2CD00071D713 /* CanSimulateControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */; };
 		2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */; };
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
 		2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */; };
@@ -200,6 +202,8 @@
 		2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuxiliaryMenuView.swift; sourceTree = "<group>"; };
 		2B520D842AC82EA100310426 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentConversationsView.swift; sourceTree = "<group>"; };
+		2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteScript.swift; sourceTree = "<group>"; };
+		2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateControl.swift; sourceTree = "<group>"; };
 		2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDetails.swift; sourceTree = "<group>"; };
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
 		2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutOnboardingView.swift; sourceTree = "<group>"; };
@@ -427,6 +431,8 @@
 				2B11FCE22B0C47FA00325F38 /* CanSimulateSelectAll.swift */,
 				2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */,
 				2B9A89862B3CE1D300041856 /* CanFocusOnElement.swift */,
+				2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */,
+				2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */,
 			);
 			path = Traits;
 			sourceTree = "<group>";
@@ -821,6 +827,7 @@
 				2BAA978B2B02E81600EC6A63 /* IntentsOnboardingView.swift in Sources */,
 				2B8CD4B42B0A9A11003E0589 /* Theme+Custom.swift in Sources */,
 				2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */,
+				2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */,
 				2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */,
 				2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */,
 				2BE5E00A2B5204AB00E34AD2 /* SpecialVisionActor.swift in Sources */,
@@ -879,6 +886,7 @@
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,
 				2BE7BB8F2B258C7900164F88 /* UIElement.swift in Sources */,
 				2B0116ED2AF878D1000C78E1 /* AppDelegate.swift in Sources */,
+				2B7669A12B5A2CD00071D713 /* CanSimulateControl.swift in Sources */,
 				2BA7F0852A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld in Sources */,
 				2BE7BB882B258B4C00164F88 /* CanGetUIElements.swift in Sources */,
 				2BAC14762AF61DD000B33E13 /* WebView.swift in Sources */,

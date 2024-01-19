@@ -336,7 +336,12 @@ class ModalManager: ObservableObject {
         messages[idx].text += text
         if text.contains("\n") {
             let chunks = messages[idx].text.split(separator: "\n", omittingEmptySubsequences: true)
-            if chunks.count >= 2 {
+
+            if text.trimmingCharacters(in: .whitespaces).hasSuffix("\n") {
+                // Case: If text looks like "bcd\n ", then chunks will look like ["abc", "bcd"]
+                speaker.narrate(String(chunks[chunks.count - 1]))
+            } else if chunks.count >= 2 {
+                // Case: If chunks looks like ["abc", "bcd", "def"]
                 speaker.narrate(String(chunks[chunks.count - 2]))
             } else {
                 speaker.narrate(String(chunks[0]))
