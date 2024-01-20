@@ -9,7 +9,34 @@ import Cocoa
 import Foundation
 import os.log
 
-actor SpecialVisionActor: CanGetUIElements {
+struct VOCursor: Codable {
+    let x: Int
+    let y: Int
+    let width: Int
+    let height: Int
+
+    var point: CGPoint {
+        return CGPoint(x: x, y: y)
+    }
+
+    var size: CGSize {
+        return CGSize(width: width, height: height)
+    }
+}
+
+actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
+    private static let voCursorScript = """
+    tell application "VoiceOver"
+        try
+            set bound to bounds of vo cursor -- Attempt to get bounds of VO cursor
+            set outputString to "{\\"x\\": " & item 1 of bound & ", \\"y\\": " & item 2 of bound & ", \\"width\\": " & (item 3 of bound) - (item 1 of bound) & ", \\"height\\": " & (item 4 of bound) - (item 2 of bound) & "}"
+            return outputString
+        on error
+            return "{}" -- Return empty JSON if an error occurs
+        end try
+    end tell
+    """
+
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialVisionActor"
@@ -28,9 +55,7 @@ actor SpecialVisionActor: CanGetUIElements {
 
     func specialVision() async throws {
         let appInfo = try await appContextManager.getActiveAppInfo()
-        let (tree, _) = getUIElements(appContext: appInfo.appContext)
-
-        guard let tree = tree, let point = tree.root.point, let size = tree.root.size else {
+        guard let (point, size) = await getPointAndSize(appContext: appInfo.appContext) else {
             return
         }
 
@@ -48,7 +73,27 @@ actor SpecialVisionActor: CanGetUIElements {
             print("failed to get tiff representation")
         }
 
-        await NSApp.activate(ignoringOtherApps: true)
+        try await modalManager.prepareUserInput()
+    }
+
+    func getPointAndSize(appContext: AppContext?) async -> (CGPoint, CGSize)? {
+        if NSWorkspace.shared.isVoiceOverEnabled {
+            /// If VoiceOver is enabled, then get the VO cursor bounds
+            if let serializedCursor = await executeScript(script: SpecialVisionActor.voCursorScript),
+               let data = serializedCursor.data(using: .utf8),
+               let cursor = try? JSONDecoder().decode(VOCursor.self, from: data) {
+                return (cursor.point, cursor.size)
+            } else {
+                return nil
+            }
+        } else {
+            let (tree, _) = getUIElements(appContext: appContext)
+            if let tree = tree, let point = tree.root.point, let size = tree.root.size {
+                return (point, size)
+            } else {
+                return nil
+            }
+        }
     }
 
     func captureScreen(point: CGPoint, size: CGSize) -> ImageData? {

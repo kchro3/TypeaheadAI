@@ -20,7 +20,13 @@ struct AppInfo {
     var apps: [String: Application]
 }
 
-class AppContextManager: CanFetchAppContext {
+class AppContextManager: CanFetchAppContext, CanExecuteScript {
+    private static let getActiveTabURLScript = """
+    tell application "Google Chrome"
+        return URL of active tab of front window
+    end tell
+    """
+
     private let scriptManager = ScriptManager()
     private let appManager = AppManager()
 
@@ -40,15 +46,10 @@ class AppContextManager: CanFetchAppContext {
 
     private func getUrl(bundleIdentifier: String?) async -> URL? {
         if bundleIdentifier == "com.google.Chrome" {
-            do {
-                let result = try await self.scriptManager.executeScript(script: .getActiveTabURL)
-                if let urlString = result.stringValue,
-                   let url = URL(string: urlString),
-                   let strippedUrl = self.stripQueryParameters(from: url) {
-                    return strippedUrl
-                }
-            } catch {
-                self.logger.error("Failed to execute script: \(error.localizedDescription)")
+            if let urlString = await executeScript(script: AppContextManager.getActiveTabURLScript),
+               let url = URL(string: urlString),
+               let strippedUrl = self.stripQueryParameters(from: url) {
+                return strippedUrl
             }
         }
 
