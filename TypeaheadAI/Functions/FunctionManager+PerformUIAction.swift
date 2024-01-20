@@ -13,6 +13,7 @@ struct Action: Identifiable, Codable {
     let narration: String
     let inputText: String?
     let pressEnter: Bool?
+    let setFocus: Bool?
 }
 
 extension FunctionCall {
@@ -26,7 +27,8 @@ extension FunctionCall {
             id: id,
             narration: narration,
             inputText: self.stringArg("inputText"),
-            pressEnter: self.boolArg("pressEnter")
+            pressEnter: self.boolArg("pressEnter"),
+            setFocus: self.boolArg("setFocus")
         )
     }
 }
