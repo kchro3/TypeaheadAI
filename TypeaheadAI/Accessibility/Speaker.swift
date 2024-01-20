@@ -25,7 +25,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, CanSimulateControl {
         speaker.delegate = self
     }
 
-    func speak(_ text: String) {
+    func speak(_ text: String, withCallback: Bool = false) {
         if isNarrateEnabled {
             Task {
                 let utterance = AVSpeechUtterance(string: NSLocalizedString(text, comment: ""))
@@ -48,6 +48,12 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, CanSimulateControl {
 
                 utterance.prefersAssistiveTechnologySettings = true
 
+                if withCallback {
+                    utterance.postUtteranceDelay = 1.0
+                } else {
+                    utterance.postUtteranceDelay = 0.0
+                }
+
                 if !speaker.isSpeaking {
                     try await simulateControl()
                 }
@@ -64,6 +70,8 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, CanSimulateControl {
     // MARK: - AVSpeechSynthesizerDelegate methods
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        onFinish?()
+        if utterance.postUtteranceDelay > 0.0 {
+            onFinish?()
+        }
     }
 }

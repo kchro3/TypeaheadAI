@@ -41,7 +41,6 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     private let maxIntents = 9
 
     private let speaker = Speaker()
-    private let speakerWithCallback = Speaker()
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -50,7 +49,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         self.triggerFocus = false
         self.isVisible = false
         self.isPending = false
-        self.speakerWithCallback.onFinish = {
+        self.speaker.onFinish = {
             Task {
                 try await self.prepareUserInput()
             }
@@ -92,6 +91,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         }
 
         if self.isDictationEnabled {
+            try await Task.sleep(for: .milliseconds(200))
             try await simulateDictation()
         }
     }
@@ -101,12 +101,11 @@ class ModalManager: ObservableObject, CanSimulateDictation {
             return
         }
 
-        try await simulateDictation()
+        try await simulateStopDictation()
     }
 
     @MainActor
     func cancelTasks() {
-        speakerWithCallback.cancel()
         speaker.cancel()
         currentTask?.cancel()
         currentTask = nil
@@ -557,7 +556,6 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     /// Add a user message without flushing the modal text. Use this when there is an active prompt.
     @MainActor
     func setUserMessage(_ text: String, messageType: MessageType = .string, isHidden: Bool = false, appContext: AppContext?) {
-        speakerWithCallback.cancel()
         speaker.cancel()
 
         isPending = true
@@ -603,7 +601,6 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     /// When isQuickAction is true, that means that the new text is implicitly a user objective.
     @MainActor
     func addUserMessage(_ text: String, isQuickAction: Bool = false, isHidden: Bool = false, appContext: AppContext?) async {
-        speakerWithCallback.cancel()
         speaker.cancel()
 
         var quickAction: QuickAction? = nil
@@ -711,7 +708,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
             if bufferedPayload.mode == .text, let text = bufferedPayload.text {
 
                 if let lastChunk = text.split(separator: "\n", omittingEmptySubsequences: true).last {
-                    speakerWithCallback.speak(String(lastChunk))
+                    speaker.speak(String(lastChunk), withCallback: true)
                 }
 
             } else if bufferedPayload.mode == .function {

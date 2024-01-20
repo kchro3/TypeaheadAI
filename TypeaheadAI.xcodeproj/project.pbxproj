@@ -56,6 +56,8 @@
 		2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */; };
 		2B7669A12B5A2CD00071D713 /* CanSimulateControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */; };
 		2B7669A32B5A72A50071D713 /* CanSimulateDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */; };
+		2B7669A52B5BA2150071D713 /* CanSetVOFocus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */; };
+		2B7669A72B5BA2610071D713 /* FunctionManager+SetVOCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A62B5BA2610071D713 /* FunctionManager+SetVOCursor.swift */; };
 		2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */; };
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
 		2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */; };
@@ -204,6 +206,8 @@
 		2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteScript.swift; sourceTree = "<group>"; };
 		2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateControl.swift; sourceTree = "<group>"; };
 		2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateDictation.swift; sourceTree = "<group>"; };
+		2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSetVOFocus.swift; sourceTree = "<group>"; };
+		2B7669A62B5BA2610071D713 /* FunctionManager+SetVOCursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+SetVOCursor.swift"; sourceTree = "<group>"; };
 		2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDetails.swift; sourceTree = "<group>"; };
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
 		2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutOnboardingView.swift; sourceTree = "<group>"; };
@@ -411,6 +415,7 @@
 				2BDDB9962B28352800D52BF0 /* FunctionManager+PerformUIAction.swift */,
 				2B9A897E2B3BE4B300041856 /* FunctionManager+OpenFile.swift */,
 				2B9A89822B3CDC1C00041856 /* FunctionManager+SaveFile.swift */,
+				2B7669A62B5BA2610071D713 /* FunctionManager+SetVOCursor.swift */,
 			);
 			path = Functions;
 			sourceTree = "<group>";
@@ -431,6 +436,7 @@
 				2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */,
 				2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */,
 				2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */,
+				2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */,
 			);
 			path = Traits;
 			sourceTree = "<group>";
@@ -831,6 +837,7 @@
 				2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2B16093F2B5649210057FC32 /* NarrationView.swift in Sources */,
+				2B7669A52B5BA2150071D713 /* CanSetVOFocus.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
 				2B0116F32AF98D68000C78E1 /* LoggedOutAccountView.swift in Sources */,
@@ -855,6 +862,7 @@
 				2BDDB98D2B282AFF00D52BF0 /* AppManager.swift in Sources */,
 				2B11FCE52B0C555000325F38 /* CanFetchAppContext.swift in Sources */,
 				2B9A89812B3CD06C00041856 /* CanSimulateGoToFile.swift in Sources */,
+				2B7669A72B5BA2610071D713 /* FunctionManager+SetVOCursor.swift in Sources */,
 				2B3792312AB83739008D812F /* CanSimulatePaste.swift in Sources */,
 				2B9A89832B3CDC1C00041856 /* FunctionManager+SaveFile.swift in Sources */,
 				2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */,
