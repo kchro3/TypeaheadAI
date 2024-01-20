@@ -65,7 +65,6 @@
 		2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */; };
 		2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
-		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */; };
 		2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */; };
 		2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4982B06DD36003E0589 /* FunctionManager.swift */; };
@@ -214,7 +213,6 @@
 		2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCopyOnboardingView.swift; sourceTree = "<group>"; };
 		2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartPasteOnboardingView.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
-		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanPerformOCR.swift; sourceTree = "<group>"; };
 		2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalFooterView.swift; sourceTree = "<group>"; };
 		2B8CD4982B06DD36003E0589 /* FunctionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionManager.swift; sourceTree = "<group>"; };
@@ -502,7 +500,6 @@
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
-				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
 				2B11FCF32B196E1500325F38 /* VersionManager.swift */,
 				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
@@ -915,7 +912,6 @@
 				2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */,
 				2B0116FB2AF99347000C78E1 /* RoundedButton.swift in Sources */,
 				2BAA97932B03693A00EC6A63 /* Notification+Extension.swift in Sources */,
-				2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
 				2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */,
 				2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */,

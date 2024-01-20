@@ -27,7 +27,6 @@ class AppContextManager: CanFetchAppContext, CanExecuteScript {
     end tell
     """
 
-    private let scriptManager = ScriptManager()
     private let appManager = AppManager()
 
     private let logger = Logger(
