@@ -65,12 +65,10 @@
 		2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */; };
 		2B7D358C2B0211FA00E85AEF /* SmartPasteOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */; };
 		2B800A0A2AF4441200E0D8F7 /* QuickActionExampleForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */; };
-		2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */; };
 		2B8CD4942B05D278003E0589 /* CanPerformOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */; };
 		2B8CD4962B05FF59003E0589 /* ModalFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */; };
 		2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4982B06DD36003E0589 /* FunctionManager.swift */; };
 		2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */; };
-		2B8CD4A22B09C3A8003E0589 /* CanScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */; };
 		2B8CD4B42B0A9A11003E0589 /* Theme+Custom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4B32B0A9A11003E0589 /* Theme+Custom.swift */; };
 		2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4B52B0AA450003E0589 /* CustomSyntaxHighlighter.swift */; };
 		2B8CD4BB2B0AAC09003E0589 /* CopyButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4BA2B0AAC09003E0589 /* CopyButtonView.swift */; };
@@ -215,12 +213,10 @@
 		2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCopyOnboardingView.swift; sourceTree = "<group>"; };
 		2B7D358B2B0211FA00E85AEF /* SmartPasteOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartPasteOnboardingView.swift; sourceTree = "<group>"; };
 		2B800A092AF4441200E0D8F7 /* QuickActionExampleForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionExampleForm.swift; sourceTree = "<group>"; };
-		2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptManager.swift; sourceTree = "<group>"; };
 		2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanPerformOCR.swift; sourceTree = "<group>"; };
 		2B8CD4952B05FF59003E0589 /* ModalFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalFooterView.swift; sourceTree = "<group>"; };
 		2B8CD4982B06DD36003E0589 /* FunctionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionManager.swift; sourceTree = "<group>"; };
 		2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivateOnboardingView.swift; sourceTree = "<group>"; };
-		2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanScreenshot.swift; sourceTree = "<group>"; };
 		2B8CD4B32B0A9A11003E0589 /* Theme+Custom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+Custom.swift"; sourceTree = "<group>"; };
 		2B8CD4B52B0AA450003E0589 /* CustomSyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSyntaxHighlighter.swift; sourceTree = "<group>"; };
 		2B8CD4BA2B0AAC09003E0589 /* CopyButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyButtonView.swift; sourceTree = "<group>"; };
@@ -424,7 +420,6 @@
 			children = (
 				2B11FCE42B0C555000325F38 /* CanFetchAppContext.swift */,
 				2B8CD4932B05D278003E0589 /* CanPerformOCR.swift */,
-				2B8CD4A12B09C3A8003E0589 /* CanScreenshot.swift */,
 				2B11FCE02B0C468100325F38 /* CanSimulateClose.swift */,
 				2B9A89802B3CD06C00041856 /* CanSimulateGoToFile.swift */,
 				2BD3821D2B2C4B2E00F96C19 /* CanSimulateEnter.swift */,
@@ -505,7 +500,6 @@
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
-				2B8B952A2A9C528B00FB9EA9 /* ScriptManager.swift */,
 				2B11FCF32B196E1500325F38 /* VersionManager.swift */,
 				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
@@ -918,7 +912,6 @@
 				2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */,
 				2B0116FB2AF99347000C78E1 /* RoundedButton.swift in Sources */,
 				2BAA97932B03693A00EC6A63 /* Notification+Extension.swift in Sources */,
-				2B8B952B2A9C528B00FB9EA9 /* ScriptManager.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
 				2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */,
 				2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */,
@@ -931,7 +924,6 @@
 				2B9A897B2B3BD9EA00041856 /* AXOpenPanelVisitor.swift in Sources */,
 				2BAA97952B042AD400EC6A63 /* PermissionsOnboardingView.swift in Sources */,
 				2B2745102AB03A3D00F37D3E /* CanSimulateCopy.swift in Sources */,
-				2B8CD4A22B09C3A8003E0589 /* CanScreenshot.swift in Sources */,
 				2B0116F02AF88051000C78E1 /* SupabaseManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1098,7 +1090,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"TypeaheadAI/Preview Content\"";
 				DEVELOPMENT_TEAM = TZA789GZFT;
@@ -1116,7 +1108,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.22;
+				MARKETING_VERSION = 2.1.23;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1139,7 +1131,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"TypeaheadAI/Preview Content\"";
 				DEVELOPMENT_TEAM = TZA789GZFT;
@@ -1157,7 +1149,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.22;
+				MARKETING_VERSION = 2.1.23;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

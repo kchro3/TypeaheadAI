@@ -981,7 +981,20 @@
       }
     },
     "Enable Dictation" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer la dictée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abilita Dettatura"
+          }
+        }
+      }
     },
     "Enable Narration" : {
       "localizations" : {
@@ -995,23 +1008,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abilita la narrazione"
-          }
-        }
-      }
-    },
-    "Enable web search" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activer la recherche web"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abilita la ricerca sul web"
           }
         }
       }
@@ -1291,7 +1287,20 @@
       }
     },
     "Hide Modal during Autopilot" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer la fenêtre modale pendant le pilote automatique"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nascondi Modale durante il Pilota Automatico"
+          }
+        }
+      }
     },
     "History" : {
       "localizations" : {

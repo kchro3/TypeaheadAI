@@ -137,7 +137,7 @@ class FunctionManager: CanFetchAppContext,
                 appContext: appInfo?.appContext
             )
         }
-        
+
         try Task.checkCancellation()
         newAppContext?.serializedUIElement = serializedUIElement
 

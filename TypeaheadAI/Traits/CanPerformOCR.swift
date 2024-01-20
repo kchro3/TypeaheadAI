@@ -14,6 +14,7 @@ private struct Constants {
     static let thresholdY: CGFloat = 0.02
 }
 
+/// NOTE: This is deprecated
 protocol CanPerformOCR {
     func performOCR(image: CGImage) async throws -> (String, NSImage?)
 }
