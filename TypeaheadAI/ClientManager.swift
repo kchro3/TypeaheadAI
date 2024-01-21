@@ -22,7 +22,7 @@ class ClientManager: CanGetUIElements {
 
     private let session: URLSession
 
-    private let version: String = "v10"
+    private let version: String = "v11"
     private let validFinishReasons: [String] = [
         "stop",
         "function_call",
