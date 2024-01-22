@@ -1,4 +1,5 @@
 TypeaheadAI.xcodeproj/project.xcworkspace/xcuserdata/
 Exports/
 build/
+static/
 *.dmg
