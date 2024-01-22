@@ -238,6 +238,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func appendToolError(_ responseError: String, functionCall: FunctionCall, appContext: AppContext?) {
         isPending = false
+        speaker.speak(responseError)
 
         if let lastMessage = messages.last {
             messages.append(
@@ -693,11 +694,18 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         }
     }
 
+    @MainActor
+    private func setPending(_ _isPending: Bool) {
+        self.isPending = _isPending
+    }
+
     private func reply(
         quickAction: QuickAction? = nil,
         prevAppInfo: AppInfo? = nil
     ) async throws {
         try Task.checkCancellation()
+
+        speaker.speak(NSLocalizedString("Thinking...", comment: ""))
 
         if let (bufferedPayload, appInfo) = try await self.clientManager?.refine(
             messages: self.messages,
@@ -724,7 +732,10 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
 
                 speaker.speak(args.humanReadable)
-                try await Task.safeSleep(for: .seconds(2))  // Add slight delay so that user can see the next action
+
+                if !hideModalDuringAutopilot {
+                    try await Task.safeSleep(for: .seconds(2))  // Add slight delay so that user can see the next action
+                }
 
                 if self.isVisible {
                     await self.closeModal()
@@ -743,6 +754,11 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 }
 
                 await self.appendTool("Updated State\n\(serialized)", functionCall: functionCall, appContext: newAppInfo?.appContext)
+
+                if case .performUIAction(let action) = args, action.setFocus == true {
+                    await self.setPending(false)
+                    return
+                }
 
                 if !hideModalDuringAutopilot {
                     await self.showModal()

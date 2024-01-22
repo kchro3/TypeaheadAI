@@ -26,7 +26,6 @@
 		2B11FCE72B0C55CD00325F38 /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCE62B0C55CD00325F38 /* AppContext.swift */; };
 		2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */; };
 		2B11FCF22B114C3F00325F38 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF12B114C3F00325F38 /* Message.swift */; };
-		2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B11FCF32B196E1500325F38 /* VersionManager.swift */; };
 		2B16093F2B5649210057FC32 /* NarrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B16093E2B5649210057FC32 /* NarrationView.swift */; };
 		2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */; };
 		2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1F20452B1987E400152F13 /* ConversationManager.swift */; };
@@ -178,7 +177,6 @@
 		2B11FCE62B0C55CD00325F38 /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
 		2B11FCEF2B0EE00900325F38 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		2B11FCF12B114C3F00325F38 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		2B11FCF32B196E1500325F38 /* VersionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionManager.swift; sourceTree = "<group>"; };
 		2B16093E2B5649210057FC32 /* NarrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationView.swift; sourceTree = "<group>"; };
 		2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialRecordActor.swift; sourceTree = "<group>"; };
 		2B1F20452B1987E400152F13 /* ConversationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationManager.swift; sourceTree = "<group>"; };
@@ -506,7 +504,6 @@
 				2BA7F0AA2A9ABC20003D38BA /* Constants.swift */,
 				2BA7F0812A9ABBA8003D38BA /* Persistence.swift */,
 				2BCB017C2A9EF9A6009F9FAC /* RequestStatus.swift */,
-				2B11FCF32B196E1500325F38 /* VersionManager.swift */,
 				2BA7F0782A9ABBA8003D38BA /* TypeaheadAIApp.swift */,
 				2BA7F07C2A9ABBA8003D38BA /* Assets.xcassets */,
 				2BA7F0832A9ABBA8003D38BA /* TypeaheadAI.xcdatamodeld */,
@@ -922,7 +919,6 @@
 				2BAA97932B03693A00EC6A63 /* Notification+Extension.swift in Sources */,
 				2BA7F0AB2A9ABC20003D38BA /* Constants.swift in Sources */,
 				2B0116F72AF98F2C000C78E1 /* NewAccountRegistrationForm.swift in Sources */,
-				2B11FCF42B196E1500325F38 /* VersionManager.swift in Sources */,
 				2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */,
 				2B11FCF02B0EE00900325F38 /* FeedbackView.swift in Sources */,
 				2B9A89972B453A0A00041856 /* AutopilotOnboardingView.swift in Sources */,

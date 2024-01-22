@@ -22,7 +22,7 @@ class ClientManager: CanGetUIElements {
 
     private let session: URLSession
 
-    private let version: String = "v10"
+    private let version: String = "v11"
     private let validFinishReasons: [String] = [
         "stop",
         "function_call",
@@ -32,28 +32,28 @@ class ClientManager: CanGetUIElements {
     @AppStorage("online") private var online: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
-    #if DEBUG
-//    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v3/get_stream")!
+#if DEBUG
+//    private let apiUrlStreaming = URL(string: "https://api.typeahead.ai/v4/stream")!
 //    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-//    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v3/latest")!
 //    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
-    private let apiUrlStreaming = URL(string: "http://localhost:8080/v3/get_stream")!
+
+    private let apiUrlStreaming = URL(string: "http://localhost:8787/v4/stream")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-    private let apiLatest = URL(string: "http://localhost:8080/v3/latest")!
     private let apiFeedback = URL(string: "http://localhost:8080/v2/feedback")!
 
-    #else
-    private let apiUrlStreaming = URL(string: "https://typeahead-ai.fly.dev/v3/get_stream")!
+#else
+
+    private let apiUrlStreaming = URL(string: "https://api.typeahead.ai/v4/stream")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiLatest = URL(string: "https://typeahead-ai.fly.dev/v3/latest")!
     private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
-    #endif
+
+#endif
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -62,16 +62,6 @@ class ClientManager: CanGetUIElements {
 
     init(session: URLSession = .shared) {
         self.session = session
-    }
-
-    func getLatestVersion() async -> AppVersion? {
-        do {
-            let (data, _) = try await URLSession.shared.data(from: apiLatest)
-            return try? JSONDecoder().decode(AppVersion.self, from: data)
-        } catch {
-            self.logger.error("\(error.localizedDescription)")
-            return nil
-        }
     }
 
     func sendFeedback(feedback: String, timeout: TimeInterval = 30) async throws {
@@ -120,9 +110,17 @@ class ClientManager: CanGetUIElements {
         appContext: AppContext?,
         timeout: TimeInterval = 30
     ) async throws -> SuggestIntentsPayload? {
-        let uuid: UUID? = try? await supabaseManager?.client.auth.session.user.id
+        guard online else {
+            // Incognito mode doesn't support this yet
+            return nil
+        }
+
+        guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
+            throw ClientManagerError.signInRequired("Must be signed in.")
+        }
+
         let payload = RequestPayload(
-            uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
+            uuid: uuid,
             username: username,
             userFullName: userFullName,
             userObjective: userObjective,
@@ -132,38 +130,34 @@ class ClientManager: CanGetUIElements {
             messages: self.sanitizeMessages(messages),
             history: history,
             appContext: appContext,
-            version: version
+            version: version,
+            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled
         )
 
-        if !online {
-            // Incognito mode doesn't support this yet
-            return nil
-        } else {
-            guard let httpBody = try? JSONEncoder().encode(payload) else {
-                throw ClientManagerError.badRequest("Request was malformed...")
-            }
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            throw ClientManagerError.badRequest("Request was malformed...")
+        }
 
-            var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
-            urlRequest.httpMethod = "POST"
-            urlRequest.httpBody = httpBody
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            let (data, resp) = try await self.session.data(for: urlRequest)
+        let (data, resp) = try await self.session.data(for: urlRequest)
 
-            guard let httpResponse = resp as? HTTPURLResponse else {
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Something went wrong...")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw ClientManagerError.serverError(errorResponse.detail)
+            } else {
                 throw ClientManagerError.serverError("Something went wrong...")
             }
-
-            guard 200...299 ~= httpResponse.statusCode else {
-                if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                    throw ClientManagerError.serverError(errorResponse.detail)
-                } else {
-                    throw ClientManagerError.serverError("Something went wrong...")
-                }
-            }
-
-            return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
         }
+
+        return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
     }
 
     /// Propose a Quick Action
@@ -325,7 +319,8 @@ class ClientManager: CanGetUIElements {
             appContext: appInfo?.appContext,
             version: self.version,
             isAutopilotEnabled: self.isAutopilotEnabled,
-            apps: appInfo?.apps.values.map { $0.bundleIdentifier }
+            apps: appInfo?.apps.values.map { $0.bundleIdentifier },
+            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled
         )
 
         // TODO: Reimplement the offline path
@@ -485,6 +480,7 @@ struct RequestPayload: Codable {
     var version: String
     var isAutopilotEnabled: Bool?
     var apps: [String]?
+    var isVoiceOverEnabled: Bool?
 }
 
 /// https://replicate.com/stability-ai/sdxl
@@ -549,13 +545,6 @@ public struct ImageResponse: Codable {
 
     /// The data sent within the response containing either `URL` or `Base64` data.
     public let data: [ImageData]
-}
-
-struct AppVersion: Codable, Equatable {
-    let major: Int
-    let minor: Int
-    let patch: Int
-    let url: String?
 }
 
 struct ResponsePayload: Codable {

@@ -16,23 +16,6 @@ struct Action: Identifiable, Codable {
     let setFocus: Bool?
 }
 
-extension FunctionCall {
-    func getAction() -> Action? {
-        guard let id = self.stringArg("id"),
-              let narration = self.stringArg("narration") else {
-            return nil
-        }
-
-        return Action(
-            id: id,
-            narration: narration,
-            inputText: self.stringArg("inputText"),
-            pressEnter: self.boolArg("pressEnter"),
-            setFocus: self.boolArg("setFocus")
-        )
-    }
-}
-
 extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
     func performUIAction(_ functionCall: FunctionCall, appInfo: AppInfo?) async throws {
