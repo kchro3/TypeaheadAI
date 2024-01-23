@@ -147,6 +147,19 @@ extension AXUIElement {
         return actions
     }
 
+    func getCenter() -> CGPoint? {
+        guard let size = self.sizeValue(forAttribute: kAXSizeAttribute),
+              let point = self.pointValue(forAttribute: kAXPositionAttribute),
+              size.width * size.height > 1.0 else {
+            return nil
+        }
+
+        return CGPoint(
+            x: point.x + size.width / 2,
+            y: point.y + size.height / 2
+        )
+    }
+
     func getElementAtMousePosition(_ mousePos: NSPoint) -> AXUIElement? {
         var element: AXUIElement?
 

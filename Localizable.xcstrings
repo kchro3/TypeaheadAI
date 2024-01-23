@@ -2497,6 +2497,9 @@
         }
       }
     },
+    "Smart-Focus: Focuses VoiceOver cursor on element" : {
+
+    },
     "Smart-Paste: Pastes the most recent Typeahead response" : {
       "localizations" : {
         "fr" : {
@@ -3048,6 +3051,9 @@
           }
         }
       }
+    },
+    "What element do you want to focus on?" : {
+
     },
     "What should TypeaheadAI know about you to provide better responses?" : {
       "localizations" : {

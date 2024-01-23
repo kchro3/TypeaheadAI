@@ -13,6 +13,7 @@ extension KeyboardShortcuts.Name {
     static let specialPaste = KeyboardShortcuts.Name("specialPaste", default: Shortcut(.v, modifiers: [.command, .option]))
     static let specialRecord = KeyboardShortcuts.Name("specialRecord", default: Shortcut(.r, modifiers: [.command, .option]))
     static let specialVision = KeyboardShortcuts.Name("specialVision", default: Shortcut(.o, modifiers: [.command, .option]))
+    static let specialFocus = KeyboardShortcuts.Name("specialFocus", default: Shortcut(.f, modifiers: [.command, .option]))
 
     static let chatNew = KeyboardShortcuts.Name("chatNew", default: Shortcut(.n, modifiers: [.command, .option]))
     static let chatOpen = KeyboardShortcuts.Name("chatOpen", default: Shortcut(.space, modifiers: [.command, .option]))
@@ -26,6 +27,7 @@ extension KeyboardShortcuts.Name: CaseIterable {
         .specialPaste,
         .specialRecord,
         .specialVision,
+        .specialFocus,
         .chatNew,
         .chatOpen,
         .cancelTasks

@@ -44,6 +44,7 @@ final class AppState: ObservableObject {
     private var specialOpenActor: SpecialOpenActor? = nil
     private var specialRecordActor: SpecialRecordActor? = nil
     private var specialVisionActor: SpecialVisionActor? = nil
+    private var specialFocusActor: SpecialFocusActor? = nil
 
     init(
         context: NSManagedObjectContext,
@@ -87,6 +88,10 @@ final class AppState: ObservableObject {
             modalManager: modalManager
         )
         self.specialVisionActor = SpecialVisionActor(
+            appContextManager: appContextManager,
+            modalManager: modalManager
+        )
+        self.specialFocusActor = SpecialFocusActor(
             appContextManager: appContextManager,
             modalManager: modalManager
         )
@@ -159,6 +164,17 @@ final class AppState: ObservableObject {
             Task {
                 do {
                     try await self.specialVisionActor?.specialVision()
+                } catch {
+                    self.logger.error("\(error.localizedDescription)")
+                    AudioServicesPlaySystemSoundWithCompletion(1103, nil)
+                }
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .specialFocus) { [self] in
+            Task {
+                do {
+                    try await self.specialFocusActor?.specialFocus()
                 } catch {
                     self.logger.error("\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)

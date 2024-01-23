@@ -6,25 +6,49 @@
 //
 
 import AppKit
+import Carbon.HIToolbox
 import Foundation
 
 protocol CanSetVOFocus {
-    func voFocus(on: AXUIElement, functionCall: FunctionCall, appContext: AppContext?) async throws
+    func focusVO(on: AXUIElement, functionCall: FunctionCall, appContext: AppContext?) async throws
 }
 
 extension CanSetVOFocus {
-    func voFocus(on axElement: AXUIElement, functionCall: FunctionCall, appContext: AppContext?) async throws {
-        if NSWorkspace.shared.isVoiceOverEnabled {
-            let status = AXUIElementSetAttributeValue(axElement, kAXFocusedAttribute as CFString, kCFBooleanTrue)
-            try await Task.safeSleep(for: .milliseconds(100))
+    func focusVO(on axElement: AXUIElement, functionCall: FunctionCall, appContext: AppContext?) async throws {
 
-            guard status == .success else {
-                throw ClientManagerError.functionCallError(
-                    "Failed to set VO focus",
-                    functionCall: functionCall,
-                    appContext: appContext
-                )
-            }
+        guard NSWorkspace.shared.isVoiceOverEnabled else {
+            throw ClientManagerError.functionCallError("VoiceOver must be enabled", functionCall: functionCall, appContext: appContext)
+        }
+
+        _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
+        try await Task.safeSleep(for: .milliseconds(100))
+
+        guard let center = axElement.getCenter() else {
+            throw ClientManagerError.functionCallError("Failed to focus on element", functionCall: functionCall, appContext: appContext)
+        }
+
+        // Move the mouse to the center of the element
+        CGWarpMouseCursorPosition(center)
+        try await Task.safeSleep(for: .milliseconds(100))
+
+        // Post a VO-Shift-F5 keystroke
+        try await sendKeyShortcut([CGKeyCode(kVK_Control), CGKeyCode(kVK_Option), CGKeyCode(kVK_Shift), CGKeyCode(kVK_F5)])
+    }
+
+    /// NOTE: Sometimes we need to issue the keys manually. No idea why.
+    private func sendKeyShortcut(_ keys: [CGKeyCode]) async throws {
+        let source = CGEventSource(stateID: .hidSystemState)
+
+        for key in keys {
+            let keydown = CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: true)!
+            keydown.post(tap: .cghidEventTap)
+            try await Task.sleep(for: .milliseconds(50))
+        }
+
+        for key in keys.reversed() {
+            let keyup = CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: false)!
+            keyup.post(tap: .cghidEventTap)
+            try await Task.sleep(for: .milliseconds(50))
         }
     }
 }

@@ -47,6 +47,11 @@ struct GeneralSettingsView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
+                    KeyboardShortcuts.Recorder(for: .specialFocus) {
+                        Text("Smart-Focus: Focuses VoiceOver cursor on element")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
                     KeyboardShortcuts.Recorder(for: .cancelTasks) {
                         Text("Cancel Tasks: Aborts any streaming results or autopilot tasks")
                             .frame(maxWidth: .infinity, alignment: .leading)
