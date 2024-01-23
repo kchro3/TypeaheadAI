@@ -23,6 +23,7 @@ class ClientManager: CanGetUIElements {
     private let session: URLSession
 
     private let version: String = "v11"
+    private let clientVersion: String? = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     private let validFinishReasons: [String] = [
         "stop",
         "function_call",
@@ -132,7 +133,8 @@ class ClientManager: CanGetUIElements {
             history: history,
             appContext: appContext,
             version: version,
-            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled
+            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled,
+            clientVersion: clientVersion
         )
 
         guard let httpBody = try? JSONEncoder().encode(payload) else {
@@ -197,7 +199,8 @@ class ClientManager: CanGetUIElements {
             messages: self.sanitizeMessages(messages),
             appContext: appInfo?.appContext,
             version: version,
-            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled
+            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled,
+            clientVersion: clientVersion
         )
 
         guard let httpBody = try? JSONEncoder().encode(payload) else {
@@ -390,7 +393,8 @@ class ClientManager: CanGetUIElements {
             version: self.version,
             isAutopilotEnabled: self.isAutopilotEnabled,
             apps: appInfo?.apps.values.map { $0.bundleIdentifier },
-            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled
+            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled,
+            clientVersion: clientVersion
         )
 
         // TODO: Reimplement the offline path
@@ -551,6 +555,7 @@ struct RequestPayload: Codable {
     var isAutopilotEnabled: Bool?
     var apps: [String]?
     var isVoiceOverEnabled: Bool?
+    var clientVersion: String?
 }
 
 /// https://replicate.com/stability-ai/sdxl
