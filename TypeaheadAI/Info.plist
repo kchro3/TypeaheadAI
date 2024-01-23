@@ -7,7 +7,7 @@
 	<key>CFBundleVersion</key>
 	<string>5</string>
 	<key>SUFeedURL</key>
-	<string>https://typeahead-ai.fly.dev/static/appcast.xml</string>
+	<string>https://pub-aad921bb9ea949159b00d32ac16f8df8.r2.dev/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>7bg36tIga0vFeX6UATDdEd6vZHVOKskQPliZrcIKfeQ=</string>
 	<key>GIDClientID</key>
