@@ -49,7 +49,7 @@ class ClientManager: CanGetUIElements {
     private let apiFeedback = URL(string: "http://localhost:8080/v2/feedback")!
 
 #else
-fc
+
     private let apiStream = URL(string: "https://api.typeahead.ai/v4/stream")!
     private let apiFocus = URL(string: "https://api.typeahead.ai/v4/focus")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
