@@ -13,7 +13,6 @@ struct Action: Identifiable, Codable {
     let narration: String
     let inputText: String?
     let pressEnter: Bool?
-    let setFocus: Bool?
 }
 
 extension FunctionManager: CanSimulateEnter, CanGetUIElements {

@@ -97,8 +97,7 @@ struct FunctionCall: Codable, Equatable {
                 id: id,
                 narration: narration,
                 inputText: self.stringArg("inputText"),
-                pressEnter: self.boolArg("pressEnter"),
-                setFocus: self.boolArg("setFocus")
+                pressEnter: self.boolArg("pressEnter")
             ))
 
         case .saveFile:
