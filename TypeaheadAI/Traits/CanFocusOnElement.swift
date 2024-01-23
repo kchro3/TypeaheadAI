@@ -22,12 +22,9 @@ extension CanFocusOnElement {
                 try await Task.safeSleep(for: .seconds(1))
                 result = AXUIElementPerformAction(axElement, "AXPress" as CFString)
             }
-        } else if let size = axElement.sizeValue(forAttribute: kAXSizeAttribute),
-                  let point = axElement.pointValue(forAttribute: kAXPositionAttribute),
-                  size.width * size.height > 1.0 {
+        } else if let center = axElement.getCenter() {
             // Simulate a mouse click event
-            let centerPoint = CGPoint(x: point.x + size.width / 2, y: point.y + size.height / 2)
-            simulateMouseClick(at: centerPoint)
+            simulateMouseClick(at: center)
             result = .success
         } else {
             result = .actionUnsupported

@@ -57,6 +57,8 @@
 		2B7669A32B5A72A50071D713 /* CanSimulateDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */; };
 		2B7669A52B5BA2150071D713 /* CanSetVOFocus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */; };
 		2B7669A72B5BA2610071D713 /* FunctionManager+SetVOCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A62B5BA2610071D713 /* FunctionManager+SetVOCursor.swift */; };
+		2B7669AA2B5EED910071D713 /* SpecialFocusActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A92B5EED910071D713 /* SpecialFocusActor.swift */; };
+		2B7669AC2B5F1CE60071D713 /* FunctionManager+FocusUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669AB2B5F1CE60071D713 /* FunctionManager+FocusUIElement.swift */; };
 		2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */; };
 		2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */; };
 		2B7D357C2B00B48600E85AEF /* LoggedOutOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */; };
@@ -206,6 +208,8 @@
 		2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateDictation.swift; sourceTree = "<group>"; };
 		2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSetVOFocus.swift; sourceTree = "<group>"; };
 		2B7669A62B5BA2610071D713 /* FunctionManager+SetVOCursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+SetVOCursor.swift"; sourceTree = "<group>"; };
+		2B7669A92B5EED910071D713 /* SpecialFocusActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecialFocusActor.swift; sourceTree = "<group>"; };
+		2B7669AB2B5F1CE60071D713 /* FunctionManager+FocusUIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FunctionManager+FocusUIElement.swift"; sourceTree = "<group>"; };
 		2B7BBABF2AF2B4D300E4CE1F /* QuickActionDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDetails.swift; sourceTree = "<group>"; };
 		2B7BBAC12AF3347100E4CE1F /* NewQuickActionForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewQuickActionForm.swift; sourceTree = "<group>"; };
 		2B7D357B2B00B48600E85AEF /* LoggedOutOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggedOutOnboardingView.swift; sourceTree = "<group>"; };
@@ -350,6 +354,7 @@
 				2B0B300F2ACF8C8000338B76 /* SpecialOpenActor.swift */,
 				2B1A18582B2D881000C31B56 /* SpecialRecordActor.swift */,
 				2BE5E0092B5204AB00E34AD2 /* SpecialVisionActor.swift */,
+				2B7669A92B5EED910071D713 /* SpecialFocusActor.swift */,
 			);
 			path = Actors;
 			sourceTree = "<group>";
@@ -414,6 +419,7 @@
 				2B9A897E2B3BE4B300041856 /* FunctionManager+OpenFile.swift */,
 				2B9A89822B3CDC1C00041856 /* FunctionManager+SaveFile.swift */,
 				2B7669A62B5BA2610071D713 /* FunctionManager+SetVOCursor.swift */,
+				2B7669AB2B5F1CE60071D713 /* FunctionManager+FocusUIElement.swift */,
 			);
 			path = Functions;
 			sourceTree = "<group>";
@@ -842,6 +848,7 @@
 				2BA7F0B52A9ABCD7003D38BA /* QuickActionManager.swift in Sources */,
 				2B2EF14E2AC17D4000EF2BD4 /* CustomTextField.swift in Sources */,
 				2B11FCF22B114C3F00325F38 /* Message.swift in Sources */,
+				2B7669AA2B5EED910071D713 /* SpecialFocusActor.swift in Sources */,
 				2B8CD4BB2B0AAC09003E0589 /* CopyButtonView.swift in Sources */,
 				2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */,
 				2B9A89872B3CE1D300041856 /* CanFocusOnElement.swift in Sources */,
@@ -884,6 +891,7 @@
 				2B7D358A2B01ED5100E85AEF /* SmartCopyOnboardingView.swift in Sources */,
 				2BAFDB6B2AF60F64009C8370 /* MenuButtonView.swift in Sources */,
 				2B1F20482B1BE94000152F13 /* SearchResultsView.swift in Sources */,
+				2B7669AC2B5F1CE60071D713 /* FunctionManager+FocusUIElement.swift in Sources */,
 				2B7BBAC22AF3347100E4CE1F /* NewQuickActionForm.swift in Sources */,
 				2BA7F0792A9ABBA8003D38BA /* TypeaheadAIApp.swift in Sources */,
 				2BA7F0B72A9ABD61003D38BA /* SettingsView.swift in Sources */,

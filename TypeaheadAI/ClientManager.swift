@@ -39,7 +39,8 @@ class ClientManager: CanGetUIElements {
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
 //    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
 
-    private let apiUrlStreaming = URL(string: "http://localhost:8787/v4/stream")!
+    private let apiStream = URL(string: "http://localhost:8787/v4/stream")!
+    private let apiFocus = URL(string: "http://localhost:8787/v4/focus")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
@@ -47,7 +48,7 @@ class ClientManager: CanGetUIElements {
 
 #else
 
-    private let apiUrlStreaming = URL(string: "https://api.typeahead.ai/v4/stream")!
+    private let apiStream = URL(string: "https://api.typeahead.ai/v4/stream")!
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
@@ -158,6 +159,75 @@ class ClientManager: CanGetUIElements {
         }
 
         return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
+    }
+
+    func focus(
+        messages: [Message],
+        timeout: TimeInterval = 30
+    ) async throws -> (FunctionCall, AppInfo?) {
+        guard online else {
+            // Incognito mode doesn't support this yet
+            throw ClientManagerError.signInRequired("Not supported in offline mode.")
+        }
+
+        guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
+            throw ClientManagerError.signInRequired("Must be signed in.")
+        }
+
+        var appInfo = try await appContextManager?.getActiveAppInfo()
+
+        // Serialize the UIElement
+        let startTime = Date()
+        let (tree, elementMap) = getUIElements(appContext: appInfo?.appContext)
+        if let serializedUIElement = tree?.serializeWithContext(appContext: appInfo?.appContext) {
+            print(serializedUIElement)
+            print("End-to-end Latency: \(Date().timeIntervalSince(startTime)) seconds")
+            appInfo?.appContext?.serializedUIElement = serializedUIElement
+            appInfo?.elementMap = elementMap
+        }
+
+        let payload = RequestPayload(
+            uuid: uuid,
+            username: NSUserName(),
+            userFullName: NSFullUserName(),
+            userObjective: "<focus>",
+            userBio: UserDefaults.standard.string(forKey: "bio"),
+            userLang: Locale.preferredLanguages.first,
+            copiedText: nil,
+            messages: self.sanitizeMessages(messages),
+            appContext: appInfo?.appContext,
+            version: version,
+            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled
+        )
+
+        guard let httpBody = try? JSONEncoder().encode(payload) else {
+            throw ClientManagerError.badRequest("Request was malformed...")
+        }
+
+        var urlRequest = URLRequest(url: self.apiFocus, timeoutInterval: timeout)
+        urlRequest.httpMethod = "POST"
+        urlRequest.httpBody = httpBody
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, resp) = try await self.session.data(for: urlRequest)
+
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            throw ClientManagerError.serverError("Something went wrong...")
+        }
+
+        guard 200...299 ~= httpResponse.statusCode else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw ClientManagerError.serverError(errorResponse.detail)
+            } else {
+                throw ClientManagerError.serverError("Something went wrong...")
+            }
+        }
+
+        guard let functionCall = try? JSONDecoder().decode(FunctionCall.self, from: data) else {
+            throw ClientManagerError.functionParsingError("Function could not be parsed: \(String(data: data, encoding: .utf8) ?? "")")
+        }
+
+        return (functionCall, appInfo)
     }
 
     /// Propose a Quick Action
@@ -400,7 +470,7 @@ class ClientManager: CanGetUIElements {
 
         return AsyncThrowingStream { continuation in
             Task {
-                var urlRequest = URLRequest(url: self.apiUrlStreaming, timeoutInterval: timeout)
+                var urlRequest = URLRequest(url: self.apiStream, timeoutInterval: timeout)
                 urlRequest.httpMethod = "POST"
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")

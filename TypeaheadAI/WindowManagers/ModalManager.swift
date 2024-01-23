@@ -152,7 +152,16 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     }
 
     @MainActor
-    func setText(_ text: String, isHidden: Bool = false, appContext: AppContext?) {
+    func setText(
+        _ text: String,
+        isHidden: Bool = false,
+        appContext: AppContext?,
+        messageContext: MessageContext? = nil
+    ) {
+        if !isHidden {
+            speaker.speak(text)
+        }
+
         if !isHidden,
            let idx = messages.indices.last,
            !messages[idx].isCurrentUser {
@@ -169,7 +178,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                         text: text,
                         isCurrentUser: false,
                         isHidden: isHidden,
-                        appContext: appContext
+                        appContext: appContext,
+                        messageContext: messageContext
                     )
                 )
             } else {
@@ -185,7 +195,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                         text: text,
                         isCurrentUser: false,
                         isHidden: isHidden,
-                        appContext: appContext
+                        appContext: appContext,
+                        messageContext: messageContext
                     )
                 )
             }
@@ -695,7 +706,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     }
 
     @MainActor
-    private func setPending(_ _isPending: Bool) {
+    func setPending(_ _isPending: Bool) {
         self.isPending = _isPending
     }
 
@@ -706,6 +717,28 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         try Task.checkCancellation()
 
         speaker.speak(NSLocalizedString("Thinking...", comment: ""))
+
+        if case .focus = self.messages.first?.messageContext {
+            let startTime = Date()
+            guard let (functionCall, appInfo) = try await self.clientManager?.focus(messages: self.messages) else {
+                throw ClientManagerError.functionParsingError("Could not parse function payload.")
+            }
+
+            if self.isVisible {
+                await self.closeModal()
+            }
+
+            print("Focus Response Latency: \(Date().timeIntervalSince(startTime)) seconds")
+
+            // Execute function and add the tool response
+            try await self.functionManager?.focusUIElement(functionCall, appInfo: appInfo)
+
+            try Task.checkCancellation()
+            print("Focus End-to-End Latency: \(Date().timeIntervalSince(startTime)) seconds")
+
+//            await self.forceRefresh()
+            return
+        }
 
         if let (bufferedPayload, appInfo) = try await self.clientManager?.refine(
             messages: self.messages,
@@ -754,11 +787,6 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 }
 
                 await self.appendTool("Updated State\n\(serialized)", functionCall: functionCall, appContext: newAppInfo?.appContext)
-
-                if case .performUIAction(let action) = args, action.setFocus == true {
-                    await self.setPending(false)
-                    return
-                }
 
                 if !hideModalDuringAutopilot {
                     await self.showModal()
@@ -901,7 +929,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 messages: self.messages,
                 streamHandler: self.appendPlan
             ), let text = bufferedPayload.text else {
-                self.setError("Could not generate a plan", appContext: nil)
+                self.setError("Could not genserate a plan", appContext: nil)
                 return
             }
 

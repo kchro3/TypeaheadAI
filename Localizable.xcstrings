@@ -2497,6 +2497,22 @@
         }
       }
     },
+    "Smart-Focus: Focuses VoiceOver cursor on element" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart-Focus : Concentre le curseur VoiceOver sur l'élément"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart-Focus: Concentra il cursore VoiceOver sull'elemento"
+          }
+        }
+      }
+    },
     "Smart-Paste: Pastes the most recent Typeahead response" : {
       "localizations" : {
         "fr" : {
@@ -3045,6 +3061,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cosa vuoi fare con questo?"
+          }
+        }
+      }
+    },
+    "What element do you want to focus on?" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur quel element voulez-vous vous concentrer ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su quale elemento vuoi mettere a fuoco?"
           }
         }
       }

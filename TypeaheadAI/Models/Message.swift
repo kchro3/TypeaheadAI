@@ -8,6 +8,10 @@
 import AppKit
 import Foundation
 
+enum MessageContext: Codable, Equatable {
+    case focus
+}
+
 enum MessageType: Codable, Equatable {
     case string
     case html(data: String)
@@ -38,6 +42,7 @@ struct Message: Codable, Identifiable, Equatable {
     var messageType: MessageType = .string
     var isTruncated: Bool = true
     var isEdited: Bool = false
+    var messageContext: MessageContext? = nil
 
     init(
         id: UUID,
@@ -53,7 +58,8 @@ struct Message: Codable, Identifiable, Equatable {
         responseError: String? = nil,
         messageType: MessageType = .string,
         isTruncated: Bool = true,
-        isEdited: Bool = false
+        isEdited: Bool = false,
+        messageContext: MessageContext? = nil
     ) {
         self.id = id
         self.rootId = rootId
@@ -69,6 +75,7 @@ struct Message: Codable, Identifiable, Equatable {
         self.isTruncated = isTruncated
         self.isEdited = isEdited
         self.quickActionId = quickActionId
+        self.messageContext = messageContext
     }
 }
 
@@ -103,6 +110,11 @@ extension Message {
             self.appContext = appContext
         }
 
+        if let serialized = entry.serializedMessageContext?.data(using: .utf8),
+           let messageContext = try? JSONDecoder().decode(MessageContext.self, from: serialized) {
+            self.messageContext = messageContext
+        }
+
         self.responseError = entry.responseError
     }
 
@@ -130,6 +142,12 @@ extension Message {
                let serialized = String(data: data, encoding: .utf8) {
                 entry.serializedMessageType = serialized
             }
+        }
+
+        if let messageContext = self.messageContext,
+           let data = try? JSONEncoder().encode(messageContext),
+           let serialized = String(data: data, encoding: .utf8) {
+            entry.serializedMessageContext = serialized
         }
 
         if let appContext = self.appContext,

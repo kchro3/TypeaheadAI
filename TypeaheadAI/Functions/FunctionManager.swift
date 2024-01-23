@@ -11,6 +11,7 @@ import Foundation
 import SwiftUI
 
 enum FunctionName: String, Codable {
+    case focusUIElement = "focus_ui_element"
     case openApplication = "open_application"
     case openFile = "open_file"
     case openURL = "open_url"
@@ -19,6 +20,7 @@ enum FunctionName: String, Codable {
 }
 
 enum FunctionArgs: Codable {
+    case focusUIElement(id: String?, errorMessage: String?)
     case openApplication(bundleIdentifier: String)
     case openFile(file: String)
     case openURL(url: String)
@@ -27,6 +29,12 @@ enum FunctionArgs: Codable {
 
     var humanReadable: String {
         switch self {
+        case .focusUIElement(_, let errorMessage):
+            if let errorMessage = errorMessage {
+                return errorMessage
+            } else {
+                return "Setting focus..."
+            }
         case .openApplication(let bundleIdentifier):
             return "Opening \(bundleIdentifier)..."
         case .openFile(let file):
@@ -48,6 +56,16 @@ struct FunctionCall: Codable, Equatable {
 
     func parseArgs() throws -> FunctionArgs {
         switch self.name {
+        case .focusUIElement:
+            let idOpt = self.stringArg("id")
+            let errorOpt = self.stringArg("error")
+
+            if idOpt == nil, errorOpt == nil {
+                throw ClientManagerError.functionArgParsingError("Function is missing ID but doesn't have an error message.")
+            }
+
+            return .focusUIElement(id: self.stringArg("id"), errorMessage: self.stringArg("error"))
+
         case .openApplication:
             guard let bundleIdentifier = self.stringArg("bundleIdentifier") else {
                 throw ClientManagerError.functionArgParsingError("Failed to open application...")
@@ -79,8 +97,7 @@ struct FunctionCall: Codable, Equatable {
                 id: id,
                 narration: narration,
                 inputText: self.stringArg("inputText"),
-                pressEnter: self.boolArg("pressEnter"),
-                setFocus: self.boolArg("setFocus")
+                pressEnter: self.boolArg("pressEnter")
             ))
 
         case .saveFile:
@@ -100,7 +117,8 @@ class FunctionManager: CanFetchAppContext,
                        CanSimulatePaste,
                        CanSimulateClose,
                        CanSimulateGoToFile,
-                       CanFocusOnElement {
+                       CanFocusOnElement,
+                       CanSetVOFocus {
 
     /// Return the parsed FunctionCall
     func parse(jsonString: String) async throws -> FunctionCall {
@@ -114,6 +132,8 @@ class FunctionManager: CanFetchAppContext,
 
     func call(_ functionCall: FunctionCall, appInfo: AppInfo?) async throws -> AppInfo {
         switch functionCall.name {
+        case .focusUIElement:
+            try await self.focusUIElement(functionCall, appInfo: appInfo)
         case .openApplication:
             try await self.openApplication(functionCall, appInfo: appInfo)
         case .openFile:
