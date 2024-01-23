@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleShortVersionString</key>
-	<string>2.1.25</string>
+	<string>2.1.26</string>
 	<key>CFBundleVersion</key>
-	<string>5</string>
+	<string>6</string>
 	<key>SUFeedURL</key>
 	<string>https://pub-aad921bb9ea949159b00d32ac16f8df8.r2.dev/appcast.xml</string>
 	<key>SUPublicEDKey</key>
