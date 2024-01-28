@@ -19,5 +19,7 @@ jobs:
           python-version: '3.x'
 
       - name: Test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python .github/scripts/update_localizations.py
