@@ -22,4 +22,5 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python .github/scripts/update_localizations.py
+          git fetch origin ${{ github.base_ref }}
+          git diff FETCH_HEAD...${{ github.sha }} -- Localizable.xcstrings | python .github/scripts/update_localizations.py
