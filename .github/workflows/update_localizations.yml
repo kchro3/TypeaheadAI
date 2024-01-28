@@ -24,4 +24,11 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python .github/scripts/update_localizations.py --file_path Localizable.xcstrings
+          python .github/scripts/update_localizations.py Localizable.xcstrings
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name 'kchro3'
+          git config --global user.email 'jhara1418@gmail.com'
+          git commit -am "Update translations"
+          git push
