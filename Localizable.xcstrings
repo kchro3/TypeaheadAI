@@ -754,6 +754,16 @@
         }
       }
     },
+    "Continue to step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Continue to step %1$lld of %2$lld"
+          }
+        }
+      }
+    },
     "Continue with Apple" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1270,6 +1280,16 @@
         }
       }
     },
+    "Go back to step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Go back to step %1$lld of %2$lld"
+          }
+        }
+      }
+    },
     "Hi,\n\nThanks for trying out Typeahead! We are working on new features and fixing bugs every day, so we appreciate your support. Please let us know if you run into any issues.\n\nBest,\nThe Typeahead Team" : {
       "localizations" : {
         "fr" : {
@@ -1592,6 +1612,9 @@
         }
       }
     },
+    "Missing Accessibility Permissions" : {
+
+    },
     "N" : {
       "localizations" : {
         "fr" : {
@@ -1835,6 +1858,9 @@
         }
       }
     },
+    "One of Typeahead's workflows is **smart-copy** and **smart-paste**. It is smarter than your standard clipboard because it uses AI to take what you've copied and predict what you want to paste.\n\nFor example, let's say you want to reply to the below email. You can select the text and **smart-copy** it with the following keyboard shortcut." : {
+
+    },
     "Online" : {
       "localizations" : {
         "fr" : {
@@ -1932,6 +1958,15 @@
         }
       }
     },
+    "Option-Command-C" : {
+
+    },
+    "Option-Command-Space" : {
+
+    },
+    "Option-Command-V" : {
+
+    },
     "Password" : {
       "localizations" : {
         "fr" : {
@@ -1963,6 +1998,9 @@
           }
         }
       }
+    },
+    "Permissions have been granted!" : {
+
     },
     "Personalize your email" : {
       "localizations" : {
@@ -2399,6 +2437,9 @@
         }
       }
     },
+    "Set focus on this element and press \"smart-paste.\"" : {
+
+    },
     "Settings" : {
       "localizations" : {
         "fr" : {
@@ -2464,6 +2505,9 @@
         }
       }
     },
+    "Skip tutorial." : {
+
+    },
     "Smart Copy-Pastes" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2528,6 +2572,9 @@
           }
         }
       }
+    },
+    "Smart-Record Overview" : {
+
     },
     "Smart-Vision: Takes a screenshot" : {
       "localizations" : {
@@ -2808,7 +2855,11 @@
         }
       }
     },
+    "The first thing you will need to learn is how to **activate** Typeahead.\n\nTypeahead runs in the **background**, so it will not be in your dock. Instead, it can be accessed by keyboard shortcut or from the menu bar.\n\nTo open and close a Typeahead window, you can press the following keyboard shortcut." : {
+
+    },
     "The first thing you will need to learn is how to **activate** Typeahead.\n\nUnlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you will see the Typeahead logo in the menu bar to indicate when the app is running.\n\nTo open and close a Typeahead window, you can press:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2857,6 +2908,7 @@
       }
     },
     "The primary interface for Typeahead is **smart-copy** and **smart-paste**. It is smarter than your standard clipboard because it uses AI to take what you've copied and predict what you want to paste.\n\nFor example, let's say you want to reply to this email. You can select the email below and **smart-copy** it with:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2936,6 +2988,15 @@
           }
         }
       }
+    },
+    "This shortcut can be reconfigured in your settings." : {
+
+    },
+    "Title" : {
+
+    },
+    "Try selecting this email and press command-option-C to \"smart-copy.\"" : {
+
     },
     "Typeahead" : {
       "localizations" : {
@@ -3114,6 +3175,7 @@
       }
     },
     "You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.\n\nNOTE: All hotkeys can be reconfigured in your Settings." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3128,6 +3190,9 @@
           }
         }
       }
+    },
+    "You can see additional options if you right-click on a message. For example, you can edit a message or retry sending the message if there is a failure.\n\nClick continue when you're satisfied." : {
+
     },
     "You can view and manage your history here." : {
       "localizations" : {

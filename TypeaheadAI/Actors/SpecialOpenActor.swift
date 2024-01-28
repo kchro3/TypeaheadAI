@@ -48,13 +48,12 @@ actor SpecialOpenActor {
             try await self.modalManager.prepareUserInput()
         } else {
             self.logger.debug("special open")
-            if await self.modalManager.isWindowVisible() {
-                // EARLY RETURN!
+            guard await !self.modalManager.isWindowVisible() else {
                 await self.modalManager.closeModal()
                 return
-            } else {
-                try await self.modalManager.prepareUserInput()
             }
+
+            try await self.modalManager.prepareUserInput()
         }
 
         if self.modalManager.messages.isEmpty && (self.modalManager.userIntents?.isEmpty ?? true) {

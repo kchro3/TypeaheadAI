@@ -43,6 +43,8 @@
 		2B3FAC212AAAF22500B2D405 /* LlamaWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */; };
 		2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */; };
 		2B3FF5352B50B70F00D7BE49 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2B3FF5342B50B70F00D7BE49 /* Sparkle */; };
+		2B4165422B65AA89007E8C61 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4165412B65AA89007E8C61 /* View+Extension.swift */; };
+		2B4165442B65C777007E8C61 /* SampleEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4165432B65C777007E8C61 /* SampleEmailView.swift */; };
 		2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B44FA972ABA783F00C6B542 /* OnboardingView.swift */; };
 		2B473E872AA85B9A0042913D /* IncognitoModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E862AA85B9A0042913D /* IncognitoModeView.swift */; };
 		2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B473E882AA85BDD0042913D /* LlamaModelManager.swift */; };
@@ -51,6 +53,8 @@
 		2B4BDB8B2ACC281E00E55D78 /* IntentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4BDB8A2ACC281E00E55D78 /* IntentManager.swift */; };
 		2B520D812AC7FD4800310426 /* AuxiliaryMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */; };
 		2B520D852AC82EA100310426 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D842AC82EA100310426 /* AccountView.swift */; };
+		2B5CA3952B65CC870070E01C /* OnboardingNavbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA3942B65CC870070E01C /* OnboardingNavbarView.swift */; };
+		2B5CA3972B65D1B60070E01C /* OnboardingHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA3962B65D1B60070E01C /* OnboardingHeaderView.swift */; };
 		2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */; };
 		2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */; };
 		2B7669A12B5A2CD00071D713 /* CanSimulateControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */; };
@@ -196,12 +200,16 @@
 		2B3FAC1F2AAAF22500B2D405 /* LlamaWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LlamaWrapper.cpp; sourceTree = "<group>"; };
 		2B3FAC202AAAF22500B2D405 /* LlamaWrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LlamaWrapper.hpp; sourceTree = "<group>"; };
 		2B3FAC222AAAF44D00B2D405 /* LlamaWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaWrapper.swift; sourceTree = "<group>"; };
+		2B4165412B65AA89007E8C61 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
+		2B4165432B65C777007E8C61 /* SampleEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleEmailView.swift; sourceTree = "<group>"; };
 		2B44FA972ABA783F00C6B542 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		2B473E862AA85B9A0042913D /* IncognitoModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoModeView.swift; sourceTree = "<group>"; };
 		2B473E882AA85BDD0042913D /* LlamaModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaModelManager.swift; sourceTree = "<group>"; };
 		2B4BDB8A2ACC281E00E55D78 /* IntentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentManager.swift; sourceTree = "<group>"; };
 		2B520D802AC7FD4800310426 /* AuxiliaryMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuxiliaryMenuView.swift; sourceTree = "<group>"; };
 		2B520D842AC82EA100310426 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		2B5CA3942B65CC870070E01C /* OnboardingNavbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNavbarView.swift; sourceTree = "<group>"; };
+		2B5CA3962B65D1B60070E01C /* OnboardingHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingHeaderView.swift; sourceTree = "<group>"; };
 		2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentConversationsView.swift; sourceTree = "<group>"; };
 		2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteScript.swift; sourceTree = "<group>"; };
 		2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateControl.swift; sourceTree = "<group>"; };
@@ -394,6 +402,9 @@
 				2B9A89962B453A0A00041856 /* AutopilotOnboardingView.swift */,
 				2B9A89942B4539DC00041856 /* SmartRecordOnboardingView.swift */,
 				2B7D35852B01B16A00E85AEF /* OutroOnboardingView.swift */,
+				2B4165432B65C777007E8C61 /* SampleEmailView.swift */,
+				2B5CA3942B65CC870070E01C /* OnboardingNavbarView.swift */,
+				2B5CA3962B65D1B60070E01C /* OnboardingHeaderView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -632,6 +643,7 @@
 				2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */,
 				2B9A89922B44D70D00041856 /* Task+Extension.swift */,
 				2BE5E00D2B53747800E34AD2 /* NSImage+Extension.swift */,
+				2B4165412B65AA89007E8C61 /* View+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -836,10 +848,12 @@
 				2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */,
 				2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */,
 				2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */,
+				2B4165422B65AA89007E8C61 /* View+Extension.swift in Sources */,
 				2BE5E00A2B5204AB00E34AD2 /* SpecialVisionActor.swift in Sources */,
 				2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2B16093F2B5649210057FC32 /* NarrationView.swift in Sources */,
+				2B5CA3972B65D1B60070E01C /* OnboardingHeaderView.swift in Sources */,
 				2B7669A52B5BA2150071D713 /* CanSetVOFocus.swift in Sources */,
 				2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */,
 				2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */,
@@ -874,6 +888,7 @@
 				2BD3821E2B2C4B2E00F96C19 /* CanSimulateEnter.swift in Sources */,
 				2B1F20462B1987E400152F13 /* ConversationManager.swift in Sources */,
 				2B7669A32B5A72A50071D713 /* CanSimulateDictation.swift in Sources */,
+				2B5CA3952B65CC870070E01C /* OnboardingNavbarView.swift in Sources */,
 				2B3FAC232AAAF44D00B2D405 /* LlamaWrapper.swift in Sources */,
 				2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */,
 				2B9A89952B4539DC00041856 /* SmartRecordOnboardingView.swift in Sources */,
@@ -907,6 +922,7 @@
 				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
 				2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */,
 				2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */,
+				2B4165442B65C777007E8C61 /* SampleEmailView.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B9A89852B3CDC9700041856 /* AXSavePanelVisitor.swift in Sources */,
 				2BDDB9972B28352800D52BF0 /* FunctionManager+PerformUIAction.swift in Sources */,

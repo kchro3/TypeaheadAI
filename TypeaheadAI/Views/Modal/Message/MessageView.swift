@@ -310,6 +310,7 @@ struct MessageView: View {
                         .foregroundColor(.primary)
                         .background(colorScheme == .dark ? .black.opacity(0.2) : .secondary.opacity(0.15))
                         .textSelection(.enabled)
+                        .accessibilityElement(children: .combine)
                     })
             case .html(let data):
                 ChatBubble(

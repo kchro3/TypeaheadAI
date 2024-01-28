@@ -9,10 +9,10 @@ import SwiftUI
 
 struct QuickActionExplanationOnboardingView: View {
     var body: some View {
-        VStack {
-            Text("Why use smart-copy and smart-paste?")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
+        VStack(spacing: 20) {
+            OnboardingHeaderView {
+                Text("Why use smart-copy and smart-paste?")
+            }
 
             Text(
             """
@@ -25,7 +25,6 @@ struct QuickActionExplanationOnboardingView: View {
             For example, if you edited the email manually or by prompting, your preferences would be remembered for the next time you say "reply to this email." It can learn to generalize patterns across examples, and the more you use Typeahead, the better it will become.
             """
             )
-            .padding(.horizontal, 30)
 
             Spacer()
         }

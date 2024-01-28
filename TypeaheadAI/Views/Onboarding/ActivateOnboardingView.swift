@@ -9,22 +9,20 @@ import SwiftUI
 
 struct ActivateOnboardingView: View {
     var body: some View {
-        VStack {
-            Text("How to **activate** a Typeahead window")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
+        VStack(spacing: 20) {
+            OnboardingHeaderView {
+                Text("How to **activate** a Typeahead window")
+            }
 
             Text(
                 """
                 The first thing you will need to learn is how to **activate** Typeahead.
 
-                Unlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you will see the Typeahead logo in the menu bar to indicate when the app is running.
+                Typeahead runs in the **background**, so it will not be in your dock. Instead, it can be accessed by keyboard shortcut or from the menu bar.
 
-                To open and close a Typeahead window, you can press:
+                To open and close a Typeahead window, you can press the following keyboard shortcut.
                 """
             )
-
-            Spacer()
 
             HStack {
                 HStack {
@@ -59,17 +57,9 @@ struct ActivateOnboardingView: View {
                         .stroke(Color.white, lineWidth: 1)
                 )
             }
-
-            Spacer()
-
-
-            Text(
-            """
-            You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.
-
-            NOTE: All hotkeys can be reconfigured in your Settings.
-            """
-            )
+            .accessibilityElement()
+            .accessibilityLabel("Option-Command-Space")
+            .accessibilityHint("This shortcut can be reconfigured in your settings.")
 
             Spacer()
         }

@@ -20,8 +20,8 @@ struct TypeaheadAIApp: App {
     init() {
         #if DEBUG
         // NOTE: Uncomment the following to wipe UserDefaults. Do not remove the #if DEBUG compiler flags.
-//        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
-//        UserDefaults.standard.synchronize()
+        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+        UserDefaults.standard.synchronize()
         #endif
 
         let context = persistenceController.container.viewContext

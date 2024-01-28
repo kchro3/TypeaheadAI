@@ -12,18 +12,16 @@ struct ModalFooterView: View {
 
     @State private var text: String = ""
     @FocusState private var isFocused: Bool
+    @AccessibilityFocusState private var isAXFocused: Bool
 
     var body: some View {
         VStack(spacing: 5) {
-            if let userIntents = modalManager.userIntents,
-               userIntents.count > 0 {
-                UserIntentsView(userIntents: userIntents) { userIntent in
-                    Task {
-                        await modalManager.addUserMessage(userIntent, isQuickAction: true, appContext: nil)
-                    }
+            UserIntentsView(userIntents: modalManager.userIntents) { userIntent in
+                Task {
+                    await modalManager.addUserMessage(userIntent, isQuickAction: true, appContext: nil)
                 }
-                .accessibilityLabel("Suggestions")
             }
+            .accessibilityLabel("Suggestions")
 
             HStack {
                 CustomTextField(
@@ -51,6 +49,7 @@ struct ModalFooterView: View {
                     }
                 }
                 .focused($isFocused)
+                .accessibilityFocused($isAXFocused)
                 .accessibilityLabel("Message")
                 .accessibilityHint("Chat with Typeahead")
                 .padding(.vertical, 5)

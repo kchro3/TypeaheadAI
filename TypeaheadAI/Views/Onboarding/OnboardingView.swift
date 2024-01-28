@@ -37,6 +37,7 @@ struct OnboardingView: View {
                     panel
                         .id(UUID())
                         .transition(.opacity)
+                        .accessibilitySortPriority(10.0)
 
                     Spacer()
 
@@ -111,6 +112,7 @@ struct OnboardingView: View {
 
                 Spacer()
             }
+            .accessibilityHidden(true)
 
             HStack {
                 RoundedButton("Skip") {
@@ -120,6 +122,8 @@ struct OnboardingView: View {
                         window.performClose(nil)
                     }
                 }
+                .accessibilityHint("Skip tutorial.")
+                .accessibilitySortPriority(1.0)
 
                 Spacer()
 
@@ -128,6 +132,8 @@ struct OnboardingView: View {
                         modalManager.closeModal()
                         step -= 1
                     }
+                    .accessibilityHint("Go back to step \(step - 1) of \(totalSteps)")
+                    .accessibilitySortPriority(2.0)
                 }
 
                 if step < totalSteps {
@@ -137,6 +143,8 @@ struct OnboardingView: View {
                         }
                         step += 1
                     }
+                    .accessibilityHint("Continue to step \(step + 1) of \(totalSteps)")
+                    .accessibilitySortPriority(3.0)
                 } else if step == totalSteps {
                     RoundedButton("Finish", isAccent: true) {
                         if let window = NSApplication.shared.keyWindow {
@@ -145,6 +153,7 @@ struct OnboardingView: View {
                             window.performClose(nil)
                         }
                     }
+                    .accessibilitySortPriority(3.0)
                 }
             }
         }

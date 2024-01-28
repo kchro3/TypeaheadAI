@@ -9,10 +9,10 @@ import SwiftUI
 
 struct OutroOnboardingView: View {
     var body: some View {
-        VStack {
-            Text("You're all set!")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
+        VStack(spacing: 20) {
+            OnboardingHeaderView {
+                Text("You're all set!")
+            }
 
             Text(
                 """

@@ -9,10 +9,10 @@ import SwiftUI
 
 struct AutopilotOnboardingView: View {
     var body: some View {
-        VStack {
-            Text("Autopilot Mode")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
+        VStack(spacing: 20) {
+            OnboardingHeaderView {
+                Text("Autopilot Mode")
+            }
 
             Text(
             """
@@ -25,7 +25,6 @@ struct AutopilotOnboardingView: View {
             Let's give it a try. Open a new window with:
             """
             )
-            .padding(.horizontal, 30)
 
             HStack {
                 HStack {

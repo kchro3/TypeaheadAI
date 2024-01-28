@@ -10,9 +10,9 @@ import SwiftUI
 struct IntroOnboardingView: View {
     var body: some View {
         VStack {
-            Text("Welcome to Typeahead")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
+            OnboardingHeaderView {
+                Text("Welcome to Typeahead")
+            }
 
             Text(
             """

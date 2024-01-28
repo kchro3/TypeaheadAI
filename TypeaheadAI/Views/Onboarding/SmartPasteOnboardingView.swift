@@ -13,10 +13,10 @@ struct SmartPasteOnboardingView: View {
     @State private var pastedContent: String = ""
 
     var body: some View {
-        VStack {
-            Text("How to **Smart-paste**")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
+        VStack(spacing: 20) {
+            OnboardingHeaderView {
+                Text("How to **Smart-paste**")
+            }
 
             Text(
             """
@@ -25,7 +25,6 @@ struct SmartPasteOnboardingView: View {
             For this tutorial, you can **smart-paste** the response into the text box below with:
             """
             )
-            .padding(.horizontal, 30)
 
             Spacer()
 
@@ -62,6 +61,9 @@ struct SmartPasteOnboardingView: View {
                         .stroke(Color.white, lineWidth: 1)
                 )
             }
+            .accessibilityElement()
+            .accessibilityLabel("Option-Command-V")
+            .accessibilityHint("This shortcut can be reconfigured in your settings.")
 
             Divider()
                 .padding(10)
@@ -91,6 +93,8 @@ struct SmartPasteOnboardingView: View {
                     }.allowsHitTesting(false),
                     alignment: .topLeading
                 )
+                .accessibilityElement()
+                .accessibilityHint("Set focus on this element and press \"smart-paste.\"")
 
             Spacer()
         }
