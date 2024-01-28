@@ -1,7 +1,7 @@
 on:
   push:
     paths:
-      - Localization.xcstrings
+      - Localizable.xcstrings
 
 jobs:
   update_localizations:
