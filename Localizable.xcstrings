@@ -3169,6 +3169,7 @@
       }
     },
     "What's up" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

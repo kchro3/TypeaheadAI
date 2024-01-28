@@ -62,15 +62,21 @@ def main(file_path):
         for key in SUPPORTED_LANGUAGES
     }
 
+    stale_keys = []
+
     for i, (key, value) in enumerate(localizable_strings['strings'].items()):
         if key == '':
             continue
-
-        if 'localizations' not in value:
+        
+        if 'extractionState' in value and value['extractionState'] == 'stale':
+            stale_keys.append(key)
+        elif 'localizations' not in value:
             for language in SUPPORTED_LANGUAGES:
                 missing_translations[language].append(key)
     
-    
+    for stale_key in stale_keys:
+        del localizable_strings['strings'][stale_key]
+
     for target, strings in missing_translations.items():
         for string in strings:
             translated = translate(target, string)
@@ -82,7 +88,6 @@ def main(file_path):
                     "value" : translated
                 }
             }
-    ##
 
     with open(file_path, 'w') as w:
         raw = json.dumps(localizable_strings, ensure_ascii=False, indent=2, separators=(',', ' : '))
