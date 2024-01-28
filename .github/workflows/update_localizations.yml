@@ -20,9 +20,8 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Test
+      - name: Update Localizations
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          git fetch origin ${{ github.base_ref }}
-          git diff FETCH_HEAD...${{ github.sha }} -- Localizable.xcstrings | python .github/scripts/update_localizations.py
+          python .github/scripts/update_localizations.py --file_path Localizable.xcstrings
