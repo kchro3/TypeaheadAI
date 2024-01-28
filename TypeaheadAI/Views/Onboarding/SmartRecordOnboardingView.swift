@@ -27,6 +27,8 @@ struct SmartRecordOnboardingView: View {
             )
             .padding(.horizontal, 30)
 
+            Text("What's up")
+
             Spacer()
         }
     }
