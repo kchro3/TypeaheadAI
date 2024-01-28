@@ -20,4 +20,4 @@ jobs:
 
       - name: Test
         run: |
-          echo "hello world"
+          python .github/scripts/update_localizations.py
