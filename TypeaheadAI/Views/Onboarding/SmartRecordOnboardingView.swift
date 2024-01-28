@@ -10,7 +10,7 @@ import SwiftUI
 struct SmartRecordOnboardingView: View {
     var body: some View {
         VStack {
-            Text("")
+            Text("How to record a new Quick Action")
                 .font(.largeTitle)
                 .padding(.vertical, 10)
 
