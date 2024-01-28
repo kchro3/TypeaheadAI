@@ -1,7 +1,9 @@
 on:
-  push:
+  pull_request:
+    branches:
+      - main
     paths:
-      - Localizable.xcstrings
+      - 'Localizable.xcstrings'
 
 jobs:
   update_localizations:
