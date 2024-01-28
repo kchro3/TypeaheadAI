@@ -5,9 +5,12 @@
 //  Created by Jeff Hara on 11/17/23.
 //
 
+import KeyboardShortcuts
 import SwiftUI
 
 struct ActivateOnboardingView: View {
+    @State private var isEditing: Bool = false
+
     var body: some View {
         VStack(spacing: 20) {
             OnboardingHeaderView {
@@ -16,50 +19,18 @@ struct ActivateOnboardingView: View {
 
             Text(
                 """
-                The first thing you will need to learn is how to **activate** Typeahead.
+                Typeahead is a globally accessible chat window.
 
-                Typeahead runs in the **background**, so it will not be in your dock. Instead, it can be accessed by keyboard shortcut or from the menu bar.
+                Like VoiceOver, it pops up over other windows and is not in your dock.
 
-                To open and close a Typeahead window, you can press the following keyboard shortcut.
+                Instead, it can be toggled by keyboard shortcut.
+
+                By default, the keyboard shortcut to open and close a Typeahead window is Option-Command-Space, but you can change it below.
                 """
             )
 
-            HStack {
-                HStack {
-                    Text("Option")
-                    Image(systemName: "option")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Command")
-                    Image(systemName: "command")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Space")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-            }
-            .accessibilityElement()
-            .accessibilityLabel("Option-Command-Space")
-            .accessibilityHint("This shortcut can be reconfigured in your settings.")
+            KeyboardShortcuts.Recorder(for: .chatOpen)
+                .accessibilityHint("You can also configure this in your settings.")
 
             Spacer()
         }

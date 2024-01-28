@@ -41,7 +41,7 @@ struct OnboardingView: View {
 
                     Spacer()
 
-                    navbar
+                    OnboardingNavbarView(modalManager: modalManager)
                 }
                 .padding(30)
                 .animation(.easeInOut, value: UUID())
@@ -99,63 +99,6 @@ struct OnboardingView: View {
             AnyView(AutopilotOnboardingView())
         } else {
             AnyView(OutroOnboardingView())
-        }
-    }
-
-    @ViewBuilder
-    var navbar: some View {
-        VStack {
-            HStack {
-                Spacer()
-
-                Text("Step \(step) of \(totalSteps)")
-
-                Spacer()
-            }
-            .accessibilityHidden(true)
-
-            HStack {
-                RoundedButton("Skip") {
-                    if let window = NSApplication.shared.keyWindow {
-                        print("Mark as onboarded...")
-                        hasOnboarded = true
-                        window.performClose(nil)
-                    }
-                }
-                .accessibilityHint("Skip tutorial.")
-                .accessibilitySortPriority(1.0)
-
-                Spacer()
-
-                if step > 1 {
-                    RoundedButton("Back") {
-                        modalManager.closeModal()
-                        step -= 1
-                    }
-                    .accessibilityHint("Go back to step \(step - 1) of \(totalSteps)")
-                    .accessibilitySortPriority(2.0)
-                }
-
-                if step < totalSteps {
-                    RoundedButton("Continue", isAccent: true) {
-                        if step != 5 && step != 6 {
-                            modalManager.closeModal()
-                        }
-                        step += 1
-                    }
-                    .accessibilityHint("Continue to step \(step + 1) of \(totalSteps)")
-                    .accessibilitySortPriority(3.0)
-                } else if step == totalSteps {
-                    RoundedButton("Finish", isAccent: true) {
-                        if let window = NSApplication.shared.keyWindow {
-                            print("Mark as onboarded...")
-                            hasOnboarded = true
-                            window.performClose(nil)
-                        }
-                    }
-                    .accessibilitySortPriority(3.0)
-                }
-            }
         }
     }
 }

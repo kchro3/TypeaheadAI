@@ -23,6 +23,7 @@ struct UserIntentView: View {
                     Image(systemName: "command")
                     Text("\(rank)")
                 }
+                .accessibilityHidden(true)
 
                 Text(userIntent)
                     .lineLimit(1)

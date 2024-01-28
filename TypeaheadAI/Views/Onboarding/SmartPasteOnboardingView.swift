@@ -5,6 +5,7 @@
 //  Created by Jeff Hara on 11/13/23.
 //
 
+import KeyboardShortcuts
 import SwiftUI
 
 struct SmartPasteOnboardingView: View {
@@ -22,48 +23,14 @@ struct SmartPasteOnboardingView: View {
             """
             Once you're happy with Typeahead's response, you can **smart-paste** the latest draft into Gmail or your favorite email app.
 
-            For this tutorial, you can **smart-paste** the response into the text box below with:
+            For this tutorial, you can **smart-paste** the response into the text box below, using the following keyboard shortcut.
             """
             )
 
             Spacer()
 
-            HStack {
-                HStack {
-                    Text("Option")
-                    Image(systemName: "option")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Command")
-                    Image(systemName: "command")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("V")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-            }
-            .accessibilityElement()
-            .accessibilityLabel("Option-Command-V")
-            .accessibilityHint("This shortcut can be reconfigured in your settings.")
+            KeyboardShortcuts.Recorder(for: .specialPaste)
+                .accessibilityHint("You can also configure this in your settings.")
 
             Divider()
                 .padding(10)

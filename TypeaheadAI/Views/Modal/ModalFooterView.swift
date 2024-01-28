@@ -60,6 +60,7 @@ struct ModalFooterView: View {
                 .onAppear {
                     DispatchQueue.main.async {
                         isFocused = true
+                        isAXFocused = true
                     }
 
                     NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in

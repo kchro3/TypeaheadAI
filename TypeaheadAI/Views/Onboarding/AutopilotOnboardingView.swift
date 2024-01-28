@@ -5,6 +5,7 @@
 //  Created by Jeff Hara on 1/2/24.
 //
 
+import KeyboardShortcuts
 import SwiftUI
 
 struct AutopilotOnboardingView: View {
@@ -22,44 +23,12 @@ struct AutopilotOnboardingView: View {
 
             This is still in early development, so we appreciate your patience if there are bugs. If you don't want it, you can disable it in the settings.
 
-            Let's give it a try. Open a new window with:
+            Let's give it a try. Open a new window with the following keyboard shortcut.
             """
             )
 
-            HStack {
-                HStack {
-                    Text("Option")
-                    Image(systemName: "option")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Command")
-                    Image(systemName: "command")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("N")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-            }
-            .padding(.vertical, 20)
+            KeyboardShortcuts.Recorder(for: .chatNew)
+                .accessibilityHint("You can also configure this in your settings.")
 
             Text(
             """

@@ -428,6 +428,7 @@
       }
     },
     "C" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -658,6 +659,7 @@
       }
     },
     "Command" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1499,6 +1501,9 @@
         }
       }
     },
+    "Introducing Typeahead AI" : {
+
+    },
     "Keep message history" : {
       "localizations" : {
         "fr" : {
@@ -1616,6 +1621,7 @@
 
     },
     "N" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1761,7 +1767,11 @@
         }
       }
     },
+    "Next, we will show you how to use **Autopilot**. Typeahead can do your busywork for you, like filling out forms and even sending emails.\n\nIt knows how to **open apps and websites** and **interact with the UI**, so you can think of it like a self-driving car. You can tell it what to do, and it will try to carry out the task on its own. If it gets stuck or needs more clarification, it will ask for help.\n\nThis is still in early development, so we appreciate your patience if there are bugs. If you don't want it, you can disable it in the settings.\n\nLet's give it a try. Open a new window with the following keyboard shortcut." : {
+
+    },
     "Next, we will show you how to use **Autopilot**. Typeahead can do your busywork for you, like filling out forms and even sending emails.\n\nIt knows how to **open apps and websites** and **interact with the UI**, so you can think of it like a self-driving car. You can tell it what to do, and it will try to carry out the task on its own. If it gets stuck or needs more clarification, it will ask for help.\n\nThis is still in early development, so we appreciate your patience if there are bugs. If you don't want it, you can disable it in the settings.\n\nLet's give it a try. Open a new window with:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1843,6 +1853,7 @@
       }
     },
     "Once you're happy with Typeahead's response, you can **smart-paste** the latest draft into Gmail or your favorite email app.\n\nFor this tutorial, you can **smart-paste** the response into the text box below with:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1858,7 +1869,10 @@
         }
       }
     },
-    "One of Typeahead's workflows is **smart-copy** and **smart-paste**. It is smarter than your standard clipboard because it uses AI to take what you've copied and predict what you want to paste.\n\nFor example, let's say you want to reply to the below email. You can select the text and **smart-copy** it with the following keyboard shortcut." : {
+    "Once you're happy with Typeahead's response, you can **smart-paste** the latest draft into Gmail or your favorite email app.\n\nFor this tutorial, you can **smart-paste** the response into the text box below, using the following keyboard shortcut." : {
+
+    },
+    "One of Typeahead's workflows is **smart-copy** and **smart-paste**. It is smarter than your standard clipboard because it uses AI to take what you've copied and predict what you want to paste.\n\nFor example, let's say you want to reply to the email below. You can select the text and **smart-copy** it with the following keyboard shortcut." : {
 
     },
     "Online" : {
@@ -1943,6 +1957,7 @@
       }
     },
     "Option" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1957,15 +1972,6 @@
           }
         }
       }
-    },
-    "Option-Command-C" : {
-
-    },
-    "Option-Command-Space" : {
-
-    },
-    "Option-Command-V" : {
-
     },
     "Password" : {
       "localizations" : {
@@ -2625,6 +2631,7 @@
       }
     },
     "Space" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2855,9 +2862,6 @@
         }
       }
     },
-    "The first thing you will need to learn is how to **activate** Typeahead.\n\nTypeahead runs in the **background**, so it will not be in your dock. Instead, it can be accessed by keyboard shortcut or from the menu bar.\n\nTo open and close a Typeahead window, you can press the following keyboard shortcut." : {
-
-    },
     "The first thing you will need to learn is how to **activate** Typeahead.\n\nUnlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you will see the Typeahead logo in the menu bar to indicate when the app is running.\n\nTo open and close a Typeahead window, you can press:" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2989,9 +2993,6 @@
         }
       }
     },
-    "This shortcut can be reconfigured in your settings." : {
-
-    },
     "Title" : {
 
     },
@@ -3014,7 +3015,11 @@
         }
       }
     },
+    "Typeahead is a globally accessible chat window.\n\nLike VoiceOver, it pops up over other windows and is not in your dock.\n\nInstead, it can be toggled by keyboard shortcut.\n\nBy default, the keyboard shortcut to open and close a Typeahead window is Option-Command-Space, but you can change it below." : {
+
+    },
     "Typeahead is an AI tool that automates your busywork.\n\nIn this tutorial, you will learn about Typeahead's basic features, and we will explain how Typeahead works behind the scenes.\n\nIn this version, we are introducing \"Autopilot\" mode, where you can record and automate your workflows." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3063,6 +3068,7 @@
       }
     },
     "V" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3094,7 +3100,11 @@
         }
       }
     },
+    "VoiceOver is a nightmare to use. Navigating websites and apps is unintuitive, especially for new users. However, for the blind and visually impaired, there have been no good alternatives until now.\n\nTypeahead is the first AI screen reader that integrates ChatGPT with VoiceOver, and it is built to be accessibility-first.\n\nLet's give it a spin." : {
+
+    },
     "Welcome to Typeahead" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3173,6 +3183,9 @@
           }
         }
       }
+    },
+    "You can also configure this in your settings." : {
+
     },
     "You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.\n\nNOTE: All hotkeys can be reconfigured in your Settings." : {
       "extractionState" : "stale",

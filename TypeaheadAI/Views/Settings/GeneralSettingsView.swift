@@ -72,7 +72,7 @@ struct GeneralSettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                KeyboardShortcuts.Recorder(for: .chatNew) {
+                KeyboardShortcuts.Recorder(for: .chatOpen) {
                     Text("Open Chat: Opens an existing chat window")
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

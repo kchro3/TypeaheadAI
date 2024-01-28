@@ -8,6 +8,7 @@
 import AppKit
 import Foundation
 
+/// NOTE: Add a message context for smart-copy
 enum MessageContext: Codable, Equatable {
     case focus
 }

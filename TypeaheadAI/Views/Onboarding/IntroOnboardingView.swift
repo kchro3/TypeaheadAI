@@ -11,16 +11,16 @@ struct IntroOnboardingView: View {
     var body: some View {
         VStack {
             OnboardingHeaderView {
-                Text("Welcome to Typeahead")
+                Text("Introducing Typeahead AI")
             }
 
             Text(
             """
-            Typeahead is an AI tool that automates your busywork.
+            VoiceOver is a nightmare to use. Navigating websites and apps is unintuitive, especially for new users. However, for the blind and visually impaired, there have been no good alternatives until now.
 
-            In this tutorial, you will learn about Typeahead's basic features, and we will explain how Typeahead works behind the scenes.
+            Typeahead is the first AI screen reader that integrates ChatGPT with VoiceOver, and it is built to be accessibility-first.
 
-            In this version, we are introducing "Autopilot" mode, where you can record and automate your workflows.
+            Let's give it a spin.
             """
             )
 
