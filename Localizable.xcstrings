@@ -3168,6 +3168,22 @@
         }
       }
     },
+    "What's up" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quoi de neuf"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cosa c'è"
+          }
+        }
+      }
+    },
     "Why use smart-copy and smart-paste?" : {
       "localizations" : {
         "fr" : {

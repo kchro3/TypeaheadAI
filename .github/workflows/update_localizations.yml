@@ -1,0 +1,41 @@
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Localizable.xcstrings'
+
+jobs:
+  update_localizations:
+    name: Update Localization strings
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai
+
+      - name: Update Localizations
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python .github/scripts/update_localizations.py Localizable.xcstrings
+
+      - name: Commit and Push Changes
+        run: |
+          git add .
+          git diff --staged --exit-code --quiet
+          if [ $? -ne 0 ]; then
+            git commit -m "Updated Translations"
+            git push
+          else
+            echo "No changes to commit"
+          fi

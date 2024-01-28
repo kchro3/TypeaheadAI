@@ -54,7 +54,7 @@ struct LoggedOutOnboardingView: View {
                 Alert(title: Text("Failed to sign-in with email"), message: failedToRegisterReason.map { Text("\($0)") })
             })
 
-            AccountOptionButton(label: "Continue with Apple", width: 250) {
+            AccountOptionButton(label: "Sign-in with Apple", width: 250) {
                 Task {
                     do {
                         try await supabaseManager.signinWithApple()
@@ -68,7 +68,7 @@ struct LoggedOutOnboardingView: View {
                 Alert(title: Text("Failed to sign-in with Apple"), message: failedToRegisterReason.map { Text("\($0)") })
             })
 
-            AccountOptionButton(label: "Continue with Google", isAccent: false, width: 250) {
+            AccountOptionButton(label: "Sign-in with Google", isAccent: false, width: 250) {
                 Task {
                     do {
                         try await supabaseManager.signinWithGoogle()
