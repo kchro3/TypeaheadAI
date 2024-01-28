@@ -11,9 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Fetches all history for all branches and tags
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -33,7 +31,11 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
-          git config --global user.name 'kchro3'
-          git config --global user.email 'jhara1418@gmail.com'
-          git commit -am "Update translations"
-          git push
+          git add .
+          git diff --staged --exit-code --quiet
+          if [ $? -ne 0 ]; then
+            git commit -m "Updated Translations"
+            git push
+          else
+            echo "No changes to commit"
+          fi
