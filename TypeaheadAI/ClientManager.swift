@@ -14,7 +14,7 @@ import Supabase
 
 class ClientManager: CanGetUIElements {
     var llamaModelManager: LlamaModelManager? = nil
-    var promptManager: QuickActionManager? = nil
+    var quickActionManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
     var intentManager: IntentManager? = nil
     var historyManager: HistoryManager? = nil
@@ -316,7 +316,7 @@ class ClientManager: CanGetUIElements {
         let quickAction: QuickAction? = messages
             .first(where: { $0.quickActionId != nil })
             .flatMap { $0.quickActionId }
-            .flatMap { self.promptManager?.getById($0) }
+            .flatMap { self.quickActionManager?.getById($0) }
 
         if let quickAction = quickAction,
            let appContext = appInfo?.appContext,

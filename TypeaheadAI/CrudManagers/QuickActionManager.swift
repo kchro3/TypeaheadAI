@@ -102,14 +102,16 @@ class QuickActionManager: ObservableObject {
         return nil
     }
 
-    func getOrCreateByLabel(_ label: String) async -> QuickAction? {
+    @discardableResult
+    @MainActor
+    func getOrCreateByLabel(_ label: String, details: String? = nil) async -> QuickAction? {
         if let quickAction = getByLabel(label) {
             return quickAction
         } else if !isHistoryEnabled {
             // Don't implicitly create a Quick Action if the history is not kept
             return nil
         } else {
-            return await addPrompt(label)
+            return addPrompt(label, details: details)
         }
     }
 

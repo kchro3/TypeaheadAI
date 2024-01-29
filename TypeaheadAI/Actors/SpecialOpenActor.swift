@@ -28,13 +28,13 @@ actor SpecialOpenActor {
     init(
         intentManager: IntentManager,
         clientManager: ClientManager,
-        promptManager: QuickActionManager,
+        quickActionManager: QuickActionManager,
         modalManager: ModalManager,
         appContextManager: AppContextManager
     ) {
         self.intentManager = intentManager
         self.clientManager = clientManager
-        self.promptManager = promptManager
+        self.promptManager = quickActionManager
         self.modalManager = modalManager
         self.appContextManager = appContextManager
     }

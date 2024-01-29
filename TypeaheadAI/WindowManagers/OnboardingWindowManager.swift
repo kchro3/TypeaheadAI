@@ -13,9 +13,10 @@ import os.log
 class OnboardingWindowManager: ObservableObject {
     var toastWindow: ModalWindow?
 
-    var supabaseManager: SupabaseManager?
-    var modalManager: ModalManager?
-    var intentManager: IntentManager?
+    private let supabaseManager: SupabaseManager
+    private let modalManager: ModalManager
+    private let intentManager: IntentManager
+    private let quickActionManager: QuickActionManager
     private let context: NSManagedObjectContext
 
     // NOTE: Main window origin
@@ -28,8 +29,18 @@ class OnboardingWindowManager: ObservableObject {
         category: "OnboardingWindowManager"
     )
 
-    init(context: NSManagedObjectContext) {
+    init(
+        context: NSManagedObjectContext,
+        supabaseManager: SupabaseManager,
+        modalManager: ModalManager,
+        intentManager: IntentManager,
+        quickActionManager: QuickActionManager
+    ) {
         self.context = context
+        self.supabaseManager = supabaseManager
+        self.modalManager = modalManager
+        self.intentManager = intentManager
+        self.quickActionManager = quickActionManager
 
         startMonitoring()
     }
@@ -61,9 +72,10 @@ class OnboardingWindowManager: ObservableObject {
         visualEffect.material = .hudWindow
 
         let contentView = OnboardingView(
-            supabaseManager: supabaseManager!,
-            modalManager: modalManager!,
-            intentManager: intentManager!
+            supabaseManager: supabaseManager,
+            modalManager: modalManager,
+            intentManager: intentManager,
+            quickActionManager: quickActionManager
         )
         .environment(\.managedObjectContext, context)
 
@@ -141,7 +153,7 @@ class OnboardingWindowManager: ObservableObject {
         guard let url = notification.userInfo?["url"] as? URL else { return }
 
         Task {
-            try await self.supabaseManager?.signinWithURL(from: url)
+            try await self.supabaseManager.signinWithURL(from: url)
             await self.showModal()
         }
     }

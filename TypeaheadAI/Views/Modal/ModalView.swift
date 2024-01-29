@@ -115,7 +115,7 @@ struct ModalView: View {
                                 newLabel: proposedLabel,
                                 newDetails: proposedDetails,
                                 onSubmit: { label, details in
-                                    modalManager.promptManager?.addPrompt(label, id: quickActionId, details: details)
+                                    modalManager.quickActionManager?.addPrompt(label, id: quickActionId, details: details)
                                     showQuickActionSaveAlert = true
                                     showQuickActionSaveSheet.toggle()
                                 }, onCancel: {
@@ -339,7 +339,7 @@ Task {
     ]
 
     let promptManager = QuickActionManager(context: container.viewContext, backgroundContext: container.newBackgroundContext())
-    modalManager.promptManager = promptManager
+    modalManager.quickActionManager = promptManager
 
     return ModalView(showModal: .constant(true), modalManager: modalManager)
 }

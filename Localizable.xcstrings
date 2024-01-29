@@ -395,7 +395,11 @@
         }
       }
     },
+    "Be concise, less than 150 words" : {
+
+    },
     "Before we can get started, Typeahead will need some Accessibility permissions to work.\n\nIn **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.\n\nPress the button below to open System Preferences and modify your Accessibility settings." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -475,6 +479,9 @@
           }
         }
       }
+    },
+    "Cancel Tasks" : {
+
     },
     "Cancel Tasks: Aborts any streaming results or autopilot tasks" : {
       "localizations" : {
@@ -1357,6 +1364,7 @@
       }
     },
     "How to **activate** a Typeahead window" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1403,6 +1411,9 @@
           }
         }
       }
+    },
+    "How to use **Smart-Vision**" : {
+
     },
     "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf" : {
       "localizations" : {
@@ -1955,6 +1966,9 @@
           }
         }
       }
+    },
+    "Open the chat window" : {
+
     },
     "Option" : {
       "extractionState" : "stale",
@@ -2582,6 +2596,9 @@
     "Smart-Record Overview" : {
 
     },
+    "Smart-Vision" : {
+
+    },
     "Smart-Vision: Takes a screenshot" : {
       "localizations" : {
         "fr" : {
@@ -2765,6 +2782,9 @@
           }
         }
       }
+    },
+    "Summarize content" : {
+
     },
     "System speech language" : {
       "localizations" : {
@@ -3015,7 +3035,7 @@
         }
       }
     },
-    "Typeahead is a globally accessible chat window.\n\nLike VoiceOver, it pops up over other windows and is not in your dock.\n\nInstead, it can be toggled by keyboard shortcut.\n\nBy default, the keyboard shortcut to open and close a Typeahead window is Option-Command-Space, but you can change it below." : {
+    "Typeahead Basics" : {
 
     },
     "Typeahead is an AI tool that automates your busywork.\n\nIn this tutorial, you will learn about Typeahead's basic features, and we will explain how Typeahead works behind the scenes.\n\nIn this version, we are introducing \"Autopilot\" mode, where you can record and automate your workflows." : {
@@ -3067,6 +3087,9 @@
         }
       }
     },
+    "Using Typeahead with VoiceOver" : {
+
+    },
     "V" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3099,9 +3122,6 @@
           }
         }
       }
-    },
-    "VoiceOver is a nightmare to use. Navigating websites and apps is unintuitive, especially for new users. However, for the blind and visually impaired, there have been no good alternatives until now.\n\nTypeahead is the first AI screen reader that integrates ChatGPT with VoiceOver, and it is built to be accessibility-first.\n\nLet's give it a spin." : {
-
     },
     "Welcome to Typeahead" : {
       "extractionState" : "stale",
@@ -3220,6 +3240,9 @@
           }
         }
       }
+    },
+    "You can reconfigure the shortcuts below or in your settings later." : {
+
     },
     "You can see additional options if you right-click on a message. For example, you can edit a message or retry sending the message if there is a failure.\n\nClick continue when you're satisfied." : {
 

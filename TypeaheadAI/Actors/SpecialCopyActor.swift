@@ -29,14 +29,14 @@ actor SpecialCopyActor: CanSimulateCopy {
         intentManager: IntentManager,
         historyManager: HistoryManager,
         clientManager: ClientManager,
-        promptManager: QuickActionManager,
+        quickActionManager: QuickActionManager,
         modalManager: ModalManager,
         appContextManager: AppContextManager
     ) {
         self.intentManager = intentManager
         self.historyManager = historyManager
         self.clientManager = clientManager
-        self.promptManager = promptManager
+        self.promptManager = quickActionManager
         self.modalManager = modalManager
         self.appContextManager = appContextManager
     }

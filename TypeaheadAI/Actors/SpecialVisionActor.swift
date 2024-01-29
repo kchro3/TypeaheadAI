@@ -69,11 +69,11 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
                 image,
                 appContext: appInfo.appContext
             )
-        } else {
-            print("failed to get tiff representation")
-        }
 
-        try await modalManager.prepareUserInput()
+            try await modalManager.prepareUserInput()
+        } else {
+            await modalManager.setError(NSLocalizedString("Failed to get screenshot", comment: ""), appContext: appInfo.appContext)
+        }
     }
 
     func getPointAndSize(appContext: AppContext?) async -> (CGPoint, CGSize)? {

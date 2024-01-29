@@ -55,6 +55,8 @@
 		2B520D852AC82EA100310426 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B520D842AC82EA100310426 /* AccountView.swift */; };
 		2B5CA3952B65CC870070E01C /* OnboardingNavbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA3942B65CC870070E01C /* OnboardingNavbarView.swift */; };
 		2B5CA3972B65D1B60070E01C /* OnboardingHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA3962B65D1B60070E01C /* OnboardingHeaderView.swift */; };
+		2B5CA39B2B67666D0070E01C /* SmartFocusOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA39A2B67666D0070E01C /* SmartFocusOnboardingView.swift */; };
+		2B5CA39D2B677F020070E01C /* SmartVisionOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA39C2B677F020070E01C /* SmartVisionOnboardingView.swift */; };
 		2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */; };
 		2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */; };
 		2B7669A12B5A2CD00071D713 /* CanSimulateControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */; };
@@ -210,6 +212,8 @@
 		2B520D842AC82EA100310426 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		2B5CA3942B65CC870070E01C /* OnboardingNavbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNavbarView.swift; sourceTree = "<group>"; };
 		2B5CA3962B65D1B60070E01C /* OnboardingHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingHeaderView.swift; sourceTree = "<group>"; };
+		2B5CA39A2B67666D0070E01C /* SmartFocusOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartFocusOnboardingView.swift; sourceTree = "<group>"; };
+		2B5CA39C2B677F020070E01C /* SmartVisionOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartVisionOnboardingView.swift; sourceTree = "<group>"; };
 		2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentConversationsView.swift; sourceTree = "<group>"; };
 		2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteScript.swift; sourceTree = "<group>"; };
 		2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateControl.swift; sourceTree = "<group>"; };
@@ -394,6 +398,8 @@
 				2B7D35832B01B14100E85AEF /* IntroOnboardingView.swift */,
 				2BAA97942B042AD400EC6A63 /* PermissionsOnboardingView.swift */,
 				2B8CD49A2B076AE6003E0589 /* ActivateOnboardingView.swift */,
+				2B5CA39C2B677F020070E01C /* SmartVisionOnboardingView.swift */,
+				2B5CA39A2B67666D0070E01C /* SmartFocusOnboardingView.swift */,
 				2B7D35892B01ED5100E85AEF /* SmartCopyOnboardingView.swift */,
 				2BAA978A2B02E81600EC6A63 /* IntentsOnboardingView.swift */,
 				2BAA978C2B02EBE500EC6A63 /* RefineOnboardingView.swift */,
@@ -851,6 +857,7 @@
 				2B4165422B65AA89007E8C61 /* View+Extension.swift in Sources */,
 				2BE5E00A2B5204AB00E34AD2 /* SpecialVisionActor.swift in Sources */,
 				2B1A18592B2D881000C31B56 /* SpecialRecordActor.swift in Sources */,
+				2B5CA39D2B677F020070E01C /* SmartVisionOnboardingView.swift in Sources */,
 				2BA7F0B32A9ABCBF003D38BA /* MenuView.swift in Sources */,
 				2B16093F2B5649210057FC32 /* NarrationView.swift in Sources */,
 				2B5CA3972B65D1B60070E01C /* OnboardingHeaderView.swift in Sources */,
@@ -936,6 +943,7 @@
 				2B0116F52AF98EBD000C78E1 /* AccountOptionButton.swift in Sources */,
 				2B7BBAC02AF2B4D300E4CE1F /* QuickActionDetails.swift in Sources */,
 				2B0116F92AF990E2000C78E1 /* EmailAndPasswordView.swift in Sources */,
+				2B5CA39B2B67666D0070E01C /* SmartFocusOnboardingView.swift in Sources */,
 				2BFBCAA12B048AC0004F8374 /* QuickAction.swift in Sources */,
 				2BAA978D2B02EBE500EC6A63 /* RefineOnboardingView.swift in Sources */,
 				2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */,

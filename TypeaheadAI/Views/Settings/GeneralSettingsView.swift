@@ -15,10 +15,10 @@ struct GeneralSettingsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedFontSize: Double = UserDefaults.standard.double(forKey: "UserFontSize")
 
-    @AppStorage("isDictationEnabled") private var isDictationEnabled: Bool = false
+    @AppStorage("isDictationEnabled") private var isDictationEnabled: Bool = true
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
     @AppStorage("hideModalDuringAutopilot") private var hideModalDuringAutopilot: Bool = true
-    @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = false
+    @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = true
 
     var body: some View {
         VStack(alignment: .leading) {

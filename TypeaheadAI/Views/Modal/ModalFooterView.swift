@@ -35,7 +35,7 @@ struct ModalFooterView: View {
                                     NSLocalizedString("What do you want to do with this?", comment: "")
                             )
                     ),
-                    autoCompleteSuggestions: self.modalManager.promptManager?.getPrompts() ?? []
+                    autoCompleteSuggestions: self.modalManager.quickActionManager?.getPrompts() ?? []
                 ) { text in
                     if !text.isEmpty {
                         Task {

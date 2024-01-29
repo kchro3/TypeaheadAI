@@ -130,12 +130,12 @@ struct ConversationView: View {
                         onDelete: {
                             if let quickActionId = quickAction.id {
                                 self.quickAction = nil
-                                modalManager.promptManager?.removePrompt(with: quickActionId)
+                                modalManager.quickActionManager?.removePrompt(with: quickActionId)
                             }
                         },
                         onSubmit: { newLabel, newDetails in
                             if let quickActionId = quickAction.id {
-                                modalManager.promptManager?.updatePrompt(
+                                modalManager.quickActionManager?.updatePrompt(
                                     with: quickActionId,
                                     newLabel: newLabel,
                                     newDetails: newDetails
@@ -147,7 +147,7 @@ struct ConversationView: View {
                 } else {
                     // This shouldn't happen though...
                     NewQuickActionForm(onSubmit: { label, details in
-                        modalManager.promptManager?.addPrompt(label, details: details)
+                        modalManager.quickActionManager?.addPrompt(label, details: details)
                         isSheetPresented = false
                     }, onCancel: {
                         isSheetPresented = false

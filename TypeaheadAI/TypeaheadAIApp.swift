@@ -37,7 +37,7 @@ struct TypeaheadAIApp: App {
         MenuBarExtra {
             MenuView(
                 modalManager: appState.modalManager,
-                promptManager: appState.promptManager,
+                promptManager: appState.quickActionManager,
                 settingsManager: appState.settingsManager,
                 supabaseManager: appState.supabaseManager,
                 isMenuVisible: $appState.isMenuVisible,

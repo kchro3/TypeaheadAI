@@ -15,6 +15,7 @@ struct OnboardingView: View {
     @ObservedObject var supabaseManager: SupabaseManager
     var modalManager: ModalManager
     var intentManager: IntentManager
+    var quickActionManager: QuickActionManager
 
     @AppStorage("step") var step: Int = 1
     private let totalSteps: Int = 9
@@ -23,11 +24,13 @@ struct OnboardingView: View {
     init(
         supabaseManager: SupabaseManager,
         modalManager: ModalManager,
-        intentManager: IntentManager
+        intentManager: IntentManager,
+        quickActionManager: QuickActionManager
     ) {
         self.supabaseManager = supabaseManager
         self.modalManager = modalManager
         self.intentManager = intentManager
+        self.quickActionManager = quickActionManager
     }
 
     var body: some View {
@@ -57,21 +60,22 @@ struct OnboardingView: View {
     @ViewBuilder
     var panel: some View {
         if step == 1 {
-            AnyView(IntroOnboardingView())
+            AnyView(IntroOnboardingView()
+                .onAppear {
+                    Task {
+                        await quickActionManager.getOrCreateByLabel(
+                            NSLocalizedString("Summarize content", comment: ""),
+                            details: NSLocalizedString("Be concise, less than 150 words", comment: "")
+                        )
+                    }
+                }
+            )
         } else if step == 2 {
             AnyView(PermissionsOnboardingView())
         } else if step == 3 {
             AnyView(ActivateOnboardingView())
         } else if step == 4 {
-            AnyView(SmartCopyOnboardingView()
-                .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
-                    self.modalManager.setUserIntents(intents: ["reply to this email"])
-                    // Add a delay so that there is time to copy the text
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        step += 1
-                    }
-                }
-            )
+            AnyView(SmartVisionOnboardingView())
         } else if step == 5 {
             AnyView(
                 IntentsOnboardingView()
@@ -117,6 +121,7 @@ struct OnboardingView: View {
     return OnboardingView(
         supabaseManager: SupabaseManager(),
         modalManager: ModalManager(context: context),
-        intentManager: IntentManager(context: context, backgroundContext: context)
+        intentManager: IntentManager(context: context, backgroundContext: context),
+        quickActionManager: QuickActionManager(context: context, backgroundContext: context)
     )
 }
