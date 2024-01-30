@@ -12,22 +12,26 @@ import AuthenticationServices
 struct OnboardingView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    @ObservedObject var supabaseManager: SupabaseManager
-    var modalManager: ModalManager
+    var clientManager: ClientManager
     var intentManager: IntentManager
+    var modalManager: ModalManager
+    var quickActionManager: QuickActionManager
+    @ObservedObject var supabaseManager: SupabaseManager
 
     @AppStorage("step") var step: Int = 1
-    private let totalSteps: Int = 9
-    @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
 
     init(
-        supabaseManager: SupabaseManager,
+        clientManager: ClientManager,
+        intentManager: IntentManager,
         modalManager: ModalManager,
-        intentManager: IntentManager
+        quickActionManager: QuickActionManager,
+        supabaseManager: SupabaseManager
     ) {
-        self.supabaseManager = supabaseManager
-        self.modalManager = modalManager
+        self.clientManager = clientManager
         self.intentManager = intentManager
+        self.modalManager = modalManager
+        self.quickActionManager = quickActionManager
+        self.supabaseManager = supabaseManager
     }
 
     var body: some View {
@@ -37,10 +41,11 @@ struct OnboardingView: View {
                     panel
                         .id(UUID())
                         .transition(.opacity)
+                        .accessibilitySortPriority(10.0)
 
                     Spacer()
 
-                    navbar
+                    OnboardingNavbarView(modalManager: modalManager)
                 }
                 .padding(30)
                 .animation(.easeInOut, value: UUID())
@@ -56,97 +61,30 @@ struct OnboardingView: View {
     @ViewBuilder
     var panel: some View {
         if step == 1 {
-            AnyView(IntroOnboardingView())
+            AnyView(IntroOnboardingView()
+                .onAppear {
+                    Task {
+                        await quickActionManager.getOrCreateByLabel(
+                            NSLocalizedString("Summarize content", comment: ""),
+                            details: NSLocalizedString("Be concise, less than 150 words", comment: "")
+                        )
+                    }
+                }
+            )
         } else if step == 2 {
             AnyView(PermissionsOnboardingView())
         } else if step == 3 {
             AnyView(ActivateOnboardingView())
         } else if step == 4 {
-            AnyView(SmartCopyOnboardingView()
-                .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
-                    self.modalManager.setUserIntents(intents: ["reply to this email"])
-                    // Add a delay so that there is time to copy the text
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        step += 1
-                    }
-                }
-            )
+            AnyView(SmartVisionOnboardingView())
         } else if step == 5 {
-            AnyView(
-                IntentsOnboardingView()
-                    .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
-                        self.modalManager.setUserIntents(intents: ["reply to this email"])
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            step += 1
-                        }
-                    }
-            )
+            AnyView(SmartFocusOnboardingView())
         } else if step == 6 {
-            AnyView(
-                RefineOnboardingView()
-                    .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
-                        self.modalManager.setUserIntents(intents: ["reply to this email"])
-                    }
-            )
-        } else if step == 7 {
-            AnyView(SmartPasteOnboardingView())
-        } else if step == 8 {
-            AnyView(QuickActionExplanationOnboardingView())
-        } else if step == 9 {
             AnyView(AutopilotOnboardingView())
         } else {
-            AnyView(OutroOnboardingView())
-        }
-    }
-
-    @ViewBuilder
-    var navbar: some View {
-        VStack {
-            HStack {
-                Spacer()
-
-                Text("Step \(step) of \(totalSteps)")
-
-                Spacer()
-            }
-
-            HStack {
-                RoundedButton("Skip") {
-                    if let window = NSApplication.shared.keyWindow {
-                        print("Mark as onboarded...")
-                        hasOnboarded = true
-                        window.performClose(nil)
-                    }
-                }
-
-                Spacer()
-
-                if step > 1 {
-                    RoundedButton("Back") {
-                        modalManager.closeModal()
-                        step -= 1
-                    }
-                }
-
-                if step < totalSteps {
-                    RoundedButton("Continue", isAccent: true) {
-                        if step != 5 && step != 6 {
-                            modalManager.closeModal()
-                        }
-                        step += 1
-                    }
-                } else if step == totalSteps {
-                    RoundedButton("Finish", isAccent: true) {
-                        if let window = NSApplication.shared.keyWindow {
-                            print("Mark as onboarded...")
-                            hasOnboarded = true
-                            window.performClose(nil)
-                        }
-                    }
-                }
-            }
+            AnyView(OutroOnboardingView { feedback in
+                try await clientManager.sendFeedback(feedback: feedback)
+            })
         }
     }
 }
@@ -163,8 +101,10 @@ struct OnboardingView: View {
 
     let context = container.viewContext
     return OnboardingView(
-        supabaseManager: SupabaseManager(),
+        clientManager: ClientManager(),
+        intentManager: IntentManager(context: context, backgroundContext: context),
         modalManager: ModalManager(context: context),
-        intentManager: IntentManager(context: context, backgroundContext: context)
+        quickActionManager: QuickActionManager(context: context, backgroundContext: context),
+        supabaseManager: SupabaseManager()
     )
 }

@@ -5,24 +5,39 @@
 //  Created by Jeff Hara on 11/12/23.
 //
 
+import MarkdownUI
 import SwiftUI
 
 struct OutroOnboardingView: View {
+    @Environment(\.colorScheme) var colorScheme
+
+    @State var feedback: String = ""
+    var onSubmit: ((String) async throws -> Void)? = nil
+
+    @State private var showAlert = false
+    @State private var errorMessage: String? = nil
+
+    private let maxCharacterCount = 4000
+    private let totalSteps: Int = 7
+
+    @AppStorage("step") var step: Int = 1
+    @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
+
+    init(onSubmit: ((String) async throws -> Void)? = nil) {
+        self.onSubmit = onSubmit
+    }
+
     var body: some View {
         VStack {
-            Text("You're all set!")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
+            OnboardingHeaderView {
+                Text("You're all set!")
+            }
 
-            Text(
+            Markdown(
                 """
-                There are plenty of ways to get started! You can think of Typeahead as a new tool in your toolkit, where you can ask it to convert meeting notes into follow-up emails or summarize news articles, and it is like a copilot for all of your apps.
+                Thank you for trying the demo, and we will continue to add more features and improve the overall experience!
 
-                **Smart-copy** works on anything that you can copy, and **smart-paste** works anywhere that you can paste.
-
-                It even works in full-screen apps, so it's always at your fingertips.
-
-                You can access your settings from the menu bar.
+                Please feel free to provide any feedback on the onboarding experience, and you can also reach out to me directly at jeff@typeahead.ai
                 """
             )
 
@@ -33,5 +48,5 @@ struct OutroOnboardingView: View {
 }
 
 #Preview {
-    OutroOnboardingView()
+    return OutroOnboardingView()
 }

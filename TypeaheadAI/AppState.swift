@@ -31,7 +31,7 @@ final class AppState: ObservableObject {
     var functionManager = FunctionManager()
     private let historyManager: HistoryManager
     @Published var intentManager: IntentManager
-    @Published var promptManager: QuickActionManager
+    @Published var quickActionManager: QuickActionManager
     @Published var modalManager: ModalManager
     @Published var onboardingWindowManager: OnboardingWindowManager
     @Published var llamaModelManager = LlamaModelManager()
@@ -50,15 +50,26 @@ final class AppState: ObservableObject {
         context: NSManagedObjectContext,
         backgroundContext: NSManagedObjectContext
     ) {
+        // Create local reference
+        let modalManager = ModalManager(context: context)
+        let intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
+        let quickActionManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
 
         // Initialize managers (alphabetize)
         self.clientManager = ClientManager()
         self.conversationManager = ConversationManager(context: context)
         self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
-        self.intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
-        self.modalManager = ModalManager(context: context)
-        self.promptManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
-        self.onboardingWindowManager = OnboardingWindowManager(context: context)
+        self.intentManager = intentManager
+        self.modalManager = modalManager
+        self.quickActionManager = quickActionManager
+        self.onboardingWindowManager = OnboardingWindowManager(
+            context: context,
+            clientManager: clientManager,
+            intentManager: intentManager,
+            modalManager: modalManager,
+            quickActionManager: quickActionManager,
+            supabaseManager: supabaseManager
+        )
         self.settingsManager = SettingsManager(context: context)
 
         // Initialize actors
@@ -66,20 +77,20 @@ final class AppState: ObservableObject {
             intentManager: intentManager,
             historyManager: historyManager,
             clientManager: clientManager,
-            promptManager: promptManager,
+            quickActionManager: quickActionManager,
             modalManager: modalManager,
             appContextManager: appContextManager
         )
         self.specialPasteActor = SpecialPasteActor(
             historyManager: historyManager,
-            promptManager: promptManager,
+            quickActionManager: quickActionManager,
             modalManager: modalManager,
             appContextManager: appContextManager
         )
         self.specialOpenActor = SpecialOpenActor(
             intentManager: intentManager,
             clientManager: clientManager,
-            promptManager: promptManager,
+            quickActionManager: quickActionManager,
             modalManager: modalManager,
             appContextManager: appContextManager
         )
@@ -99,7 +110,7 @@ final class AppState: ObservableObject {
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
         self.clientManager.llamaModelManager = llamaModelManager
-        self.clientManager.promptManager = promptManager
+        self.clientManager.quickActionManager = quickActionManager
         self.clientManager.appContextManager = appContextManager
         self.clientManager.intentManager = intentManager
         self.clientManager.historyManager = historyManager
@@ -108,18 +119,14 @@ final class AppState: ObservableObject {
         self.modalManager.clientManager = clientManager
         self.modalManager.conversationManager = conversationManager
         self.modalManager.functionManager = functionManager
-        self.modalManager.promptManager = promptManager
+        self.modalManager.quickActionManager = quickActionManager
         self.modalManager.settingsManager = settingsManager
         self.modalManager.specialRecordActor = specialRecordActor
 
         self.settingsManager.clientManager = clientManager
         self.settingsManager.llamaModelManager = llamaModelManager
-        self.settingsManager.promptManager = promptManager
+        self.settingsManager.quickActionManager = quickActionManager
         self.settingsManager.supabaseManager = supabaseManager
-
-        self.onboardingWindowManager.supabaseManager = supabaseManager
-        self.onboardingWindowManager.modalManager = modalManager
-        self.onboardingWindowManager.intentManager = intentManager
 
         checkAndRequestNotificationPermissions()
 

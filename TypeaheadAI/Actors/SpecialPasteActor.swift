@@ -39,12 +39,12 @@ actor SpecialPasteActor: CanSimulatePaste {
 
     init(
         historyManager: HistoryManager,
-        promptManager: QuickActionManager,
+        quickActionManager: QuickActionManager,
         modalManager: ModalManager,
         appContextManager: AppContextManager
     ) {
         self.historyManager = historyManager
-        self.promptManager = promptManager
+        self.promptManager = quickActionManager
         self.modalManager = modalManager
         self.appContextManager = appContextManager
     }

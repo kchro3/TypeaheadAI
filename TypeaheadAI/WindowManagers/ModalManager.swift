@@ -31,7 +31,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @AppStorage("toastWidth") var toastWidth: Double = 400.0
     @AppStorage("toastHeight") var toastHeight: Double = 400.0
     @AppStorage("hideModalDuringAutopilot") private var hideModalDuringAutopilot: Bool = true
-    @AppStorage("isDictationEnabled") private var isDictationEnabled: Bool = false
+    @AppStorage("isDictationEnabled") private var isDictationEnabled: Bool = true
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -51,6 +51,10 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         self.isPending = false
         self.speaker.onFinish = {
             Task {
+                guard self.isVisible else {
+                    return
+                }
+
                 try await self.prepareUserInput()
             }
         }
@@ -62,9 +66,9 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     var conversationManager: ConversationManager? = nil
     var functionManager: FunctionManager? = nil
     var intentManager: IntentManager? = nil
-    var promptManager: QuickActionManager? = nil
+    var quickActionManager: QuickActionManager? = nil
     var settingsManager: SettingsManager? = nil
-    var specialRecordActor: SpecialRecordActor? = nil
+    var specialRecordActor: SpecialRecordActor? = nil  // Needed for special record hook... Pretty nasty
 
     var toastWindow: CustomModalWindow?
 
@@ -83,15 +87,15 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     }
 
     func prepareUserInput() async throws {
-        await NSApp.activate(ignoringOtherApps: true)
-        try await Task.sleep(for: .milliseconds(200))
-
         if !self.isVisible {
             await self.showModal()
         }
 
+        await NSApp.activate(ignoringOtherApps: true)
+        try await Task.sleep(for: .milliseconds(200))
+
         if self.isDictationEnabled {
-            try await Task.sleep(for: .milliseconds(200))
+            try await Task.sleep(for: .milliseconds(400))
             try await simulateDictation()
         }
     }
@@ -148,7 +152,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         return messages
             .first(where: { msg in msg.quickActionId != nil })?
             .quickActionId
-            .flatMap { promptManager?.getById($0) }
+            .flatMap { quickActionManager?.getById($0) }
     }
 
     @MainActor
@@ -159,7 +163,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         messageContext: MessageContext? = nil
     ) {
         if !isHidden {
-            speaker.speak(text)
+            speaker.speak(text, withCallback: true)
         }
 
         if !isHidden,
@@ -618,7 +622,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         var quickAction: QuickAction? = nil
         if isQuickAction {
             // Look up the quick action by its label or create a new one
-            quickAction = await self.promptManager?.getOrCreateByLabel(text)
+            quickAction = await self.quickActionManager?.getOrCreateByLabel(text)
         }
 
         if let lastMessage = messages.last {
@@ -873,7 +877,6 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func replyToUserMessage() async throws {
         isPending = true
-        speaker.speak(NSLocalizedString("Thinking...", comment: ""))
         userIntents = nil
 
         currentTask?.cancel()

@@ -1,17 +1,17 @@
 on:
-  pull_request:
+  push:
     branches:
       - main
     paths:
       - 'Localizable.xcstrings'
-
+      
 jobs:
   update_localizations:
     name: Update Localization strings
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -29,13 +29,5 @@ jobs:
         run: |
           python .github/scripts/update_localizations.py Localizable.xcstrings
 
-      - name: Commit and Push Changes
-        run: |
-          git add .
-          git diff --staged --exit-code --quiet
-          if [ $? -ne 0 ]; then
-            git commit -m "Updated Translations"
-            git push
-          else
-            echo "No changes to commit"
-          fi
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5

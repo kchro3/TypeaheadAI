@@ -235,6 +235,7 @@
       }
     },
     "and type \"Check Microsoft's stock\"" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -395,7 +396,11 @@
         }
       }
     },
+    "Be concise, less than 150 words" : {
+
+    },
     "Before we can get started, Typeahead will need some Accessibility permissions to work.\n\nIn **System Settings**, under the **Privacy & Security** tab, please navigate to the **Accessibility** options and add Typeahead to your allowed apps.\n\nPress the button below to open System Preferences and modify your Accessibility settings." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -428,6 +433,7 @@
       }
     },
     "C" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -474,6 +480,9 @@
           }
         }
       }
+    },
+    "Cancel Tasks" : {
+
     },
     "Cancel Tasks: Aborts any streaming results or autopilot tasks" : {
       "localizations" : {
@@ -642,6 +651,7 @@
       }
     },
     "Click here and press \"smart-paste\"" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -658,6 +668,7 @@
       }
     },
     "Command" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -750,6 +761,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continua"
+          }
+        }
+      }
+    },
+    "Continue to step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Continue to step %1$lld of %2$lld"
           }
         }
       }
@@ -933,6 +954,7 @@
       }
     },
     "Edit your email by clicking the edit button next to the Typeahead response. Press **Enter** to save or **Shift-Enter** for a new line.\n\nAlternatively, you can type feedback like \"make it more concise\" or \"more casual,\" and it will provide a revised draft.\n\nIf you want it to remember detailed instructions for the future, you can click on the wrench icon to configure a Quick Action.\n\nClick continue when you're satisfied." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1059,6 +1081,9 @@
           }
         }
       }
+    },
+    "Failed to get screenshot" : {
+
     },
     "Failed to register" : {
       "localizations" : {
@@ -1270,7 +1295,18 @@
         }
       }
     },
+    "Go back to step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Go back to step %1$lld of %2$lld"
+          }
+        }
+      }
+    },
     "Hi,\n\nThanks for trying out Typeahead! We are working on new features and fixing bugs every day, so we appreciate your support. Please let us know if you run into any issues.\n\nBest,\nThe Typeahead Team" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1335,6 +1371,7 @@
       }
     },
     "How to **activate** a Typeahead window" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1351,6 +1388,7 @@
       }
     },
     "How to **smart-copy**" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1367,6 +1405,7 @@
       }
     },
     "How to **Smart-paste**" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1381,6 +1420,9 @@
           }
         }
       }
+    },
+    "How to use **Smart-Vision**" : {
+
     },
     "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf" : {
       "localizations" : {
@@ -1431,6 +1473,7 @@
       }
     },
     "In the chat window, you can tell Typeahead what to do with the copied data, and Typeahead may also try to suggest relevant actions.\n\nFor this tutorial, you can click on the \"reply to this email\" suggestion." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1478,6 +1521,9 @@
           }
         }
       }
+    },
+    "Introducing Typeahead AI" : {
+
     },
     "Keep message history" : {
       "localizations" : {
@@ -1528,6 +1574,7 @@
       }
     },
     "Let's break down what happened behind the scenes.\n\nAt its core, **smart-copy** and **smart-paste** is an **interface** to make AI more accessible, but it also learns how you like to work.\n\nEvery time you **smart-copy** and **smart-paste** something, Typeahead will use the copied input and the pasted output as an example for how to do that task again.\n\nFor example, if you edited the email manually or by prompting, your preferences would be remembered for the next time you say \"reply to this email.\" It can learn to generalize patterns across examples, and the more you use Typeahead, the better it will become." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1592,7 +1639,11 @@
         }
       }
     },
+    "Missing Accessibility Permissions" : {
+
+    },
     "N" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1689,6 +1740,9 @@
         }
       }
     },
+    "New Chat" : {
+
+    },
     "New Chat: Opens a new chat window" : {
       "localizations" : {
         "fr" : {
@@ -1739,6 +1793,7 @@
       }
     },
     "Next, we will show you how to use **Autopilot**. Typeahead can do your busywork for you, like filling out forms and even sending emails.\n\nIt knows how to **open apps and websites** and **interact with the UI**, so you can think of it like a self-driving car. You can tell it what to do, and it will try to carry out the task on its own. If it gets stuck or needs more clarification, it will ask for help.\n\nThis is still in early development, so we appreciate your patience if there are bugs. If you don't want it, you can disable it in the settings.\n\nLet's give it a try. Open a new window with:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1820,6 +1875,7 @@
       }
     },
     "Once you're happy with Typeahead's response, you can **smart-paste** the latest draft into Gmail or your favorite email app.\n\nFor this tutorial, you can **smart-paste** the response into the text box below with:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1916,7 +1972,11 @@
         }
       }
     },
+    "Open the chat window" : {
+
+    },
     "Option" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1964,7 +2024,11 @@
         }
       }
     },
+    "Permissions have been granted!" : {
+
+    },
     "Personalize your email" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2059,6 +2123,9 @@
           }
         }
       }
+    },
+    "Press Option-Command-I" : {
+
     },
     "Profile" : {
       "localizations" : {
@@ -2464,6 +2531,9 @@
         }
       }
     },
+    "Skip tutorial." : {
+
+    },
     "Smart Copy-Pastes" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2497,6 +2567,9 @@
         }
       }
     },
+    "Smart-Focus" : {
+
+    },
     "Smart-Focus: Focuses VoiceOver cursor on element" : {
       "localizations" : {
         "fr" : {
@@ -2528,6 +2601,9 @@
           }
         }
       }
+    },
+    "Smart-Vision" : {
+
     },
     "Smart-Vision: Takes a screenshot" : {
       "localizations" : {
@@ -2578,6 +2654,7 @@
       }
     },
     "Space" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2626,6 +2703,7 @@
       }
     },
     "Specify your **intent**" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2711,6 +2789,9 @@
           }
         }
       }
+    },
+    "Summarize content" : {
+
     },
     "System speech language" : {
       "localizations" : {
@@ -2809,6 +2890,7 @@
       }
     },
     "The first thing you will need to learn is how to **activate** Typeahead.\n\nUnlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you will see the Typeahead logo in the menu bar to indicate when the app is running.\n\nTo open and close a Typeahead window, you can press:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2857,6 +2939,7 @@
       }
     },
     "The primary interface for Typeahead is **smart-copy** and **smart-paste**. It is smarter than your standard clipboard because it uses AI to take what you've copied and predict what you want to paste.\n\nFor example, let's say you want to reply to this email. You can select the email below and **smart-copy** it with:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2873,6 +2956,7 @@
       }
     },
     "There are plenty of ways to get started! You can think of Typeahead as a new tool in your toolkit, where you can ask it to convert meeting notes into follow-up emails or summarize news articles, and it is like a copilot for all of your apps.\n\n**Smart-copy** works on anything that you can copy, and **smart-paste** works anywhere that you can paste.\n\nIt even works in full-screen apps, so it's always at your fingertips.\n\nYou can access your settings from the menu bar." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2937,6 +3021,9 @@
         }
       }
     },
+    "Title" : {
+
+    },
     "Typeahead" : {
       "localizations" : {
         "fr" : {
@@ -2953,7 +3040,11 @@
         }
       }
     },
+    "Typeahead Basics" : {
+
+    },
     "Typeahead is an AI tool that automates your busywork.\n\nIn this tutorial, you will learn about Typeahead's basic features, and we will explain how Typeahead works behind the scenes.\n\nIn this version, we are introducing \"Autopilot\" mode, where you can record and automate your workflows." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3001,7 +3092,11 @@
         }
       }
     },
+    "Using Typeahead with VoiceOver" : {
+
+    },
     "V" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3034,6 +3129,7 @@
       }
     },
     "Welcome to Typeahead" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3098,6 +3194,7 @@
       }
     },
     "What's up" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3114,6 +3211,7 @@
       }
     },
     "Why use smart-copy and smart-paste?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3129,7 +3227,11 @@
         }
       }
     },
+    "You can also configure this in your settings." : {
+
+    },
     "You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.\n\nNOTE: All hotkeys can be reconfigured in your Settings." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

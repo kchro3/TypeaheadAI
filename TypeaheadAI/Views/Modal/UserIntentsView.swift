@@ -23,6 +23,7 @@ struct UserIntentView: View {
                     Image(systemName: "command")
                     Text("\(rank)")
                 }
+                .accessibilityHidden(true)
 
                 Text(userIntent)
                     .lineLimit(1)
@@ -38,26 +39,31 @@ struct UserIntentView: View {
             )
         }
         .buttonStyle(.plain)
+        .id(UUID())  // Force resetting the view per load
         .keyboardShortcut(KeyEquivalent(Character("\(rank)")), modifiers: .command)
     }
 }
 
 struct UserIntentsView: View {
-    let userIntents: [String]
+    let userIntents: [String]?
     let onButtonClick: ((String) -> Void)?
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                ForEach(userIntents.indices, id: \.self) { index in
-                    UserIntentView(
-                        userIntent: userIntents[index],
-                        rank: index + 1,
-                        onButtonClick: onButtonClick
-                    )
-                    .padding([.horizontal, .vertical], 5)
+        if let userIntents = userIntents, userIntents.count > 0 {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(userIntents.indices, id: \.self) { index in
+                        UserIntentView(
+                            userIntent: userIntents[index],
+                            rank: index + 1,
+                            onButtonClick: onButtonClick
+                        )
+                        .padding([.horizontal, .vertical], 5)
+                    }
                 }
             }
+        } else {
+            EmptyView()
         }
     }
 }

@@ -11,7 +11,7 @@ import Foundation
 import SwiftUI
 
 class Speaker: NSObject, AVSpeechSynthesizerDelegate, CanSimulateControl {
-    @AppStorage("isNarrateEnabled") var isNarrateEnabled: Bool = false
+    @AppStorage("isNarrateEnabled") var isNarrateEnabled: Bool = true
     @AppStorage("selectedVoice") private var selectedVoice: String?
     @AppStorage("speakingRate") private var speakingRate: Double?
     @AppStorage("speakingVolume") private var speakingVolume: Double?

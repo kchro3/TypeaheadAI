@@ -14,7 +14,7 @@ import Supabase
 
 class ClientManager: CanGetUIElements {
     var llamaModelManager: LlamaModelManager? = nil
-    var promptManager: QuickActionManager? = nil
+    var quickActionManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
     var intentManager: IntentManager? = nil
     var historyManager: HistoryManager? = nil
@@ -39,14 +39,14 @@ class ClientManager: CanGetUIElements {
 //    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-//    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
+//    private let apiFeedback = URL(string: "https://api.typeahead.ai/v4/feedback")!
 
     private let apiStream = URL(string: "http://localhost:8787/v4/stream")!
     private let apiFocus = URL(string: "http://localhost:8787/v4/focus")!
     private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-    private let apiFeedback = URL(string: "http://localhost:8080/v2/feedback")!
+    private let apiFeedback = URL(string: "http://localhost:8787/v4/feedback")!
 
 #else
 
@@ -55,7 +55,7 @@ class ClientManager: CanGetUIElements {
     private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiFeedback = URL(string: "https://typeahead-ai.fly.dev/v2/feedback")!
+    private let apiFeedback = URL(string: "https://api.typeahead.ai/v4/feedback")!
 
 #endif
 
@@ -73,7 +73,12 @@ class ClientManager: CanGetUIElements {
             throw ClientManagerError.signInRequired("Must be signed in to share feedback!")
         }
         
-        let payload = FeedbackPayload(uuid: uuid, feedback: feedback)
+        let payload = FeedbackPayload(
+            uuid: uuid,
+            username: NSUserName(),
+            userFullName: NSFullUserName(),
+            feedback: feedback
+        )
 
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ClientManagerError.badRequest("Request was malformed...")
@@ -316,7 +321,7 @@ class ClientManager: CanGetUIElements {
         let quickAction: QuickAction? = messages
             .first(where: { $0.quickActionId != nil })
             .flatMap { $0.quickActionId }
-            .flatMap { self.promptManager?.getById($0) }
+            .flatMap { self.quickActionManager?.getById($0) }
 
         if let quickAction = quickAction,
            let appContext = appInfo?.appContext,
@@ -696,5 +701,7 @@ struct SuggestIntentsPayload: Codable {
 
 struct FeedbackPayload: Codable {
     let uuid: UUID
+    let username: String
+    let userFullName: String
     let feedback: String
 }

@@ -5,71 +5,47 @@
 //  Created by Jeff Hara on 11/17/23.
 //
 
+import KeyboardShortcuts
+import MarkdownUI
 import SwiftUI
 
 struct ActivateOnboardingView: View {
+    @State private var isEditing: Bool = false
+
     var body: some View {
-        VStack {
-            Text("How to **activate** a Typeahead window")
-                .font(.largeTitle)
-                .padding(.vertical, 10)
-
-            Text(
-                """
-                The first thing you will need to learn is how to **activate** Typeahead.
-
-                Unlike many apps, Typeahead runs in the **background**, so you won't see it in your dock. Instead, you will see the Typeahead logo in the menu bar to indicate when the app is running.
-
-                To open and close a Typeahead window, you can press:
-                """
-            )
-
-            Spacer()
-
-            HStack {
-                HStack {
-                    Text("Option")
-                    Image(systemName: "option")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Command")
-                    Image(systemName: "command")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
-
-                HStack {
-                    Text("Space")
-                }
-                .padding(5)
-                .cornerRadius(5)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white, lineWidth: 1)
-                )
+        VStack(spacing: 20) {
+            OnboardingHeaderView {
+                Text("Typeahead Basics")
             }
 
-            Spacer()
+            Markdown(
+                """
+                Typeahead is a **globally accessible** chat window. It can handle text or voice input, so you can ask it questions or tell it to do something for you.
 
+                Like VoiceOver, the chat window sits on top of other windows and can access the main application. To open and close the Typeahead window, you can use a keyboard shortcut.  When you send a message, Typeahead will think for a couple seconds and then respond with text and voice.
 
-            Text(
-            """
-            You can move the window by dragging it by the top region of the window, and you can resize it by dragging its corners.
+                You can cancel a response by pressing **Command-Escape**.
 
-            NOTE: All hotkeys can be reconfigured in your Settings.
-            """
+                Let's give it a try. Press **Option-Command-Space** to open the chat window, say "hello" when you hear the cue, and press enter to send the message. To close the window and return to the tutorial, press **Option-Command-Space** again.
+                
+                You can reconfigure the shortcuts below or in your settings later.
+                """
             )
+
+            VStack {
+                KeyboardShortcuts.Recorder(for: .chatOpen) {
+                    Text("Open the chat window")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .accessibilityHint("You can also configure this in your settings.")
+
+                KeyboardShortcuts.Recorder(for: .cancelTasks) {
+                    Text("Cancel Tasks")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .accessibilityHint("You can also configure this in your settings.")
+            }
+            .padding(.horizontal, 30)
 
             Spacer()
         }

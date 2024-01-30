@@ -13,9 +13,11 @@ import os.log
 class OnboardingWindowManager: ObservableObject {
     var toastWindow: ModalWindow?
 
-    var supabaseManager: SupabaseManager?
-    var modalManager: ModalManager?
-    var intentManager: IntentManager?
+    private let clientManager: ClientManager
+    private let intentManager: IntentManager
+    private let modalManager: ModalManager
+    private let quickActionManager: QuickActionManager
+    private let supabaseManager: SupabaseManager
     private let context: NSManagedObjectContext
 
     // NOTE: Main window origin
@@ -28,8 +30,20 @@ class OnboardingWindowManager: ObservableObject {
         category: "OnboardingWindowManager"
     )
 
-    init(context: NSManagedObjectContext) {
+    init(
+        context: NSManagedObjectContext,
+        clientManager: ClientManager,
+        intentManager: IntentManager,
+        modalManager: ModalManager,
+        quickActionManager: QuickActionManager,
+        supabaseManager: SupabaseManager
+    ) {
         self.context = context
+        self.clientManager = clientManager
+        self.intentManager = intentManager
+        self.modalManager = modalManager
+        self.quickActionManager = quickActionManager
+        self.supabaseManager = supabaseManager
 
         startMonitoring()
     }
@@ -61,9 +75,11 @@ class OnboardingWindowManager: ObservableObject {
         visualEffect.material = .hudWindow
 
         let contentView = OnboardingView(
-            supabaseManager: supabaseManager!,
-            modalManager: modalManager!,
-            intentManager: intentManager!
+            clientManager: clientManager,
+            intentManager: intentManager,
+            modalManager: modalManager,
+            quickActionManager: quickActionManager,
+            supabaseManager: supabaseManager
         )
         .environment(\.managedObjectContext, context)
 
@@ -141,7 +157,7 @@ class OnboardingWindowManager: ObservableObject {
         guard let url = notification.userInfo?["url"] as? URL else { return }
 
         Task {
-            try await self.supabaseManager?.signinWithURL(from: url)
+            try await self.supabaseManager.signinWithURL(from: url)
             await self.showModal()
         }
     }
