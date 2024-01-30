@@ -390,7 +390,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "it"
+            "value" : "Sii conciso, meno di 150 parole"
           }
         }
       }
@@ -1319,7 +1319,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comment utiliser Smart-Vision"
+            "value" : "Comment utiliser **Vision Intelligente**"
           }
         },
         "it" : {
@@ -1885,7 +1885,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les autorisations ont \\'\n \\'t\\u00e9 accord\\u00e9es !"
+            "value" : "Les autorisations ont été accordées !"
           }
         },
         "it" : {
@@ -2498,7 +2498,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fr"
+            "value" : "Vision Intelligente"
           }
         },
         "it" : {
@@ -2896,7 +2896,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Typeahead Basics"
+            "value" : "Nozioni di base su Typeahead"
           }
         }
       }
