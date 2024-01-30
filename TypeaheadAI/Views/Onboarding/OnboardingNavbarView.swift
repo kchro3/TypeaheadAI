@@ -11,7 +11,7 @@ struct OnboardingNavbarView: View {
     var modalManager: ModalManager
 
     @AppStorage("step") var step: Int = 1
-    private let totalSteps: Int = 9
+    private let totalSteps: Int = 7
     @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
 
     init(
@@ -21,7 +21,7 @@ struct OnboardingNavbarView: View {
     }
 
     var body: some View {
-        VStack {
+        ZStack {
             HStack {
                 Spacer()
 

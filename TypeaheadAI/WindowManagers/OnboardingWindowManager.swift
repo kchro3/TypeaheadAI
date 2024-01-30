@@ -13,10 +13,11 @@ import os.log
 class OnboardingWindowManager: ObservableObject {
     var toastWindow: ModalWindow?
 
-    private let supabaseManager: SupabaseManager
-    private let modalManager: ModalManager
+    private let clientManager: ClientManager
     private let intentManager: IntentManager
+    private let modalManager: ModalManager
     private let quickActionManager: QuickActionManager
+    private let supabaseManager: SupabaseManager
     private let context: NSManagedObjectContext
 
     // NOTE: Main window origin
@@ -31,16 +32,18 @@ class OnboardingWindowManager: ObservableObject {
 
     init(
         context: NSManagedObjectContext,
-        supabaseManager: SupabaseManager,
-        modalManager: ModalManager,
+        clientManager: ClientManager,
         intentManager: IntentManager,
-        quickActionManager: QuickActionManager
+        modalManager: ModalManager,
+        quickActionManager: QuickActionManager,
+        supabaseManager: SupabaseManager
     ) {
         self.context = context
-        self.supabaseManager = supabaseManager
-        self.modalManager = modalManager
+        self.clientManager = clientManager
         self.intentManager = intentManager
+        self.modalManager = modalManager
         self.quickActionManager = quickActionManager
+        self.supabaseManager = supabaseManager
 
         startMonitoring()
     }
@@ -72,10 +75,11 @@ class OnboardingWindowManager: ObservableObject {
         visualEffect.material = .hudWindow
 
         let contentView = OnboardingView(
-            supabaseManager: supabaseManager,
-            modalManager: modalManager,
+            clientManager: clientManager,
             intentManager: intentManager,
-            quickActionManager: quickActionManager
+            modalManager: modalManager,
+            quickActionManager: quickActionManager,
+            supabaseManager: supabaseManager
         )
         .environment(\.managedObjectContext, context)
 

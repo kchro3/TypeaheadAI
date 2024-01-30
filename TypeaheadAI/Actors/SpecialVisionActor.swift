@@ -70,7 +70,7 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
                 appContext: appInfo.appContext
             )
 
-            try await modalManager.prepareUserInput()
+            try await modalManager.replyToUserMessage()
         } else {
             await modalManager.setError(NSLocalizedString("Failed to get screenshot", comment: ""), appContext: appInfo.appContext)
         }

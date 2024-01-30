@@ -64,10 +64,11 @@ final class AppState: ObservableObject {
         self.quickActionManager = quickActionManager
         self.onboardingWindowManager = OnboardingWindowManager(
             context: context,
-            supabaseManager: supabaseManager,
-            modalManager: modalManager,
+            clientManager: clientManager,
             intentManager: intentManager,
-            quickActionManager: quickActionManager
+            modalManager: modalManager,
+            quickActionManager: quickActionManager,
+            supabaseManager: supabaseManager
         )
         self.settingsManager = SettingsManager(context: context)
 

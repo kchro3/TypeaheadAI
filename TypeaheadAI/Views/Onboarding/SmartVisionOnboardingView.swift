@@ -17,10 +17,20 @@ struct SmartVisionOnboardingView: View {
             }
 
             Markdown("""
-            When you're using VoiceOver, some elements like pictures and icons may not be labeled properly, so you may want to ask Typeahead to describe it for you.
+            When using VoiceOver, some elements like pictures and icons may not be labeled properly, so you can ask Typeahead to describe it for you.
 
-            You can take a screenshot of what is currently under VoiceOver's cursor, and Typeahead will describe what it sees.
+            By pressing **Option-Command-I**, you can take a screenshot of what is currently under VoiceOver's cursor, and Typeahead will describe what it sees.
+
+            Try setting your cursor onto the image below and pressing **Option-Command-I**.
+
+            Note that it doesn't work when screen curtain is enabled.
             """)
+
+            Image("OnboardingImage")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 250)
+                .accessibilityHint("Press Option-Command-I")
 
             KeyboardShortcuts.Recorder(for: .specialVision) {
                 Text("Smart-Vision")
@@ -30,11 +40,6 @@ struct SmartVisionOnboardingView: View {
             .padding(.horizontal, 30)
 
             Spacer()
-
-            Image("OnboardingImage")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 250)
         }
     }
 }

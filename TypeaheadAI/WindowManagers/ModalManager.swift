@@ -87,12 +87,12 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     }
 
     func prepareUserInput() async throws {
-        await NSApp.activate(ignoringOtherApps: true)
-        try await Task.sleep(for: .milliseconds(200))
-
         if !self.isVisible {
             await self.showModal()
         }
+
+        await NSApp.activate(ignoringOtherApps: true)
+        try await Task.sleep(for: .milliseconds(200))
 
         if self.isDictationEnabled {
             try await Task.sleep(for: .milliseconds(400))
@@ -163,7 +163,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         messageContext: MessageContext? = nil
     ) {
         if !isHidden {
-            speaker.speak(text)
+            speaker.speak(text, withCallback: true)
         }
 
         if !isHidden,
@@ -877,7 +877,6 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func replyToUserMessage() async throws {
         isPending = true
-        speaker.speak(NSLocalizedString("Thinking...", comment: ""))
         userIntents = nil
 
         currentTask?.cancel()

@@ -31,6 +31,14 @@ actor SpecialFocusActor: CanGetUIElements, CanExecuteScript {
             return
         }
 
+        if await !self.modalManager.isWindowVisible() {
+            await self.modalManager.showModal()
+        }
+
+        await NSApp.activate(ignoringOtherApps: true)
+        try await Task.sleep(for: .milliseconds(200))
+        try await self.modalManager.stopDictation()
+
         await self.modalManager.forceRefresh()
         await self.modalManager.setText(
             NSLocalizedString("What element do you want to focus on?", comment: ""),
@@ -40,7 +48,5 @@ actor SpecialFocusActor: CanGetUIElements, CanExecuteScript {
         )
 
         await self.modalManager.setPending(false)
-
-        try await modalManager.prepareUserInput()
     }
 }

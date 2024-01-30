@@ -56,9 +56,8 @@ struct FeedbackView: View {
                             .padding(.top, 8)
                             .padding(.horizontal, 15)
                             .transition(.opacity)
-                            .allowsHitTesting(false)
                         }
-                    },
+                    }.allowsHitTesting(false),
                     alignment: .topLeading
                 )
                 .onChange(of: feedback) { newValue in

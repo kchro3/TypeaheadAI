@@ -17,17 +17,21 @@ struct SmartFocusOnboardingView: View {
             }
 
             Markdown("""
-            When you're using VoiceOver, it can be annoying to find a button or an element. You can use Typeahead to control the VoiceOver cursor.
+            When using VoiceOver, it can be cumbersome to find a button or an element, so you can ask Typeahead to set the focus on something for you.
 
+            By pressing **Option-Command-F**, you can tell Typeahead where you want to focus, and Typeahead will try move the VoiceOver cursor. You can describe the button or text field you are looking for, like "search button" or "log-in button."
 
+            Note that this feature only works when VoiceOver is enabled.
             """)
 
-            KeyboardShortcuts.Recorder(for: .specialCopy)
-                .accessibilityHint("You can also configure this in your settings.")
+            KeyboardShortcuts.Recorder(for: .specialFocus) {
+                Text("Smart-Focus")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .accessibilityHint("You can also configure this in your settings.")
+            .padding(.horizontal, 30)
 
             Spacer()
-
-            SampleEmailView()
         }
     }
 }

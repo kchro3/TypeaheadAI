@@ -12,25 +12,26 @@ import AuthenticationServices
 struct OnboardingView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    @ObservedObject var supabaseManager: SupabaseManager
-    var modalManager: ModalManager
+    var clientManager: ClientManager
     var intentManager: IntentManager
+    var modalManager: ModalManager
     var quickActionManager: QuickActionManager
+    @ObservedObject var supabaseManager: SupabaseManager
 
     @AppStorage("step") var step: Int = 1
-    private let totalSteps: Int = 9
-    @AppStorage("hasOnboardedV4") var hasOnboarded: Bool = false
 
     init(
-        supabaseManager: SupabaseManager,
-        modalManager: ModalManager,
+        clientManager: ClientManager,
         intentManager: IntentManager,
-        quickActionManager: QuickActionManager
+        modalManager: ModalManager,
+        quickActionManager: QuickActionManager,
+        supabaseManager: SupabaseManager
     ) {
-        self.supabaseManager = supabaseManager
-        self.modalManager = modalManager
+        self.clientManager = clientManager
         self.intentManager = intentManager
+        self.modalManager = modalManager
         self.quickActionManager = quickActionManager
+        self.supabaseManager = supabaseManager
     }
 
     var body: some View {
@@ -77,32 +78,13 @@ struct OnboardingView: View {
         } else if step == 4 {
             AnyView(SmartVisionOnboardingView())
         } else if step == 5 {
-            AnyView(
-                IntentsOnboardingView()
-                    .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
-                        self.modalManager.setUserIntents(intents: ["reply to this email"])
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: .userIntentSent)) { _ in
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            step += 1
-                        }
-                    }
-            )
+            AnyView(SmartFocusOnboardingView())
         } else if step == 6 {
-            AnyView(
-                RefineOnboardingView()
-                    .onReceive(NotificationCenter.default.publisher(for: .smartCopyPerformed)) { _ in
-                        self.modalManager.setUserIntents(intents: ["reply to this email"])
-                    }
-            )
-        } else if step == 7 {
-            AnyView(SmartPasteOnboardingView())
-        } else if step == 8 {
-            AnyView(QuickActionExplanationOnboardingView())
-        } else if step == 9 {
             AnyView(AutopilotOnboardingView())
         } else {
-            AnyView(OutroOnboardingView())
+            AnyView(OutroOnboardingView { feedback in
+                try await clientManager.sendFeedback(feedback: feedback)
+            })
         }
     }
 }
@@ -119,9 +101,10 @@ struct OnboardingView: View {
 
     let context = container.viewContext
     return OnboardingView(
-        supabaseManager: SupabaseManager(),
-        modalManager: ModalManager(context: context),
+        clientManager: ClientManager(),
         intentManager: IntentManager(context: context, backgroundContext: context),
-        quickActionManager: QuickActionManager(context: context, backgroundContext: context)
+        modalManager: ModalManager(context: context),
+        quickActionManager: QuickActionManager(context: context, backgroundContext: context),
+        supabaseManager: SupabaseManager()
     )
 }

@@ -23,10 +23,10 @@ struct IntroOnboardingView: View {
 
             Here are just a few things you can do:
 
-            - You can tell Typeahead where to set the VoiceOver cursor, like on a search bar or a log-in button.
-            - You can ask Typeahead to summarize what's on the screen.
-            - You can ask Typeahead to take a screenshot of the VO cursor.
-            - You can ask Typeahead to do simple workflows.
+            - Summarize what's happening on the screen.
+            - Set the VoiceOver cursor onto a search bar or a login-button.
+            - Take a screenshot of the VO cursor and describe what's happening.
+            - Execute simple workflows.
 
             Let's get started!
             """

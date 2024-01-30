@@ -22,19 +22,15 @@ struct ActivateOnboardingView: View {
                 """
                 Typeahead is a **globally accessible** chat window. It can handle text or voice input, so you can ask it questions or tell it to do something for you.
 
-                Like VoiceOver, the chat window sits on top of other windows and can access the main application. To open and close the Typeahead window, you can use a keyboard shortcut, which is **Option-Command-Space** by default.
+                Like VoiceOver, the chat window sits on top of other windows and can access the main application. To open and close the Typeahead window, you can use a keyboard shortcut.  When you send a message, Typeahead will think for a couple seconds and then respond with text and voice.
 
-                When you send a message, Typeahead will think for a couple seconds and then respond with text and voice. You can cancel a response by pressing **Command-Escape**.
+                You can cancel a response by pressing **Command-Escape**.
+
+                Let's give it a try. Press **Option-Command-Space** to open the chat window, say "hello" when you hear the cue, and press enter to send the message. To close the window and return to the tutorial, press **Option-Command-Space** again.
+                
+                You can reconfigure the shortcuts below or in your settings later.
                 """
             )
-
-            Markdown(
-                """
-                Let's give it a try. Press **Option-Command-Space** to open the chat window. Then type or say "summarize content" and press enter to send.
-                """
-            )
-
-            Text("You can reconfigure the shortcuts below or in your settings later.")
 
             VStack {
                 KeyboardShortcuts.Recorder(for: .chatOpen) {
