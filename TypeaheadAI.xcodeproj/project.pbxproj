@@ -119,6 +119,7 @@
 		2BCF84352A9DD90F00359841 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84342A9DD90F00359841 /* HistoryManager.swift */; };
 		2BCF843A2A9DE6DA00359841 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCF84392A9DE6DA00359841 /* GeneralSettingsView.swift */; };
 		2BD3821E2B2C4B2E00F96C19 /* CanSimulateEnter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD3821D2B2C4B2E00F96C19 /* CanSimulateEnter.swift */; };
+		2BD97C7E2B69FF57002570C1 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2BD97C7D2B69FF57002570C1 /* WhisperKit */; };
 		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BDDB9892B27DDE100D52BF0 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 2BDDB9882B27DDE100D52BF0 /* SwiftSoup */; };
 		2BDDB98B2B27DDFF00D52BF0 /* String+XMLMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */; };
@@ -294,6 +295,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B4BDB892ACBED2100E55D78 /* SettingsAccess in Frameworks */,
+				2BD97C7E2B69FF57002570C1 /* WhisperKit in Frameworks */,
 				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
 				2BFC51552B38DAB200F3E559 /* LaunchAtLogin in Frameworks */,
@@ -687,6 +689,7 @@
 				2BDDB9882B27DDE100D52BF0 /* SwiftSoup */,
 				2BFC51542B38DAB200F3E559 /* LaunchAtLogin */,
 				2B3FF5342B50B70F00D7BE49 /* Sparkle */,
+				2BD97C7D2B69FF57002570C1 /* WhisperKit */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -736,7 +739,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1430;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1520;
 				TargetAttributes = {
 					2BA7F0742A9ABBA8003D38BA = {
 						CreatedOnToolsVersion = 14.3.1;
@@ -775,6 +778,7 @@
 				2BDDB9872B27DDE100D52BF0 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				2BFC51532B38DAB200F3E559 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2B3FF5332B50B70F00D7BE49 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				2B5CA39E2B69ED350070E01C /* XCRemoteSwiftPackageReference "whisperkit" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -973,6 +977,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -1035,6 +1040,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -1317,6 +1323,14 @@
 				minimumVersion = 1.2.0;
 			};
 		};
+		2B5CA39E2B69ED350070E01C /* XCRemoteSwiftPackageReference "whisperkit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/whisperkit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kchro3/swift-markdown-ui";
@@ -1410,6 +1424,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2BA7F0AC2A9ABC47003D38BA /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
+		};
+		2BD97C7D2B69FF57002570C1 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B5CA39E2B69ED350070E01C /* XCRemoteSwiftPackageReference "whisperkit" */;
+			productName = WhisperKit;
 		};
 		2BDDB9882B27DDE100D52BF0 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
