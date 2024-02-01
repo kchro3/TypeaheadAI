@@ -41,6 +41,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     private let maxIntents = 9
 
     private let speaker = Speaker()
+    private var speakerCursor = 0
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -114,6 +115,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         currentTask?.cancel()
         currentTask = nil
         isPending = false
+        speakerCursor = 0
 
         // NOTE: Worry about this later... Deal with cancellations of tools
 //        var toolCallId: String? = nil
@@ -146,6 +148,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         messages = []
         isPending = false
         userIntents = nil
+        speakerCursor = 0
     }
 
     func getQuickAction() -> QuickAction? {
@@ -163,7 +166,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         messageContext: MessageContext? = nil
     ) {
         if !isHidden {
-            speaker.speak(text, withCallback: true)
+            speaker.speak(NSLocalizedString(text, comment: ""), withCallback: true)
         }
 
         if !isHidden,
@@ -253,7 +256,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func appendToolError(_ responseError: String, functionCall: FunctionCall, appContext: AppContext?) {
         isPending = false
-        speaker.speak(responseError)
+        speaker.speak(NSLocalizedString(responseError, comment: ""))
 
         if let lastMessage = messages.last {
             messages.append(
@@ -296,7 +299,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
-        speaker.speak(responseError)
+        speaker.speak(NSLocalizedString(responseError, comment: ""))
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden {
             messages[idx].responseError = responseError
@@ -342,6 +345,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     func appendText(_ text: String, appContext: AppContext?) async {
         guard let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden else {
             // If the AI response doesn't exist yet, create one.
+            speakerCursor = 0
             if let lastMessage = messages.last {
                 messages.append(
                     Message(
@@ -379,19 +383,36 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         }
 
         messages[idx].text += text
-        if text.contains("\n") {
-            let chunks = messages[idx].text.split(separator: "\n", omittingEmptySubsequences: true)
 
-            if text.trimmingCharacters(in: .whitespaces).hasSuffix("\n") {
-                // Case: If text looks like "bcd\n ", then chunks will look like ["abc", "bcd"]
-                speaker.speak(String(chunks[chunks.count - 1]))
-            } else if chunks.count >= 2 {
-                // Case: If chunks looks like ["abc", "bcd", "def"]
+        let containsWhitespace = text.rangeOfCharacter(from: .whitespacesAndNewlines) != nil
+        if containsWhitespace {
+            if let lastIndex = messages[idx].text.lastIndex(where: { $0.isWhitespace || $0.isNewline }) {
+                print(lastIndex)
+                speaker.speak(String()
+            }
+
+
+            let chunks = messages[idx].text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+            let numComponents = text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.count
+
+            if chunks.count >= 2 {
                 speaker.speak(String(chunks[chunks.count - 2]))
             } else {
                 speaker.speak(String(chunks[0]))
             }
+
+            print(chunks, numComponents, text)
         }
+
+//            if text.trimmingCharacters(in: .whitespaces).hasSuffix("\n") {
+//                // Case: If text looks like "bcd\n ", then chunks will look like ["abc", "bcd"]
+//                speaker.speak(String(chunks[chunks.count - 1]))
+//            } else if chunks.count >= 2 {
+//                // Case: If chunks looks like ["abc", "bcd", "def"]
+//                speaker.speak(String(chunks[chunks.count - 2]))
+//            } else {
+//                speaker.speak(String(chunks[0]))
+//            }
     }
 
     /// Append plan to the AI response. Creates a new message if there is nothing to append to.
@@ -752,7 +773,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
 
             if bufferedPayload.mode == .text, let text = bufferedPayload.text {
 
-                if let lastChunk = text.split(separator: "\n", omittingEmptySubsequences: true).last {
+                if let lastChunk = text.split(separator: " ", omittingEmptySubsequences: true).last {
                     speaker.speak(String(lastChunk), withCallback: true)
                 }
 

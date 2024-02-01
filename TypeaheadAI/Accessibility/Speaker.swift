@@ -28,7 +28,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate, CanSimulateControl {
     func speak(_ text: String, withCallback: Bool = false) {
         if isNarrateEnabled {
             Task {
-                let utterance = AVSpeechUtterance(string: NSLocalizedString(text, comment: ""))
+                let utterance = AVSpeechUtterance(string: text)
 
                 if let selectedVoice = selectedVoice {
                     utterance.voice = AVSpeechSynthesisVoice(identifier: selectedVoice)
