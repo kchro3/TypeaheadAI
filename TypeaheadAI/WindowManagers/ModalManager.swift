@@ -91,6 +91,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
             await self.showModal()
         }
 
+        try await Task.sleep(for: .milliseconds(100))
         await NSApp.activate(ignoringOtherApps: true)
         try await Task.sleep(for: .milliseconds(200))
 
@@ -379,8 +380,10 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         }
 
         messages[idx].text += text
-        if text.contains("\n") {
-            let chunks = messages[idx].text.split(separator: "\n", omittingEmptySubsequences: true)
+        if text.contains("\n") || text.contains(" ") {
+//            let chunks = messages[idx].text.split(separator: "\n", omittingEmptySubsequences: true)
+            let chunks = messages[idx].text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+            print(chunks)
 
             if text.trimmingCharacters(in: .whitespaces).hasSuffix("\n") {
                 // Case: If text looks like "bcd\n ", then chunks will look like ["abc", "bcd"]
@@ -752,7 +755,9 @@ class ModalManager: ObservableObject, CanSimulateDictation {
 
             if bufferedPayload.mode == .text, let text = bufferedPayload.text {
 
-                if let lastChunk = text.split(separator: "\n", omittingEmptySubsequences: true).last {
+
+                let components = text.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter { !$0.isEmpty }
+                if let lastChunk = components.last {
                     speaker.speak(String(lastChunk), withCallback: true)
                 }
 

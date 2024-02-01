@@ -5,8 +5,9 @@
 //  Created by Jeff Hara on 1/19/24.
 //
 
-import Foundation
+import AudioToolbox
 import Carbon.HIToolbox
+import Foundation
 
 protocol CanSimulateDictation {
     func simulateDictation() async throws
