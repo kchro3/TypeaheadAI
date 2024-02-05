@@ -10,11 +10,11 @@ import SwiftUI
 enum Tab: String, CaseIterable, Identifiable {
     case general = "General"
     case profile = "Profile"
-    case narration = "Narration Settings"
+    case narration = "Narration"
     case quickActions = "Quick Actions"
     case history = "History"
-    case incognito = "Offline Mode"
-    case account = "Account Settings"
+//    case incognito = "Offline Mode"
+    case account = "Account"
     case feedback = "Feedback"
 
     var id: String { self.rawValue }
@@ -35,24 +35,18 @@ struct SettingsView: View {
     @AppStorage("settingsTab") var settingsTab: String = Tab.general.rawValue
 
     var body: some View {
-        HStack {
-            VStack {
-                ForEach(Tab.allCases, id: \.self) { tab in
-                    ItemRow(tab: tab, settingsTab: $settingsTab)
-                }
-
-                Spacer()
+        NavigationSplitView {
+            List(Tab.allCases, id: \.self) { tab in
+                ItemRow(tab: tab, settingsTab: $settingsTab)
             }
             .frame(width: 150)
-            .padding(10)
             .padding(.top, 25)
-
+        } detail: {
             viewForTab(settingsTab)
                 .frame(minWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
                 .padding(10)
                 .background(Color(NSColor.windowBackgroundColor))
         }
-        .background(VisualEffect().ignoresSafeArea())
     }
 
     private func viewForTab(_ tab: String) -> some View {
@@ -71,8 +65,8 @@ struct SettingsView: View {
             return AnyView(QuickActionsView(promptManager: promptManager))
         case .history:
             return AnyView(HistoryListView())
-        case .incognito:
-            return AnyView(IncognitoModeView(llamaModelManager: llamaModelManager))
+//        case .incognito:
+//            return AnyView(IncognitoModeView(llamaModelManager: llamaModelManager))
         case .account:
             return AnyView(AccountView(supabaseManager: supabaseManager))
         case .feedback:
@@ -91,25 +85,23 @@ struct ItemRow: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        HStack {
-            Text(tab.localized)
-                .foregroundStyle((settingsTab == tab.id || colorScheme == .dark) ? Color.white : Color.black)
-            Spacer()
-        }
-        .padding(10)
-        .background(
-            RoundedRectangle(cornerRadius: 5)
-                .fill(
-                    settingsTab == tab.id ? .accentColor : (isHovered ? Color.primary.opacity(0.2) : Color.clear)
-                )
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 10))
-        .onHover { hovering in
-            isHovered = hovering
-        }
-        .onTapGesture {
-            settingsTab = tab.id
-        }
+        Text(tab.localized)
+            .foregroundStyle((settingsTab == tab.id || colorScheme == .dark) ? Color.white : Color.black)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(
+                        settingsTab == tab.id ? .accentColor : (isHovered ? Color.primary.opacity(0.2) : Color.clear)
+                    )
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 10))
+            .onHover { hovering in
+                isHovered = hovering
+            }
+            .onTapGesture {
+                settingsTab = tab.id
+            }
     }
 }
 
