@@ -1052,6 +1052,12 @@
     },
     "Failed to get screenshot boundaries" : {
       "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l'obtention des limites de la capture d'écran"
+          }
+        },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
