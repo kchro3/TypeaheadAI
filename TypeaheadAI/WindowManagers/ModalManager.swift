@@ -40,7 +40,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
 
     private let maxIntents = 9
 
-    private let speaker = Speaker()
+    private let speaker = StreamingSpeechProcessor()
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -163,7 +163,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         messageContext: MessageContext? = nil
     ) {
         if !isHidden {
-            speaker.speak(text, withCallback: true)
+            speaker.processToken(text)
+            speaker.flushBuffer(withCallback: true)
         }
 
         if !isHidden,
@@ -253,7 +254,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func appendToolError(_ responseError: String, functionCall: FunctionCall, appContext: AppContext?) {
         isPending = false
-        speaker.speak(responseError)
+        speaker.processToken(responseError)
+        speaker.flushBuffer()
 
         if let lastMessage = messages.last {
             messages.append(
@@ -296,7 +298,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func setError(_ responseError: String, isHidden: Bool = false, appContext: AppContext?) {
         isPending = false
-        speaker.speak(responseError)
+        speaker.processToken(responseError)
+        speaker.flushBuffer()
 
         if let idx = messages.indices.last, !messages[idx].isCurrentUser, !messages[idx].isHidden {
             messages[idx].responseError = responseError
@@ -375,23 +378,12 @@ class ModalManager: ObservableObject, CanSimulateDictation {
             }
             userIntents = nil
             isPending = false
+            speaker.processToken(text)
             return
         }
 
         messages[idx].text += text
-        if text.contains("\n") {
-            let chunks = messages[idx].text.split(separator: "\n", omittingEmptySubsequences: true)
-
-            if text.trimmingCharacters(in: .whitespaces).hasSuffix("\n") {
-                // Case: If text looks like "bcd\n ", then chunks will look like ["abc", "bcd"]
-                speaker.speak(String(chunks[chunks.count - 1]))
-            } else if chunks.count >= 2 {
-                // Case: If chunks looks like ["abc", "bcd", "def"]
-                speaker.speak(String(chunks[chunks.count - 2]))
-            } else {
-                speaker.speak(String(chunks[0]))
-            }
-        }
+        speaker.processToken(text)
     }
 
     /// Append plan to the AI response. Creates a new message if there is nothing to append to.
@@ -665,7 +657,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         }
 
         isPending = true
-        speaker.speak(text)
+        speaker.processToken(text)
+        speaker.flushBuffer()
 
         currentTask?.cancel()
         currentTask = Task {
@@ -710,7 +703,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     ) async throws {
         try Task.checkCancellation()
 
-        speaker.speak(NSLocalizedString("Thinking...", comment: ""))
+        speaker.processToken(NSLocalizedString("Thinking...", comment: ""))
+        speaker.flushBuffer()
 
         if case .focus = self.messages.first?.messageContext {
             let startTime = Date()
@@ -740,12 +734,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
             prevAppInfo: prevAppInfo,
             streamHandler: self.appendText) {
 
-            if bufferedPayload.mode == .text, let text = bufferedPayload.text {
-
-                if let lastChunk = text.split(separator: "\n", omittingEmptySubsequences: true).last {
-                    speaker.speak(String(lastChunk), withCallback: true)
-                }
-
+            if bufferedPayload.mode == .text {
+                speaker.flushBuffer(withCallback: true)
             } else if bufferedPayload.mode == .function {
                 try Task.checkCancellation()
                 // Handle Function payloads
@@ -758,7 +748,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 let args = try functionCall.parseArgs()
                 await self.appendFunction(args.humanReadable, functionCall: functionCall, appContext: appInfo?.appContext)
 
-                speaker.speak(args.humanReadable)
+                speaker.processToken(args.humanReadable)
+                speaker.flushBuffer()
 
                 if !hideModalDuringAutopilot {
                     try await Task.safeSleep(for: .seconds(2))  // Add slight delay so that user can see the next action
@@ -805,7 +796,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
             }
 
             isPending = true
-            speaker.speak(NSLocalizedString("Thinking...", comment: ""))
+            speaker.processToken(NSLocalizedString("Thinking...", comment: ""))
+            speaker.flushBuffer()
             userIntents = nil
 
             currentTask?.cancel()
@@ -914,7 +906,9 @@ class ModalManager: ObservableObject, CanSimulateDictation {
     @MainActor
     func proposeQuickAction() async throws {
         isPending = true
-        speaker.speak(NSLocalizedString("Thinking...", comment: ""))
+        speaker.processToken(NSLocalizedString("Thinking...", comment: ""))
+        speaker.flushBuffer()
+
         userIntents = nil
 
         do {
@@ -926,7 +920,8 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 return
             }
 
-            speaker.speak(text)
+            speaker.processToken(text)
+            speaker.flushBuffer(withCallback: true)
         } catch {
             self.setError("Could not generate a plan", appContext: nil)
         }
