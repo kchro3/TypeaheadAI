@@ -19,7 +19,6 @@ struct GeneralSettingsView: View {
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
     @AppStorage("hideModalDuringAutopilot") private var hideModalDuringAutopilot: Bool = true
     @AppStorage("isNarrateEnabled") private var isNarrateEnabled: Bool = true
-    @AppStorage("isDebugModeEnabled") private var isDebugModeEnabled: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -102,10 +101,6 @@ struct GeneralSettingsView: View {
                         Spacer()
                         Toggle(isOn: $isDictationEnabled) {
                             Text("Enable Dictation")
-                        }
-                        Spacer()
-                        Toggle(isOn: $isDebugModeEnabled) {
-                            Text("Enable Debug Mode")
                         }
                         Spacer()
                     }

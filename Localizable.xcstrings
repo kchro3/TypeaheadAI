@@ -939,6 +939,7 @@
       }
     },
     "Enable Debug Mode" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
