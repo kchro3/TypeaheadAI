@@ -11,11 +11,11 @@ import Foundation
 extension FunctionManager {
     func openApplication(_ functionCall: FunctionCall, appInfo: AppInfo?) async throws {
         guard case .openApplication(let bundleIdentifier) = try functionCall.parseArgs() else {
-            throw ClientManagerError.appError("Invalid app state")
+            throw ApiError.appError("Invalid app state")
         }
 
         guard appInfo?.apps[bundleIdentifier] != nil else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "This app cannot be opened by Typeahead",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext
@@ -23,7 +23,7 @@ extension FunctionManager {
         }
 
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "Failed to open \(bundleIdentifier)",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext

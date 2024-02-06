@@ -32,7 +32,7 @@ extension CanFocusOnElement {
 
         try await Task.safeSleep(for: .milliseconds(100))
         guard result == .success else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "Action failed (code: \(result?.rawValue ?? -1))",
                 functionCall: functionCall,
                 appContext: appContext

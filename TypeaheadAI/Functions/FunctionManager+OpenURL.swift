@@ -11,11 +11,11 @@ import Foundation
 extension FunctionManager {
     func openURL(_ functionCall: FunctionCall, appInfo: AppInfo?) async throws {
         guard case .openURL(let url) = try functionCall.parseArgs() else {
-            throw ClientManagerError.appError("Invalid app state")
+            throw ApiError.appError("Invalid app state")
         }
 
         guard let url = URL(string: url) else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "URL not found", 
                 functionCall: functionCall,
                 appContext: appInfo?.appContext

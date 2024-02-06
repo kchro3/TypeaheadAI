@@ -22,11 +22,11 @@ extension FunctionManager: CanSimulateEnter, CanGetUIElements {
 
         guard case .performUIAction(let action) = try functionCall.parseArgs(),
               let elementMap = appInfo?.elementMap else {
-            throw ClientManagerError.appError("Invalid app state")
+            throw ApiError.appError("Invalid app state")
         }
 
         guard let axElement = elementMap[action.id] else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "No such element \(action.id)",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext

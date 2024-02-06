@@ -13,12 +13,12 @@ extension FunctionManager {
         let appContext = appInfo?.appContext
 
         guard case .saveFile(let id, let file) = try functionCall.parseArgs() else {
-            throw ClientManagerError.appError("Invalid app state")
+            throw ApiError.appError("Invalid app state")
         }
 
         guard let elementMap = appInfo?.elementMap,
               let savePanel = elementMap[id] else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "Failed to save file",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext

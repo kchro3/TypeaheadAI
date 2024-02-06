@@ -61,28 +61,28 @@ struct FunctionCall: Codable, Equatable {
             let errorOpt = self.stringArg("error")
 
             if idOpt == nil, errorOpt == nil {
-                throw ClientManagerError.functionArgParsingError("Function is missing ID but doesn't have an error message.")
+                throw ApiError.functionArgParsingError("Function is missing ID but doesn't have an error message.")
             }
 
             return .focusUIElement(id: self.stringArg("id"), errorMessage: self.stringArg("error"))
 
         case .openApplication:
             guard let bundleIdentifier = self.stringArg("bundleIdentifier") else {
-                throw ClientManagerError.functionArgParsingError("Failed to open application...")
+                throw ApiError.functionArgParsingError("Failed to open application...")
             }
 
             return .openApplication(bundleIdentifier: bundleIdentifier)
 
         case .openFile:
             guard let file = self.stringArg("file") else {
-                throw ClientManagerError.functionArgParsingError("Failed to open file...")
+                throw ApiError.functionArgParsingError("Failed to open file...")
             }
 
             return .openFile(file: file)
 
         case .openURL:
             guard let url = self.stringArg("url") else {
-                throw ClientManagerError.functionArgParsingError("Failed to open file...")
+                throw ApiError.functionArgParsingError("Failed to open file...")
             }
 
             return .openURL(url: url)
@@ -90,7 +90,7 @@ struct FunctionCall: Codable, Equatable {
         case .performUIAction:
             guard let id = self.stringArg("id"),
                   let narration = self.stringArg("narration") else {
-                throw ClientManagerError.functionArgParsingError("Failed to perform UI action...")
+                throw ApiError.functionArgParsingError("Failed to perform UI action...")
             }
 
             return .performUIAction(action: Action(
@@ -103,7 +103,7 @@ struct FunctionCall: Codable, Equatable {
         case .saveFile:
             guard let id = self.stringArg("id"),
                   let file = self.stringArg("file") else {
-                throw ClientManagerError.functionArgParsingError("Failed to save file...")
+                throw ApiError.functionArgParsingError("Failed to save file...")
             }
 
             return .saveFile(id: id, file: file)
@@ -124,7 +124,7 @@ class FunctionManager: CanFetchAppContext,
     func parse(jsonString: String) async throws -> FunctionCall {
         guard let jsonData = jsonString.data(using: .utf8),
               let functionCall = try? JSONDecoder().decode(FunctionCall.self, from: jsonData) else {
-            throw ClientManagerError.functionParsingError("Function could not be parsed: \(jsonString)")
+            throw ApiError.functionParsingError("Function could not be parsed: \(jsonString)")
         }
 
         return functionCall
@@ -152,7 +152,7 @@ class FunctionManager: CanFetchAppContext,
         try Task.checkCancellation()
 
         guard let serializedUIElement = newTree?.serializeWithContext(appContext: newAppContext) else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "Failed to serialize UI state",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext

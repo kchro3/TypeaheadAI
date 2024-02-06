@@ -9,7 +9,7 @@ import Cocoa
 import Foundation
 import os.log
 
-actor SpecialFocusActor: CanGetUIElements, CanExecuteScript {
+actor SpecialFocusActor: CanGetUIElements {
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "SpecialFocusActor"

@@ -70,7 +70,7 @@ class ClientManager: CanGetUIElements {
 
     func sendFeedback(feedback: String, timeout: TimeInterval = 30) async throws {
         guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
-            throw ClientManagerError.signInRequired("Must be signed in to share feedback!")
+            throw ApiError.signInRequired("Must be signed in to share feedback!")
         }
         
         let payload = FeedbackPayload(
@@ -81,7 +81,7 @@ class ClientManager: CanGetUIElements {
         )
 
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            throw ClientManagerError.badRequest("Request was malformed...")
+            throw ApiError.badRequest("Request was malformed...")
         }
 
         var urlRequest = URLRequest(url: self.apiFeedback, timeoutInterval: timeout)
@@ -92,14 +92,14 @@ class ClientManager: CanGetUIElements {
         let (data, resp) = try await self.session.data(for: urlRequest)
 
         guard let httpResponse = resp as? HTTPURLResponse else {
-            throw ClientManagerError.serverError("Something went wrong...")
+            throw ApiError.serverError("Something went wrong...")
         }
 
         guard 200...299 ~= httpResponse.statusCode else {
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw ClientManagerError.serverError(errorResponse.detail)
+                throw ApiError.serverError(errorResponse.detail)
             } else {
-                throw ClientManagerError.serverError("Something went wrong...")
+                throw ApiError.serverError("Something went wrong...")
             }
         }
     }
@@ -125,7 +125,7 @@ class ClientManager: CanGetUIElements {
         }
 
         guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
-            throw ClientManagerError.signInRequired("Must be signed in.")
+            throw ApiError.signInRequired("Must be signed in.")
         }
 
         let payload = RequestPayload(
@@ -145,7 +145,7 @@ class ClientManager: CanGetUIElements {
         )
 
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            throw ClientManagerError.badRequest("Request was malformed...")
+            throw ApiError.badRequest("Request was malformed...")
         }
 
         var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
@@ -156,14 +156,14 @@ class ClientManager: CanGetUIElements {
         let (data, resp) = try await self.session.data(for: urlRequest)
 
         guard let httpResponse = resp as? HTTPURLResponse else {
-            throw ClientManagerError.serverError("Something went wrong...")
+            throw ApiError.serverError("Something went wrong...")
         }
 
         guard 200...299 ~= httpResponse.statusCode else {
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw ClientManagerError.serverError(errorResponse.detail)
+                throw ApiError.serverError(errorResponse.detail)
             } else {
-                throw ClientManagerError.serverError("Something went wrong...")
+                throw ApiError.serverError("Something went wrong...")
             }
         }
 
@@ -176,11 +176,11 @@ class ClientManager: CanGetUIElements {
     ) async throws -> (FunctionCall, AppInfo?) {
         guard online else {
             // Incognito mode doesn't support this yet
-            throw ClientManagerError.signInRequired("Not supported in offline mode.")
+            throw ApiError.signInRequired("Not supported in offline mode.")
         }
 
         guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
-            throw ClientManagerError.signInRequired("Must be signed in.")
+            throw ApiError.signInRequired("Must be signed in.")
         }
 
         var appInfo = try await appContextManager?.getActiveAppInfo()
@@ -211,7 +211,7 @@ class ClientManager: CanGetUIElements {
         )
 
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            throw ClientManagerError.badRequest("Request was malformed...")
+            throw ApiError.badRequest("Request was malformed...")
         }
 
         var urlRequest = URLRequest(url: self.apiFocus, timeoutInterval: timeout)
@@ -222,19 +222,19 @@ class ClientManager: CanGetUIElements {
         let (data, resp) = try await self.session.data(for: urlRequest)
 
         guard let httpResponse = resp as? HTTPURLResponse else {
-            throw ClientManagerError.serverError("Something went wrong...")
+            throw ApiError.serverError("Something went wrong...")
         }
 
         guard 200...299 ~= httpResponse.statusCode else {
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw ClientManagerError.serverError(errorResponse.detail)
+                throw ApiError.serverError(errorResponse.detail)
             } else {
-                throw ClientManagerError.serverError("Something went wrong...")
+                throw ApiError.serverError("Something went wrong...")
             }
         }
 
         guard let functionCall = try? JSONDecoder().decode(FunctionCall.self, from: data) else {
-            throw ClientManagerError.functionParsingError("Function could not be parsed: \(String(data: data, encoding: .utf8) ?? "")")
+            throw ApiError.functionParsingError("Function could not be parsed: \(String(data: data, encoding: .utf8) ?? "")")
         }
 
         return (functionCall, appInfo)
@@ -441,7 +441,7 @@ class ClientManager: CanGetUIElements {
         var payloadCopy = payload
         payloadCopy.version = version
         guard let httpBody = try? JSONEncoder().encode(payloadCopy) else {
-            throw ClientManagerError.badRequest("Bad request format")
+            throw ApiError.badRequest("Bad request format")
         }
 
         var urlRequest = URLRequest(url: self.apiImage, timeoutInterval: timeout)
@@ -452,14 +452,14 @@ class ClientManager: CanGetUIElements {
         let (data, resp) = try await self.session.data(for: urlRequest)
 
         guard let httpResponse = resp as? HTTPURLResponse else {
-            throw ClientManagerError.serverError("Something went wrong...")
+            throw ApiError.serverError("Something went wrong...")
         }
 
         guard 200...299 ~= httpResponse.statusCode else {
             if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw ClientManagerError.serverError(errorResponse.detail)
+                throw ApiError.serverError(errorResponse.detail)
             } else {
-                throw ClientManagerError.serverError("Something went wrong...")
+                throw ApiError.serverError("Something went wrong...")
             }
         }
 
@@ -473,7 +473,7 @@ class ClientManager: CanGetUIElements {
         appInfo: AppInfo?
     ) throws -> AsyncThrowingStream<ChunkPayload, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
-            throw ClientManagerError.badRequest("Encoding error")
+            throw ApiError.badRequest("Encoding error")
         }
 
         let decoder = JSONDecoder()
@@ -491,25 +491,25 @@ class ClientManager: CanGetUIElements {
                 do {
                     (data, resp) = try await self.session.bytes(for: urlRequest)
                 } catch {
-                    let error = ClientManagerError.serverError(error.localizedDescription)
+                    let error = ApiError.serverError(error.localizedDescription)
                     continuation.finish(throwing: error)
                     return
                 }
 
                 guard let httpResponse = resp as? HTTPURLResponse else {
-                    let error = ClientManagerError.serverError("Something went wrong...")
+                    let error = ApiError.serverError("Something went wrong...")
                     continuation.finish(throwing: error)
                     return
                 }
 
                 guard 200...299 ~= httpResponse.statusCode else {
                     var buffer = Data()
-                    var error = ClientManagerError.serverError("Something went wrong...")
+                    var error = ApiError.serverError("Something went wrong...")
                     for try await byte in data {
                         buffer.append(byte)
                     }
                     if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: buffer) {
-                        error = ClientManagerError.serverError(errorResponse.detail)
+                        error = ApiError.serverError(errorResponse.detail)
                     }
 
                     continuation.finish(throwing: error)
@@ -519,13 +519,13 @@ class ClientManager: CanGetUIElements {
                 for try await line in data.lines {
                     guard let data = line.data(using: .utf8),
                           let chunk = try? decoder.decode(ChunkPayload.self, from: data) else {
-                        let error = ClientManagerError.serverError("Failed to parse response...")
+                        let error = ApiError.serverError("Failed to parse response...")
                         continuation.finish(throwing: error)
                         return
                     }
 
                     guard chunk.finishReason == nil || validFinishReasons.contains(chunk.finishReason!) else {
-                        let error = ClientManagerError.serverError("Stream is incomplete. Finished with error: \"\(chunk.finishReason!)\"")
+                        let error = ApiError.serverError("Stream is incomplete. Finished with error: \"\(chunk.finishReason!)\"")
                         continuation.finish(throwing: error)
                         return
                     }
@@ -645,54 +645,6 @@ struct ChunkPayload: Codable {
     var text: String?
     var mode: Mode?
     let finishReason: String?
-}
-
-enum ClientManagerError: LocalizedError {
-    case badRequest(_ message: String)
-    case retriesExceeded(_ message: String)
-    case clientError(_ message: String)
-    case serverError(_ message: String)
-    case appError(_ message: String)
-    case networkError(_ message: String)
-    case corruptedDataError(_ message: String)
-    case signInRequired(_ message: String)
-
-    // LLaMA errors
-    case modelNotFound(_ message: String)
-    case modelNotLoaded(_ message: String)
-    case modelDirectoryNotAuthorized(_ message: String)
-    case modelFailed(_ message: String)
-
-    // FunctionManager errors
-    case functionParsingError(_ message: String)
-    case functionArgParsingError(_ message: String)
-    case functionCallError(_ message: String, functionCall: FunctionCall, appContext: AppContext?)
-    case functionOnFocusError(_ message: String)
-
-    var errorDescription: String {
-        switch self {
-        case .badRequest(let message): return message
-        case .retriesExceeded(let message): return message
-        case .clientError(let message): return message
-        case .serverError(let message): return message
-        case .appError(let message): return message
-        case .networkError(let message): return message
-        case .corruptedDataError(let message): return message
-        case .signInRequired(let message): return message
-
-        // LLaMA model errors
-        case .modelNotFound(let message): return message
-        case .modelNotLoaded(let message): return message
-        case .modelDirectoryNotAuthorized(let message): return message
-        case .modelFailed(let message): return message
-
-        // FunctionManager errors
-        case .functionParsingError(let message): return message
-        case .functionArgParsingError(let message): return message
-        case .functionCallError(let message, _, _): return message
-        case .functionOnFocusError(let message): return message
-        }
-    }
 }
 
 struct SuggestIntentsPayload: Codable {

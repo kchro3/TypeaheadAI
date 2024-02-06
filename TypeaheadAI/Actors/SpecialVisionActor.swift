@@ -54,14 +54,19 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
     }
 
     func specialVision() async throws {
+        // Clear the current state
+        await self.modalManager.forceRefresh()
+
         let appInfo = try await appContextManager.getActiveAppInfo()
-        guard let (point, size) = await getPointAndSize(appContext: appInfo.appContext) else {
+        guard let (point, size) = try await getPointAndSize(appContext: appInfo.appContext) else {
+            await self.modalManager.showModal()
+            await modalManager.setError(NSLocalizedString("Failed to get screenshot boundaries", comment: ""), appContext: appInfo.appContext)
+
+            await NSApp.activate(ignoringOtherApps: true)
             return
         }
 
         if let image = captureScreen(point: point, size: size) {
-            // Clear the current state
-            await self.modalManager.forceRefresh()
             await self.modalManager.showModal()
 
             // Add user image
@@ -72,15 +77,18 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
 
             try await modalManager.replyToUserMessage()
         } else {
+            await self.modalManager.showModal()
             await modalManager.setError(NSLocalizedString("Failed to get screenshot", comment: ""), appContext: appInfo.appContext)
         }
+
+        await NSApp.activate(ignoringOtherApps: true)
     }
 
-    func getPointAndSize(appContext: AppContext?) async -> (CGPoint, CGSize)? {
+    func getPointAndSize(appContext: AppContext?) async throws -> (CGPoint, CGSize)? {
         if NSWorkspace.shared.isVoiceOverEnabled {
             /// If VoiceOver is enabled, then get the VO cursor bounds
-            if let serializedCursor = await executeScript(script: SpecialVisionActor.voCursorScript),
-               let data = serializedCursor.data(using: .utf8),
+            let serializedCursor = try await executeScript(script: SpecialVisionActor.voCursorScript)
+            if let data = serializedCursor.data(using: .utf8),
                let cursor = try? JSONDecoder().decode(VOCursor.self, from: data) {
                 return (cursor.point, cursor.size)
             } else {

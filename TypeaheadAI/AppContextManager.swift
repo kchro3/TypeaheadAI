@@ -45,7 +45,7 @@ class AppContextManager: CanFetchAppContext, CanExecuteScript {
 
     private func getUrl(bundleIdentifier: String?) async -> URL? {
         if bundleIdentifier == "com.google.Chrome" {
-            if let urlString = await executeScript(script: AppContextManager.getActiveTabURLScript),
+            if let urlString = try? await executeScript(script: AppContextManager.getActiveTabURLScript),
                let url = URL(string: urlString),
                let strippedUrl = self.stripQueryParameters(from: url) {
                 return strippedUrl

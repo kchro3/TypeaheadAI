@@ -173,7 +173,7 @@ class LlamaModelManager: ObservableObject {
         self.model = LlamaWrapper(url)
 
         guard let _ = self.model?.isLoaded() else {
-            throw ClientManagerError.modelNotLoaded("Model could not be loaded")
+            throw ApiError.modelNotLoaded("Model could not be loaded")
         }
 
         self.logger.info("model loaded successfully: \(url.lastPathComponent)")
@@ -234,14 +234,14 @@ class LlamaModelManager: ObservableObject {
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void
     ) async throws {
         guard let model = model else {
-            throw ClientManagerError.modelNotLoaded("Open Settings > Offline Mode to select a model for offline mode.")
+            throw ApiError.modelNotLoaded("Open Settings > Offline Mode to select a model for offline mode.")
         }
 
         var payloadCopy = payload
         payloadCopy.messages = []
 
         guard let jsonPayload = encodeToJSONString(from: payloadCopy) else {
-            throw ClientManagerError.badRequest("Encoding error")
+            throw ApiError.badRequest("Encoding error")
         }
 
         var refinements = ""
@@ -281,7 +281,7 @@ class LlamaModelManager: ObservableObject {
                 await streamHandler(.success(token), nil)
             }
         } catch {
-            throw ClientManagerError.modelFailed(error.localizedDescription)
+            throw ApiError.modelFailed(error.localizedDescription)
         }
     }
 

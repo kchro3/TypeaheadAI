@@ -8,12 +8,12 @@
 import Foundation
 
 protocol CanExecuteScript {
-    func executeScript(script: String) async -> String?
+    func executeScript(script: String) async throws -> String
 }
 
 extension CanExecuteScript {
-    func executeScript(script: String) async -> String? {
-        await withCheckedContinuation { continuation in
+    func executeScript(script: String) async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
             let task = Process()
             let pipe = Pipe()
 
@@ -23,15 +23,17 @@ extension CanExecuteScript {
 
             task.terminationHandler = { _ in
                 let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                let output = String(data: data, encoding: .utf8)
-                continuation.resume(returning: output)
+                if let output = String(data: data, encoding: .utf8) {
+                    continuation.resume(returning: output)
+                } else {
+                    continuation.resume(throwing: ApiError.appError("Failed to execute script"))
+                }
             }
 
             do {
                 try task.run()
             } catch {
-                print("An error occurred: \(error)")
-                continuation.resume(returning: nil)
+                continuation.resume(throwing: ApiError.appError(error.localizedDescription))
             }
         }
     }

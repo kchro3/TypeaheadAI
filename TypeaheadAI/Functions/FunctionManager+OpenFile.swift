@@ -13,7 +13,7 @@ extension FunctionManager {
         let appContext = appInfo?.appContext
 
         guard case .openFile(let file) = try functionCall.parseArgs() else {
-            throw ClientManagerError.appError("Invalid app state")
+            throw ApiError.appError("Invalid app state")
         }
 
         // Activate relevant app

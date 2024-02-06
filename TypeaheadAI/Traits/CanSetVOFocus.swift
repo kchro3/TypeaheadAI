@@ -17,14 +17,14 @@ extension CanSetVOFocus {
     func focusVO(on axElement: AXUIElement, functionCall: FunctionCall, appContext: AppContext?) async throws {
 
         guard NSWorkspace.shared.isVoiceOverEnabled else {
-            throw ClientManagerError.functionCallError("VoiceOver must be enabled", functionCall: functionCall, appContext: appContext)
+            throw ApiError.functionCallError("VoiceOver must be enabled", functionCall: functionCall, appContext: appContext)
         }
 
         _ = AXUIElementPerformAction(axElement, "AXScrollToVisible" as CFString)
         try await Task.safeSleep(for: .milliseconds(100))
 
         guard let center = axElement.getCenter() else {
-            throw ClientManagerError.functionCallError("Failed to focus on element", functionCall: functionCall, appContext: appContext)
+            throw ApiError.functionCallError("Failed to focus on element", functionCall: functionCall, appContext: appContext)
         }
 
         // Move the mouse to the center of the element

@@ -14,8 +14,7 @@ import UserNotifications
 
 @MainActor
 final class AppState: ObservableObject {
-    @Published var isLoading: Bool = false
-    @Published var isBlinking: Bool = false
+    // NOTE: This is needed for the Menu View
     @Published var isMenuVisible: Bool = false
 
     private var updateTimer: Timer?
@@ -128,8 +127,6 @@ final class AppState: ObservableObject {
         self.settingsManager.quickActionManager = quickActionManager
         self.settingsManager.supabaseManager = supabaseManager
 
-        checkAndRequestNotificationPermissions()
-
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             Task {
                 do {
@@ -138,6 +135,7 @@ final class AppState: ObservableObject {
                         NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
                     }
                 } catch {
+                    try? await clientManager.sendFeedback(feedback: "Failed to smart-copy\n\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -151,6 +149,7 @@ final class AppState: ObservableObject {
                         NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
                     }
                 } catch {
+                    try? await clientManager.sendFeedback(feedback: "Failed to smart-paste\n\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -161,7 +160,7 @@ final class AppState: ObservableObject {
                 do {
                     try await self.specialRecordActor?.specialRecord()
                 } catch {
-                    self.logger.error("\(error.localizedDescription)")
+                    try? await clientManager.sendFeedback(feedback: "Failed to smart-record\n\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -172,7 +171,7 @@ final class AppState: ObservableObject {
                 do {
                     try await self.specialVisionActor?.specialVision()
                 } catch {
-                    self.logger.error("\(error.localizedDescription)")
+                    try? await clientManager.sendFeedback(feedback: "Failed to smart-vision\n\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -183,7 +182,7 @@ final class AppState: ObservableObject {
                 do {
                     try await self.specialFocusActor?.specialFocus()
                 } catch {
-                    self.logger.error("\(error.localizedDescription)")
+                    try? await clientManager.sendFeedback(feedback: "Failed to smart-focus\n\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -194,7 +193,7 @@ final class AppState: ObservableObject {
                 do {
                     try await self.specialOpenActor?.specialOpen()
                 } catch {
-                    self.logger.error("\(error.localizedDescription)")
+                    try? await clientManager.sendFeedback(feedback: "Failed to open chat\n\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -205,7 +204,7 @@ final class AppState: ObservableObject {
                 do {
                     try await self.specialOpenActor?.specialOpen(forceRefresh: true)
                 } catch {
-                    self.logger.error("\(error.localizedDescription)")
+                    try? await clientManager.sendFeedback(feedback: "Failed to open new chat\n\(error.localizedDescription)")
                     AudioServicesPlaySystemSoundWithCompletion(1103, nil)
                 }
             }
@@ -213,16 +212,6 @@ final class AppState: ObservableObject {
 
         KeyboardShortcuts.onKeyUp(for: .cancelTasks) { [self] in
             self.modalManager.cancelTasks()
-        }
-    }
-
-    private func checkAndRequestNotificationPermissions() -> Void {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
-            if granted {
-                self.logger.debug("Notification permission granted")
-            } else if let error = error {
-                self.logger.error("Notification permission error: \(error.localizedDescription)")
-            }
         }
     }
 }

@@ -671,27 +671,17 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         currentTask = Task {
             do {
                 try await reply(quickAction: quickAction)
-            } catch let error as ClientManagerError {
+            } catch let error as ApiError {
                 switch error {
-                case .badRequest(let message):
-                    self.setError(message, appContext: appContext)
-                case .serverError(let message):
-                    self.setError(message, appContext: appContext)
-                case .clientError(let message):
-                    self.setError(message, appContext: appContext)
-                case .modelNotFound(let message):
-                    self.setError(message, appContext: appContext)
-                case .modelNotLoaded(let message):
-                    self.setError(message, appContext: appContext)
-                case .functionParsingError(let message):
-                    self.setError(message, appContext: appContext)
-                case .functionArgParsingError(let message):
-                    self.setError(message, appContext: appContext)
                 case .functionCallError(let message, let functionCall, let appContext):
                     self.showModal()
                     self.appendToolError(message, functionCall: functionCall, appContext: appContext)
                 default:
-                    self.setError("Something went wrong. \(error.errorDescription)", appContext: appContext)
+                    if !self.isVisible {
+                        self.showModal()
+                    }
+
+                    self.setError(error.errorDescription, appContext: appContext)
                 }
             } catch _ as CancellationError {
                 if !self.isVisible {
@@ -725,7 +715,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         if case .focus = self.messages.first?.messageContext {
             let startTime = Date()
             guard let (functionCall, appInfo) = try await self.clientManager?.focus(messages: self.messages) else {
-                throw ClientManagerError.functionParsingError("Could not parse function payload.")
+                throw ApiError.functionParsingError("Could not parse function payload.")
             }
 
             if self.isVisible {
@@ -761,7 +751,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 // Handle Function payloads
                 guard let jsonString = bufferedPayload.text,
                       let functionCall = try await functionManager?.parse(jsonString: jsonString) else {
-                    throw ClientManagerError.functionParsingError("Could not parse function payload.")
+                    throw ApiError.functionParsingError("Could not parse function payload.")
                 }
 
                 // Parse arguments and update UI with human readable description.
@@ -783,7 +773,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
                 try Task.checkCancellation()
 
                 guard let serialized = newAppInfo?.appContext?.serializedUIElement else {
-                    throw ClientManagerError.functionCallError(
+                    throw ApiError.functionCallError(
                         "Failed to get updated state",
                         functionCall: functionCall,
                         appContext: appInfo?.appContext
@@ -822,7 +812,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
             currentTask = Task {
                 do {
                     try await reply()
-                } catch let error as ClientManagerError {
+                } catch let error as ApiError {
                     switch error {
                     case .badRequest(let message):
                         self.setError(message, appContext: nil)
@@ -883,7 +873,7 @@ class ModalManager: ObservableObject, CanSimulateDictation {
         currentTask = Task {
             do {
                 try await reply()
-            } catch let error as ClientManagerError {
+            } catch let error as ApiError {
                 switch error {
                 case .badRequest(let message):
                     self.setError(message, appContext: nil)

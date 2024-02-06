@@ -14,11 +14,11 @@ extension FunctionManager: CanSimulateControl {
 
         guard case .focusUIElement(let idOpt, let errorMessage) = try functionCall.parseArgs(),
               let elementMap = appInfo?.elementMap else {
-            throw ClientManagerError.appError("Invalid app state")
+            throw ApiError.appError("Invalid app state")
         }
         
         if let errorMessage = errorMessage {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 errorMessage,
                 functionCall: functionCall,
                 appContext: appInfo?.appContext
@@ -26,7 +26,7 @@ extension FunctionManager: CanSimulateControl {
         }
 
         guard let elementId = idOpt else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "Missing element ID",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext
@@ -34,7 +34,7 @@ extension FunctionManager: CanSimulateControl {
         }
 
         guard let axElement = elementMap[elementId] else {
-            throw ClientManagerError.functionCallError(
+            throw ApiError.functionCallError(
                 "No such element \(elementId)",
                 functionCall: functionCall,
                 appContext: appInfo?.appContext

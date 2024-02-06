@@ -938,6 +938,22 @@
         }
       }
     },
+    "Enable Debug Mode" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer le mode de débogage"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abilita la modalità di debug"
+          }
+        }
+      }
+    },
     "Enable Dictation" : {
       "localizations" : {
         "fr" : {
@@ -1030,6 +1046,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossibile ottenere lo screenshot"
+          }
+        }
+      }
+    },
+    "Failed to get screenshot boundaries" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile ottenere i confini dello screenshot"
           }
         }
       }
