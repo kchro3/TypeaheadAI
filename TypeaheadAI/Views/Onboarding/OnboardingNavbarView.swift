@@ -63,7 +63,7 @@ struct OnboardingNavbarView: View {
                     .accessibilityHint("Continue to step \(step + 1) of \(totalSteps)")
                     .accessibilitySortPriority(3.0)
 
-                } else if step == totalSteps {
+                } else {
                     RoundedButton("Finish", isAccent: true) {
                         if let window = NSApplication.shared.keyWindow {
                             print("Mark as onboarded...")
