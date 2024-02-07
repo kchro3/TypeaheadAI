@@ -99,7 +99,8 @@ final class AppState: ObservableObject {
         )
         self.specialVisionActor = SpecialVisionActor(
             appContextManager: appContextManager,
-            modalManager: modalManager
+            modalManager: modalManager,
+            clientManager: clientManager
         )
         self.specialFocusActor = SpecialFocusActor(
             appContextManager: appContextManager,

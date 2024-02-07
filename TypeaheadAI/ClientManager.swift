@@ -189,7 +189,6 @@ class ClientManager: CanGetUIElements {
         let startTime = Date()
         let (tree, elementMap) = getUIElements(appContext: appInfo?.appContext)
         if let serializedUIElement = tree?.serializeWithContext(appContext: appInfo?.appContext) {
-            print(serializedUIElement)
             print("End-to-end Latency: \(Date().timeIntervalSince(startTime)) seconds")
             appInfo?.appContext?.serializedUIElement = serializedUIElement
             appInfo?.elementMap = elementMap
@@ -295,7 +294,6 @@ class ClientManager: CanGetUIElements {
                 let startTime = Date()
                 let (tree, elementMap) = getUIElements(appContext: appInfo?.appContext)
                 if let serializedUIElement = tree?.serializeWithContext(appContext: appInfo?.appContext) {
-                    print(serializedUIElement)
                     print("End-to-end Latency: \(Date().timeIntervalSince(startTime)) seconds")
                     appInfo?.appContext?.serializedUIElement = serializedUIElement
                     appInfo?.elementMap = elementMap

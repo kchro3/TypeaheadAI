@@ -61,7 +61,7 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
         await self.modalManager.forceRefresh()
 
         let appInfo = try await appContextManager.getActiveAppInfo()
-        guard let (point, size) = try await getPointAndSize(appContext: appInfo.appContext) else {
+        guard let (point, size) = await getPointAndSize(appContext: appInfo.appContext) else {
             await self.modalManager.showModal()
             await modalManager.setError(NSLocalizedString("Failed to get screenshot boundaries", comment: ""), appContext: appInfo.appContext)
 
@@ -87,15 +87,36 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
         await NSApp.activate(ignoringOtherApps: true)
     }
 
-    func getPointAndSize(appContext: AppContext?) async throws -> (CGPoint, CGSize)? {
+    /// NOTE: This is getting complicated because I'm trying to log some error messages to see why the cursor is not being read correctly.
+    /// Once it gets cleaned up, we can remove the clientManager calls, and we can simplify the error handling logic.
+    func getPointAndSize(appContext: AppContext?) async -> (CGPoint, CGSize)? {
         if NSWorkspace.shared.isVoiceOverEnabled {
             /// If VoiceOver is enabled, then attempt to get the VO cursor bounds
-            let serializedCursorOrError = try await executeScript(script: SpecialVisionActor.voCursorScript)
-            if let data = serializedCursorOrError.data(using: .utf8),
+            var serializedCursorOrError: String? = nil
+            do {
+                serializedCursorOrError = try await executeScript(script: SpecialVisionActor.voCursorScript)
+            } catch let error as ApiError {
+                Task {
+                    try? await clientManager.sendFeedback(
+                        feedback: "Failed to get cursor: \(error.errorDescription.trimmingCharacters(in: .whitespacesAndNewlines))")
+                }
+            } catch {
+                Task {
+                    try? await clientManager.sendFeedback(
+                        feedback: "Failed to get cursor: \(error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines))")
+                }
+            }
+
+            if let data = serializedCursorOrError?.data(using: .utf8),
                let cursor = try? JSONDecoder().decode(VOCursor.self, from: data) {
                 return (cursor.point, cursor.size)
             } else {
-                try? await clientManager.sendFeedback(feedback: "Failed to get cursor: \(serializedCursorOrError)")
+                if let error = serializedCursorOrError {
+                    Task {
+                        try? await clientManager.sendFeedback(
+                            feedback: "Failed to get cursor: \(error.trimmingCharacters(in: .whitespacesAndNewlines))")
+                    }
+                }
             }
         }
 
