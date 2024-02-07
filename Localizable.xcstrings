@@ -938,23 +938,6 @@
         }
       }
     },
-    "Enable Debug Mode" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activer le mode de débogage"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abilita la modalità di debug"
-          }
-        }
-      }
-    },
     "Enable Dictation" : {
       "localizations" : {
         "fr" : {

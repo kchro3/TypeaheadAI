@@ -31,8 +31,8 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
             set bound to bounds of vo cursor -- Attempt to get bounds of VO cursor
             set outputString to "{\\"x\\": " & item 1 of bound & ", \\"y\\": " & item 2 of bound & ", \\"width\\": " & (item 3 of bound) - (item 1 of bound) & ", \\"height\\": " & (item 4 of bound) - (item 2 of bound) & "}"
             return outputString
-        on error
-            return "{}" -- Return empty JSON if an error occurs
+        on error errMsg
+            return errMsg -- Return message if an error occurs
         end try
     end tell
     """
@@ -44,13 +44,16 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
 
     private let appContextManager: AppContextManager
     private let modalManager: ModalManager
+    private let clientManager: ClientManager
 
     init(
         appContextManager: AppContextManager,
-        modalManager: ModalManager
+        modalManager: ModalManager,
+        clientManager: ClientManager
     ) {
         self.appContextManager = appContextManager
         self.modalManager = modalManager
+        self.clientManager = clientManager
     }
 
     func specialVision() async throws {
@@ -86,21 +89,21 @@ actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
 
     func getPointAndSize(appContext: AppContext?) async throws -> (CGPoint, CGSize)? {
         if NSWorkspace.shared.isVoiceOverEnabled {
-            /// If VoiceOver is enabled, then get the VO cursor bounds
-            let serializedCursor = try await executeScript(script: SpecialVisionActor.voCursorScript)
-            if let data = serializedCursor.data(using: .utf8),
+            /// If VoiceOver is enabled, then attempt to get the VO cursor bounds
+            let serializedCursorOrError = try await executeScript(script: SpecialVisionActor.voCursorScript)
+            if let data = serializedCursorOrError.data(using: .utf8),
                let cursor = try? JSONDecoder().decode(VOCursor.self, from: data) {
                 return (cursor.point, cursor.size)
             } else {
-                return nil
+                try? await clientManager.sendFeedback(feedback: "Failed to get cursor: \(serializedCursorOrError)")
             }
+        }
+
+        let (tree, _) = getUIElements(appContext: appContext)
+        if let tree = tree, let point = tree.root.point, let size = tree.root.size {
+            return (point, size)
         } else {
-            let (tree, _) = getUIElements(appContext: appContext)
-            if let tree = tree, let point = tree.root.point, let size = tree.root.size {
-                return (point, size)
-            } else {
-                return nil
-            }
+            return nil
         }
     }
 
