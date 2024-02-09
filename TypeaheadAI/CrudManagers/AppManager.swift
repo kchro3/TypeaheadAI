@@ -34,7 +34,10 @@ extension AppManager {
         var apps: [String: Application] = [:]
         for directory in directoriesToSearch {
             do {
-                let contents = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+                let contents = try fileManager.contentsOfDirectory(
+                    at: directory,
+                    includingPropertiesForKeys: [.isSymbolicLinkKey]
+                )
 
                 let appURLs = contents.filter { $0.pathExtension == "app" }
 
