@@ -20,7 +20,7 @@ struct AppInfo {
     var apps: [String: Application]
 }
 
-class AppContextManager: CanFetchAppContext, CanExecuteScript {
+class AppContextManager: CanFetchAppContext, CanExecuteApplescript {
     private static let getActiveTabURLScript = """
     tell application "Google Chrome"
         return URL of active tab of front window
@@ -28,11 +28,16 @@ class AppContextManager: CanFetchAppContext, CanExecuteScript {
     """
 
     private let appManager = AppManager()
+    private let clientManager: ClientManager
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
         category: "AppContextManager"
     )
+
+    init(clientManager: ClientManager) {
+        self.clientManager = clientManager
+    }
 
     func getActiveAppInfo() async throws -> AppInfo {
         guard var appContext = try await fetchAppContext() else {
@@ -45,10 +50,22 @@ class AppContextManager: CanFetchAppContext, CanExecuteScript {
 
     private func getUrl(bundleIdentifier: String?) async -> URL? {
         if bundleIdentifier == "com.google.Chrome" {
-            if let urlString = try? await executeScript(script: AppContextManager.getActiveTabURLScript),
-               let url = URL(string: urlString),
-               let strippedUrl = self.stripQueryParameters(from: url) {
-                return strippedUrl
+            do {
+                let urlString = try await executeScript(script: AppContextManager.getActiveTabURLScript)
+                if let url = URL(string: urlString),
+                   let strippedUrl = self.stripQueryParameters(from: url) {
+                    return strippedUrl
+                }
+            } catch let error as ApiError {
+                Task {
+                    try? await clientManager.sendFeedback(
+                        feedback: "Failed to get chrome URL: \(error.errorDescription.trimmingCharacters(in: .whitespacesAndNewlines))")
+                }
+            } catch {
+                Task {
+                    try? await clientManager.sendFeedback(
+                        feedback: "Failed to get chrome URL: \(error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines))")
+                }
             }
         }
 

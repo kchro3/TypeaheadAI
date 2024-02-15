@@ -24,7 +24,7 @@ struct VOCursor: Codable {
     }
 }
 
-actor SpecialVisionActor: CanGetUIElements, CanExecuteScript {
+actor SpecialVisionActor: CanGetUIElements, CanExecuteApplescript {
     private static let voCursorScript = """
     tell application "VoiceOver"
         try

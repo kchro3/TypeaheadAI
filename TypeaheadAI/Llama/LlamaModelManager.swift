@@ -189,7 +189,7 @@ class LlamaModelManager: ObservableObject {
 
     /// Disable suggest intents for offline mode
     func suggestIntents(
-        payload: RequestPayload
+        payload: ChatRequest
     ) async throws -> SuggestIntentsPayload {
         return SuggestIntentsPayload(intents: [])
     }
@@ -230,7 +230,7 @@ class LlamaModelManager: ObservableObject {
 //    }
 
     func predict(
-        payload: RequestPayload,
+        payload: ChatRequest,
         streamHandler: @escaping (Result<String, Error>, AppInfo?) async -> Void
     ) async throws {
         guard let model = model else {

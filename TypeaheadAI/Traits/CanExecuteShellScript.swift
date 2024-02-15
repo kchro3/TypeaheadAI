@@ -1,25 +1,25 @@
 //
-//  CanExecuteScript.swift
+//  CanExecuteShellScript.swift
 //  TypeaheadAI
 //
-//  Created by Jeff Hara on 1/18/24.
+//  Created by Jeff Hara on 2/14/24.
 //
 
 import Foundation
 
-protocol CanExecuteScript {
-    func executeScript(script: String) async throws -> String
+protocol CanExecuteShellScript {
+    func executeShellScript(url: String, script: [String]) async throws -> String
 }
 
-extension CanExecuteScript {
-    func executeScript(script: String) async throws -> String {
+extension CanExecuteShellScript {
+    func executeShellScript(url: String, script: [String]) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let task = Process()
             let outputPipe = Pipe()
             let errorPipe = Pipe()
 
-            task.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-            task.arguments = ["-e", script]
+            task.executableURL = URL(fileURLWithPath: url)
+            task.arguments = script
             task.standardOutput = outputPipe
             task.standardError = errorPipe  // Capture standard error
 

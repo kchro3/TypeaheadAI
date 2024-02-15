@@ -24,7 +24,7 @@ final class AppState: ObservableObject {
     )
 
     // Managers (alphabetize)
-    private let appContextManager: AppContextManager = AppContextManager()
+    private let appContextManager: AppContextManager
     var clientManager: ClientManager
     var conversationManager: ConversationManager
     var functionManager = FunctionManager()
@@ -50,12 +50,14 @@ final class AppState: ObservableObject {
         backgroundContext: NSManagedObjectContext
     ) {
         // Create local reference
+        let clientManager = ClientManager()
         let modalManager = ModalManager(context: context)
         let intentManager = IntentManager(context: context, backgroundContext: backgroundContext)
         let quickActionManager = QuickActionManager(context: context, backgroundContext: backgroundContext)
 
         // Initialize managers (alphabetize)
-        self.clientManager = ClientManager()
+        self.appContextManager = AppContextManager(clientManager: clientManager)
+        self.clientManager = clientManager
         self.conversationManager = ConversationManager(context: context)
         self.historyManager = HistoryManager(context: context, backgroundContext: backgroundContext)
         self.intentManager = intentManager

@@ -5,10 +5,11 @@
 //  Created by Jeff Hara on 1/19/24.
 //
 
+import AppKit
 import Foundation
 import Carbon.HIToolbox
 
-protocol CanSimulateDictation {
+protocol CanSimulateDictation: CanExecuteShellScript {
     func simulateDictation() async throws
 
     func simulateStopDictation() async throws
@@ -16,6 +17,13 @@ protocol CanSimulateDictation {
 
 extension CanSimulateDictation {
     func simulateDictation() async throws {
+        let isGlobeKeyDictation = try? await executeShellScript(
+            url: "/usr/bin/defaults",
+            script: ["read", "com.apple.HIToolbox", "AppleFnUsageType"]
+        )
+
+        // NOTE: Test on Mei's Macbook Pro.
+
         let source = CGEventSource(stateID: .hidSystemState)!
         let keyDown = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(0xB0), keyDown: true)!
         let keyUp = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(0xB0), keyDown: false)!

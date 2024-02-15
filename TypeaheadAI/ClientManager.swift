@@ -128,7 +128,7 @@ class ClientManager: CanGetUIElements {
             throw ApiError.signInRequired("Must be signed in.")
         }
 
-        let payload = RequestPayload(
+        let payload = ChatRequest(
             uuid: uuid,
             username: username,
             userFullName: userFullName,
@@ -194,7 +194,7 @@ class ClientManager: CanGetUIElements {
             appInfo?.elementMap = elementMap
         }
 
-        let payload = RequestPayload(
+        let payload = ChatRequest(
             uuid: uuid,
             username: NSUserName(),
             userFullName: NSFullUserName(),
@@ -384,7 +384,7 @@ class ClientManager: CanGetUIElements {
         streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> ChunkPayload {
         let uuid = try? await self.supabaseManager?.client.auth.session.user.id
-        let payload = RequestPayload(
+        let payload = ChatRequest(
             uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
             username: username,
             userFullName: userFullName,
@@ -466,7 +466,7 @@ class ClientManager: CanGetUIElements {
     }
 
     private func generateOnlineStream(
-        payload: RequestPayload,
+        payload: ChatRequest,
         timeout: TimeInterval,
         appInfo: AppInfo?
     ) throws -> AsyncThrowingStream<ChunkPayload, Error> {
@@ -543,24 +543,6 @@ class ClientManager: CanGetUIElements {
             return messageCopy
         }
     }
-}
-
-struct RequestPayload: Codable {
-    let uuid: UUID
-    var username: String
-    var userFullName: String
-    var userObjective: String?
-    var userBio: String?
-    var userLang: String?
-    var copiedText: String?
-    var messages: [Message]
-    var history: [Message]?
-    var appContext: AppContext?
-    var version: String
-    var isAutopilotEnabled: Bool?
-    var apps: [String]?
-    var isVoiceOverEnabled: Bool?
-    var clientVersion: String?
 }
 
 /// https://replicate.com/stability-ai/sdxl

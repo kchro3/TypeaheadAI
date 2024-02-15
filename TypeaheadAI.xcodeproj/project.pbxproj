@@ -57,7 +57,7 @@
 		2B5CA39B2B67666D0070E01C /* SmartFocusOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA39A2B67666D0070E01C /* SmartFocusOnboardingView.swift */; };
 		2B5CA39D2B677F020070E01C /* SmartVisionOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5CA39C2B677F020070E01C /* SmartVisionOnboardingView.swift */; };
 		2B5FFA652B2507BE001F9B74 /* RecentConversationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */; };
-		2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */; };
+		2B76699F2B5A084A0071D713 /* CanExecuteApplescript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B76699E2B5A084A0071D713 /* CanExecuteApplescript.swift */; };
 		2B7669A12B5A2CD00071D713 /* CanSimulateControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */; };
 		2B7669A32B5A72A50071D713 /* CanSimulateDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */; };
 		2B7669A52B5BA2150071D713 /* CanSetVOFocus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */; };
@@ -121,6 +121,8 @@
 		2BD3821E2B2C4B2E00F96C19 /* CanSimulateEnter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD3821D2B2C4B2E00F96C19 /* CanSimulateEnter.swift */; };
 		2BD97C802B720496002570C1 /* ApiError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD97C7F2B720496002570C1 /* ApiError.swift */; };
 		2BD97C822B72DCB5002570C1 /* StreamingSpeechProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD97C812B72DCB5002570C1 /* StreamingSpeechProcessor.swift */; };
+		2BD97C862B7C4A2A002570C1 /* ChatRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD97C852B7C4A2A002570C1 /* ChatRequest.swift */; };
+		2BD97C8A2B7D9485002570C1 /* CanExecuteShellScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD97C892B7D9485002570C1 /* CanExecuteShellScript.swift */; };
 		2BDA45C32ABEE840006128BC /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDA45C22ABEE840006128BC /* MessageView.swift */; };
 		2BDDB9892B27DDE100D52BF0 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 2BDDB9882B27DDE100D52BF0 /* SwiftSoup */; };
 		2BDDB98B2B27DDFF00D52BF0 /* String+XMLMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */; };
@@ -208,7 +210,7 @@
 		2B5CA39A2B67666D0070E01C /* SmartFocusOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartFocusOnboardingView.swift; sourceTree = "<group>"; };
 		2B5CA39C2B677F020070E01C /* SmartVisionOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartVisionOnboardingView.swift; sourceTree = "<group>"; };
 		2B5FFA642B2507BE001F9B74 /* RecentConversationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentConversationsView.swift; sourceTree = "<group>"; };
-		2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteScript.swift; sourceTree = "<group>"; };
+		2B76699E2B5A084A0071D713 /* CanExecuteApplescript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteApplescript.swift; sourceTree = "<group>"; };
 		2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateControl.swift; sourceTree = "<group>"; };
 		2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateDictation.swift; sourceTree = "<group>"; };
 		2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSetVOFocus.swift; sourceTree = "<group>"; };
@@ -273,6 +275,8 @@
 		2BD3821D2B2C4B2E00F96C19 /* CanSimulateEnter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanSimulateEnter.swift; sourceTree = "<group>"; };
 		2BD97C7F2B720496002570C1 /* ApiError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiError.swift; sourceTree = "<group>"; };
 		2BD97C812B72DCB5002570C1 /* StreamingSpeechProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingSpeechProcessor.swift; sourceTree = "<group>"; };
+		2BD97C852B7C4A2A002570C1 /* ChatRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRequest.swift; sourceTree = "<group>"; };
+		2BD97C892B7D9485002570C1 /* CanExecuteShellScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanExecuteShellScript.swift; sourceTree = "<group>"; };
 		2BDA45C22ABEE840006128BC /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		2BDDB98A2B27DDFF00D52BF0 /* String+XMLMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+XMLMarkdown.swift"; sourceTree = "<group>"; };
 		2BDDB98C2B282AFF00D52BF0 /* AppManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
@@ -435,7 +439,8 @@
 				2B11FCE22B0C47FA00325F38 /* CanSimulateSelectAll.swift */,
 				2BE7BB872B258B4C00164F88 /* CanGetUIElements.swift */,
 				2B9A89862B3CE1D300041856 /* CanFocusOnElement.swift */,
-				2B76699E2B5A084A0071D713 /* CanExecuteScript.swift */,
+				2B76699E2B5A084A0071D713 /* CanExecuteApplescript.swift */,
+				2BD97C892B7D9485002570C1 /* CanExecuteShellScript.swift */,
 				2B7669A02B5A2CD00071D713 /* CanSimulateControl.swift */,
 				2B7669A22B5A72A50071D713 /* CanSimulateDictation.swift */,
 				2B7669A42B5BA2150071D713 /* CanSetVOFocus.swift */,
@@ -657,6 +662,7 @@
 				2BDDB98E2B282B3000D52BF0 /* Application.swift */,
 				2B9A89902B44CBCC00041856 /* JSONAny.swift */,
 				2BD97C7F2B720496002570C1 /* ApiError.swift */,
+				2BD97C852B7C4A2A002570C1 /* ChatRequest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -832,7 +838,7 @@
 				2B473E892AA85BDD0042913D /* LlamaModelManager.swift in Sources */,
 				2B8CD4B42B0A9A11003E0589 /* Theme+Custom.swift in Sources */,
 				2B0B30192ADCBF1600338B76 /* QuickActionsView.swift in Sources */,
-				2B76699F2B5A084A0071D713 /* CanExecuteScript.swift in Sources */,
+				2B76699F2B5A084A0071D713 /* CanExecuteApplescript.swift in Sources */,
 				2B8CD49B2B076AE6003E0589 /* ActivateOnboardingView.swift in Sources */,
 				2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */,
 				2B4165422B65AA89007E8C61 /* View+Extension.swift in Sources */,
@@ -908,10 +914,12 @@
 				2B44FA982ABA783F00C6B542 /* OnboardingView.swift in Sources */,
 				2B8CD4992B06DD36003E0589 /* FunctionManager.swift in Sources */,
 				2BE7BB8D2B258C4400164F88 /* AXUIElement+Extension.swift in Sources */,
+				2BD97C862B7C4A2A002570C1 /* ChatRequest.swift in Sources */,
 				2BE0EC222AA0956C00E47C52 /* ModalView.swift in Sources */,
 				2B9A89852B3CDC9700041856 /* AXSavePanelVisitor.swift in Sources */,
 				2BDDB9972B28352800D52BF0 /* FunctionManager+PerformUIAction.swift in Sources */,
 				2B9A897F2B3BE4B300041856 /* FunctionManager+OpenFile.swift in Sources */,
+				2BD97C8A2B7D9485002570C1 /* CanExecuteShellScript.swift in Sources */,
 				2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */,
 				2BCB017D2A9EF9A6009F9FAC /* RequestStatus.swift in Sources */,
 				2BDDB9952B2834B100D52BF0 /* FunctionManager+OpenURL.swift in Sources */,
@@ -1102,7 +1110,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"TypeaheadAI/Preview Content\"";
 				DEVELOPMENT_TEAM = TZA789GZFT;
@@ -1120,7 +1128,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.30;
+				MARKETING_VERSION = 2.1.31;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1143,7 +1151,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"TypeaheadAI/Preview Content\"";
 				DEVELOPMENT_TEAM = TZA789GZFT;
@@ -1161,7 +1169,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.30;
+				MARKETING_VERSION = 2.1.31;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.typeahead.TypeaheadAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

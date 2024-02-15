@@ -2509,6 +2509,22 @@
         }
       }
     },
+    "Smart-Record: Records a Quick Action" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre une Action Rapide"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra un'Azione Rapida"
+          }
+        }
+      }
+    },
     "Smart-Vision" : {
       "localizations" : {
         "fr" : {
