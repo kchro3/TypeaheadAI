@@ -79,6 +79,8 @@
 		2B8CD4B62B0AA450003E0589 /* CustomSyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4B52B0AA450003E0589 /* CustomSyntaxHighlighter.swift */; };
 		2B8CD4BB2B0AAC09003E0589 /* CopyButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8CD4BA2B0AAC09003E0589 /* CopyButtonView.swift */; };
 		2B8CD4BE2B0AB13B003E0589 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 2B8CD4BD2B0AB13B003E0589 /* MarkdownUI */; };
+		2B9109E42B833D46005C729B /* Stripe in Frameworks */ = {isa = PBXBuildFile; productRef = 2B9109E32B833D46005C729B /* Stripe */; };
+		2B9109E62B833D46005C729B /* StripePaymentSheet in Frameworks */ = {isa = PBXBuildFile; productRef = 2B9109E52B833D46005C729B /* StripePaymentSheet */; };
 		2B92BDB92AA3A2DD00E65CFA /* CustomModalWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDB82AA3A2DD00E65CFA /* CustomModalWindow.swift */; };
 		2B92BDBB2AA3D10800E65CFA /* ModalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B92BDBA2AA3D10800E65CFA /* ModalManager.swift */; };
 		2B9A897B2B3BD9EA00041856 /* AXOpenPanelVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A897A2B3BD9EA00041856 /* AXOpenPanelVisitor.swift */; };
@@ -299,9 +301,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B9109E42B833D46005C729B /* Stripe in Frameworks */,
 				2B4BDB892ACBED2100E55D78 /* SettingsAccess in Frameworks */,
 				2BA3C2352AADAC5700537F95 /* llama in Frameworks */,
 				2B473E8C2AA860380042913D /* MenuBarExtraAccess in Frameworks */,
+				2B9109E62B833D46005C729B /* StripePaymentSheet in Frameworks */,
 				2BFC51552B38DAB200F3E559 /* LaunchAtLogin in Frameworks */,
 				2B1F3B7E2AEC5F8500F1BB60 /* Supabase in Frameworks */,
 				2BF929852AB13FEC00FC105B /* Highlighter in Frameworks */,
@@ -696,6 +700,8 @@
 				2BDDB9882B27DDE100D52BF0 /* SwiftSoup */,
 				2BFC51542B38DAB200F3E559 /* LaunchAtLogin */,
 				2B3FF5342B50B70F00D7BE49 /* Sparkle */,
+				2B9109E32B833D46005C729B /* Stripe */,
+				2B9109E52B833D46005C729B /* StripePaymentSheet */,
 			);
 			productName = TypeaheadAI;
 			productReference = 2BA7F0752A9ABBA8003D38BA /* TypeaheadAI.app */;
@@ -784,6 +790,7 @@
 				2BDDB9872B27DDE100D52BF0 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				2BFC51532B38DAB200F3E559 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2B3FF5332B50B70F00D7BE49 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				2B9109E22B833D46005C729B /* XCRemoteSwiftPackageReference "stripe-ios-spm" */,
 			);
 			productRefGroup = 2BA7F0762A9ABBA8003D38BA /* Products */;
 			projectDirPath = "";
@@ -1337,6 +1344,14 @@
 				kind = branch;
 			};
 		};
+		2B9109E22B833D46005C729B /* XCRemoteSwiftPackageReference "stripe-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stripe/stripe-ios-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 23.22.0;
+			};
+		};
 		2BA3C2332AADAC5700537F95 /* XCRemoteSwiftPackageReference "llama" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ggerganov/llama.cpp";
@@ -1412,6 +1427,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2B8CD4BC2B0AB13B003E0589 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		2B9109E32B833D46005C729B /* Stripe */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B9109E22B833D46005C729B /* XCRemoteSwiftPackageReference "stripe-ios-spm" */;
+			productName = Stripe;
+		};
+		2B9109E52B833D46005C729B /* StripePaymentSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B9109E22B833D46005C729B /* XCRemoteSwiftPackageReference "stripe-ios-spm" */;
+			productName = StripePaymentSheet;
 		};
 		2BA3C2342AADAC5700537F95 /* llama */ = {
 			isa = XCSwiftPackageProductDependency;
