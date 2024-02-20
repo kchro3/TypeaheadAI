@@ -33,6 +33,13 @@ struct AccountView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
+        .onAppear {
+            Task {
+                if let uuid = supabaseManager.uuid {
+                    try await supabaseManager.checkAndSetUserStatus(uuid: uuid)
+                }
+            }
+        }
     }
 
     @ViewBuilder

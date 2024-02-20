@@ -80,36 +80,35 @@ class SupabaseManager: ObservableObject {
 
     /// Sign-in and fetch whether or not the user is a premium user
     private func signIn(uuid: String) async {
-        guard let userStatus = await fetchUserStatus(uuid: uuid) else {
-            logger.error("Failed to fetch user status")
-            return
-        }
-
-        await MainActor.run {
-            self.uuid = uuid
-            self.isPremium = userStatus.isPremium
+        do {
+            try await checkAndSetUserStatus(uuid: uuid)
+            await MainActor.run {
+                self.uuid = uuid
+            }
+        } catch {
+            await MainActor.run {
+                self.uuid = nil
+                self.isPremium = false
+            }
         }
     }
 
-    func fetchUserStatus(uuid: String) async -> UserStatus? {
-        do {
-            guard let url = URL(string: "\(apiIsPremiumURL)?uuid=\(uuid)") else {
-                return nil
-            }
+    func checkAndSetUserStatus(uuid: String) async throws {
+        guard let url = URL(string: "\(apiIsPremiumURL)?uuid=\(uuid)") else {
+            throw ApiError.badRequest("Could not reach server.")
+        }
 
-            let urlRequest = URLRequest(url: url, timeoutInterval: 200)
-            let (data, resp) = try await URLSession.shared.data(for: urlRequest)
+        let urlRequest = URLRequest(url: url, timeoutInterval: 200)
+        let (data, resp) = try await URLSession.shared.data(for: urlRequest)
 
-            guard let httpResponse = resp as? HTTPURLResponse,
-                  200...299 ~= httpResponse.statusCode else {
-                throw ApiError.serverError("Something went wrong...")
-            }
+        guard let httpResponse = resp as? HTTPURLResponse,
+              200...299 ~= httpResponse.statusCode else {
+            throw ApiError.serverError("Something went wrong...")
+        }
 
-            let response = try JSONDecoder().decode(UserStatus.self, from: data)
-            return response
-        } catch {
-            print(error.localizedDescription)
-            return nil
+        let userStatus = try JSONDecoder().decode(UserStatus.self, from: data)
+        await MainActor.run {
+            self.isPremium = userStatus.isPremium
         }
     }
 }
