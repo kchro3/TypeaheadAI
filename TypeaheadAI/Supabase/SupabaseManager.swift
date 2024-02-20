@@ -11,11 +11,22 @@ import SwiftUI
 import Foundation
 import os.log
 
+struct UserStatus: Codable {
+    let isPremium: Bool
+    let status: String?
+}
+
 class SupabaseManager: ObservableObject {
     let client = SupabaseClient(
         supabaseURL: URL(string: "https://hwkkvezmbrlrhvipbsum.supabase.co")!,
         supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3a2t2ZXptYnJscmh2aXBic3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTgzNjY4NTEsImV4cCI6MjAxMzk0Mjg1MX0.aDzWW0p2uI7wsVGsu1mtfvEh4my8s9zhgVTr4r008YU")
     private let callbackURL: URL = URL(string: "app.typeahead://login-callback")!
+
+#if DEBUG
+    private let apiIsPremiumURL: String = "http://localhost:8787/v4/isPremium"
+#else
+    private let apiIsPremiumURL: String = "https://api.typeahead.ai/v4/isPremium"
+#endif
 
     private let logger = Logger(
         subsystem: "ai.typeahead.TypeaheadAI",
@@ -23,37 +34,25 @@ class SupabaseManager: ObservableObject {
     )
 
     @Published var uuid: String?
+    @Published var isPremium: Bool = false
 
     init() {
         Task {
-            await signinOnInit()
+            if let session = try? await client.auth.session {
+                await signIn(uuid: session.user.id.uuidString)
+            }
         }
     }
 
-    @MainActor
-    private func signinOnInit() async {
-        do {
-            let session = try await client.auth.session
-            self.uuid = session.user.id.uuidString
-        } catch {
-            logger.info("Not signed-in")
-        }
-    }
-
-    @MainActor
     func registerWithEmail(email: String, password: String) async throws {
         try await client.auth.signUp(email: email, password: password)
         let session = try await client.auth.session
-
-        let user = session.user
-        uuid = user.id.uuidString
+        await signIn(uuid: session.user.id.uuidString)
     }
 
-    @MainActor
     func signinWithEmail(email: String, password: String) async throws {
         let response = try await client.auth.signIn(email: email, password: password)
-        let user = response.user
-        uuid = user.id.uuidString
+        await signIn(uuid: response.user.id.uuidString)
         let _ = try await client.auth.session
     }
 
@@ -70,13 +69,47 @@ class SupabaseManager: ObservableObject {
     @MainActor
     func signout() async throws {
         uuid = nil
+        isPremium = false
         try await client.auth.signOut()
     }
 
-    @MainActor
     func signinWithURL(from: URL) async throws {
         let session = try await client.auth.session(from: from)
-        let user = session.user
-        self.uuid = user.id.uuidString
+        await signIn(uuid: session.user.id.uuidString)
+    }
+
+    /// Sign-in and fetch whether or not the user is a premium user
+    private func signIn(uuid: String) async {
+        guard let userStatus = await fetchUserStatus(uuid: uuid) else {
+            logger.error("Failed to fetch user status")
+            return
+        }
+
+        await MainActor.run {
+            self.uuid = uuid
+            self.isPremium = userStatus.isPremium
+        }
+    }
+
+    func fetchUserStatus(uuid: String) async -> UserStatus? {
+        do {
+            guard let url = URL(string: "\(apiIsPremiumURL)?uuid=\(uuid)") else {
+                return nil
+            }
+
+            let urlRequest = URLRequest(url: url, timeoutInterval: 200)
+            let (data, resp) = try await URLSession.shared.data(for: urlRequest)
+
+            guard let httpResponse = resp as? HTTPURLResponse,
+                  200...299 ~= httpResponse.statusCode else {
+                throw ApiError.serverError("Something went wrong...")
+            }
+
+            let response = try JSONDecoder().decode(UserStatus.self, from: data)
+            return response
+        } catch {
+            print(error.localizedDescription)
+            return nil
+        }
     }
 }

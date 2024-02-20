@@ -2756,6 +2756,9 @@
         }
       }
     },
+    "Thank you for being a Premium user!" : {
+
+    },
     "Thank you for your feedback! We will review it as soon as possible and take it into consideration. Please feel free to reach out to @kchro3 on Twitter or jeff@typeahead.ai" : {
       "localizations" : {
         "fr" : {
@@ -2773,6 +2776,7 @@
       }
     },
     "Thanks for trying out TypeaheadAI! We are working on building new features, and we would appreciate your support." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
