@@ -40,6 +40,7 @@ class ClientManager: CanGetUIElements {
 //    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
 //    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
 //    private let apiFeedback = URL(string: "https://api.typeahead.ai/v4/feedback")!
+//    private let apiPaymentsURL = "http://api.typeahead.ai/v4/premium"
 
     private let apiStream = URL(string: "http://localhost:8787/v4/stream")!
     private let apiFocus = URL(string: "http://localhost:8787/v4/focus")!
@@ -47,6 +48,7 @@ class ClientManager: CanGetUIElements {
     private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
     private let apiFeedback = URL(string: "http://localhost:8787/v4/feedback")!
+    private let apiPaymentsURL = "http://localhost:8787/v4/premium"
 
 #else
 
@@ -56,6 +58,7 @@ class ClientManager: CanGetUIElements {
     private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
     private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
     private let apiFeedback = URL(string: "https://api.typeahead.ai/v4/feedback")!
+    private let apiPaymentsURL = "http://api.typeahead.ai/v4/premium"
 
 #endif
 
@@ -66,6 +69,14 @@ class ClientManager: CanGetUIElements {
 
     init(session: URLSession = .shared) {
         self.session = session
+    }
+
+    func createPaymentIntent(uuid: String?) async throws {
+        guard let uuid = uuid, let url = URL(string: "\(apiPaymentsURL)?uuid=\(uuid)") else {
+            return
+        }
+
+        NSWorkspace.shared.open(url)
     }
 
     func sendFeedback(feedback: String, timeout: TimeInterval = 30) async throws {

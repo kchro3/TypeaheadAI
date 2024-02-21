@@ -68,7 +68,10 @@ struct SettingsView: View {
 //        case .incognito:
 //            return AnyView(IncognitoModeView(llamaModelManager: llamaModelManager))
         case .account:
-            return AnyView(AccountView(supabaseManager: supabaseManager))
+            return AnyView(AccountView(
+                supabaseManager: supabaseManager,
+                clientManager: clientManager
+            ))
         case .feedback:
             return AnyView(FeedbackView(onSubmit: { feedback in
                 try await clientManager.sendFeedback(feedback: feedback)

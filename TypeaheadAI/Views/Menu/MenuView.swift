@@ -95,14 +95,6 @@ struct MenuView: View {
             .padding(.trailing, -8)
 
             VStack(spacing: 0) {
-                MenuButtonView(
-                    title: NSLocalizedString("Quick Actions", comment: "")
-                ) {
-                    modalManager.closeModal()
-                    settingsManager.showModal(tab: .quickActions)
-                    isMenuVisible = false
-                }
-
                 if modalManager.isPending {
                     MenuButtonView(
                         title: NSLocalizedString("Cancel task", comment: ""),
@@ -133,10 +125,6 @@ struct MenuView: View {
                         isMenuVisible = false
                     }
                 }
-
-                Divider()
-                    .padding(.vertical, verticalPadding)
-                    .padding(.horizontal, horizontalPadding)
 
                 MenuButtonView(
                     title: NSLocalizedString("Feedback", comment: "")
@@ -192,6 +180,13 @@ struct MenuView: View {
             }
         }
         .padding(4)
+        .onAppear {
+            Task {
+                if let uuid = supabaseManager.uuid {
+                    try await supabaseManager.checkAndSetUserStatus(uuid: uuid)
+                }
+            }
+        }
     }
 }
 
