@@ -45,7 +45,13 @@ struct AccountView: View {
     @ViewBuilder
     var loggedInPremiumView: some View {
         VStack(alignment: .leading) {
-            Text("Thank you for being a Premium user!")
+            Text("""
+            Thank you for being a Premium user!
+
+            With your continued support and feedback, we will make tech more accessible for everyone.
+
+            If you have any questions, please feel free to reach out to jeff@typeahead.ai directly.
+            """)
                 .padding()
 
             Spacer()
@@ -77,11 +83,15 @@ struct AccountView: View {
     @ViewBuilder
     var loggedInView: some View {
         VStack(alignment: .leading) {
-            Text("You're signed in!")
-                .padding()
+            Text("""
+            Thank you for using Typeahead AI!
+
+            Please support Typeahead AI by becoming a Premium user! As a Premium user, you will have access to the latest AI models and enjoy exclusive features.
+            """)
+            .padding()
 
             Spacer()
-            
+
             HStack {
                 AccountOptionButton(label: "Get Premium Mode", isAccent: true) {
                     Task {
@@ -125,9 +135,28 @@ struct AccountView: View {
 
 #Preview {
     let manager = SupabaseManager()
-    manager.uuid = "test"
     return AccountView(
         supabaseManager: manager,
         clientManager: ClientManager()
     )
+    .onAppear(perform: {
+        Task {
+            manager.uuid = "test"
+            manager.isPremium = false
+        }
+    })
+}
+
+#Preview {
+    let manager = SupabaseManager()
+    return AccountView(
+        supabaseManager: manager,
+        clientManager: ClientManager()
+    )
+    .onAppear(perform: {
+        Task {
+            manager.uuid = "test"
+            manager.isPremium = true
+        }
+    })
 }

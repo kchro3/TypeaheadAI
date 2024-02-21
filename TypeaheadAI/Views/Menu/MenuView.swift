@@ -95,12 +95,14 @@ struct MenuView: View {
             .padding(.trailing, -8)
 
             VStack(spacing: 0) {
-                MenuButtonView(
-                    title: NSLocalizedString("Quick Actions", comment: "")
-                ) {
-                    modalManager.closeModal()
-                    settingsManager.showModal(tab: .quickActions)
-                    isMenuVisible = false
+                if supabaseManager.uuid != nil, !supabaseManager.isPremium {
+                    MenuButtonView(
+                        title: NSLocalizedString("Get Premium Mode", comment: "")
+                    ) {
+                        modalManager.closeModal()
+                        settingsManager.showModal(tab: .account)
+                        isMenuVisible = false
+                    }
                 }
 
                 if modalManager.isPending {
