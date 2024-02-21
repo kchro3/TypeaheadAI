@@ -80,7 +80,8 @@ class ClientManager: CanGetUIElements {
     }
 
     func sendFeedback(feedback: String, timeout: TimeInterval = 30) async throws {
-        guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
+        guard let uuid = try? await supabaseManager?.client.auth.session.user.id,
+              let jwtToken = try? await supabaseManager?.client.auth.session.accessToken else {
             throw ApiError.signInRequired("Must be signed in to share feedback!")
         }
         
@@ -99,6 +100,7 @@ class ClientManager: CanGetUIElements {
         urlRequest.httpMethod = "POST"
         urlRequest.httpBody = httpBody
         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
 
         let (data, resp) = try await self.session.data(for: urlRequest)
 
@@ -113,72 +115,6 @@ class ClientManager: CanGetUIElements {
                 throw ApiError.serverError("Something went wrong...")
             }
         }
-    }
-
-    /// This used to call the suggest intents API, but it's too slow.
-    /// This is using CoreData instead of remotely fetching the user intents.
-    func suggestIntents(
-        id: UUID,
-        username: String,
-        userFullName: String,
-        userObjective: String?,
-        userBio: String,
-        userLang: String,
-        copiedText: String,
-        messages: [Message],
-        history: [Message]?,
-        appContext: AppContext?,
-        timeout: TimeInterval = 30
-    ) async throws -> SuggestIntentsPayload? {
-        guard online else {
-            // Incognito mode doesn't support this yet
-            return nil
-        }
-
-        guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
-            throw ApiError.signInRequired("Must be signed in.")
-        }
-
-        let payload = ChatRequest(
-            uuid: uuid,
-            username: username,
-            userFullName: userFullName,
-            userObjective: userObjective,
-            userBio: userBio,
-            userLang: userLang,
-            copiedText: copiedText,
-            messages: self.sanitizeMessages(messages),
-            history: history,
-            appContext: appContext,
-            version: version,
-            isVoiceOverEnabled: NSWorkspace.shared.isVoiceOverEnabled,
-            clientVersion: clientVersion
-        )
-
-        guard let httpBody = try? JSONEncoder().encode(payload) else {
-            throw ApiError.badRequest("Request was malformed...")
-        }
-
-        var urlRequest = URLRequest(url: self.apiIntents, timeoutInterval: timeout)
-        urlRequest.httpMethod = "POST"
-        urlRequest.httpBody = httpBody
-        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let (data, resp) = try await self.session.data(for: urlRequest)
-
-        guard let httpResponse = resp as? HTTPURLResponse else {
-            throw ApiError.serverError("Something went wrong...")
-        }
-
-        guard 200...299 ~= httpResponse.statusCode else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw ApiError.serverError(errorResponse.detail)
-            } else {
-                throw ApiError.serverError("Something went wrong...")
-            }
-        }
-
-        return try JSONDecoder().decode(SuggestIntentsPayload.self, from: data)
     }
 
     func focus(
@@ -190,7 +126,8 @@ class ClientManager: CanGetUIElements {
             throw ApiError.signInRequired("Not supported in offline mode.")
         }
 
-        guard let uuid = try? await supabaseManager?.client.auth.session.user.id else {
+        guard let uuid = try? await supabaseManager?.client.auth.session.user.id,
+              let jwtToken = try? await supabaseManager?.client.auth.session.accessToken else {
             throw ApiError.signInRequired("Must be signed in.")
         }
 
@@ -228,6 +165,7 @@ class ClientManager: CanGetUIElements {
         urlRequest.httpMethod = "POST"
         urlRequest.httpBody = httpBody
         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
 
         let (data, resp) = try await self.session.data(for: urlRequest)
 
@@ -394,9 +332,13 @@ class ClientManager: CanGetUIElements {
         timeout: TimeInterval = 30,
         streamHandler: @escaping (String, AppContext?) async -> Void
     ) async throws -> ChunkPayload {
-        let uuid = try? await self.supabaseManager?.client.auth.session.user.id
+        guard let uuid = try? await self.supabaseManager?.client.auth.session.user.id,
+              let jwtToken = try? await supabaseManager?.client.auth.session.accessToken else {
+            throw ApiError.signInRequired("Must be signed in!")
+        }
+
         let payload = ChatRequest(
-            uuid: uuid ?? UUID(uuidString: "00000000-0000-0000-0000-000000000000")!,
+            uuid: uuid,
             username: username,
             userFullName: userFullName,
             userObjective: userObjective,
@@ -418,7 +360,8 @@ class ClientManager: CanGetUIElements {
         let stream = try self.generateOnlineStream(
             payload: payload,
             timeout: timeout,
-            appInfo: appInfo
+            appInfo: appInfo,
+            jwtToken: jwtToken
         )
 
         for try await chunk in stream {
@@ -443,43 +386,11 @@ class ClientManager: CanGetUIElements {
         return bufferedPayload
     }
 
-    func generateImage(
-        payload: ImageRequestPayload,
-        timeout: TimeInterval = 30.0
-    ) async throws -> ImageData? {
-        var payloadCopy = payload
-        payloadCopy.version = version
-        guard let httpBody = try? JSONEncoder().encode(payloadCopy) else {
-            throw ApiError.badRequest("Bad request format")
-        }
-
-        var urlRequest = URLRequest(url: self.apiImage, timeoutInterval: timeout)
-        urlRequest.httpMethod = "POST"
-        urlRequest.httpBody = httpBody
-        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let (data, resp) = try await self.session.data(for: urlRequest)
-
-        guard let httpResponse = resp as? HTTPURLResponse else {
-            throw ApiError.serverError("Something went wrong...")
-        }
-
-        guard 200...299 ~= httpResponse.statusCode else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw ApiError.serverError(errorResponse.detail)
-            } else {
-                throw ApiError.serverError("Something went wrong...")
-            }
-        }
-
-        let response = try JSONDecoder().decode(ImageResponse.self, from: data)
-        return response.data[0]
-    }
-
     private func generateOnlineStream(
         payload: ChatRequest,
         timeout: TimeInterval,
-        appInfo: AppInfo?
+        appInfo: AppInfo?,
+        jwtToken: String
     ) throws -> AsyncThrowingStream<ChunkPayload, Error> {
         guard let httpBody = try? JSONEncoder().encode(payload) else {
             throw ApiError.badRequest("Encoding error")
@@ -494,6 +405,7 @@ class ClientManager: CanGetUIElements {
                 urlRequest.httpMethod = "POST"
                 urlRequest.httpBody = httpBody
                 urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                urlRequest.addValue("Bearer \(jwtToken)", forHTTPHeaderField: "Authorization")
 
                 let data: URLSession.AsyncBytes
                 let resp: URLResponse
