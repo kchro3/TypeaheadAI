@@ -95,16 +95,6 @@ struct MenuView: View {
             .padding(.trailing, -8)
 
             VStack(spacing: 0) {
-                if supabaseManager.uuid != nil, !supabaseManager.isPremium {
-                    MenuButtonView(
-                        title: NSLocalizedString("Get Premium Mode", comment: "")
-                    ) {
-                        modalManager.closeModal()
-                        settingsManager.showModal(tab: .account)
-                        isMenuVisible = false
-                    }
-                }
-
                 if modalManager.isPending {
                     MenuButtonView(
                         title: NSLocalizedString("Cancel task", comment: ""),
@@ -135,10 +125,6 @@ struct MenuView: View {
                         isMenuVisible = false
                     }
                 }
-
-                Divider()
-                    .padding(.vertical, verticalPadding)
-                    .padding(.horizontal, horizontalPadding)
 
                 MenuButtonView(
                     title: NSLocalizedString("Feedback", comment: "")
