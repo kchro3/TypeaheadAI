@@ -35,8 +35,8 @@ struct AccountView: View {
         .padding(10)
         .onAppear {
             Task {
-                if let uuid = supabaseManager.uuid {
-                    try await supabaseManager.checkAndSetUserStatus(uuid: uuid)
+                if supabaseManager.uuid != nil {
+                    await supabaseManager.signIn()
                 }
             }
         }
