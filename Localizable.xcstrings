@@ -2779,6 +2779,12 @@
             "state" : "translated",
             "value" : "Merci d'utiliser Typeahead AI !\n\nVeuillez soutenir Typeahead AI en devenant un utilisateur Premium ! En tant qu'utilisateur Premium, vous aurez accès aux derniers modèles d'IA et profiterez de fonctionnalités exclusives."
           }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grazie per aver utilizzato Typeahead AI!\n\nPer favore, supporta Typeahead AI diventando un utente Premium! Come utente Premium, avrai accesso agli ultimi modelli di intelligenza artificiale e godrai di funzionalità esclusive."
+          }
         }
       }
     },

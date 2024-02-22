@@ -182,8 +182,8 @@ struct MenuView: View {
         .padding(4)
         .onAppear {
             Task {
-                if let uuid = supabaseManager.uuid {
-                    try await supabaseManager.checkAndSetUserStatus(uuid: uuid)
+                if supabaseManager.uuid != nil {
+                    await supabaseManager.signIn()
                 }
             }
         }
