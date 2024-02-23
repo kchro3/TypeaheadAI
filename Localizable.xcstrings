@@ -530,6 +530,7 @@
       }
     },
     "Choose different folder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -546,6 +547,7 @@
       }
     },
     "Choose folder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -859,6 +861,7 @@
       }
     },
     "Directory:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1347,6 +1350,7 @@
       }
     },
     "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1379,6 +1383,7 @@
       }
     },
     "In incognito mode, TypeaheadAI works without connecting to the Internet, and your copy-paste history is 100% private. We will make this more user-friendly, but you can choose which model you want to run below." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1395,6 +1400,7 @@
       }
     },
     "Incognito Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1816,6 +1822,7 @@
       }
     },
     "Open in Finder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2558,6 +2565,7 @@
       }
     },
     "Something went wrong..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2837,6 +2845,7 @@
       }
     },
     "The model failed to load." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2886,6 +2895,7 @@
       }
     },
     "This is still a work in progress. Need to use a more advanced sampling method, since it's currently just doing a greedy search. Will integrate with HuggingFace in a future version, but for now, try downloading this to your model directory:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

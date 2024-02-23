@@ -73,17 +73,7 @@ struct MenuView: View {
                 Toggle("Online", isOn: $modalManager.online)
                     .scaleEffect(0.8)
                     .onChange(of: modalManager.online) { online in
-                        if let manager = modalManager.clientManager?.llamaModelManager,
-                           !online,
-                           let _ = selectedModelURL {
-                            Task {
-                                do {
-                                    try await manager.load()
-                                } catch {
-                                    print(error.localizedDescription)
-                                }
-                            }
-                        }
+                        // TODO
                     }
                     .foregroundColor(Color.secondary)
                     .toggleStyle(.switch)

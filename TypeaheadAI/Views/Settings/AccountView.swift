@@ -8,11 +8,11 @@
 import MarkdownUI
 import SwiftUI
 import Supabase
-import AuthenticationServices
 
 struct AccountView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var supabaseManager: SupabaseManager
+
     let clientManager: ClientManager
 
     var body: some View {

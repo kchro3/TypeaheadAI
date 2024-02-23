@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import AuthenticationServices
 import Supabase
 import SwiftUI
 import Foundation
@@ -57,12 +58,12 @@ class SupabaseManager: ObservableObject {
     }
 
     func signinWithApple() async throws {
-        let url = try client.auth.getOAuthSignInURL(provider: Provider.apple, redirectTo: callbackURL)
+        let url = try await client.auth.getOAuthSignInURL(provider: Provider.apple, redirectTo: callbackURL)
         NSWorkspace.shared.open(url)
     }
 
     func signinWithGoogle() async throws {
-        let url = try client.auth.getOAuthSignInURL(provider: Provider.google, redirectTo: callbackURL)
+        let url = try await client.auth.getOAuthSignInURL(provider: Provider.google, redirectTo: callbackURL)
         NSWorkspace.shared.open(url)
     }
 

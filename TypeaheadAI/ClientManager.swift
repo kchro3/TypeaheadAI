@@ -13,7 +13,6 @@ import SwiftUI
 import Supabase
 
 class ClientManager: CanGetUIElements {
-    var llamaModelManager: LlamaModelManager? = nil
     var quickActionManager: QuickActionManager? = nil
     var appContextManager: AppContextManager? = nil
     var intentManager: IntentManager? = nil
