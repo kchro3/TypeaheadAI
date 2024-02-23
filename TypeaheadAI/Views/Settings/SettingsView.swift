@@ -27,7 +27,6 @@ enum Tab: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     var clientManager: ClientManager
     var promptManager: QuickActionManager
-    var llamaModelManager: LlamaModelManager
     @ObservedObject var supabaseManager: SupabaseManager
 
     @Environment(\.colorScheme) var colorScheme
@@ -65,8 +64,6 @@ struct SettingsView: View {
             return AnyView(QuickActionsView(promptManager: promptManager))
         case .history:
             return AnyView(HistoryListView())
-//        case .incognito:
-//            return AnyView(IncognitoModeView(llamaModelManager: llamaModelManager))
         case .account:
             return AnyView(AccountView(
                 supabaseManager: supabaseManager,
@@ -130,14 +127,12 @@ struct SettingsView_Previews: PreviewProvider {
             promptManager.addPrompt(prompt)
         }
 
-        let llamaModelManager = LlamaModelManager()
         let supabaseManager = SupabaseManager()
 
         return Group {
             SettingsView(
                 clientManager: ClientManager(),
                 promptManager: promptManager,
-                llamaModelManager: llamaModelManager,
                 supabaseManager: supabaseManager
             )
             .environment(\.managedObjectContext, context)
@@ -145,7 +140,6 @@ struct SettingsView_Previews: PreviewProvider {
             SettingsView(
                 clientManager: ClientManager(),
                 promptManager: promptManager,
-                llamaModelManager: llamaModelManager,
                 supabaseManager: supabaseManager
             )
             .environment(\.managedObjectContext, context)

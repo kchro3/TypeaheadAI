@@ -33,7 +33,6 @@ final class AppState: ObservableObject {
     @Published var quickActionManager: QuickActionManager
     @Published var modalManager: ModalManager
     @Published var onboardingWindowManager: OnboardingWindowManager
-    @Published var llamaModelManager = LlamaModelManager()
     @Published var settingsManager: SettingsManager
     var supabaseManager = SupabaseManager()
 
@@ -111,7 +110,6 @@ final class AppState: ObservableObject {
 
         // Set lazy params
         // TODO: Use a dependency injection framework or encapsulate these managers
-        self.clientManager.llamaModelManager = llamaModelManager
         self.clientManager.quickActionManager = quickActionManager
         self.clientManager.appContextManager = appContextManager
         self.clientManager.intentManager = intentManager
@@ -126,7 +124,6 @@ final class AppState: ObservableObject {
         self.modalManager.specialRecordActor = specialRecordActor
 
         self.settingsManager.clientManager = clientManager
-        self.settingsManager.llamaModelManager = llamaModelManager
         self.settingsManager.quickActionManager = quickActionManager
         self.settingsManager.supabaseManager = supabaseManager
 

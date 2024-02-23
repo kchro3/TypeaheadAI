@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct LoggedOutAccountView: View {
-    @AppStorage("uuid") var uuid: String?
-
     @Environment(\.colorScheme) var colorScheme
 
     @State private var email: String = ""
@@ -43,9 +41,6 @@ struct LoggedOutAccountView: View {
                         }
                     }
                 }
-                .alert(isPresented: $failedToSignIn, content: {
-                    Alert(title: Text("Failed to sign-in with Apple"), message: failedToRegisterReason.map { Text("\($0)") })
-                })
 
                 AccountOptionButton(label: "Sign-in with Google") {
                     Task {
@@ -57,9 +52,6 @@ struct LoggedOutAccountView: View {
                         }
                     }
                 }
-                .alert(isPresented: $failedToSignIn, content: {
-                    Alert(title: Text("Failed to sign-in with Google"), message: failedToRegisterReason.map { Text("\($0)") })
-                })
 
                 AccountOptionButton(label: "Register with email", isAccent: true) {
                     // Open up the modal window for registration
@@ -73,6 +65,9 @@ struct LoggedOutAccountView: View {
                     // on cancel
                     isSheetPresenting = false
                 }
+            })
+            .alert(isPresented: $failedToSignIn, content: {
+                Alert(title: Text("Failed to sign-in"), message: failedToRegisterReason.map { Text("\($0)") })
             })
 
             Spacer()
@@ -93,7 +88,6 @@ struct LoggedOutAccountView: View {
                         do {
                             let authResponse = try await supabaseManager.client.auth.signIn(email: email, password: password)
                             let user = authResponse.user
-                            uuid = user.id.uuidString
                             let _ = try await supabaseManager.client.auth.session
                             email = ""
                             password = ""
