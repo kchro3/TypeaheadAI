@@ -22,6 +22,7 @@ final class MenuViewModel: ObservableObject {
 
 struct MenuView: View {
     // Alphabetize
+    @Binding var isOnline: Bool
     @ObservedObject var modalManager: ModalManager
     @ObservedObject var promptManager: QuickActionManager
     @ObservedObject var settingsManager: SettingsManager
@@ -34,7 +35,6 @@ struct MenuView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.colorScheme) private var colorScheme
 
-    @AppStorage("online") var online: Bool = true
     @AppStorage("settingsTab") var settingsTab: String?
     @AppStorage("selectedModel") private var selectedModelURL: URL?
 
@@ -46,13 +46,15 @@ struct MenuView: View {
     private let horizontalPadding: CGFloat = 5
 
     init(
-        modalManager: ModalManager, 
+        isOnline: Binding<Bool>,
+        modalManager: ModalManager,
         promptManager: QuickActionManager,
         settingsManager: SettingsManager,
         supabaseManager: SupabaseManager,
         isMenuVisible: Binding<Bool>,
         updater: SPUUpdater
     ) {
+        self._isOnline = isOnline
         self.modalManager = modalManager
         self.promptManager = promptManager
         self.settingsManager = settingsManager
@@ -70,11 +72,10 @@ struct MenuView: View {
 
                 Spacer()
 
-                Toggle("Online", isOn: $modalManager.online)
+                Toggle("Online", isOn: $isOnline)
+                    .accessibilityLabel("Toggle Typeahead")
+                    .accessibilityHint("Disable Typeahead without quitting the app")
                     .scaleEffect(0.8)
-                    .onChange(of: modalManager.online) { online in
-                        // TODO
-                    }
                     .foregroundColor(Color.secondary)
                     .toggleStyle(.switch)
                     .accentColor(.blue)
@@ -209,6 +210,7 @@ struct MenuView_Previews: PreviewProvider {
         let updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
 
         return MenuView(
+            isOnline: .constant(true),
             modalManager: modalManager,
             promptManager: promptManager,
             settingsManager: SettingsManager(context: context),
