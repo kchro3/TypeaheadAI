@@ -173,7 +173,7 @@ struct MenuView: View {
         .onAppear {
             Task {
                 if supabaseManager.uuid != nil {
-                    await supabaseManager.signIn()
+                    try await supabaseManager.signIn()
                 }
             }
         }

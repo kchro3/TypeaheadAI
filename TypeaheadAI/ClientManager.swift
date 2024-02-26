@@ -33,31 +33,22 @@ class ClientManager: CanGetUIElements {
     @AppStorage("isAutopilotEnabled") private var isAutopilotEnabled: Bool = true
 
 #if DEBUG
-//    private let apiUrlStreaming = URL(string: "https://api.typeahead.ai/v4/stream")!
-//    private let apiFocus = URL(string: "https://api.typeahead.ai/v4/focus")!
-//    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-//    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-//    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
+//    private let apiUrlStreaming = URL(string: "https://api.typeahead.ai/v5/stream")!
+//    private let apiFocus = URL(string: "https://api.typeahead.ai/v5/focus")!
 //    private let apiFeedback = URL(string: "https://api.typeahead.ai/v4/feedback")!
 //    private let apiPaymentsURL = "http://api.typeahead.ai/v4/premium"
 
-    private let apiStream = URL(string: "http://localhost:8787/v4/stream")!
-    private let apiFocus = URL(string: "http://localhost:8787/v4/focus")!
-    private let apiImage = URL(string: "http://localhost:8080/v2/get_image")!
-    private let apiIntents = URL(string: "http://localhost:8080/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "http://localhost:8080/v2/get_image_caption")!
-    private let apiFeedback = URL(string: "http://localhost:8787/v4/feedback")!
-    private let apiPaymentsURL = "http://localhost:8787/v4/premium"
+    private let apiStream = URL(string: "http://localhost:8787/v5/stream")!
+    private let apiFocus = URL(string: "http://localhost:8787/v5/focus")!
+    private let apiFeedback = URL(string: "http://localhost:8787/v5/feedback")!
+    private let apiPaymentsURL = "http://localhost:8787/v5/premium"
 
 #else
 
-    private let apiStream = URL(string: "https://api.typeahead.ai/v4/stream")!
-    private let apiFocus = URL(string: "https://api.typeahead.ai/v4/focus")!
-    private let apiImage = URL(string: "https://typeahead-ai.fly.dev/v2/get_image")!
-    private let apiIntents = URL(string: "https://typeahead-ai.fly.dev/v2/suggest_intents")!
-    private let apiImageCaptions = URL(string: "https://typeahead-ai.fly.dev/v2/get_image_caption")!
-    private let apiFeedback = URL(string: "https://api.typeahead.ai/v4/feedback")!
-    private let apiPaymentsURL = "http://api.typeahead.ai/v4/premium"
+    private let apiStream = URL(string: "https://api.typeahead.ai/v5/stream")!
+    private let apiFocus = URL(string: "https://api.typeahead.ai/v5/focus")!
+    private let apiFeedback = URL(string: "https://api.typeahead.ai/v5/feedback")!
+    private let apiPaymentsURL = "http://api.typeahead.ai/v5/premium"
 
 #endif
 

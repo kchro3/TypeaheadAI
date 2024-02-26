@@ -18,11 +18,11 @@ struct TypeaheadAIApp: App {
     @StateObject var appState: AppState
 
     init() {
-        #if DEBUG
+#if DEBUG
         // NOTE: Uncomment the following to wipe UserDefaults. Do not remove the #if DEBUG compiler flags.
 //        UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
 //        UserDefaults.standard.synchronize()
-        #endif
+#endif
 
         let context = persistenceController.container.viewContext
         context.mergePolicy = NSMergePolicy(merge: .mergeByPropertyStoreTrumpMergePolicyType)
