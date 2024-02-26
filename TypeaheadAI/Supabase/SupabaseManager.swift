@@ -24,9 +24,9 @@ class SupabaseManager: ObservableObject {
     private let callbackURL: URL = URL(string: "app.typeahead://login-callback")!
 
 #if DEBUG
-    private let apiIsPremiumURL: String = "http://localhost:8787/v4/isPremium"
+    private let apiIsPremiumURL: String = "http://localhost:8787/v5/isPremium"
 #else
-    private let apiIsPremiumURL: String = "https://api.typeahead.ai/v4/isPremium"
+    private let apiIsPremiumURL: String = "https://api.typeahead.ai/v5/isPremium"
 #endif
 
     private let logger = Logger(
@@ -40,7 +40,7 @@ class SupabaseManager: ObservableObject {
     init() {
         Task {
             if let session = try? await client.auth.session {
-                await signIn(session: session)
+                try? await signIn(session: session)
             }
         }
     }
@@ -48,12 +48,12 @@ class SupabaseManager: ObservableObject {
     func registerWithEmail(email: String, password: String) async throws {
         try await client.auth.signUp(email: email, password: password)
         let session = try await client.auth.session
-        await signIn(session: session)
+        try await signIn(session: session)
     }
 
     func signinWithEmail(email: String, password: String) async throws {
         let session = try await client.auth.signIn(email: email, password: password)
-        await signIn(session: session)
+        try await signIn(session: session)
         let _ = try await client.auth.session
     }
 
@@ -76,11 +76,11 @@ class SupabaseManager: ObservableObject {
 
     func signinWithURL(from: URL) async throws {
         let session = try await client.auth.session(from: from)
-        await signIn(session: session)
+        try await signIn(session: session)
     }
 
     /// Sign-in and fetch whether or not the user is a premium user
-    func signIn(session: Session? = nil) async {
+    func signIn(session: Session? = nil) async throws {
         // If session is nil, fetch current session
         var _session: Session? = session
         if _session == nil {
@@ -88,7 +88,7 @@ class SupabaseManager: ObservableObject {
         }
 
         guard let _session = _session,
-              let userStatus = try? await getUserStatus(session: _session) else {
+              let userStatus = try await getUserStatus(session: _session) else {
             await MainActor.run {
                 self.uuid = nil
                 self.isPremium = false
