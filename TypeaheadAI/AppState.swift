@@ -14,7 +14,8 @@ import UserNotifications
 
 @MainActor
 final class AppState: ObservableObject {
-    // NOTE: This is needed for the Menu View
+    // NOTE: These are needed for the Menu View
+    @Published var isOnline: Bool = true
     @Published var isMenuVisible: Bool = false
 
     private var updateTimer: Timer?
@@ -130,6 +131,10 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialCopy) { [self] in
             Task {
                 do {
+                    guard isOnline else {
+                        return
+                    }
+
                     try await self.specialCopyActor?.specialCopy()
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(name: .smartCopyPerformed, object: nil)
@@ -144,6 +149,10 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialPaste) { [self] in
             Task {
                 do {
+                    guard isOnline else {
+                        return
+                    }
+
                     try await specialPasteActor?.specialPaste()
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(name: .smartPastePerformed, object: nil)
@@ -158,6 +167,10 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialRecord) { [self] in
             Task {
                 do {
+                    guard isOnline else {
+                        return
+                    }
+
                     try await self.specialRecordActor?.specialRecord()
                 } catch {
                     try? await clientManager.sendFeedback(feedback: "Failed to smart-record\n\(error.localizedDescription)")
@@ -169,6 +182,10 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialVision) { [self] in
             Task {
                 do {
+                    guard isOnline else {
+                        return
+                    }
+
                     try await self.specialVisionActor?.specialVision()
                 } catch {
                     try? await clientManager.sendFeedback(feedback: "Failed to smart-vision\n\(error.localizedDescription)")
@@ -180,6 +197,10 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .specialFocus) { [self] in
             Task {
                 do {
+                    guard isOnline else {
+                        return
+                    }
+
                     try await self.specialFocusActor?.specialFocus()
                 } catch {
                     try? await clientManager.sendFeedback(feedback: "Failed to smart-focus\n\(error.localizedDescription)")
@@ -191,6 +212,10 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .chatOpen) { [self] in
             Task {
                 do {
+                    guard isOnline else {
+                        return
+                    }
+
                     try await self.specialOpenActor?.specialOpen()
                 } catch {
                     try? await clientManager.sendFeedback(feedback: "Failed to open chat\n\(error.localizedDescription)")
@@ -202,6 +227,10 @@ final class AppState: ObservableObject {
         KeyboardShortcuts.onKeyUp(for: .chatNew) { [self] in
             Task {
                 do {
+                    guard isOnline else {
+                        return
+                    }
+
                     try await self.specialOpenActor?.specialOpen(forceRefresh: true)
                 } catch {
                     try? await clientManager.sendFeedback(feedback: "Failed to open new chat\n\(error.localizedDescription)")
@@ -211,6 +240,10 @@ final class AppState: ObservableObject {
         }
 
         KeyboardShortcuts.onKeyUp(for: .cancelTasks) { [self] in
+            guard isOnline else {
+                return
+            }
+
             self.modalManager.cancelTasks()
         }
     }

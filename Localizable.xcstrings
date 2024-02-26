@@ -826,6 +826,9 @@
         }
       }
     },
+    "Disable Typeahead without quitting the app" : {
+
+    },
     "Edit" : {
       "localizations" : {
         "fr" : {
@@ -2772,6 +2775,9 @@
           }
         }
       }
+    },
+    "Toggle Typeahead" : {
+
     },
     "Typeahead" : {
       "localizations" : {

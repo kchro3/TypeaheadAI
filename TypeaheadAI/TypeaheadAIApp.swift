@@ -36,6 +36,7 @@ struct TypeaheadAIApp: App {
     var body: some Scene {
         MenuBarExtra {
             MenuView(
+                isOnline: $appState.isOnline,
                 modalManager: appState.modalManager,
                 promptManager: appState.quickActionManager,
                 settingsManager: appState.settingsManager,
