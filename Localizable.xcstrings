@@ -529,40 +529,6 @@
         }
       }
     },
-    "Choose different folder" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir un autre dossier"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scegli una cartella diversa"
-          }
-        }
-      }
-    },
-    "Choose folder" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir un dossier"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scegli la cartella"
-          }
-        }
-      }
-    },
     "Clear" : {
       "localizations" : {
         "fr" : {
@@ -856,23 +822,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Piano dettagliato"
-          }
-        }
-      }
-    },
-    "Directory:" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Répertoire :"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cartella:"
           }
         }
       }
@@ -1247,6 +1196,22 @@
         }
       }
     },
+    "Get Premium Mode" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obtenez le Mode Premium"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ottieni la Modalità Premium"
+          }
+        }
+      }
+    },
     "Getting Started" : {
       "localizations" : {
         "fr" : {
@@ -1349,23 +1314,6 @@
         }
       }
     },
-    "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "https://huggingface.co/TheBloke/MythoMax-L2-Kimiko-v2-13B-GGUF/blob/main/mythomax-l2-kimiko-v2-13b.Q4_K_M.gguf"
-          }
-        }
-      }
-    },
     "If you delete this, TypeaheadAI will forget about this example, and this action cannot be undone." : {
       "localizations" : {
         "fr" : {
@@ -1378,40 +1326,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Se elimini questo, TypeaheadAI dimenticherà questo esempio e questa azione non può essere annullata."
-          }
-        }
-      }
-    },
-    "In incognito mode, TypeaheadAI works without connecting to the Internet, and your copy-paste history is 100% private. We will make this more user-friendly, but you can choose which model you want to run below." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En mode incognito, TypeaheadAI fonctionne sans se connecter à Internet, et votre historique de copier-coller est 100 % privé. Nous rendrons cela plus convivial, mais vous pouvez choisir ci-dessous quel modèle vous souhaitez exécuter."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In modalità incognito, TypeaheadAI funziona senza connettersi a Internet e la tua cronologia di copia-incolla è privata al 100%. Renderemo questo più facile da usare, ma puoi scegliere quale modello vuoi eseguire qui sotto."
-          }
-        }
-      }
-    },
-    "Incognito Settings" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paramètres d'incognito"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impostazioni di navigazione in incognito"
           }
         }
       }
@@ -1817,23 +1731,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apri la chat: Apre una finestra di chat esistente"
-          }
-        }
-      }
-    },
-    "Open in Finder" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ouvrir dans le Finder"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apri in Finder"
           }
         }
       }
@@ -2564,23 +2461,6 @@
         }
       }
     },
-    "Something went wrong..." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quelque chose s'est mal passé..."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Qualcosa è andato storto..."
-          }
-        }
-      }
-    },
     "Something went wrong... Please check your internet connection and make sure that you are signed in." : {
       "localizations" : {
         "fr" : {
@@ -2844,23 +2724,6 @@
         }
       }
     },
-    "The model failed to load." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le modèle n'a pas pu être chargé."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il modello non è riuscito a caricarsi."
-          }
-        }
-      }
-    },
     "Thinking" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2890,23 +2753,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pensando..."
-          }
-        }
-      }
-    },
-    "This is still a work in progress. Need to use a more advanced sampling method, since it's currently just doing a greedy search. Will integrate with HuggingFace in a future version, but for now, try downloading this to your model directory:" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "C'est encore un travail en cours. Il faut utiliser une méthode d'échantillonnage plus avancée, car elle effectue actuellement juste une recherche avide. Sera intégré avec HuggingFace dans une future version, mais pour l'instant, essayez de télécharger ceci dans votre répertoire de modèles :"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Questo è ancora un lavoro in corso. È necessario utilizzare un metodo di campionamento più avanzato, poiché attualmente sta eseguendo solo una ricerca avida. Si integrerà con HuggingFace in una versione futura, ma per ora, prova a scaricare questo nella tua directory dei modelli:"
           }
         }
       }
@@ -3099,22 +2945,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Puoi visualizzare e gestire la tua cronologia qui."
-          }
-        }
-      }
-    },
-    "You're all set!" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tout est prêt !"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sei a posto!"
           }
         }
       }

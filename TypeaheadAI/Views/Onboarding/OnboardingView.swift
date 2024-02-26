@@ -82,9 +82,10 @@ struct OnboardingView: View {
         } else if step == 6 {
             AnyView(AutopilotOnboardingView())
         } else {
-            AnyView(OutroOnboardingView { feedback in
-                try await clientManager.sendFeedback(feedback: feedback)
-            })
+            AnyView(OutroOnboardingView(
+                clientManager: clientManager, 
+                supabaseManager: supabaseManager
+            ))
         }
     }
 }
